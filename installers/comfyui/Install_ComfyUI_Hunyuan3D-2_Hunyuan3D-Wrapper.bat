@@ -46,9 +46,10 @@ echo ------------------------------
 if not "%~1"=="" (
     set ROOT_DIR=%~1
 ) else (
-    set ROOT_DIR=%CD%
+    for %%I in ("%~dp0..\..\data\comfyui") do set ROOT_DIR=%%~fI
 )
 echo Install root: %ROOT_DIR%
+if not exist "%ROOT_DIR%" mkdir "%ROOT_DIR%"
 set VENV_DIR=%ROOT_DIR%\venv
 set PYTHON_EXE=%VENV_DIR%\Scripts\python.exe
 
@@ -181,12 +182,10 @@ if not exist "%ROOT_DIR%\ComfyUI\custom_nodes\ComfyUI_essentials" (
 )
 
 :: ------------------------------
-:: 13. Launch ComfyUI
+:: 13. Complete setup
 :: ------------------------------
 echo ------------------------------
-echo 13. Launch ComfyUI
+echo 13. Setup complete
 echo ------------------------------
-echo Launching ComfyUI...
-"%PYTHON_EXE%" "%ROOT_DIR%\ComfyUI\main.py" --windows-standalone-build
-
-pause
+echo URAGE_COMFYUI_ROOT=%ROOT_DIR%
+echo ComfyUI is installed. Start it from URage NOW Settings ^> Setup ^> ComfyUI.

@@ -29,6 +29,7 @@ import {
   getDashboardNetworkConfiguration,
   saveDashboardNetworkConfiguration
 } from "../companion/dashboardNetworkConfiguration.js";
+import {saveComfyUiRuntimeConfiguration} from "../comfyUi/comfyUiRuntimeManager.js";
 
 const uploadedModelImagesDirectory = path.resolve(appConfig.dataDirectory, "uploaded-model-images");
 const dashboardLogoRelativePaths = ["dashboard/logo.png"];
@@ -70,6 +71,7 @@ type DashboardInstallerSpec = {
   command: string;
   args: string[];
   cwd?: string;
+  comfyUiInstallRoot?: string;
 };
 
 function isDashboardResourcePoolKind(value: string | null | undefined): value is "image" | "model3d" | "video" | "audio" | "music" {
@@ -395,12 +397,14 @@ async function resolveInstallerSpec(installerId: DashboardInstallerId, installPa
     if (!scriptPath) {
       return null;
     }
+    const comfyUiInstallRoot = installPath || resolveRepoPath("data", "comfyui");
     return {
       id: "comfyui",
       label: "ComfyUI",
       command: "cmd.exe",
-      args: ["/d", "/s", "/c", installPath ? `"${scriptPath}" "${installPath}"` : `"${scriptPath}"`],
-      cwd: path.dirname(scriptPath)
+      args: ["/d", "/s", "/c", `"${scriptPath}" "${comfyUiInstallRoot}"`],
+      cwd: path.dirname(scriptPath),
+      comfyUiInstallRoot
     };
   }
   return null;
@@ -659,6 +663,9 @@ async function handlePostApiInstallersRun(request: IncomingMessage, response: Se
   }
   dependencies.runtimeState.recordAction("dashboard:installer:start", `Running installer for ${spec.label}${requestedInstallPath ? ` at ${requestedInstallPath}` : " using the default location"}.`);
   const result = await runInstaller(spec);
+  const comfyUiRuntime = result.ok && spec.comfyUiInstallRoot
+    ? await saveComfyUiRuntimeConfiguration({workingDirectory: spec.comfyUiInstallRoot})
+    : null;
   const summary = result.ok
     ? `${spec.label} installer completed successfully.`
     : `${spec.label} installer failed (exit ${result.exitCode ?? "unknown"}).`;
@@ -674,7 +681,8 @@ async function handlePostApiInstallersRun(request: IncomingMessage, response: Se
     exitCode: result.exitCode,
     signal: result.signal,
     stdout: result.stdout,
-    stderr: result.stderr
+    stderr: result.stderr,
+    comfyUiRuntime
   });
 }
 
