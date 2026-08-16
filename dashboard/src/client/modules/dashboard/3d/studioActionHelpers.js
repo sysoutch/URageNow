@@ -549,6 +549,7 @@ function createDashboardThreeDStudioActionHelpers(input) {
       const result = await request("/api/model3d-lowpoly-generate", {
         modelId: selected.id,
         executionTarget,
+        force: true,
         llmTargetFaces: lowPolyOptions.lowPolyUseLlmTargetFaces,
         targetFaces: lowPolyOptions.lowPolyUseLlmTargetFaces ? undefined : lowPolyOptions.lowPolyTargetFaceCount,
         llmMinTargetFaces: lowPolyOptions.llmMinTargetFaceCount,

@@ -1,1 +1,1 @@
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\capture\capture.py" -- --output "C:\files\screenshot_ortho_flat.png" --width 1080 --height 1080 --background transparent --rotate --axis Z --frames 60 --projection ORTHO --zoom 1.5 --gif-folder "C:\files\gif_frames_ortho_flat"
+@call "%~dp0capture-runner.cmd" "%~1" "%~2" "screenshot_ortho_flat.png" "gif_frames_ortho_flat" --width 1080 --height 1080 --background transparent --rotate --axis Z --frames 60 --projection ORTHO --zoom 1.5

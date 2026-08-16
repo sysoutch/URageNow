@@ -441,10 +441,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
           <article class="panel-card studio-workflow-quick-card studio-home-overview-only" id="studio-home-card">
             <div class="studio-workflow-quick-head">
               <div class="panel-heading">
-                <div class="panel-kicker">LazyDev Suite</div>
-                <h3>AI content generation suite</h3>
+                <div class="panel-kicker">Quick launch</div>
+                <h3>Start a new creation</h3>
               </div>
-              <button class="secondary studio-workflow-quick-open-all" data-view="ai" data-studio-home-view="workflow" type="button">${renderButtonIcon("folder")}<span>Go to LazyDev Home</span></button>
+              <button class="secondary studio-workflow-quick-open-all" data-view="ai" data-studio-home-view="workflow" type="button">${renderButtonIcon("folder")}<span>Open LazyDev</span></button>
             </div>
             <div class="studio-workflow-quick-grid">
               ${renderWorkflowQuickTile({
@@ -491,6 +491,20 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
               })}
             </div>
           </article>
+          <section class="studio-home-workbench studio-home-overview-only" aria-label="Current work and recent outputs">
+            <article class="studio-home-workbench-panel studio-home-current-panel">
+              <div class="studio-home-section-head"><div><div class="panel-kicker">Workspace</div><h3>Continue working</h3></div></div>
+              <div class="studio-home-empty" id="studio-home-current-project-empty">Loading your most recent project...</div>
+              <div class="studio-home-current-project" id="studio-home-current-project"></div>
+            </article>
+            <article class="studio-home-workbench-panel studio-home-output-panel">
+              <div class="studio-home-section-head"><div><div class="panel-kicker">Recent outputs</div><h3>Pick up where you left off</h3></div><button class="ghost compact" type="button">View all</button></div>
+              <div class="studio-home-project-grid studio-home-project-grid-list">
+                <div class="studio-home-empty" id="studio-home-recent-projects-empty">Loading recent projects...</div>
+                <div class="studio-home-project-list" id="studio-home-recent-projects"></div>
+              </div>
+            </article>
+          </section>
           <div class="studio-home-feature-grid studio-home-overview-only">
             <article class="panel-card studio-home-feature-card is-tools">
               <div class="studio-home-feature-copy">
@@ -535,22 +549,12 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
               <div class="studio-home-feature-art is-bots" aria-hidden="true">${renderDashboardNavigationIcon("discord")}</div>
             </article>
           </div>
-          <section class="studio-home-project-section studio-home-overview-only">
-            <div class="studio-home-section-head">
-              <h3>Recent Projects</h3>
-              <button class="ghost compact" type="button">View all</button>
-            </div>
-            <div class="studio-home-project-grid">
-              <div class="studio-home-empty" id="studio-home-recent-projects-empty">Loading recent projects...</div>
-              <div class="studio-home-project-list" id="studio-home-recent-projects"></div>
-            </div>
-          </section>
           <article class="panel-card lazydev-home-card lazydev-home-only">
             <div class="lazydev-home-hero">
               <div class="lazydev-home-hero-copy">
                 <div class="panel-kicker">URage NOW / LazyDev</div>
-                <h2>Welcome back</h2>
-                <p>Choose a workflow or pick up one of your recent creations.</p>
+                <h2>Your creative workspace</h2>
+                <p>Start a workflow, track what you made, and continue where you left off.</p>
               </div>
               <label class="studio-home-search" aria-label="Search LazyDev">
                 <span class="button-icon" aria-hidden="true">${renderToolsSearchIcon()}</span>

@@ -34,8 +34,8 @@ Example:
 
 ```powershell
 & $env:BLENDER_EXECUTABLE_PATH --background --python blender-scripts/albedo_to_geometry.py -- `
-  --filepath=C:\models\source.glb `
-  --output_path=C:\models\source-displaced.glb `
+  --filepath=.\models\source.glb `
+  --output_path=.\models\source-displaced.glb `
   --strength=0.05 `
   --subdivisions=1 `
   --topology_mode=subdivision `

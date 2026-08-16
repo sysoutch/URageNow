@@ -21,9 +21,13 @@ function createDashboardShellRuntimeThemeFallback(input) {
       state.dashboardTheme = this.normalizeDashboardTheme(nextTheme);
       document.body.setAttribute("data-dashboard-theme", state.dashboardTheme);
       const themeInfo = getDashboardThemeMeta(state.dashboardTheme) || {};
+      const imagePath = themeInfo.imagePath || ("/assets/dashboard-theme-logo.png?theme=" + encodeURIComponent(state.dashboardTheme));
       document.querySelectorAll("[data-dashboard-theme-logo=\"studio\"]").forEach(image => {
-        image.setAttribute("src", themeInfo.imagePath || ("/assets/dashboard-theme-logo.png?theme=" + encodeURIComponent(state.dashboardTheme)));
+        image.setAttribute("src", imagePath);
         image.setAttribute("alt", this.getDashboardThemeLabel(state.dashboardTheme) + " Studio");
+      });
+      document.querySelectorAll("[data-dashboard-theme-favicon]").forEach(icon => {
+        icon.setAttribute("href", imagePath);
       });
       window.dispatchEvent(new CustomEvent("dashboard:theme-changed", { detail: { theme: state.dashboardTheme } }));
     },

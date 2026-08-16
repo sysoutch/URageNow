@@ -49,6 +49,47 @@ def decimate_mesh_object_to_target_faces(mesh_obj, target_faces):
     bpy.ops.object.modifier_apply(modifier=decimate_modifier.name, report=True)
 
 
+def triangulate_mesh_object(mesh_obj):
+    if not mesh_obj or mesh_obj.type != "MESH":
+        return
+    ensure_object_mode()
+    bpy.ops.object.select_all(action="DESELECT")
+    mesh_obj.select_set(True)
+    bpy.context.view_layer.objects.active = mesh_obj
+    triangulate_modifier = mesh_obj.modifiers.new(name="Triangulate before low-poly decimation", type="TRIANGULATE")
+    bpy.ops.object.modifier_apply(modifier=triangulate_modifier.name, report=True)
+
+
+def allocate_total_face_budget(mesh_objects, target_faces):
+    """Distribute one model-wide face budget across its imported meshes."""
+    face_counts = [len(mesh_obj.data.polygons) for mesh_obj in mesh_objects]
+    total_faces = sum(face_counts)
+    if target_faces <= 0 or total_faces <= target_faces:
+        return face_counts
+
+    # Largest-remainder allocation keeps the total budget stable while retaining
+    # every imported mesh, rather than applying the full budget to each mesh.
+    raw_budgets = [(face_count / total_faces) * target_faces for face_count in face_counts]
+    budgets = [max(1, int(raw_budget)) for raw_budget in raw_budgets]
+    remaining = target_faces - sum(budgets)
+    ranked_indices = sorted(
+        range(len(mesh_objects)),
+        key=lambda index: raw_budgets[index] - int(raw_budgets[index]),
+        reverse=True
+    )
+    if remaining > 0:
+        for index in ranked_indices[:remaining]:
+            budgets[index] += 1
+    elif remaining < 0:
+        for index in reversed(ranked_indices):
+            if remaining == 0:
+                break
+            if budgets[index] > 1:
+                budgets[index] -= 1
+                remaining += 1
+    return budgets
+
+
 # Get arguments after '--'
 args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 
@@ -68,8 +109,6 @@ if not filepath:
 # Clear all existing objects
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
-
-pre_import_names = set(obj.name for obj in bpy.context.scene.objects)
 
 source_path_lower = filepath.lower()
 if source_path_lower.endswith(".fbx"):
@@ -101,15 +140,10 @@ else:
         bpy.ops.preferences.addon_enable(module="io_scene_gltf2")
         bpy.ops.import_scene.gltf(filepath=filepath)
 
-# Prefer freshly imported objects; fallback to all mesh/empty.
-imported_objects = [
-    obj
-    for obj in bpy.context.scene.objects
-    if obj.name not in pre_import_names and obj.type in ("MESH", "EMPTY")
-]
-if not imported_objects:
-    imported_objects = [obj for obj in bpy.context.scene.objects if obj.type in ("MESH", "EMPTY")]
-
+# The scene was cleared before import, so every mesh now present belongs to
+# the source asset. Name-based filtering can miss FBX siblings with a reused
+# name, leaving part of the model untouched.
+imported_objects = [obj for obj in bpy.context.scene.objects if obj.type in ("MESH", "EMPTY")]
 mesh_objects = [obj for obj in imported_objects if obj.type == "MESH"]
 if not mesh_objects:
     raise RuntimeError(f"No mesh objects were imported from source model: {filepath}")
@@ -142,17 +176,32 @@ if merge_vertices:
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.mesh.remove_doubles()
     bpy.ops.object.mode_set(mode="OBJECT")
+# Use Blender's built-in UV projection after topology reduction. This keeps
+# UV generation independent from the decimation step and makes the exported
+# geometry predictable across headless Blender runs.
 if should_decimate:
     for mesh_obj in mesh_objects:
-        decimate_mesh_object_to_target_faces(mesh_obj, decimate_face_count)
+        triangulate_mesh_object(mesh_obj)
+    source_face_count = sum(len(mesh_obj.data.polygons) for mesh_obj in mesh_objects)
+    mesh_face_budgets = allocate_total_face_budget(mesh_objects, decimate_face_count)
+    print(f"Decimating {len(mesh_objects)} meshes from {source_face_count} faces to a total target of {sum(mesh_face_budgets)} faces.")
+    for mesh_obj, mesh_face_budget in zip(mesh_objects, mesh_face_budgets):
+        decimate_mesh_object_to_target_faces(mesh_obj, mesh_face_budget)
+    decimated_face_count = sum(len(mesh_obj.data.polygons) for mesh_obj in mesh_objects)
+    print(f"Decimation completed with {decimated_face_count} faces.")
 
-# Run LowpolyUV
+ensure_object_mode()
+bpy.ops.object.select_all(action="DESELECT")
+for mesh_obj in mesh_objects:
+    mesh_obj.select_set(True)
+bpy.context.view_layer.objects.active = active_mesh
 bpy.ops.object.mode_set(mode="EDIT")
 bpy.ops.mesh.select_all(action="SELECT")
-bpy.ops.uv.lowpolyuv(max_colors=max_colors, block_size=block_size)
-
-# Switch back to Object mode
+bpy.ops.uv.smart_project()
 bpy.ops.object.mode_set(mode="OBJECT")
+for mesh_obj in mesh_objects:
+    for polygon in mesh_obj.data.polygons:
+        polygon.use_smooth = False
 
 # Prepare export paths
 if not output_path or output_path == "null":
@@ -192,15 +241,15 @@ bpy.ops.object.select_all(action="DESELECT")
 for obj in mesh_objects:
     obj.select_set(True)
 bpy.context.view_layer.objects.active = active_mesh
-
-# Export lowpoly model
+# Export the explicitly applied mesh without evaluating optional display
+# modifiers during FBX export.
 bpy.ops.export_scene.fbx(
     filepath=output_path,
     use_selection=True,
     apply_scale_options="FBX_SCALE_ALL",
     axis_forward="-Z",
     axis_up="Y",
-    use_mesh_modifiers=True,
+    use_mesh_modifiers=False,
     apply_unit_scale=True,
     path_mode="COPY",
     embed_textures=True,

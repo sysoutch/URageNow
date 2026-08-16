@@ -13,6 +13,13 @@ function createDashboardAiStudioLayoutHelpers(input) {
     activity: "all",
     actions: "all"
   };
+  const homeMediaFallbackIcons = {
+    image: "bi-image",
+    model3d: "bi-box",
+    audio: "bi-soundwave",
+    music: "bi-music-note-beamed",
+    video: "bi-camera-video"
+  };
 
   function formatHomeDate(value) {
     if (!value) {
@@ -61,7 +68,6 @@ function createDashboardAiStudioLayoutHelpers(input) {
           id: entry.id,
           kind: "image",
           label: "Image",
-          icon: "IMG",
           title: getHomeTitle(entry, fileName, "Generated image"),
           date: entry.createdAt || "",
           dateMs: getHomeDateMs(entry),
@@ -78,7 +84,6 @@ function createDashboardAiStudioLayoutHelpers(input) {
           id: entry.id,
           kind: "model3d",
           label: "3D Model",
-          icon: "3D",
           title: getHomeTitle(entry, fileName, "Generated 3D model"),
           date: entry.createdAt || "",
           dateMs: getHomeDateMs(entry),
@@ -96,7 +101,6 @@ function createDashboardAiStudioLayoutHelpers(input) {
           id: entry.id,
           kind: isMusic ? "music" : "audio",
           label: isMusic ? "Music" : "Audio",
-          icon: isMusic ? "MUS" : "AUD",
           title: getHomeTitle(entry, fileName, isMusic ? "Generated music" : "Generated audio"),
           date: entry.createdAt || "",
           dateMs: getHomeDateMs(entry),
@@ -113,7 +117,6 @@ function createDashboardAiStudioLayoutHelpers(input) {
           id: entry.id,
           kind: "video",
           label: "Video",
-          icon: "VID",
           title: getHomeTitle(entry, fileName, "Generated video"),
           date: entry.createdAt || "",
           dateMs: getHomeDateMs(entry),
@@ -386,7 +389,10 @@ function createDashboardAiStudioLayoutHelpers(input) {
       video.src = record.url;
       thumb.appendChild(video);
     } else {
-      thumb.textContent = record.icon;
+      const fallbackIcon = document.createElement("i");
+      fallbackIcon.className = "bi " + (homeMediaFallbackIcons[record.kind] || "bi-file-earmark") + " studio-home-media-fallback-icon";
+      fallbackIcon.setAttribute("aria-hidden", "true");
+      thumb.appendChild(fallbackIcon);
     }
     parent.appendChild(thumb);
   }
@@ -432,26 +438,47 @@ function createDashboardAiStudioLayoutHelpers(input) {
     });
   }
 
-  function createLazydevCurrentProjectCard(record) {
+  function createHomeCurrentProjectCard(record, classPrefix) {
     const button = document.createElement("button");
-    button.className = "lazydev-home-current-project-card";
+    button.className = classPrefix + "-card";
     button.type = "button";
     button.addEventListener("click", () => {
       selectHomeMediaRecord(record);
     });
-    appendHomeThumb(button, record, "lazydev-home-current-project-thumb");
+    appendHomeThumb(button, record, classPrefix + "-thumb");
     const copy = document.createElement("span");
-    copy.className = "lazydev-home-current-project-copy";
+    copy.className = classPrefix + "-copy";
     const eyebrow = document.createElement("small");
     eyebrow.textContent = record.label + (record.date ? " · " + formatHomeDate(record.date) : "");
     const title = document.createElement("strong");
     title.textContent = record.title;
     const action = document.createElement("span");
-    action.className = "lazydev-home-current-project-action";
+    action.className = classPrefix + "-action";
     action.textContent = "Open in " + record.label;
     copy.append(eyebrow, title, action);
     button.append(copy);
     return button;
+  }
+
+  function createLazydevCurrentProjectCard(record) {
+    return createHomeCurrentProjectCard(record, "lazydev-home-current-project");
+  }
+
+  function renderHomeCurrentProject(containerId, emptyId, records, emptyText) {
+    const container = document.getElementById(containerId);
+    const empty = document.getElementById(emptyId);
+    if (!container) {
+      return;
+    }
+    clearChildren(container);
+    const currentRecord = records[0];
+    if (empty) {
+      empty.textContent = emptyText;
+      empty.classList.toggle("hidden", Boolean(currentRecord));
+    }
+    if (currentRecord) {
+      container.appendChild(createHomeCurrentProjectCard(currentRecord, "studio-home-current-project"));
+    }
   }
 
   function renderLazydevHomeContinue(records, emptyText) {
@@ -550,6 +577,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
     const records = buildHomeMediaRecords();
     const emptyText = "No generated projects yet. Open a workflow and create media to populate this list.";
     renderHomeProjectList("studio-home-recent-projects", "studio-home-recent-projects-empty", records, 4, emptyText);
+    renderHomeCurrentProject("studio-home-current-project", "studio-home-current-project-empty", records, emptyText);
     renderLazydevHomeContinue(records, emptyText);
     renderHomeActivity(records);
     renderHomeUsageOverview(records);

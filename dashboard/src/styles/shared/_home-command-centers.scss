@@ -1,0 +1,375 @@
+// The two home modes have different jobs: URage Now is an application launchpad,
+// while LazyDev is a working dashboard. Keep their final layout contract together
+// and scoped to home mode so focused workflow screens remain unaffected.
+
+body.view-ai-active.studio-home-active .studio-view-shell {
+  width: min(1760px, 100%);
+  margin-inline: auto;
+  gap: 14px;
+  padding: clamp(14px, 1.8vw, 26px);
+}
+
+body.view-ai-active.studio-home-active .studio-home-topbar {
+  min-height: 70px;
+  padding: 0 2px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 68%, transparent);
+}
+
+body.view-ai-active.studio-home-active .studio-home-topbar h2 {
+  font-size: clamp(26px, 2.5vw, 36px);
+}
+
+body.view-ai-active.studio-home-active .studio-home-topbar p {
+  max-width: 62ch;
+  font-size: 14px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only#studio-home-card {
+  padding: clamp(16px, 1.8vw, 24px);
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border-radius: 14px;
+}
+
+body.view-ai-active.studio-home-active .studio-workflow-quick-head {
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+body.view-ai-active.studio-home-active .studio-workflow-quick-head h3 {
+  font-size: clamp(20px, 1.8vw, 27px);
+}
+
+body.view-ai-active.studio-home-active .studio-workflow-quick-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile {
+  min-height: 168px;
+  padding: 16px 13px 13px;
+  border-radius: 10px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 15px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile-icon svg {
+  width: 31px;
+  height: 31px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile h4 {
+  font-size: 17px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile .panel-subtitle {
+  min-height: 0;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile-open {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  border-radius: 8px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 0;
+}
+
+body.view-ai-active.studio-home-active .studio-home-workbench {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
+  gap: 12px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-workbench-panel {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 86% 4%, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 13%, transparent) 0%, transparent 40%),
+    color-mix(in srgb, var(--panel-alt) 78%, black 22%);
+}
+
+body.view-ai-active.studio-home-active .studio-home-workbench-panel .studio-home-section-head {
+  margin-bottom: 12px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-workbench-panel h3 {
+  font-size: 18px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-project-card {
+  min-height: 170px;
+  display: grid;
+  grid-template-columns: minmax(128px, 0.72fr) minmax(0, 1fr);
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 42%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel) 88%, black 12%);
+  color: var(--ink);
+  text-align: left;
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-project-thumb {
+  display: grid;
+  min-width: 0;
+  min-height: 100%;
+  place-items: center;
+  overflow: hidden;
+  color: var(--studio-accent-1, var(--accent));
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 12%, var(--panel));
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-project-thumb :is(img, video) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-project-copy {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-project-copy small,
+body.view-ai-active.studio-home-active .studio-home-current-project-action {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-project-copy strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(17px, 1.5vw, 23px);
+  line-height: 1.12;
+  text-overflow: ellipsis;
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-project-action {
+  color: var(--studio-accent-1, var(--accent));
+  font-weight: 800;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-grid-list {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-grid-list .studio-home-project-list {
+  display: grid;
+  gap: 7px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-grid-list .studio-home-project-card {
+  min-height: 42px;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-grid-list .studio-home-project-thumb {
+  width: 38px;
+  height: 38px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-card {
+  min-height: 178px;
+  grid-template-columns: minmax(0, 1fr) 84px;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-copy {
+  gap: 7px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-copy h3 {
+  font-size: 18px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-copy > span {
+  width: fit-content;
+  min-height: 24px;
+  padding-inline: 8px;
+  font-size: 11px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-copy p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-button {
+  min-width: 0;
+  min-height: 32px;
+  margin-top: 2px;
+  padding-inline: 9px;
+  font-size: 11px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-art {
+  width: 76px;
+  aspect-ratio: 1;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-art .button-icon,
+body.view-ai-active.studio-home-active .studio-home-feature-art svg {
+  width: 52px;
+  height: 52px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-section {
+  margin-top: 4px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-card {
+  min-height: 78px;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 9px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-thumb {
+  width: 54px;
+  height: 54px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-copy strong {
+  font-size: 13px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-copy span {
+  font-size: 11px;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-card {
+  width: min(1600px, 100%);
+  gap: 14px !important;
+  padding: clamp(14px, 1.6vw, 24px) !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-hero {
+  min-height: 64px;
+  padding-bottom: 10px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-hero h2 {
+  font-size: clamp(24px, 2.4vw, 33px);
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-create-panel {
+  grid-template-columns: minmax(250px, 0.3fr) minmax(0, 1fr) !important;
+  gap: 18px !important;
+  padding: 16px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-workflow-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-workflow-button {
+  min-height: 72px !important;
+  padding: 9px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-dashboard-grid {
+  grid-template-columns: minmax(0, 1.16fr) minmax(330px, 0.84fr) !important;
+  gap: 12px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-panel {
+  padding: 14px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-card {
+  min-height: 112px !important;
+  grid-template-rows: auto auto auto minmax(28px, 1fr) !important;
+  padding: 11px !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-card > strong {
+  font-size: clamp(19px, 1.7vw, 25px) !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-sparkline {
+  height: 30px !important;
+}
+
+// Do not let the activity column force the current-work card into a tall
+// poster. Each dashboard panel owns its natural content height instead.
+body.view-ai-active.studio-workflow-home-active .lazydev-home-dashboard-grid {
+  align-items: start !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-panel {
+  height: auto !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-current-project-card {
+  min-height: 174px;
+  height: 174px;
+}
+
+body.view-ai-active.studio-workflow-home-active .lazydev-home-current-project-thumb {
+  min-height: 0;
+}
+
+@media (max-width: 1280px) {
+  body.view-ai-active.studio-home-active .studio-workflow-quick-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body.view-ai-active.studio-home-active .studio-home-topbar,
+  body.view-ai-active.studio-workflow-home-active .lazydev-home-hero,
+  body.view-ai-active.studio-workflow-home-active .lazydev-home-create-panel {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-profile-pill {
+    display: none;
+  }
+
+  body.view-ai-active.studio-home-active .studio-workflow-quick-grid,
+  body.view-ai-active.studio-home-active .studio-home-project-grid,
+  body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-feature-grid,
+  body.view-ai-active.studio-home-active .studio-home-workbench,
+  body.view-ai-active.studio-workflow-home-active .lazydev-home-dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

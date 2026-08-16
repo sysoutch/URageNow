@@ -73,6 +73,11 @@ function createDashboardShellRuntimeThemeHelpers(input) {
         }
         image.setAttribute("alt", label + " Studio");
       });
+      document.querySelectorAll("[data-dashboard-theme-favicon]").forEach(icon => {
+        if (icon.getAttribute("href") !== imagePath) {
+          icon.setAttribute("href", imagePath);
+        }
+      });
     }
 
     async ensureStudioThemeConfigLoaded() {

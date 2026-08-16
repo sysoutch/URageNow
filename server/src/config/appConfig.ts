@@ -82,6 +82,11 @@ function optionalString(name: string, fallback: string): string {
   return trimmed;
 }
 
+function optionalRepositoryPath(name: string, fallback: string): string {
+  const configuredPath = optionalString(name, fallback);
+  return path.isAbsolute(configuredPath) ? configuredPath : resolveRepoPath(configuredPath);
+}
+
 export function optionalAliasedString(primaryName: string, legacyName: string, fallback: string): string {
   return optionalString(primaryName, optionalString(legacyName, fallback));
 }
@@ -226,19 +231,19 @@ export const appConfig = {
   rustAssetIndexerExecutablePath: optionalString("RUST_ASSET_INDEXER_EXECUTABLE_PATH", ""),
   rustMediaProbeExecutablePath: optionalString("RUST_MEDIA_PROBE_EXECUTABLE_PATH", ""),
   ffmpegExecutablePath: optionalString("FFMPEG_EXECUTABLE_PATH", "ffmpeg"),
-  blenderOpenScriptPath: optionalString("BLENDER_OPEN_SCRIPT_PATH", resolveRepoPath("blender-scripts", "import.py")),
-  blenderLowPolyScriptPath: optionalString("BLENDER_LOWPOLY_SCRIPT_PATH", resolveRepoPath("blender-scripts", "LowPolyUV.py")),
-  blenderModelPreviewScriptPath: optionalString("BLENDER_MODEL_PREVIEW_SCRIPT_PATH", resolveRepoPath("blender-scripts", "RenderModelPreview.py")),
-  blenderModelCaptureScriptPath: optionalString("BLENDER_MODEL_CAPTURE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "capture", "capture.py")),
-  blenderModelDelightScriptPath: optionalString("BLENDER_MODEL_DELIGHT_SCRIPT_PATH", resolveRepoPath("blender-scripts", "delight.py")),
-  blenderModelSeparateByLoosePartsScriptPath: optionalString("BLENDER_MODEL_SEPARATE_BY_LOOSE_PARTS_SCRIPT_PATH", resolveRepoPath("blender-scripts", "separate", "separate_by_loose_parts.py")),
-  blenderModelDecimateScriptPath: optionalString("BLENDER_MODEL_DECIMATE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "decimate", "decimateToFaces.py")),
-  blenderModelMergeVerticesScriptPath: optionalString("BLENDER_MODEL_MERGE_VERTICES_SCRIPT_PATH", resolveRepoPath("blender-scripts", "merge_vertices.py")),
-  blenderModelMetallicScriptPath: optionalString("BLENDER_MODEL_METALLIC_SCRIPT_PATH", resolveRepoPath("blender-scripts", "apply_metallic.py")),
-  blenderModelMaterialScriptPath: optionalString("BLENDER_MODEL_MATERIAL_SCRIPT_PATH", resolveRepoPath("blender-scripts", "apply_material_finish.py")),
-  blenderModelAlbedoToGeometryScriptPath: optionalString("BLENDER_MODEL_ALBEDO_TO_GEOMETRY_SCRIPT_PATH", resolveRepoPath("blender-scripts", "albedo_to_geometry.py")),
-  blenderModelScaleScriptPath: optionalString("BLENDER_MODEL_SCALE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "transform", "scale.py")),
-  blenderModelAutoRigScriptPath: optionalString("BLENDER_MODEL_AUTORIG_SCRIPT_PATH", resolveRepoPath("blender-scripts", "rig", "autorigger", "autorig.py")),
+  blenderOpenScriptPath: optionalRepositoryPath("BLENDER_OPEN_SCRIPT_PATH", resolveRepoPath("blender-scripts", "import.py")),
+  blenderLowPolyScriptPath: optionalRepositoryPath("BLENDER_LOWPOLY_SCRIPT_PATH", resolveRepoPath("blender-scripts", "LowPolyUV.py")),
+  blenderModelPreviewScriptPath: optionalRepositoryPath("BLENDER_MODEL_PREVIEW_SCRIPT_PATH", resolveRepoPath("blender-scripts", "RenderModelPreview.py")),
+  blenderModelCaptureScriptPath: optionalRepositoryPath("BLENDER_MODEL_CAPTURE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "capture", "capture.py")),
+  blenderModelDelightScriptPath: optionalRepositoryPath("BLENDER_MODEL_DELIGHT_SCRIPT_PATH", resolveRepoPath("blender-scripts", "delight.py")),
+  blenderModelSeparateByLoosePartsScriptPath: optionalRepositoryPath("BLENDER_MODEL_SEPARATE_BY_LOOSE_PARTS_SCRIPT_PATH", resolveRepoPath("blender-scripts", "separate", "separate_by_loose_parts.py")),
+  blenderModelDecimateScriptPath: optionalRepositoryPath("BLENDER_MODEL_DECIMATE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "decimate", "decimateToFaces.py")),
+  blenderModelMergeVerticesScriptPath: optionalRepositoryPath("BLENDER_MODEL_MERGE_VERTICES_SCRIPT_PATH", resolveRepoPath("blender-scripts", "merge_vertices.py")),
+  blenderModelMetallicScriptPath: optionalRepositoryPath("BLENDER_MODEL_METALLIC_SCRIPT_PATH", resolveRepoPath("blender-scripts", "apply_metallic.py")),
+  blenderModelMaterialScriptPath: optionalRepositoryPath("BLENDER_MODEL_MATERIAL_SCRIPT_PATH", resolveRepoPath("blender-scripts", "apply_material_finish.py")),
+  blenderModelAlbedoToGeometryScriptPath: optionalRepositoryPath("BLENDER_MODEL_ALBEDO_TO_GEOMETRY_SCRIPT_PATH", resolveRepoPath("blender-scripts", "albedo_to_geometry.py")),
+  blenderModelScaleScriptPath: optionalRepositoryPath("BLENDER_MODEL_SCALE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "transform", "scale.py")),
+  blenderModelAutoRigScriptPath: optionalRepositoryPath("BLENDER_MODEL_AUTORIG_SCRIPT_PATH", resolveRepoPath("blender-scripts", "rig", "autorigger", "autorig.py")),
   blenderModelPreviewTimeoutMs: optionalNumber("BLENDER_MODEL_PREVIEW_TIMEOUT_MS", 3 * 60_000),
   blenderModelCaptureTimeoutMs: optionalNumber("BLENDER_MODEL_CAPTURE_TIMEOUT_MS", 5 * 60_000),
   blenderModelSeparateByLoosePartsTimeoutMs: optionalNumber("BLENDER_MODEL_SEPARATE_BY_LOOSE_PARTS_TIMEOUT_MS", 10 * 60_000),

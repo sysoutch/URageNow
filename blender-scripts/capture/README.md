@@ -49,8 +49,13 @@ README.md
 
 # Basic Usage
 
+Run these examples from the `blender-scripts\\capture` directory. Ensure Blender
+is on `PATH`, or set `BLENDER_EXECUTABLE_PATH` before using the launcher files.
+The launchers accept `[input.blend] [output-directory]` and default to
+`test.blend` and `output` beside the scripts.
+
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --output "C:\files\screenshot.png"
+blender -b ".\test.blend" --python ".\capture.py" -- --output ".\output\screenshot.png"
 ```
 
 ---
@@ -58,7 +63,7 @@ README.md
 # Transparent Render
 
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --output "C:\files\screenshot.png" --background transparent
+blender -b ".\test.blend" --python ".\capture.py" -- --output ".\output\screenshot.png" --background transparent
 ```
 
 ---
@@ -68,19 +73,19 @@ README.md
 Black:
 
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --output "C:\files\screenshot.png" --background solidcolor --bg-color 0,0,0
+blender -b ".\test.blend" --python ".\capture.py" -- --output ".\output\screenshot.png" --background solidcolor --bg-color 0,0,0
 ```
 
 White:
 
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --output "C:\files\screenshot.png" --background solidcolor --bg-color 1,1,1
+blender -b ".\test.blend" --python ".\capture.py" -- --output ".\output\screenshot.png" --background solidcolor --bg-color 1,1,1
 ```
 
 Gray:
 
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --output "C:\files\screenshot.png" --background solidcolor --bg-color 0.5,0.5,0.5
+blender -b ".\test.blend" --python ".\capture.py" -- --output ".\output\screenshot.png" --background solidcolor --bg-color 0.5,0.5,0.5
 ```
 
 ---
@@ -88,7 +93,7 @@ Gray:
 # Skybox / World Background
 
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --output "C:\files\screenshot.png" --background skybox
+blender -b ".\test.blend" --python ".\capture.py" -- --output ".\output\screenshot.png" --background skybox
 ```
 
 ---
@@ -96,7 +101,7 @@ Gray:
 # Rotating Turntable Render
 
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --background transparent --rotate --axis Z --frames 60 --gif-folder "C:\files\gif_frames"
+blender -b ".\test.blend" --python ".\capture.py" -- --background transparent --rotate --axis Z --frames 60 --gif-folder ".\output\gif_frames"
 ```
 
 ---
@@ -106,7 +111,7 @@ Gray:
 Requires ImageMagick:
 
 ```bat
-magick -delay 4 -loop 0 "C:\files\gif_frames\frame_*.png" "C:\files\spin.gif"
+magick -delay 4 -loop 0 ".\output\gif_frames\frame_*.png" ".\output\spin.gif"
 ```
 
 ---
@@ -159,5 +164,5 @@ Resolution: 1920x1080
 # Example Full Command
 
 ```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\blender_capture.py" -- --output "C:\files\screenshot.png" --width 1080 --height 1080 --background transparent --rotate --axis Z --frames 60 --gif-folder "C:\files\gif_frames"
+blender -b ".\test.blend" --python ".\capture.py" -- --output ".\output\screenshot.png" --width 1080 --height 1080 --background transparent --rotate --axis Z --frames 60 --gif-folder ".\output\gif_frames"
 ```

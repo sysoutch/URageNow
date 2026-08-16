@@ -166,6 +166,8 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
   <meta name="theme-color" content="#050813">
   <meta name="color-scheme" content="dark">
   <title>URage Now — Studio</title>
+  <link rel="icon" type="image/png" data-dashboard-theme-favicon href="/assets/dashboard-theme-logo.png?theme=${defaultDashboardTheme}">
+  <link rel="apple-touch-icon" data-dashboard-theme-favicon href="/assets/dashboard-theme-logo.png?theme=${defaultDashboardTheme}">
   <link rel="stylesheet" href="/assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
   <style>${latestDashboardStyles}</style>
   <script>${markedLibraryScript}</script>
