@@ -121,6 +121,14 @@ function buildSkillSuggestionClarification(tasks: ChatSkillTaskDecision[], quest
   return options.length > 0 ? { question, mode: "suggestion", groups: [{ label: "Suggested actions", options }] } : null;
 }
 
+function shouldIncludeLocalToolsCatalog(prompt: string): boolean {
+  const request = stripChatSkillCommandPrefix(String(prompt || "")).trim();
+  if (/^\/tools\b/i.test(String(prompt || "").trim())) {
+    return true;
+  }
+  return /\b(?:tools?|toolbox|utilities|utility|tool\s+catalog|tool\s+list|open\s+(?:a\s+)?tool|pixel(?:\s+art)?\s+converter|game\s+engine|3d\s+(?:suite|suites)|blender|unity|godot)\b/i.test(request);
+}
+
 export function buildChatSkillRouterPrompt(input: {
   prompt: string;
   images: string[];
@@ -133,7 +141,8 @@ export function buildChatSkillRouterPrompt(input: {
   const availableSkillIds = input.availableSkills.map(skill => skill.id).filter(Boolean);
   const catalogText = buildChatSkillsCatalog(input.availableSkills);
   const routingHintsText = buildChatSkillRoutingHints(input.availableSkills);
-  const toolsCatalogText = buildLocalToolsCatalog(input.availableTools);
+  const includeLocalToolsCatalog = shouldIncludeLocalToolsCatalog(input.prompt);
+  const toolsCatalogText = includeLocalToolsCatalog ? buildLocalToolsCatalog(input.availableTools) : "";
   return [
     "You are the multilingual task router for URage NOW.",
     "Choose zero, one, or multiple root skills from the catalog. Understand the user's intent in any language.",
@@ -159,8 +168,7 @@ export function buildChatSkillRouterPrompt(input: {
     availableSkillIds.length > 0 ? availableSkillIds.join(", ") : "(none)",
     "Skill catalog:",
     catalogText,
-    "Local tools catalog (informational):",
-    toolsCatalogText,
+    ...(includeLocalToolsCatalog ? ["Local tools catalog (informational):", toolsCatalogText] : []),
     "Attachment context:",
     `- Uploaded images: ${input.images.length}`,
     `- Uploaded 3D model files: ${input.models.length}`,
@@ -174,7 +182,9 @@ export function buildChatSkillRouterPrompt(input: {
     "- Only return followUpSkillIds that are valid follow-ups for the first skill.",
     "- For dependent workflows, use one task with followUpSkillIds. For independent workflows, use multiple tasks.",
     "- If conversation history makes a short follow-up clear, route using that context; otherwise ask clarification.",
-    "- Requests about local utility tools can still map to a built-in skill when a matching skill already exists (for example uploaded image transforms such as remove background, delight image, normal map, or pixel-art style conversions).",
+    ...(includeLocalToolsCatalog
+      ? ["- Requests about local utility tools can still map to a built-in skill when a matching skill already exists (for example uploaded image transforms such as remove background, delight image, normal map, or pixel-art style conversions)."]
+      : []),
     "Skill-specific routing hints:",
     routingHintsText,
     "Recent conversation:",
@@ -274,21 +284,21 @@ export function buildPromptWithSkillContext(input: {
   const cleanedUserPrompt = stripChatSkillCommandPrefix(input.prompt);
   const userRequest = cleanedUserPrompt || String(input.prompt || "").trim();
   const catalogText = buildChatSkillsCatalog(input.availableSkills);
-  const localToolsCatalogText = buildLocalToolsCatalog(input.availableTools);
+  const includeLocalToolsCatalog = shouldIncludeLocalToolsCatalog(input.prompt);
+  const localToolsCatalogText = includeLocalToolsCatalog ? buildLocalToolsCatalog(input.availableTools) : "";
   const fileContext = buildUploadedFileContext(input.files);
   const baseSections = [
     "You are LazyDev in URage NOW.",
     "You have access to these chat skills:",
     catalogText,
-    "You also have access to these local studio tools:",
-    localToolsCatalogText,
+    ...(includeLocalToolsCatalog ? ["You also have access to these local studio tools:", localToolsCatalogText] : []),
   ];
   const skillSections = input.selectedSkill
     ? [
         `Active selected skill: ${input.selectedSkill.id} (${input.selectedSkill.name}).`,
         "Follow the selected skill instructions exactly when they apply.",
         "If the selected skill does not fit and a direct code answer is clearly more useful, generate the code or explanation directly instead of forcing a skill workflow.",
-        "When relevant, you may suggest opening a matching tool from the tools catalog and using Send Image To Tool or Send 3D Model To Tool quick actions.",
+        ...(includeLocalToolsCatalog ? ["When relevant, you may suggest opening a matching tool from the tools catalog and using Send Image To Tool or Send 3D Model To Tool quick actions."] : []),
         "Skill instructions:",
         input.selectedSkill.content,
       ]
@@ -303,8 +313,9 @@ export function buildPromptWithSkillContext(input: {
         input.autoRunSkills === false
           ? "Only execute a skill if the user explicitly requests one with /skill <id>."
           : "Do not lead with the skill catalog. Answer the chat request first; optional skill actions are shown separately by the UI when available.",
-        "If the user asks about available skills or tools, list them from the catalogs above.",
-        "For tool-related requests, mention the best matching tool name from the tool catalog and how to open it in the Tools view.",
+        includeLocalToolsCatalog
+          ? "For this tool-related request, mention the best matching tool name from the tool catalog and how to open it in the Tools view."
+          : "If the user asks about available skills, list them from the skill catalog above.",
       ];
   return [
     ...baseSections,

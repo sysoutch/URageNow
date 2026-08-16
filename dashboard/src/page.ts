@@ -942,10 +942,11 @@ ${renderDashboardMobileNav()}
           <article class="status-card settings-overlay-card settings-subtab-card">
             <h4>ComfyUI Runtime</h4>
             <div class="hint">The dashboard starts only the batch file you select. Keep <code>--listen 127.0.0.1</code> for a ComfyUI instance used only by this PC’s dashboard.</div>
-            <div class="field"><label for="comfy-runtime-root-input">ComfyUI launcher folder</label><input id="comfy-runtime-root-input" placeholder="C:\\Files\\apps\\pc\\ComfyUI"></div>
-            <div class="field"><label for="comfy-runtime-launcher-input">Launcher batch file</label><input id="comfy-runtime-launcher-input" placeholder="C:\\Files\\apps\\pc\\ComfyUI\\run_urage_nvidia_fast_fp16_accumulation_listen.bat"></div>
+            <div class="field"><label for="comfy-runtime-root-input">ComfyUI launcher folder</label><div class="row"><input id="comfy-runtime-root-input" placeholder="Choose the folder containing venv and ComfyUI"><button class="secondary" id="comfy-runtime-browse-folder-button" type="button">Browse</button></div></div>
+            <div class="field"><label for="comfy-runtime-launcher-input">Launcher batch file</label><div class="row"><input id="comfy-runtime-launcher-input" value="scripts/comfyui/run-comfyui.bat" placeholder="scripts/comfyui/run-comfyui.bat"><button class="secondary" id="comfy-runtime-browse-launcher-button" type="button">Browse</button></div><div class="hint">Default: bundled launcher. Choose a custom <code>.bat</code> or <code>.cmd</code> file to override it.</div></div>
             <div class="row"><button class="secondary" id="comfy-runtime-create-launchers-button" type="button">Create URage launcher batches</button><button id="comfy-runtime-save-button" type="button">Save runtime</button></div>
             <div class="row"><button id="comfy-runtime-start-button" type="button">Start ComfyUI</button><button class="secondary" id="comfy-runtime-stop-button" type="button">Stop ComfyUI</button><button class="secondary" id="comfy-runtime-refresh-button" type="button">Refresh status</button></div>
+            <div class="comfy-runtime-progress" id="comfy-runtime-progress" aria-live="polite"><div class="comfy-runtime-progress-bar"><span id="comfy-runtime-progress-fill"></span></div><strong id="comfy-runtime-progress-label">Waiting to start.</strong><pre id="comfy-runtime-output">No ComfyUI output yet.</pre></div>
             <div class="hint" id="comfy-runtime-status">ComfyUI runtime not loaded yet.</div>
           </article>
         </div>

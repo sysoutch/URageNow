@@ -1400,19 +1400,41 @@ function createDashboardOverlayHelpers(input) {
       if (!node) return;
       node.textContent = runtime?.error || (runtime?.status === "running" ? `Running${runtime.pid ? ` · PID ${runtime.pid}` : ""}` : "Stopped") + (runtime?.launcherPath ? ` · ${runtime.launcherPath}` : " · choose a launcher batch.");
     };
-    const loadComfyRuntime = async () => {
+    const setComfyRuntimeProgress = runtime => {
+      const progress = document.getElementById("comfy-runtime-progress");
+      const fill = document.getElementById("comfy-runtime-progress-fill");
+      const label = document.getElementById("comfy-runtime-progress-label");
+      const output = document.getElementById("comfy-runtime-output");
+      if (!progress || !fill || !label || !output) return;
+      const hasError = Boolean(runtime?.error);
+      const running = runtime?.status === "running";
+      progress.classList.toggle("is-running", running);
+      progress.classList.toggle("has-error", hasError);
+      fill.style.width = hasError ? "100%" : running ? "78%" : "0%";
+      label.textContent = hasError ? "Launcher error" : running ? `ComfyUI is running${runtime?.pid ? ` (PID ${runtime.pid})` : ""}. Live launcher output:` : "Waiting to start.";
+      const lines = Array.isArray(runtime?.output) ? runtime.output.slice(-80) : [];
+      output.textContent = lines.length > 0 ? lines.join("\n") : "No ComfyUI output yet.";
+      output.scrollTop = output.scrollHeight;
+    };
+    const loadComfyRuntime = async (syncFields = true) => {
       const runtime = await request("/api/comfyui/runtime");
-      document.getElementById("comfy-runtime-root-input").value = runtime.workingDirectory || "";
-      document.getElementById("comfy-runtime-launcher-input").value = runtime.launcherPath || "";
+      if (syncFields) {
+        document.getElementById("comfy-runtime-root-input").value = runtime.workingDirectory || "";
+        document.getElementById("comfy-runtime-launcher-input").value = runtime.launcherPath || "";
+      }
       setComfyRuntimeStatus(runtime);
+      setComfyRuntimeProgress(runtime);
       return runtime;
     };
     bindClick("comfy-runtime-refresh-button", () => void loadComfyRuntime().catch(error => setComfyRuntimeStatus({error: describeClientError(error, "Failed to read ComfyUI runtime.")})));
     bindClick("comfy-runtime-save-button", () => void request("/api/comfyui/runtime", {workingDirectory: document.getElementById("comfy-runtime-root-input").value.trim(), launcherPath: document.getElementById("comfy-runtime-launcher-input").value.trim()}).then(runtime => { setComfyRuntimeStatus(runtime); setOutput("Saved ComfyUI runtime."); }).catch(error => setComfyRuntimeStatus({error: describeClientError(error, "Failed to save ComfyUI runtime.")})));
+    bindClick("comfy-runtime-browse-folder-button", () => void request("/api/comfyui/runtime/browse-folder", {}).then(result => { if (!result.canceled) document.getElementById("comfy-runtime-root-input").value = result.workingDirectory || ""; }).catch(error => setComfyRuntimeStatus({error: describeClientError(error, "Failed to browse for a ComfyUI folder.")})));
+    bindClick("comfy-runtime-browse-launcher-button", () => void request("/api/comfyui/runtime/browse-launcher", {}).then(result => { if (!result.canceled) document.getElementById("comfy-runtime-launcher-input").value = result.launcherPath || ""; }).catch(error => setComfyRuntimeStatus({error: describeClientError(error, "Failed to browse for a ComfyUI launcher.")})));
     bindClick("comfy-runtime-create-launchers-button", () => void request("/api/comfyui/runtime/create-launchers", {rootPath: document.getElementById("comfy-runtime-root-input").value.trim()}).then(result => { document.getElementById("comfy-runtime-launcher-input").value = result.selectedLauncherPath; setComfyRuntimeStatus({status: "stopped", launcherPath: result.selectedLauncherPath}); setOutput(`Created ${result.files.length} URage ComfyUI launcher batches.`); }).catch(error => setComfyRuntimeStatus({error: describeClientError(error, "Failed to create launchers.")})));
     bindClick("comfy-runtime-start-button", () => void request("/api/comfyui/runtime/start", {}).then(runtime => { setComfyRuntimeStatus(runtime); setOutput("Started ComfyUI."); }).catch(error => setComfyRuntimeStatus({error: describeClientError(error, "Failed to start ComfyUI.")})));
     bindClick("comfy-runtime-stop-button", () => void request("/api/comfyui/runtime/stop", {}).then(runtime => { setComfyRuntimeStatus(runtime); setOutput("Stopped ComfyUI."); }).catch(error => setComfyRuntimeStatus({error: describeClientError(error, "Failed to stop ComfyUI.")})));
     void loadComfyRuntime().catch(() => {});
+    window.setInterval(() => void loadComfyRuntime(false).catch(() => {}), 1500);
     bindClick("quick-reload-comfy-path-settings-button", async () => {
       try {
         await input.loadGlobalSettingsFromState?.();

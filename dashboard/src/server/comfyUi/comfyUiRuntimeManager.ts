@@ -2,6 +2,7 @@ import {spawn, type ChildProcess} from "node:child_process";
 import {existsSync} from "node:fs";
 import {mkdir, readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
+import {resolveRepoPath} from "@urage/server/config/repositoryPaths";
 
 export type ComfyUiRuntimeConfiguration = {
   launcherPath: string;
@@ -13,27 +14,37 @@ type RuntimeStatus = {
   pid: number | null;
   launcherPath: string;
   workingDirectory: string;
+  startedAt: string | null;
+  output: string[];
 };
 
 const configPath = path.resolve("data", "comfyui-runtime.json");
+const bundledLauncherPath = "scripts/comfyui/run-comfyui.bat";
 const processExitTimeoutMs = 10_000;
+const maxRuntimeOutputLines = 160;
 let runningProcess: ChildProcess | null = null;
 let stopPromise: Promise<void> | null = null;
+let runtimeStartedAt: string | null = null;
+let runtimeOutput: string[] = [];
 
 const clean = (value: unknown) => typeof value === "string" ? value.trim() : "";
 
+function resolveRuntimePath(value: string): string {
+  return path.isAbsolute(value) ? path.resolve(value) : resolveRepoPath(value);
+}
+
 function directory(value: string): string {
-  const resolved = path.resolve(value);
-  if (!path.isAbsolute(value) || !existsSync(resolved)) {
-    throw new Error("ComfyUI working directory must be an existing absolute folder.");
+  const resolved = resolveRuntimePath(value);
+  if (!existsSync(resolved)) {
+    throw new Error("ComfyUI working directory must be an existing folder.");
   }
   return resolved;
 }
 
 function launcher(value: string): string {
-  const resolved = path.resolve(value);
-  if (!path.isAbsolute(value) || !/\.(bat|cmd)$/i.test(resolved) || !existsSync(resolved)) {
-    throw new Error("ComfyUI launcher must be an existing absolute .bat or .cmd file.");
+  const resolved = resolveRuntimePath(value);
+  if (!/\.(bat|cmd)$/i.test(resolved) || !existsSync(resolved)) {
+    throw new Error("ComfyUI launcher must be an existing .bat or .cmd file.");
   }
   return resolved;
 }
@@ -44,10 +55,17 @@ function isProcessRunning(child: ChildProcess | null): child is ChildProcess {
 
 async function readConfig(): Promise<ComfyUiRuntimeConfiguration> {
   try {
-    return JSON.parse(await readFile(configPath, "utf8"));
+    const parsed = JSON.parse(await readFile(configPath, "utf8")) as Partial<ComfyUiRuntimeConfiguration>;
+    return {launcherPath: clean(parsed.launcherPath) || bundledLauncherPath, workingDirectory: clean(parsed.workingDirectory)};
   } catch {
-    return {launcherPath: "", workingDirectory: ""};
+    return {launcherPath: bundledLauncherPath, workingDirectory: ""};
   }
+}
+
+function appendRuntimeOutput(chunk: unknown): void {
+  const lines = String(chunk || "").replace(/\r/g, "").split("\n").map(line => line.trimEnd()).filter(Boolean);
+  if (lines.length === 0) return;
+  runtimeOutput = [...runtimeOutput, ...lines].slice(-maxRuntimeOutputLines);
 }
 
 async function writeConfig(config: ComfyUiRuntimeConfiguration): Promise<ComfyUiRuntimeConfiguration> {
@@ -106,16 +124,18 @@ export async function getComfyUiRuntimeStatus(): Promise<RuntimeStatus> {
   return {
     status: active ? "running" : "stopped",
     pid: active ? child.pid || null : null,
+    startedAt: active ? runtimeStartedAt : null,
+    output: runtimeOutput,
     ...config
   };
 }
 
 export async function saveComfyUiRuntimeConfiguration(input: Partial<ComfyUiRuntimeConfiguration>): Promise<RuntimeStatus> {
   const previous = await readConfig();
-  const launcherPath = input.launcherPath === undefined ? previous.launcherPath : clean(input.launcherPath);
+  const launcherPath = input.launcherPath === undefined ? previous.launcherPath : clean(input.launcherPath) || bundledLauncherPath;
   const workingDirectory = input.workingDirectory === undefined ? previous.workingDirectory : clean(input.workingDirectory);
   const config = {
-    launcherPath: launcherPath ? launcher(launcherPath) : "",
+    launcherPath: launcherPath === bundledLauncherPath ? bundledLauncherPath : launcher(launcherPath),
     workingDirectory: workingDirectory ? directory(workingDirectory) : ""
   };
   await writeConfig(config);
@@ -128,7 +148,10 @@ export async function startComfyUiRuntime(): Promise<RuntimeStatus> {
   }
   const config = await readConfig();
   const launcherPath = launcher(config.launcherPath);
-  const workingDirectory = directory(config.workingDirectory || path.dirname(launcherPath));
+  if (!config.workingDirectory) {
+    throw new Error("Choose the ComfyUI launcher folder before starting the runtime.");
+  }
+  const workingDirectory = directory(config.workingDirectory);
   if (process.platform !== "win32") {
     throw new Error("Dashboard batch launchers are currently supported on Windows only.");
   }
@@ -136,11 +159,17 @@ export async function startComfyUiRuntime(): Promise<RuntimeStatus> {
   const child = spawn("cmd.exe", ["/d", "/s", "/c", launcherPath], {
     cwd: workingDirectory,
     detached: true,
-    stdio: "ignore",
+    stdio: ["ignore", "pipe", "pipe"],
     windowsHide: false
   });
   runningProcess = child;
+  runtimeStartedAt = new Date().toISOString();
+  runtimeOutput = [`[${runtimeStartedAt}] Starting ${config.launcherPath} from ${workingDirectory}`];
+  child.stdout?.on("data", appendRuntimeOutput);
+  child.stderr?.on("data", appendRuntimeOutput);
+  child.once("error", error => appendRuntimeOutput(`[ERROR] ${error.message}`));
   child.once("exit", () => {
+    appendRuntimeOutput("ComfyUI process stopped.");
     if (runningProcess === child) {
       runningProcess = null;
     }
@@ -184,4 +213,38 @@ export async function createComfyUiLauncherBatches(rootPath: string) {
   const selectedLauncherPath = path.join(root, "run_urage_nvidia_fast_fp16_accumulation_listen.bat");
   await writeConfig({launcherPath: selectedLauncherPath, workingDirectory: root});
   return {directory: root, files, selectedLauncherPath};
+}
+
+async function browseWithPowerShell(script: string, fallbackMessage: string): Promise<string> {
+  if (process.platform !== "win32") throw new Error("The native picker is currently available on Windows only.");
+  return await new Promise((resolve, reject) => {
+    const child = spawn("powershell.exe", ["-NoProfile", "-STA", "-Command", script], {windowsHide: false, stdio: ["ignore", "pipe", "pipe"]});
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", chunk => stdout += String(chunk));
+    child.stderr.on("data", chunk => stderr += String(chunk));
+    child.once("error", reject);
+    child.once("close", code => code === 0 ? resolve(stdout.trim()) : reject(new Error(stderr.trim() || fallbackMessage)));
+  });
+}
+
+export async function browseForComfyUiLauncherFolder(): Promise<string> {
+  return await browseWithPowerShell([
+    "Add-Type -AssemblyName System.Windows.Forms",
+    "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog",
+    "$dialog.Description = 'Select the folder containing venv and ComfyUI'",
+    "$dialog.ShowNewFolderButton = $false",
+    "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($dialog.SelectedPath) }"
+  ].join("; "), "ComfyUI folder picker failed.");
+}
+
+export async function browseForComfyUiLauncherBatch(): Promise<string> {
+  return await browseWithPowerShell([
+    "Add-Type -AssemblyName System.Windows.Forms",
+    "$dialog = New-Object System.Windows.Forms.OpenFileDialog",
+    "$dialog.Title = 'Select a ComfyUI launcher batch'",
+    "$dialog.Filter = 'Batch files (*.bat;*.cmd)|*.bat;*.cmd'",
+    "$dialog.Multiselect = $false",
+    "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($dialog.FileName) }"
+  ].join("; "), "ComfyUI launcher picker failed.");
 }

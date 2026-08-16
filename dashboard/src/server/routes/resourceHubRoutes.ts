@@ -77,7 +77,7 @@ import {
 } from "../resourceHub/remoteAssetCatalogManager.js";
 import {getRemoteBlenderScriptCatalog, prepareRemoteBlenderScriptPackage} from "../resourceHub/remoteBlenderScriptCatalogManager.js";
 import {isThreeDSuiteKey, listThreeDSuiteInstalls} from "../resourceHub/threeDSuiteInstallManager.js";
-import {createComfyUiLauncherBatches, getComfyUiRuntimeStatus, saveComfyUiRuntimeConfiguration, startComfyUiRuntime, stopComfyUiRuntime} from "../comfyUi/comfyUiRuntimeManager.js";
+import {browseForComfyUiLauncherBatch, browseForComfyUiLauncherFolder, createComfyUiLauncherBatches, getComfyUiRuntimeStatus, saveComfyUiRuntimeConfiguration, startComfyUiRuntime, stopComfyUiRuntime} from "../comfyUi/comfyUiRuntimeManager.js";
 
 function readString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -109,6 +109,8 @@ async function handlePostComfyUiRuntimeStop(_request: IncomingMessage, response:
   }
 }
 async function handlePostComfyUiRuntimeCreateLaunchers(request: IncomingMessage, response: ServerResponse): Promise<void> { try { const body = await parseJsonBody(request) as Record<string, unknown>; sendJson(response, 200, await createComfyUiLauncherBatches(readString(body.rootPath))); } catch (error) { sendJson(response, 400, {error: error instanceof Error ? error.message : "Failed to create ComfyUI launchers."}); } }
+async function handlePostComfyUiRuntimeBrowseFolder(_request: IncomingMessage, response: ServerResponse): Promise<void> { try { const workingDirectory = await browseForComfyUiLauncherFolder(); sendJson(response, 200, workingDirectory ? {workingDirectory} : {canceled: true}); } catch (error) { sendJson(response, 400, {error: error instanceof Error ? error.message : "Failed to browse for a ComfyUI folder."}); } }
+async function handlePostComfyUiRuntimeBrowseLauncher(_request: IncomingMessage, response: ServerResponse): Promise<void> { try { const launcherPath = await browseForComfyUiLauncherBatch(); sendJson(response, 200, launcherPath ? {launcherPath} : {canceled: true}); } catch (error) { sendJson(response, 400, {error: error instanceof Error ? error.message : "Failed to browse for a ComfyUI launcher."}); } }
 
 async function handlePostApiToolScaffoldPlan(
   request: IncomingMessage,
@@ -686,6 +688,8 @@ const dashboardResourceHubRouteTable = createDashboardRouteTable([
   postRoute("/api/comfyui/runtime/start", handlePostComfyUiRuntimeStart),
   postRoute("/api/comfyui/runtime/stop", handlePostComfyUiRuntimeStop),
   postRoute("/api/comfyui/runtime/create-launchers", handlePostComfyUiRuntimeCreateLaunchers),
+  postRoute("/api/comfyui/runtime/browse-folder", handlePostComfyUiRuntimeBrowseFolder),
+  postRoute("/api/comfyui/runtime/browse-launcher", handlePostComfyUiRuntimeBrowseLauncher),
   getRoute("/api/blender/installs", handleGetApiBlenderInstalls),
   getRoute("/api/3d-suites/installs", handleGetApiThreeDSuiteInstalls),
   getRoute("/api/blender/addons", handleGetApiBlenderInstalledAddons),

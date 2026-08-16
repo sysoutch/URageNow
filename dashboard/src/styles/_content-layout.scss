@@ -1562,6 +1562,52 @@
     align-content: start;
   }
 
+  .comfy-runtime-progress {
+    display: grid;
+    gap: 8px;
+    margin-top: 4px;
+    padding: 10px;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 75%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--panel-bg) 88%, #000);
+  }
+
+  .comfy-runtime-progress-bar {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-border) 65%, transparent);
+  }
+
+  .comfy-runtime-progress-bar span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent, #f97316);
+    transition: width 220ms ease;
+  }
+
+  .comfy-runtime-progress.is-running .comfy-runtime-progress-bar span { animation: comfy-runtime-pulse 1.3s ease-in-out infinite; }
+  .comfy-runtime-progress.has-error .comfy-runtime-progress-bar span { background: #ef4444; }
+
+  .comfy-runtime-progress pre {
+    max-height: 210px;
+    margin: 0;
+    overflow: auto;
+    padding: 8px;
+    border-radius: 7px;
+    background: color-mix(in srgb, #000 45%, transparent);
+    font-size: 11px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+  }
+
+  @keyframes comfy-runtime-pulse {
+    0%, 100% { opacity: .55; }
+    50% { opacity: 1; }
+  }
+
   .settings-overlay-panel :is(.settings-overlay-card, .status-card),
   .resources-overlay-panel :is(.resources-overlay-card, .status-card),
   .skills-overlay-panel :is(.skills-overlay-card, .status-card) {
