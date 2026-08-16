@@ -1,0 +1,332 @@
+body {
+  --dashboard-border-radius: 0px;
+  --dashboard-padding: 0px;
+  --dashboard-margin: 0px;
+  --dashboard-card-radius: var(--dashboard-border-radius);
+  --dashboard-control-radius: var(--dashboard-border-radius);
+  --dashboard-tabs-radius: var(--dashboard-border-radius);
+  --dashboard-tabs-padding: var(--dashboard-padding);
+  --dashboard-tabs-margin: var(--dashboard-margin);
+  --dashboard-buttons-radius: var(--dashboard-border-radius);
+  --dashboard-buttons-padding: var(--dashboard-padding);
+  --dashboard-buttons-margin: var(--dashboard-margin);
+  --dashboard-selections-radius: var(--dashboard-border-radius);
+  --dashboard-selections-padding: var(--dashboard-padding);
+  --dashboard-selections-margin: var(--dashboard-margin);
+  --dashboard-inputs-radius: var(--dashboard-selections-radius);
+  --dashboard-inputs-padding: var(--dashboard-selections-padding);
+  --dashboard-inputs-margin: var(--dashboard-selections-margin);
+  --dashboard-textareas-radius: var(--dashboard-selections-radius);
+  --dashboard-textareas-padding: var(--dashboard-selections-padding);
+  --dashboard-textareas-margin: var(--dashboard-selections-margin);
+  --dashboard-selects-radius: var(--dashboard-selections-radius);
+  --dashboard-selects-padding: var(--dashboard-selections-padding);
+  --dashboard-selects-margin: var(--dashboard-selections-margin);
+  --dashboard-ranges-radius: var(--dashboard-selections-radius);
+  --dashboard-ranges-padding: var(--dashboard-selections-padding);
+  --dashboard-ranges-margin: var(--dashboard-selections-margin);
+  --dashboard-checkboxes-radius: var(--dashboard-border-radius);
+  --dashboard-checkboxes-padding: var(--dashboard-padding);
+  --dashboard-checkboxes-margin: var(--dashboard-margin);
+  --dashboard-chips-radius: var(--dashboard-border-radius);
+  --dashboard-chips-padding: var(--dashboard-padding);
+  --dashboard-chips-margin: var(--dashboard-margin);
+  --dashboard-cards-radius: var(--dashboard-border-radius);
+  --dashboard-cards-padding: var(--dashboard-padding);
+  --dashboard-cards-margin: var(--dashboard-margin);
+  --dashboard-foldouts-radius: var(--dashboard-cards-radius);
+  --dashboard-foldouts-padding: var(--dashboard-cards-padding);
+  --dashboard-foldouts-margin: var(--dashboard-cards-margin);
+  --dashboard-sidebars-radius: var(--dashboard-card-radius);
+  --dashboard-sidebars-padding: var(--dashboard-padding);
+  --dashboard-sidebars-margin: var(--dashboard-margin);
+  --dashboard-toolbars-radius: var(--dashboard-control-radius);
+  --dashboard-toolbars-padding: var(--dashboard-padding);
+  --dashboard-toolbars-margin: var(--dashboard-margin);
+  --dashboard-lists-radius: var(--dashboard-card-radius);
+  --dashboard-lists-padding: var(--dashboard-padding);
+  --dashboard-lists-margin: var(--dashboard-margin);
+  --dashboard-tables-radius: var(--dashboard-card-radius);
+  --dashboard-tables-padding: var(--dashboard-padding);
+  --dashboard-tables-margin: var(--dashboard-margin);
+  --dashboard-badges-radius: var(--dashboard-control-radius);
+  --dashboard-badges-padding: var(--dashboard-padding);
+  --dashboard-badges-margin: var(--dashboard-margin);
+  --dashboard-modals-radius: var(--dashboard-card-radius);
+  --dashboard-modals-padding: var(--dashboard-padding);
+  --dashboard-modals-margin: var(--dashboard-margin);
+  --dashboard-overlays-radius: var(--dashboard-border-radius);
+  --dashboard-overlays-padding: var(--dashboard-padding);
+  --dashboard-overlays-margin: var(--dashboard-margin);
+  --dashboard-previews-radius: var(--dashboard-card-radius);
+  --dashboard-previews-padding: var(--dashboard-padding);
+  --dashboard-previews-margin: var(--dashboard-margin);
+  --dashboard-outputs-radius: var(--dashboard-card-radius);
+  --dashboard-outputs-padding: var(--dashboard-padding);
+  --dashboard-outputs-margin: var(--dashboard-margin);
+  --dashboard-rails-radius: var(--dashboard-border-radius);
+  --dashboard-rails-padding: var(--dashboard-padding);
+  --dashboard-rails-margin: var(--dashboard-margin);
+  --dashboard-tab-bg: color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 88%, black 12%);
+  --dashboard-tab-bg-soft: color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 86%, black 14%);
+  --dashboard-tab-border: color-mix(in srgb, var(--studio-panel-border, var(--line)) 84%, transparent);
+  --dashboard-tab-accent: var(--studio-accent-1, var(--accent));
+  --dashboard-tab-accent-strong: var(--studio-accent-2, var(--accent-2));
+  --dashboard-tab-radius: var(--dashboard-tabs-radius, var(--dashboard-card-radius, 0px));
+  --dashboard-tab-button-radius: var(--dashboard-tabs-radius, var(--dashboard-control-radius, 0px));
+  --dashboard-tab-gap: var(--studio-tab-gap, 4px);
+  --dashboard-tab-padding: max(var(--studio-tab-padding, 4px), var(--dashboard-tabs-padding, 0px));
+}
+
+body :is([role="tablist"],
+  .tabs,
+  [class$="-tabs"]:not(.ask-chat-tabs),
+  [class*="-tabs "]:not(.ask-chat-tabs)) {
+  display: inline-flex !important;
+  align-items: stretch !important;
+  flex-wrap: nowrap !important;
+  gap: var(--dashboard-tab-gap) !important;
+  width: fit-content !important;
+  max-width: calc(100% - var(--dashboard-tabs-margin, 0px) - var(--dashboard-tabs-margin, 0px)) !important;
+  padding: var(--dashboard-tab-padding) !important;
+  scrollbar-width: none;
+  margin: var(--dashboard-tabs-margin, 0px) !important;
+}
+
+body :is([role="tablist"],
+  .tabs,
+  [class$="-tabs"]:not(.ask-chat-tabs),
+  [class*="-tabs "]:not(.ask-chat-tabs))::-webkit-scrollbar {
+  display: none;
+}
+
+body :is([role="tablist"],
+  .tabs,
+  [class$="-tabs"]:not(.ask-chat-tabs),
+  [class*="-tabs "]:not(.ask-chat-tabs))> :is(button, .ghost, .nav-link, .messenger-tab) {
+  min-height: 32px !important;
+  min-width: 92px !important;
+  padding: 0 max(12px, var(--dashboard-tabs-padding, 0px)) !important;
+  border: 1px solid transparent !important;
+  color: color-mix(in srgb, var(--muted) 78%, white 22%) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+}
+
+body :is([role="tablist"],
+  .tabs,
+  [class$="-tabs"]:not(.ask-chat-tabs),
+  [class*="-tabs "]:not(.ask-chat-tabs))> :is(button, .ghost, .nav-link, .messenger-tab):is(:hover, .active, .is-active, [aria-selected="true"], [aria-pressed="true"]) {
+  color: var(--button-primary-fg, var(--ink)) !important;
+}
+
+body :is(button, a.secondary, .ghost, .mini-button):not(.rail-nav-button):not(.rail-settings-button):not(.theme-manager-card-button) {
+  border-radius: var(--dashboard-buttons-radius, var(--dashboard-control-radius, 0px)) !important;
+  margin: var(--dashboard-buttons-margin, 0px);
+  max-width: calc(100% - var(--dashboard-buttons-margin, 0px) - var(--dashboard-buttons-margin, 0px));
+}
+
+body :is(.runtime-overlay-panel, .settings-overlay-panel, .resources-overlay-panel, .skills-overlay-panel, .console-overlay-panel, .quick-actions-overlay-panel) {
+  border-radius: var(--dashboard-overlays-radius, var(--dashboard-card-radius, 0px)) !important;
+  padding: max(16px, var(--dashboard-overlays-padding, 0px)) !important;
+  margin: var(--dashboard-overlays-margin, 0px) !important;
+  max-width: calc(100% - var(--dashboard-overlays-margin, 0px) - var(--dashboard-overlays-margin, 0px));
+  max-height: calc(100% - var(--dashboard-overlays-margin, 0px) - var(--dashboard-overlays-margin, 0px));
+}
+
+body :is(.status-card, .settings-overlay-card, .panel-card, .detail-card, .theme-manager-card, .resources-overlay-card, .skills-overlay-card, .console-list-card, .console-detail-card) {
+  border-radius: var(--dashboard-cards-radius, var(--dashboard-card-radius, 0px)) !important;
+  padding: max(12px, var(--dashboard-cards-padding, 0px)) !important;
+  margin: var(--dashboard-cards-margin, 0px) !important;
+  max-width: calc(100% - var(--dashboard-cards-margin, 0px) - var(--dashboard-cards-margin, 0px));
+  max-height: calc(100% - var(--dashboard-cards-margin, 0px) - var(--dashboard-cards-margin, 0px));
+}
+
+body :is(input, textarea, select):not([type="range"]):not([type="checkbox"]) {
+  border-radius: var(--dashboard-selections-radius, var(--dashboard-control-radius, 0px)) !important;
+  padding: max(10px, var(--dashboard-selections-padding, 0px)) max(12px, var(--dashboard-selections-padding, 0px));
+  margin: var(--dashboard-selections-margin, 0px);
+  max-width: calc(100% - var(--dashboard-selections-margin, 0px) - var(--dashboard-selections-margin, 0px));
+}
+
+body input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
+  border-radius: var(--dashboard-inputs-radius, var(--dashboard-selections-radius, var(--dashboard-control-radius, 0px))) !important;
+  padding: max(10px, var(--dashboard-inputs-padding, 0px)) max(12px, var(--dashboard-inputs-padding, 0px));
+  margin: var(--dashboard-inputs-margin, 0px);
+  max-width: calc(100% - var(--dashboard-inputs-margin, 0px) - var(--dashboard-inputs-margin, 0px));
+}
+
+body textarea {
+  border-radius: var(--dashboard-textareas-radius, var(--dashboard-selections-radius, var(--dashboard-control-radius, 0px))) !important;
+  padding: max(10px, var(--dashboard-textareas-padding, 0px)) max(12px, var(--dashboard-textareas-padding, 0px));
+  margin: var(--dashboard-textareas-margin, 0px);
+  max-width: calc(100% - var(--dashboard-textareas-margin, 0px) - var(--dashboard-textareas-margin, 0px));
+}
+
+body select {
+  border-radius: var(--dashboard-selects-radius, var(--dashboard-selections-radius, var(--dashboard-control-radius, 0px))) !important;
+  padding: max(10px, var(--dashboard-selects-padding, 0px)) max(12px, var(--dashboard-selects-padding, 0px));
+  margin: var(--dashboard-selects-margin, 0px);
+  max-width: calc(100% - var(--dashboard-selects-margin, 0px) - var(--dashboard-selects-margin, 0px));
+}
+
+body input[type="range"] {
+  --dashboard-range-track-bg: color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 78%, black 22%);
+  --dashboard-range-fill-bg: linear-gradient(90deg, var(--studio-accent-1, var(--accent)), var(--studio-accent-2, var(--accent-2)));
+  --dashboard-range-thumb-bg: color-mix(in srgb, var(--ink) 94%, white 6%);
+  --dashboard-range-thumb-border: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 74%, white 12%);
+  appearance: none;
+  width: 100%;
+  min-height: 26px;
+  border-radius: var(--dashboard-ranges-radius, var(--dashboard-selections-radius, var(--dashboard-control-radius, 0px)));
+  padding: var(--dashboard-ranges-padding, 0px);
+  margin: var(--dashboard-ranges-margin, 0px);
+  max-width: calc(100% - var(--dashboard-ranges-margin, 0px) - var(--dashboard-ranges-margin, 0px));
+  border: 0;
+  background: transparent;
+  color: var(--studio-accent-1, var(--accent));
+  cursor: pointer;
+}
+
+body input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  background:
+    var(--dashboard-range-fill-bg) 0 0 / calc((var(--range-progress, 0) * 1%) + 0px) 100% no-repeat,
+    var(--dashboard-range-track-bg);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border-radius: 999px;
+  border: 2px solid var(--dashboard-range-thumb-border);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.88), transparent 32%),
+    var(--dashboard-range-thumb-bg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--studio-accent-1, var(--accent)) 18%, transparent), 0 4px 12px rgba(0, 0, 0, 0.34);
+}
+
+body input[type="range"]::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  background: var(--dashboard-range-track-bg);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body input[type="range"]::-moz-range-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--dashboard-range-fill-bg);
+}
+
+body input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid var(--dashboard-range-thumb-border);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.88), transparent 32%),
+    var(--dashboard-range-thumb-bg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--studio-accent-1, var(--accent)) 18%, transparent), 0 4px 12px rgba(0, 0, 0, 0.34);
+}
+
+body input[type="range"]:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 72%, white 12%);
+  outline-offset: 4px;
+}
+
+body :is(input[type="checkbox"], .toggle, .compact-toggle) {
+  border-radius: var(--dashboard-checkboxes-radius, var(--dashboard-control-radius, 0px)) !important;
+  margin: var(--dashboard-checkboxes-margin, 0px);
+}
+
+body :is(.toggle, .compact-toggle) {
+  padding: max(8px, var(--dashboard-checkboxes-padding, 0px)) max(10px, var(--dashboard-checkboxes-padding, 0px));
+}
+
+body :is(.chip, .messaging-chip, .variant-route-chip, .studio-prompt-preset-button, .quick-actions-command-chip) {
+  border-radius: var(--dashboard-chips-radius, var(--dashboard-control-radius, 0px)) !important;
+  padding: max(8px, var(--dashboard-chips-padding, 0px)) max(10px, var(--dashboard-chips-padding, 0px));
+  margin: var(--dashboard-chips-margin, 0px);
+}
+
+body :is(.fold-card, .studio-side-foldout, .resources-foldout, details.status-card) {
+  border-radius: var(--dashboard-foldouts-radius, var(--dashboard-cards-radius, var(--dashboard-card-radius, 0px))) !important;
+  margin: var(--dashboard-foldouts-margin, 0px) !important;
+  max-width: calc(100% - var(--dashboard-foldouts-margin, 0px) - var(--dashboard-foldouts-margin, 0px));
+}
+
+body :is(.fold-card > summary, .studio-side-foldout > summary, .resources-foldout-summary) {
+  padding: max(10px, var(--dashboard-foldouts-padding, 0px)) max(12px, var(--dashboard-foldouts-padding, 0px)) !important;
+}
+
+body :is(.workspace-sidebar, .side-panel, .studio-right-sidebar, .studio-workflow-sidebar, .sidebar-card, .sidebar-mode-panel) {
+  border-radius: var(--dashboard-sidebars-radius, var(--dashboard-card-radius, 0px)) !important;
+  margin: var(--dashboard-sidebars-margin, 0px);
+  max-width: calc(100% - var(--dashboard-sidebars-margin, 0px) - var(--dashboard-sidebars-margin, 0px));
+  max-height: calc(100% - var(--dashboard-sidebars-margin, 0px) - var(--dashboard-sidebars-margin, 0px));
+}
+
+body :is(.sidebar-card, .sidebar-mode-panel, .studio-workflow-sidebar-list) {
+  padding: max(0px, var(--dashboard-sidebars-padding, 0px));
+}
+
+body :is(.resource-manager-toolbar, .image-studio-preview-tools, .video-studio-preview-tools, .model3d-preview-actions, .audio-preview-actions, .music-preview-actions, .image-preview-focus-toolbar, .quick-tool-overlay-actions, .settings-overlay-footer) {
+  border-radius: var(--dashboard-toolbars-radius, var(--dashboard-control-radius, 0px)) !important;
+  padding: var(--dashboard-toolbars-padding, 0px);
+  margin: var(--dashboard-toolbars-margin, 0px);
+  max-width: calc(100% - var(--dashboard-toolbars-margin, 0px) - var(--dashboard-toolbars-margin, 0px));
+}
+
+body :is(.list, .compact-list, .medium-list, .resources-source-list, .console-event-list, .quick-actions-command-list, .quick-actions-tool-results, .latest-media-grid) {
+  border-radius: var(--dashboard-lists-radius, var(--dashboard-card-radius, 0px)) !important;
+  padding: var(--dashboard-lists-padding, 0px);
+  margin: var(--dashboard-lists-margin, 0px);
+  max-width: calc(100% - var(--dashboard-lists-margin, 0px) - var(--dashboard-lists-margin, 0px));
+}
+
+body :is(table, .table, .table-responsive) {
+  border-radius: var(--dashboard-tables-radius, var(--dashboard-card-radius, 0px)) !important;
+  margin: var(--dashboard-tables-margin, 0px);
+  max-width: calc(100% - var(--dashboard-tables-margin, 0px) - var(--dashboard-tables-margin, 0px));
+}
+
+body :is(th, td) {
+  padding: max(8px, var(--dashboard-tables-padding, 0px)) max(10px, var(--dashboard-tables-padding, 0px));
+}
+
+body :is(.badge, .tag, .panel-kicker, .section-label, .image-preview-context-badge, .game-engine-send-preview-badge, .image-variant-badge, .model3d-variant-badge) {
+  border-radius: var(--dashboard-badges-radius, var(--dashboard-control-radius, 0px)) !important;
+  padding: max(4px, var(--dashboard-badges-padding, 0px)) max(7px, var(--dashboard-badges-padding, 0px));
+  margin: var(--dashboard-badges-margin, 0px);
+}
+
+body :is(.modal, .modal-content, .image-quick-action-modal, .model3d-autorig-modal, .image-preview-focus-shell, .image-pool-preview-panel) {
+  border-radius: var(--dashboard-modals-radius, var(--dashboard-card-radius, 0px)) !important;
+  padding: var(--dashboard-modals-padding, 0px);
+  margin: var(--dashboard-modals-margin, 0px);
+  max-width: calc(100% - var(--dashboard-modals-margin, 0px) - var(--dashboard-modals-margin, 0px));
+  max-height: calc(100% - var(--dashboard-modals-margin, 0px) - var(--dashboard-modals-margin, 0px));
+}
+
+body :is(.image-studio-preview-panel, .image-preview-reveal-stage, .model3d-viewer-overlay, .game-engine-send-preview-card, .game-engine-send-preview-stage, .image-quick-action-preview, .video-source-preview, .latest-media-card, .studio-home-activity-preview, .theme-manager-card-button) {
+  border-radius: var(--dashboard-previews-radius, var(--dashboard-card-radius, 0px)) !important;
+  padding: var(--dashboard-previews-padding, 0px);
+  margin: var(--dashboard-previews-margin, 0px);
+  max-width: calc(100% - var(--dashboard-previews-margin, 0px) - var(--dashboard-previews-margin, 0px));
+}
+
+body :is(.output, .simulation-output, .resources-output, .skills-output, .status-card pre, .console-detail-block pre, .quick-actions-command-status, .resources-text-source-preview) {
+  border-radius: var(--dashboard-outputs-radius, var(--dashboard-card-radius, 0px)) !important;
+  padding: max(10px, var(--dashboard-outputs-padding, 0px)) max(12px, var(--dashboard-outputs-padding, 0px));
+  margin: var(--dashboard-outputs-margin, 0px);
+  max-width: calc(100% - var(--dashboard-outputs-margin, 0px) - var(--dashboard-outputs-margin, 0px));
+}

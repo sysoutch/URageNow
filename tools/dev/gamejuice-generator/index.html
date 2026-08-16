@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Juice Generator</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+  <div class="app">
+    <aside class="left-rail">
+      <div class="brand"><div class="brand-mark">JG</div><div><h1>Juice Generator</h1><p>visual feedback lab</p></div></div>
+      <section class="panel">
+        <label for="input">Actions</label>
+        <textarea id="input" spellcheck="false">jump
+hit
+explosion
+pickup</textarea>
+        <div class="btn-row"><button id="generateBtn" class="primary">Generate</button><button id="resetBtn" class="ghost">Reset</button></div>
+      </section>
+      <section class="panel">
+        <label>Quick add</label>
+        <div class="chips">
+          <button class="chip" data-add="dash">dash</button>
+          <button class="chip" data-add="land">land</button>
+          <button class="chip" data-add="coin">coin</button>
+          <button class="chip" data-add="boss hit">boss hit</button>
+          <button class="chip" data-add="powerup">powerup</button>
+        </div>
+      </section>
+      <section class="panel">
+        <label for="framework">Export</label>
+        <select id="framework"><option value="phaser">Phaser</option><option value="pixijs">PixiJS</option><option value="babylon">Babylon.js</option><option value="unity">Unity C#</option></select>
+      </section>
+      <section class="panel preset-panel">
+        <div class="panel-headline">
+          <label>Editable presets</label>
+          <p class="muted">Change values here, then replay an action.</p>
+        </div>
+        <div id="cards" class="cards"></div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="hero">
+        <div class="hero-copy"><p class="eyebrow">HTML5 Game Juice Generator</p><h2>Click an action. Feel the juice.</h2><p>A responsive game-feel dashboard for particles, screenshake, easing, sound timing, animation timing, downloadable sprites, and engine snippets.</p></div>
+        <div class="metrics">
+          <div class="metric"><span>Actions</span><strong id="actionCount">4</strong></div>
+          <div class="metric"><span>Export</span><strong id="exportName">Phaser</strong></div>
+          <div class="metric"><span>Assets</span><strong id="assetCount">19 PNGs</strong></div>
+          <div class="metric"><span>Mode</span><strong>Juicy</strong></div>
+        </div>
+      </header>
+
+      <details class="foldout" id="assetFoldout">
+        <summary><div><p class="eyebrow">Downloadable sprite pack</p><p class="muted">Player and particle PNGs. Open the foldout to browse and download assets.</p></div></summary>
+        <div class="asset-content">
+          <div class="asset-toolbar"><button id="downloadAllSprites">Download All PNGs</button></div>
+          <div id="assetBrowser" class="asset-browser"></div>
+        </div>
+      </details>
+
+      <section class="stage-panel">
+        <div class="stage-head"><div><p class="eyebrow">Live preview</p><p class="muted">Generated actions become playable buttons</p></div><div id="stageActions" class="stage-actions"></div></div>
+        <div id="stage"><div class="ground"></div><div id="player" class="player"></div></div>
+      </section>
+    </main>
+
+    <aside class="right-rail">
+      <div class="right-head"><p class="eyebrow">Docked Sidebar</p><h2>Inspector & Export</h2><p class="muted">Own scrollbar on desktop. Moves below the main content before it crushes the layout.</p></div>
+      <div class="right-scroll">
+        <section class="side-panel">
+          <div class="side-head"><h3>Preset Inspector</h3><span class="eyebrow">Live</span></div>
+          <div class="side-body"><div class="mini-preview"><div class="mini-player"></div><div class="mini-ground"></div></div><div id="inspectGrid" class="inspect-grid"></div></div>
+        </section>
+        <section class="side-panel">
+          <div class="side-head"><h3>Export Targets</h3><span class="eyebrow">Runtime</span></div>
+          <div class="side-body"><div class="engine-list">
+            <div class="engine-item"><div><strong>Phaser</strong><span>Emitter + sprite frame</span></div><span>Ready</span></div>
+            <div class="engine-item"><div><strong>PixiJS</strong><span>Sprite burst particles</span></div><span>Ready</span></div>
+            <div class="engine-item"><div><strong>Babylon.js</strong><span>ParticleSystem texture</span></div><span>Ready</span></div>
+            <div class="engine-item"><div><strong>Unity C#</strong><span>ParticleSystem sprites</span></div><span>Ready</span></div>
+          </div></div>
+        </section>
+        <section class="code-panel">
+          <div class="code-head"><div><p class="eyebrow">Snippet</p><h3 id="codeTitle">Phaser</h3></div><div class="tabs"><button data-fw="phaser" class="active">Phaser</button><button data-fw="pixijs">Pixi</button><button data-fw="babylon">Babylon</button><button data-fw="unity">Unity</button></div></div>
+          <pre><code id="codeOutput"></code></pre>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

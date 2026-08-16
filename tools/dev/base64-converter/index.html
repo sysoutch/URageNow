@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Base64 encoder, decoder, Data URL and image preview tool">
+<title>Base64 Converter</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --card2: #172033;
+  --border: #334155;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #4ade80;
+  --error: #f87171;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
+}
+
+h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 34px;
+}
+
+.subtitle {
+  margin: 8px 0 30px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.card {
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.25);
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.tab {
+  flex: 1;
+  padding: 13px;
+  border: 0;
+  border-radius: 10px;
+  background: #334155;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tab:hover {
+  background: #475569;
+}
+
+.tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 250px;
+  padding: 16px;
+  resize: vertical;
+  border: 1px solid #475569;
+  border-radius: 10px;
+  outline: none;
+  background: #0b1220;
+  color: var(--text);
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+.drop-zone {
+  margin-top: 12px;
+  padding: 24px;
+  border: 2px dashed #475569;
+  border-radius: 10px;
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: .2s;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+  border-color: var(--primary);
+  background: rgba(59,130,246,.08);
+  color: #cbd5e1;
+}
+
+.drop-zone input {
+  display: none;
+}
+
+/* Attachment */
+
+.attachment {
+  display: none;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card2);
+}
+
+.attachment.visible {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.attachment-preview {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0f172a;
+}
+
+.attachment-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-icon {
+  font-size: 32px;
+}
+
+.attachment-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.attachment-name {
+  overflow: hidden;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.remove-file {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  background: #475569;
+  color: white;
+}
+
+.remove-file:hover {
+  background: #64748b;
+}
+
+.option-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 12px 14px;
+  background: var(--card2);
+  border-radius: 9px;
+}
+
+.option-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 11px 17px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.primary {
+  background: var(--primary);
+  color: white;
+}
+
+.primary:hover {
+  background: var(--primary-hover);
+}
+
+.secondary {
+  background: #475569;
+  color: white;
+}
+
+.secondary:hover {
+  background: #64748b;
+}
+
+.danger {
+  background: #7f1d1d;
+  color: white;
+}
+
+.danger:hover {
+  background: #991b1b;
+}
+
+.status {
+  min-height: 24px;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.success {
+  color: var(--success);
+}
+
+.error {
+  color: var(--error);
+}
+
+.result-card {
+  display: none;
+  margin-top: 25px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card2);
+}
+
+.result-card.visible {
+  display: block;
+}
+
+.result-title {
+  margin: 0 0 15px;
+  font-size: 18px;
+}
+
+.result-text {
+  display: none;
+}
+
+.result-text.visible {
+  display: block;
+}
+
+.result-text textarea {
+  min-height: 220px;
+}
+
+.metadata {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.metadata-item {
+  padding: 12px;
+  border-radius: 8px;
+  background: #0f172a;
+}
+
+.metadata-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.metadata-value {
+  color: var(--text);
+  font-family: monospace;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.image-preview {
+  display: none;
+  padding: 15px;
+  text-align: center;
+  border-radius: 10px;
+  background:
+    linear-gradient(45deg,#1e293b 25%,transparent 25%),
+    linear-gradient(-45deg,#1e293b 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#1e293b 75%),
+    linear-gradient(-45deg,transparent 75%,#1e293b 75%);
+  background-size: 20px 20px;
+  background-position: 0 0,0 10px,10px -10px,-10px 0;
+}
+
+.image-preview.visible {
+  display: block;
+}
+
+.image-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 600px;
+  margin: auto;
+  border-radius: 6px;
+}
+
+.hex-preview {
+  display: none;
+  max-height: 250px;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 8px;
+  background: #0b1220;
+  color: #94a3b8;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre;
+}
+
+.hex-preview.visible {
+  display: block;
+}
+
+.text-preview {
+  display: none;
+  max-height: 300px;
+  overflow: auto;
+  padding: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 8px;
+  background: #0b1220;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.text-preview.visible {
+  display: block;
+}
+
+.info {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background: var(--card2);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+  body {
+    padding: 20px 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+
+  h1 {
+    font-size: 27px;
+  }
+
+  .attachment.visible {
+    align-items: flex-start;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Base64 Converter</h1>
+
+  <p class="subtitle">
+    Encode, decode, preview images, and work with Data URLs
+  </p>
+
+  <div class="card">
+
+    <div class="tabs">
+    <button id="encodeTab" class="tab active" onclick="setMode('encode')">
+        Text / File → Base64
+    </button>
+
+    <button id="decodeTab" class="tab" onclick="setMode('decode')">
+        Base64 / Data URL → File
+    </button>
+    </div>
+
+    <label id="inputLabel" for="input">
+    Text
+    </label>
+
+    <textarea
+    id="input"
+    spellcheck="false"
+    placeholder="Enter text to encode..."
+    ></textarea>
+
+    <!-- File attachment -->
+
+    <div
+    id="dropZone"
+    class="drop-zone"
+    onclick="document.getElementById('fileInput').click()"
+    >
+    <strong>Attach a file</strong>
+    <br>
+    <span>Drop a file here or click to browse</span>
+
+    <input
+        id="fileInput"
+        type="file"
+        onchange="handleFile(this.files[0])"
+    >
+    </div>
+
+    <div id="attachment" class="attachment">
+
+    <div id="attachmentPreview" class="attachment-preview">
+        <span class="file-icon">📄</span>
+    </div>
+
+    <div class="attachment-info">
+        <div id="attachmentName" class="attachment-name">
+        filename
+        </div>
+
+        <div id="attachmentMeta" class="attachment-meta">
+        file
+        </div>
+    </div>
+
+    <button
+        class="remove-file"
+        onclick="removeFile(event)"
+    >
+        Remove
+    </button>
+
+    </div>
+
+    <!-- Encoding options -->
+
+    <div id="encodeOptions" style="margin-top:20px">
+
+    <label>Encoding output</label>
+
+    <div class="option-row">
+
+        <label>
+        <input
+            type="radio"
+            name="outputFormat"
+            value="base64"
+            checked
+        >
+        Raw Base64
+        </label>
+
+        <label>
+        <input
+            type="radio"
+            name="outputFormat"
+            value="dataurl"
+        >
+        Data URL
+        </label>
+
+    </div>
+
+    </div>
+
+    <div class="controls">
+
+    <button class="primary" onclick="convert()">
+        Convert
+    </button>
+
+    <button class="secondary" onclick="copyResult()">
+        Copy Result
+    </button>
+
+    <button
+        id="downloadButton"
+        class="secondary"
+        onclick="downloadResult()"
+        style="display:none"
+    >
+        Download
+    </button>
+
+    <button class="secondary" onclick="swap()">
+        Swap
+    </button>
+
+    <button class="danger" onclick="clearAll()">
+        Clear
+    </button>
+
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <!-- Result -->
+
+    <div id="resultCard" class="result-card">
+
+    <h2 id="resultTitle" class="result-title">
+        Result
+    </h2>
+
+    <div class="metadata">
+
+        <div class="metadata-item">
+        <span class="metadata-label">Type</span>
+        <span id="metaType" class="metadata-value">—</span>
+        </div>
+
+        <div class="metadata-item">
+        <span class="metadata-label">Size</span>
+        <span id="metaSize" class="metadata-value">—</span>
+        </div>
+
+        <div class="metadata-item">
+        <span class="metadata-label">Format</span>
+        <span id="metaFormat" class="metadata-value">—</span>
+        </div>
+
+        <div
+        id="dimensionsItem"
+        class="metadata-item"
+        style="display:none"
+        >
+        <span class="metadata-label">Dimensions</span>
+        <span id="metaDimensions" class="metadata-value">—</span>
+        </div>
+
+    </div>
+
+    <!-- Encoded text result -->
+
+    <div id="resultText" class="result-text">
+        <textarea
+        id="resultTextarea"
+        readonly
+        spellcheck="false"
+        ></textarea>
+    </div>
+
+    <!-- Image -->
+
+    <div id="imagePreview" class="image-preview">
+        <img id="previewImage" alt="Decoded image preview">
+    </div>
+
+    <!-- Text -->
+
+    <div id="textPreview" class="text-preview"></div>
+
+    <!-- Binary -->
+
+    <div id="hexPreview" class="hex-preview"></div>
+
+    </div>
+
+    <div class="info">
+    <strong>Privacy:</strong>
+    Everything runs locally in your browser. No files or data are uploaded.
+
+    <br><br>
+
+    Base64 is an encoding format, not encryption.
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+let mode = "encode";
+let attachedFile = null;
+let attachedPreviewURL = null;
+
+let decodedBlob = null;
+let decodedFileName = "decoded-file";
+let decodedMime = "application/octet-stream";
+
+
+/* ---------------------------
+   MODE
+--------------------------- */
+
+function setMode(newMode) {
+
+  mode = newMode;
+
+  document.getElementById("encodeTab")
+    .classList.toggle("active", mode === "encode");
+
+  document.getElementById("decodeTab")
+    .classList.toggle("active", mode === "decode");
+
+  document.getElementById("encodeOptions")
+    .style.display =
+      mode === "encode" ? "block" : "none";
+
+  const input =
+    document.getElementById("input");
+
+  const label =
+    document.getElementById("inputLabel");
+
+  const dropZone =
+    document.getElementById("dropZone");
+
+  if (mode === "encode") {
+
+    label.textContent = attachedFile
+      ? "Text"
+      : "Text";
+
+    input.placeholder =
+      "Enter text to encode...";
+
+    dropZone.style.display = "block";
+
+  } else {
+
+    label.textContent =
+      "Base64 or Data URL";
+
+    input.placeholder =
+      "Paste Base64 or a Data URL such as data:image/png;base64,...";
+
+    dropZone.style.display = "none";
+  }
+
+  clearStatus();
+}
+
+
+/* ---------------------------
+   TEXT → BASE64
+--------------------------- */
+
+function textToBase64(text) {
+
+  const bytes =
+    new TextEncoder().encode(text);
+
+  return bytesToBase64(bytes);
+}
+
+
+/* ---------------------------
+   BYTES → BASE64
+--------------------------- */
+
+function bytesToBase64(bytes) {
+
+  let binary = "";
+
+  const chunkSize = 0x8000;
+
+  for (
+    let i = 0;
+    i < bytes.length;
+    i += chunkSize
+  ) {
+
+    binary += String.fromCharCode(
+      ...bytes.subarray(
+        i,
+        i + chunkSize
+      )
+    );
+  }
+
+  return btoa(binary);
+}
+
+
+/* ---------------------------
+   BASE64 → BYTES
+--------------------------- */
+
+function base64ToBytes(base64) {
+
+  base64 = base64
+    .replace(/\s/g, "")
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .replace(/=+$/, "");
+
+  if (!base64) {
+    return new Uint8Array();
+  }
+
+  if (!/^[A-Za-z0-9+/]*$/.test(base64)) {
+    throw new Error(
+      "Invalid Base64 characters."
+    );
+  }
+
+  if (base64.length % 4 === 1) {
+    throw new Error(
+      "Invalid Base64 length."
+    );
+  }
+
+  const remainder =
+    base64.length % 4;
+
+  if (remainder === 2) {
+    base64 += "==";
+  } else if (remainder === 3) {
+    base64 += "=";
+  }
+
+  let binary;
+
+  try {
+    binary = atob(base64);
+  } catch {
+    throw new Error(
+      "Invalid Base64 data."
+    );
+  }
+
+  const bytes =
+    new Uint8Array(binary.length);
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+    bytes[i] =
+      binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+
+/* ---------------------------
+   DATA URL
+--------------------------- */
+
+function parseDataURL(value) {
+
+  const match =
+    value.match(
+      /^data:([^;,]*)(;[^,]*)?,([\s\S]*)$/i
+    );
+
+  if (!match) {
+    return null;
+  }
+
+  const mime =
+    match[1] ||
+    "text/plain";
+
+  const metadata =
+    match[2] || "";
+
+  const data =
+    match[3];
+
+  if (!/;base64/i.test(metadata)) {
+    throw new Error(
+      "Data URL is not Base64 encoded."
+    );
+  }
+
+  return {
+    mime,
+    data
+  };
+}
+
+
+/* ---------------------------
+   MIME DETECTION
+--------------------------- */
+
+function detectMime(bytes) {
+
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4E &&
+    bytes[3] === 0x47
+  ) {
+    return "image/png";
+  }
+
+  if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xFF &&
+    bytes[1] === 0xD8 &&
+    bytes[2] === 0xFF
+  ) {
+    return "image/jpeg";
+  }
+
+  if (
+    bytes.length >= 6 &&
+    bytes[0] === 0x47 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46
+  ) {
+    return "image/gif";
+  }
+
+  if (
+    bytes.length >= 12 &&
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  ) {
+    return "image/webp";
+  }
+
+  if (
+    bytes.length >= 2 &&
+    bytes[0] === 0x42 &&
+    bytes[1] === 0x4D
+  ) {
+    return "image/bmp";
+  }
+
+  try {
+
+    const text =
+      new TextDecoder().decode(
+        bytes.slice(0, 1000)
+      );
+
+    if (
+      /<svg[\s>]/i.test(text)
+    ) {
+      return "image/svg+xml";
+    }
+
+  } catch {}
+
+  return "application/octet-stream";
+}
+
+
+/* ---------------------------
+   CONVERT
+--------------------------- */
+
+function convert() {
+
+  clearStatus();
+
+  try {
+
+    if (mode === "encode") {
+
+      if (attachedFile) {
+        encodeFile();
+      } else {
+        encodeText();
+      }
+
+    } else {
+
+      decodeInput();
+
+    }
+
+  } catch (error) {
+
+    clearResult();
+
+    showStatus(
+      error.message ||
+      "Conversion failed.",
+      "error"
+    );
+  }
+}
+
+
+/* ---------------------------
+   TEXT ENCODING
+--------------------------- */
+
+function encodeText() {
+
+  const input =
+    document.getElementById("input").value;
+
+  if (!input) {
+    throw new Error(
+      "Enter some text to encode."
+    );
+  }
+
+  const base64 =
+    textToBase64(input);
+
+  const outputFormat =
+    document.querySelector(
+      'input[name="outputFormat"]:checked'
+    ).value;
+
+  let result = base64;
+
+  if (outputFormat === "dataurl") {
+
+    result =
+      "data:text/plain;charset=utf-8;base64," +
+      base64;
+  }
+
+  showEncodedResult(
+    result,
+    "text/plain",
+    new TextEncoder().encode(input).length,
+    "Text"
+  );
+
+  showStatus(
+    "Text encoded successfully.",
+    "success"
+  );
+}
+
+
+/* ---------------------------
+   FILE ENCODING
+--------------------------- */
+
+async function encodeFile() {
+
+  if (!attachedFile) {
+    throw new Error(
+      "No file attached."
+    );
+  }
+
+  const buffer =
+    await attachedFile.arrayBuffer();
+
+  const bytes =
+    new Uint8Array(buffer);
+
+  const base64 =
+    bytesToBase64(bytes);
+
+  const outputFormat =
+    document.querySelector(
+      'input[name="outputFormat"]:checked'
+    ).value;
+
+  let result = base64;
+
+  if (outputFormat === "dataurl") {
+
+    result =
+      "data:" +
+      (
+        attachedFile.type ||
+        "application/octet-stream"
+      ) +
+      ";base64," +
+      base64;
+  }
+
+  showEncodedResult(
+    result,
+    attachedFile.type ||
+      "application/octet-stream",
+    bytes.length,
+    attachedFile.name
+  );
+
+  showStatus(
+    "File encoded successfully.",
+    "success"
+  );
+}
+
+
+/* ---------------------------
+   ENCODED RESULT
+--------------------------- */
+
+function showEncodedResult(
+  result,
+  mime,
+  size,
+  name
+) {
+
+  const card =
+    document.getElementById("resultCard");
+
+  card.classList.add("visible");
+
+  document.getElementById("resultTitle")
+    .textContent =
+      "Encoded Result";
+
+  document.getElementById("metaType")
+    .textContent = mime;
+
+  document.getElementById("metaSize")
+    .textContent = formatBytes(size);
+
+  document.getElementById("metaFormat")
+    .textContent = "Base64";
+
+  hideAllPreviews();
+
+  document.getElementById("resultText")
+    .classList.add("visible");
+
+  document.getElementById("resultTextarea")
+    .value = result;
+
+  decodedBlob =
+    new Blob(
+      [result],
+      { type: "text/plain" }
+    );
+
+  decodedFileName =
+    name
+      ? name + ".base64.txt"
+      : "encoded-base64.txt";
+
+  document.getElementById("downloadButton")
+    .style.display = "inline-block";
+}
+
+
+/* ---------------------------
+   DECODE
+--------------------------- */
+
+function decodeInput() {
+
+  let input =
+    document.getElementById("input")
+      .value
+      .trim();
+
+  if (!input) {
+    throw new Error(
+      "Paste Base64 or a Data URL."
+    );
+  }
+
+  let mime = null;
+  let base64 = input;
+
+  const dataURL =
+    parseDataURL(input);
+
+  if (dataURL) {
+
+    mime = dataURL.mime;
+    base64 = dataURL.data;
+  }
+
+  const bytes =
+    base64ToBytes(base64);
+
+  const detectedMime =
+    mime || detectMime(bytes);
+
+  decodedMime =
+    detectedMime;
+
+  decodedBlob =
+    new Blob(
+      [bytes],
+      { type: detectedMime }
+    );
+
+  showDecodedResult(
+    bytes,
+    detectedMime
+  );
+
+  showStatus(
+    "Successfully decoded.",
+    "success"
+  );
+}
+
+
+/* ---------------------------
+   DECODED RESULT
+--------------------------- */
+
+function showDecodedResult(
+  bytes,
+  mime
+) {
+
+  const card =
+    document.getElementById("resultCard");
+
+  card.classList.add("visible");
+
+  document.getElementById("resultTitle")
+    .textContent =
+      isImageMime(mime)
+        ? "Decoded Image"
+        : "Decoded Data";
+
+  document.getElementById("metaType")
+    .textContent = mime;
+
+  document.getElementById("metaSize")
+    .textContent =
+      formatBytes(bytes.length);
+
+  document.getElementById("metaFormat")
+    .textContent =
+      formatName(mime);
+
+  hideAllPreviews();
+
+  if (isImageMime(mime)) {
+
+    showImagePreview(
+      bytes,
+      mime
+    );
+
+  } else {
+
+    showTextOrBinary(
+      bytes,
+      mime
+    );
+  }
+
+  decodedFileName =
+    getFileName(mime);
+
+  document.getElementById("downloadButton")
+    .style.display = "inline-block";
+}
+
+
+/* ---------------------------
+   IMAGE PREVIEW
+--------------------------- */
+
+function showImagePreview(
+  bytes,
+  mime
+) {
+
+  const preview =
+    document.getElementById(
+      "imagePreview"
+    );
+
+  const img =
+    document.getElementById(
+      "previewImage"
+    );
+
+  const blob =
+    new Blob(
+      [bytes],
+      { type: mime }
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  img.onload = function() {
+
+    document.getElementById(
+      "dimensionsItem"
+    ).style.display = "block";
+
+    document.getElementById(
+      "metaDimensions"
+    ).textContent =
+      img.naturalWidth +
+      " × " +
+      img.naturalHeight;
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.onerror = function() {
+
+    URL.revokeObjectURL(url);
+
+    showStatus(
+      "The data was decoded, but the image could not be displayed.",
+      "error"
+    );
+  };
+
+  img.src = url;
+
+  preview.classList.add("visible");
+}
+
+
+/* ---------------------------
+   TEXT / BINARY
+--------------------------- */
+
+function showTextOrBinary(
+  bytes,
+  mime
+) {
+
+  let text = null;
+
+  try {
+
+    text =
+      new TextDecoder(
+        "utf-8",
+        { fatal: true }
+      ).decode(bytes);
+
+  } catch {}
+
+  if (
+    text !== null &&
+    (
+      mime.startsWith("text/") ||
+      isMostlyPrintable(text)
+    )
+  ) {
+
+    const preview =
+      document.getElementById(
+        "textPreview"
+      );
+
+    preview.textContent =
+      text;
+
+    preview.classList.add(
+      "visible"
+    );
+
+    return;
+  }
+
+  const hex =
+    document.getElementById(
+      "hexPreview"
+    );
+
+  hex.textContent =
+    bytesToHex(bytes);
+
+  hex.classList.add(
+    "visible"
+  );
+}
+
+
+/* ---------------------------
+   ATTACH FILE
+--------------------------- */
+
+function handleFile(file) {
+
+  if (!file) {
+    return;
+  }
+
+  attachedFile = file;
+
+  showAttachment(file);
+
+  /*
+   * IMPORTANT:
+   * Do NOT put Base64 into the textarea.
+   * The textarea remains empty because
+   * the file is represented by the attachment.
+   */
+
+  document.getElementById("input")
+    .value = "";
+
+  clearResult();
+  clearStatus();
+
+  showStatus(
+    "File attached. Click Convert to encode it.",
+    "success"
+  );
+}
+
+
+/* ---------------------------
+   ATTACHMENT UI
+--------------------------- */
+
+function showAttachment(file) {
+
+  const attachment =
+    document.getElementById(
+      "attachment"
+    );
+
+  const preview =
+    document.getElementById(
+      "attachmentPreview"
+    );
+
+  document.getElementById(
+    "attachmentName"
+  ).textContent =
+    file.name;
+
+  document.getElementById(
+    "attachmentMeta"
+  ).textContent =
+    (
+      file.type ||
+      "Unknown type"
+    ) +
+    " · " +
+    formatBytes(file.size);
+
+  preview.innerHTML =
+    '<span class="file-icon">📄</span>';
+
+  if (
+    file.type &&
+    file.type.startsWith("image/")
+  ) {
+
+    if (attachedPreviewURL) {
+      URL.revokeObjectURL(
+        attachedPreviewURL
+      );
+    }
+
+    attachedPreviewURL =
+      URL.createObjectURL(file);
+
+    const img =
+      document.createElement("img");
+
+    img.src =
+      attachedPreviewURL;
+
+    img.alt =
+      file.name;
+
+    preview.innerHTML = "";
+
+    preview.appendChild(img);
+  }
+
+  attachment.classList.add(
+    "visible"
+  );
+}
+
+
+/* ---------------------------
+   REMOVE FILE
+--------------------------- */
+
+function removeFile(event) {
+
+  event.stopPropagation();
+
+  attachedFile = null;
+
+  if (attachedPreviewURL) {
+
+    URL.revokeObjectURL(
+      attachedPreviewURL
+    );
+
+    attachedPreviewURL = null;
+  }
+
+  document.getElementById(
+    "attachment"
+  ).classList.remove(
+    "visible"
+  );
+
+  document.getElementById(
+    "fileInput"
+  ).value = "";
+
+  clearStatus();
+}
+
+
+/* ---------------------------
+   DOWNLOAD
+--------------------------- */
+
+function downloadResult() {
+
+  if (!decodedBlob) {
+
+    showStatus(
+      "There is nothing to download.",
+      "error"
+    );
+
+    return;
+  }
+
+  const url =
+    URL.createObjectURL(
+      decodedBlob
+    );
+
+  const link =
+    document.createElement("a");
+
+  link.href = url;
+
+  link.download =
+    decodedFileName;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+
+/* ---------------------------
+   COPY
+--------------------------- */
+
+async function copyResult() {
+
+  const result =
+    document.getElementById(
+      "resultTextarea"
+    ).value;
+
+  if (!result) {
+
+    showStatus(
+      "There is no result to copy.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    await navigator.clipboard
+      .writeText(result);
+
+    showStatus(
+      "Result copied to clipboard.",
+      "success"
+    );
+
+  } catch {
+
+    showStatus(
+      "Could not copy the result.",
+      "error"
+    );
+  }
+}
+
+
+/* ---------------------------
+   SWAP
+--------------------------- */
+
+function swap() {
+
+  const result =
+    document.getElementById(
+      "resultTextarea"
+    ).value;
+
+  if (!result) {
+
+    showStatus(
+      "There is no result to swap.",
+      "error"
+    );
+
+    return;
+  }
+
+  removeFile(
+    new Event("click")
+  );
+
+  document.getElementById(
+    "input"
+  ).value =
+    result;
+
+  setMode(
+    mode === "encode"
+      ? "decode"
+      : "encode"
+  );
+
+  clearResult();
+}
+
+
+/* ---------------------------
+   CLEAR
+--------------------------- */
+
+function clearAll() {
+
+  document.getElementById(
+    "input"
+  ).value = "";
+
+  removeFile(
+    new Event("click")
+  );
+
+  clearResult();
+  clearStatus();
+
+  decodedBlob = null;
+}
+
+
+/* ---------------------------
+   HELPERS
+--------------------------- */
+
+function isImageMime(mime) {
+  return mime.startsWith("image/");
+}
+
+
+function formatName(mime) {
+
+  const names = {
+    "image/png": "PNG",
+    "image/jpeg": "JPEG",
+    "image/gif": "GIF",
+    "image/webp": "WebP",
+    "image/bmp": "BMP",
+    "image/svg+xml": "SVG"
+  };
+
+  return names[mime] || mime;
+}
+
+
+function formatBytes(bytes) {
+
+  if (bytes === 0) {
+    return "0 bytes";
+  }
+
+  const units = [
+    "bytes",
+    "KB",
+    "MB",
+    "GB"
+  ];
+
+  const index =
+    Math.floor(
+      Math.log(bytes) /
+      Math.log(1024)
+    );
+
+  return (
+    (
+      bytes /
+      Math.pow(1024, index)
+    ).toFixed(
+      index === 0 ? 0 : 2
+    ) +
+    " " +
+    units[index]
+  );
+}
+
+
+function getFileName(mime) {
+
+  const extensions = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/gif": "gif",
+    "image/webp": "webp",
+    "image/bmp": "bmp",
+    "image/svg+xml": "svg",
+    "text/plain": "txt",
+    "application/json": "json",
+    "application/pdf": "pdf"
+  };
+
+  return (
+    "decoded-file." +
+    (
+      extensions[mime] ||
+      "bin"
+    )
+  );
+}
+
+
+function isMostlyPrintable(text) {
+
+  if (!text.length) {
+    return true;
+  }
+
+  let printable = 0;
+
+  for (const char of text) {
+
+    const code =
+      char.charCodeAt(0);
+
+    if (
+      code === 9 ||
+      code === 10 ||
+      code === 13 ||
+      (code >= 32 && code !== 127)
+    ) {
+      printable++;
+    }
+  }
+
+  return (
+    printable / text.length >= .85
+  );
+}
+
+
+function bytesToHex(bytes) {
+
+  const lines = [];
+
+  for (
+    let i = 0;
+    i < bytes.length;
+    i += 16
+  ) {
+
+    const chunk =
+      bytes.slice(i, i + 16);
+
+    const hex =
+      Array.from(chunk)
+        .map(
+          byte =>
+            byte
+              .toString(16)
+              .padStart(2, "0")
+              .toUpperCase()
+        )
+        .join(" ");
+
+    lines.push(
+      i
+        .toString(16)
+        .padStart(8, "0")
+        .toUpperCase() +
+      "  " +
+      hex
+    );
+  }
+
+  return lines.join("\n");
+}
+
+
+/* ---------------------------
+   RESULT CLEANUP
+--------------------------- */
+
+function hideAllPreviews() {
+
+  document.getElementById(
+    "resultText"
+  ).classList.remove("visible");
+
+  document.getElementById(
+    "imagePreview"
+  ).classList.remove("visible");
+
+  document.getElementById(
+    "textPreview"
+  ).classList.remove("visible");
+
+  document.getElementById(
+    "hexPreview"
+  ).classList.remove("visible");
+
+  document.getElementById(
+    "dimensionsItem"
+  ).style.display = "none";
+}
+
+
+function clearResult() {
+
+  document.getElementById(
+    "resultCard"
+  ).classList.remove("visible");
+
+  hideAllPreviews();
+
+  document.getElementById(
+    "downloadButton"
+  ).style.display = "none";
+
+  document.getElementById(
+    "resultTextarea"
+  ).value = "";
+}
+
+
+/* ---------------------------
+   STATUS
+--------------------------- */
+
+function showStatus(message, type) {
+
+  const status =
+    document.getElementById(
+      "status"
+    );
+
+  status.textContent =
+    message;
+
+  status.className =
+    "status " + type;
+}
+
+
+function clearStatus() {
+
+  const status =
+    document.getElementById(
+      "status"
+    );
+
+  status.textContent = "";
+
+  status.className =
+    "status";
+}
+
+
+/* ---------------------------
+   DRAG & DROP
+--------------------------- */
+
+const dropZone =
+  document.getElementById(
+    "dropZone"
+  );
+
+dropZone.addEventListener(
+  "dragover",
+  event => {
+
+    event.preventDefault();
+
+    dropZone.classList.add(
+      "dragover"
+    );
+  }
+);
+
+dropZone.addEventListener(
+  "dragleave",
+  () => {
+
+    dropZone.classList.remove(
+      "dragover"
+    );
+  }
+);
+
+dropZone.addEventListener(
+  "drop",
+  event => {
+
+    event.preventDefault();
+
+    dropZone.classList.remove(
+      "dragover"
+    );
+
+    const file =
+      event.dataTransfer.files[0];
+
+    if (file) {
+      handleFile(file);
+    }
+  }
+);
+
+
+/* ---------------------------
+   KEYBOARD
+--------------------------- */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      (event.ctrlKey ||
+       event.metaKey) &&
+      event.key === "Enter"
+    ) {
+
+      event.preventDefault();
+
+      convert();
+    }
+  }
+);
+
+</script>
+
+</body>
+</html>

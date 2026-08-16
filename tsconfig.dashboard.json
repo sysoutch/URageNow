@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "noEmit": false
+  },
+  "include": [
+    "bots/discord-bot/src/**/*.ts",
+    "dashboard/src/**/*.ts",
+    "server/src/**/*.ts",
+    "shared/src/**/*.ts"
+  ]
+}

@@ -1,0 +1,312 @@
+@media (max-width: 1500px) {
+  body.view-ai-active.studio-workflow-focused {
+    --editor-dock-height: clamp(110px, 16vh, 150px);
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-workspace,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-workspace {
+    --focused-left-width: 300px;
+    grid-template-columns: var(--focused-left-width) minmax(360px, 1fr) 10px minmax(300px, var(--workflow-side-width)) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-studio-workspace {
+    --focused-left-width: 292px;
+    grid-template-columns: var(--focused-left-width) minmax(360px, 1fr) 10px minmax(300px, var(--workflow-side-width)) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-bottom-dock,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-bottom-dock {
+    left: calc(300px + 10px) !important;
+    right: calc(300px + 10px) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-bottom-dock {
+    left: calc(292px + 10px) !important;
+    right: calc(300px + 10px) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #video-studio-card #videogen-preview {
+    min-height: 280px !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  body.view-ai-active.studio-workflow-focused {
+    --editor-dock-height: 0px;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-workspace,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-workspace {
+    grid-template-columns: 60px minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-studio-workspace {
+    grid-template-columns: 60px minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-side, #video-studio-card .video-studio-side, #model3d-studio-card .model3d-studio-side, #image-studio-card .image-prompt-card, #video-studio-card .video-prompt-field-card, #model3d-studio-card .model3d-studio-panel.active, #image-studio-card .image-bottom-dock, #video-studio-card .video-bottom-dock, #model3d-studio-card .model3d-bottom-dock) {
+    display: none !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-editor-appbar,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-editor-appbar,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-editor-appbar {
+    grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-panel, #video-studio-card .video-preview-card-main, #model3d-studio-card .model3d-main-threejs-panel) {
+    grid-column: 2 !important;
+    padding-bottom: 76px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #video-studio-card #videogen-preview {
+    width: min(100%, 820px) !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - 220px) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-tools, #video-studio-card .video-studio-preview-tools, #model3d-studio-card .model3d-preview-quick-actions) {
+    bottom: 16px !important;
+    max-width: calc(100% - 24px) !important;
+    overflow-x: auto !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools .mini-button,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools .studio-tool-picker > button {
+    min-width: 96px !important;
+  }
+}
+
+@media (max-width: 860px) {
+  body.view-ai-active.studio-workflow-focused {
+    --editor-dock-height: 0px;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-editor-appbar,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-editor-appbar,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-editor-appbar {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .editor-project-pill, #video-studio-card .editor-project-pill, #model3d-studio-card .editor-project-pill),
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .editor-autosave, #video-studio-card .editor-autosave, #model3d-studio-card .editor-autosave),
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .editor-appbar-actions .mini-button:not(.share), #video-studio-card .editor-appbar-actions .mini-button:not(.share), #model3d-studio-card .editor-appbar-actions .mini-button:not(.share)) {
+    display: none !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-workspace,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-workspace {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-studio-workspace {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-prompt-card, #video-studio-card .video-prompt-field-card, #model3d-studio-card .model3d-studio-panel.active, #image-studio-card .image-bottom-dock, #video-studio-card .video-bottom-dock, #model3d-studio-card .model3d-bottom-dock) {
+    display: none !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-panel, #video-studio-card .video-preview-card-main, #model3d-studio-card .model3d-main-threejs-panel) {
+    grid-column: 2 !important;
+    padding-bottom: 72px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-tools, #video-studio-card .video-studio-preview-tools, #model3d-studio-card .model3d-preview-quick-actions) {
+    bottom: 14px !important;
+    max-width: calc(100% - 20px) !important;
+    overflow-x: auto !important;
+  }
+}
+
+@media (max-width: 700px) {
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card, #model3d-studio-card, #video-studio-card) {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-editor-appbar,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-editor-appbar,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-editor-appbar {
+    min-height: 48px !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    padding: 6px 8px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-app-title, #video-studio-card .video-app-title, #model3d-studio-card .model3d-app-title) {
+    max-width: 112px !important;
+    white-space: normal !important;
+    line-height: 1.05 !important;
+    font-size: 14px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-appbar-brand, #video-studio-card .video-appbar-brand, #model3d-studio-card .model3d-appbar-brand) {
+    gap: 7px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-editor-appbar .editor-beta-badge, #video-studio-card .video-editor-appbar .editor-beta-badge, #model3d-studio-card .model3d-editor-appbar .editor-beta-badge, #image-studio-card .editor-appbar-actions, #video-studio-card .editor-appbar-actions, #model3d-studio-card .editor-appbar-actions, #image-studio-card .image-project-dropdown, #video-studio-card .video-project-dropdown, #model3d-studio-card .model3d-project-dropdown) {
+    display: none !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-workspace,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-workspace,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-studio-workspace {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-chat-tabs {
+    min-width: 48px !important;
+    width: 48px !important;
+    grid-auto-rows: 44px !important;
+    gap: 5px !important;
+    padding: 8px 5px !important;
+    overflow-y: auto !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-chat-tab {
+    min-height: 40px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    border-radius: 9px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-chat-tab-label {
+    display: none !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-panel, #video-studio-card .video-preview-card-main, #model3d-studio-card .model3d-main-threejs-panel) {
+    grid-column: 1 !important;
+    padding: 10px 8px 54px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-canvas-toolbar,
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-preview-metadata-badge,
+  body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-viewport-actions,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-viewer-flyout,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-stats-panel,
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-preview-card-main > label,
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools {
+    display: none !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card #imagegen-preview {
+    width: min(100%, calc(var(--image-preview-workflow-width, 1024) * 1px)) !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 140px) !important;
+    object-fit: contain !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #video-studio-card #videogen-preview {
+    width: 100% !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - 150px) !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-main-viewer-shell {
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+}
+
+@media (min-width: 981px) {
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-workspace, #video-studio-card .video-studio-workspace, #model3d-studio-card .model3d-studio-workspace) {
+    grid-template-rows: minmax(0, 1fr) var(--editor-dock-height) !important;
+    row-gap: 10px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-prompt-card, #video-studio-card .video-prompt-field-card, #model3d-studio-card .model3d-studio-panel.active, #image-studio-card .image-studio-side, #video-studio-card .video-studio-side, #model3d-studio-card .model3d-studio-side) {
+    grid-row: 1 / -1 !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card.image-studio-edit-mode .image-studio-workspace {
+    grid-template-rows: minmax(0, 1fr) var(--editor-dock-height) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card.image-studio-edit-mode .image-prompt-card {
+    grid-row: auto !important;
+    height: auto !important;
+    padding-bottom: 12px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #image-studio-card.image-studio-edit-mode #image-studio-panel-edit.active {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    display: grid !important;
+    height: auto !important;
+    overflow: visible !important;
+    scrollbar-gutter: auto !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-prompt-field-card {
+    grid-row: 1 !important;
+    padding-bottom: 12px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #video-studio-card .video-generate-row {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    align-self: stretch !important;
+    align-content: center !important;
+    margin: 0 12px 10px !important;
+    padding: 0 !important;
+    z-index: 1 !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-panel, #video-studio-card .video-preview-card-main, #model3d-studio-card .model3d-main-threejs-panel) {
+    grid-row: 1 !important;
+    padding: 10px 12px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-tools, #video-studio-card .video-studio-preview-tools, #model3d-studio-card .model3d-preview-quick-actions) {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    grid-row: 2 !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 8px 0 0 !important;
+    transform: none !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-bottom-dock, #video-studio-card .video-bottom-dock, #model3d-studio-card .model3d-bottom-dock) {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    z-index: 1 !important;
+    width: auto !important;
+    height: var(--editor-dock-height) !important;
+    min-height: 0 !important;
+    max-height: var(--editor-dock-height) !important;
+    margin: 0 10px 10px !important;
+    overflow: hidden !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #video-studio-card.video-studio-image-text-mode #videogen-image-source-field {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    transform: none !important;
+    margin: 0 !important;
+  }
+
+body.view-ai-active.studio-workflow-focused #model3d-studio-card :is(.model3d-viewer-flyout, .model3d-viewer-overlay) {
+    display: none !important;
+  }
+}
+

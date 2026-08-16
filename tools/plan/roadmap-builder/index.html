@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmap Builder</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        :root {
+            --primary: #ff8a4d;
+            --primary-hover: #ff6136;
+            --danger: #f87171;
+            --bg: #120d0d;
+            --card-bg: rgba(24, 14, 14, 0.92);
+            --surface: rgba(18, 11, 11, 0.98);
+            --text-main: #f6f1ee;
+            --text-muted: #c8b6ae;
+            --border: rgba(255, 180, 128, 0.18);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background:
+                radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 38%),
+                linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+                var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        /* Toolbar / Header */
+        .header {
+            background: var(--surface);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+
+        body[data-dashboard-sidebar-externalized] .header {
+            display: none;
+        }
+
+        body[data-dashboard-sidebar-externalized] .canvas {
+            padding-top: 2rem;
+        }
+
+        .btn-group { display: flex; gap: 8px; }
+
+        button {
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button:hover { background: rgba(255,255,255,0.08); border-color: color-mix(in srgb, var(--primary) 28%, var(--border)); }
+        button.primary { background: var(--primary); color: white; border: none; }
+        button.primary:hover { background: var(--primary-hover); }
+
+        /* Roadmap Containers */
+        .canvas { padding: 4rem 2rem; min-height: 100vh; }
+
+        /* --- VERTICAL LAYOUT --- */
+        .roadmap.vertical {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .roadmap.vertical::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0; bottom: 0;
+            width: 4px;
+            background: var(--border);
+            transform: translateX(-50%);
+            border-radius: 4px;
+        }
+
+        .roadmap.vertical .item {
+            width: 50%;
+            padding: 0 40px;
+            box-sizing: border-box;
+            position: relative;
+            margin-bottom: 3rem;
+        }
+
+        .roadmap.vertical .item:nth-child(odd) { margin-right: 50%; text-align: right; }
+        .roadmap.vertical .item:nth-child(even) { margin-left: 50%; text-align: left; }
+
+        /* --- HORIZONTAL LAYOUT --- */
+        .roadmap.horizontal {
+            display: flex;
+            align-items: flex-start;
+            padding-top: 60px;
+            overflow-x: auto;
+            border-top: 4px solid var(--border);
+        }
+
+        .roadmap.horizontal .item {
+            flex: 0 0 320px;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        /* Card Visuals */
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.24);
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-4px); }
+
+        .dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border: 4px solid var(--bg);
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .vertical .item:nth-child(odd) .dot { right: -10px; top: 24px; }
+        .vertical .item:nth-child(even) .dot { left: -10px; top: 24px; }
+        .horizontal .dot { top: -68px; left: 50%; transform: translateX(-50%); }
+
+        .card h3 { margin: 0; font-size: 1.125rem; outline: none; }
+        .card p { margin: 0.5rem 0 1rem 0; color: var(--text-muted); font-size: 0.9375rem; outline: none; }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .card:hover .actions { opacity: 1; }
+
+        .btn-icon { padding: 4px; border-radius: 4px; color: var(--text-muted); }
+        .btn-icon:hover { color: var(--danger); }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+    <header class="header" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Roadmap Controls">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <h2 style="margin:0; color: var(--primary)">Roadmap Studio</h2>
+            <div class="btn-group">
+                <button onclick="toggleLayout()">⇄ Switch View</button>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="primary" onclick="addItem()">+ Add Milestone</button>
+            <button onclick="clearAll()" style="color: var(--danger)">Clear All</button>
+        </div>
+    </header>
+
+    <div class="canvas">
+        <div id="roadmap" class="roadmap vertical"></div>
+    </div>
+
+    <script>
+        let milestones = JSON.parse(localStorage.getItem('myRoadmap')) || [
+            { title: "Project Kickoff", desc: "Aligning stakeholders and defining high-level goals." },
+            { title: "UX Research", desc: "User interviews and competitive analysis." },
+            { title: "Visual Design", desc: "Design system and high-fidelity mockups." },
+            { title: "Alpha Version", desc: "Internal testing of core features." },
+            { title: "Beta Launch", desc: "Rolling out to the first 500 early adopters." },
+            { title: "Global Scale", desc: "Expanding server infrastructure globally." }
+        ];
+
+        const container = document.getElementById('roadmap');
+
+        function save() {
+            localStorage.setItem('myRoadmap', JSON.stringify(milestones));
+        }
+
+        function render() {
+            container.innerHTML = '';
+            milestones.forEach((m, i) => {
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.innerHTML = `
+                    <div class="dot"></div>
+                    <div class="card">
+                        <h3 contenteditable="true" onblur="update(${i}, 'title', this.innerText)">${m.title}</h3>
+                        <p contenteditable="true" onblur="update(${i}, 'desc', this.innerText)">${m.desc}</p>
+                        <div class="actions">
+                            <button class="btn-icon" onclick="move(${i}, -1)" title="Move Up/Left">←</button>
+                            <button class="btn-icon" onclick="move(${i}, 1)" title="Move Down/Right">→</button>
+                            <button class="btn-icon" onclick="remove(${i})" title="Delete">🗑</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function update(i, field, val) {
+            milestones[i][field] = val;
+            save();
+        }
+
+        function addItem() {
+            milestones.push({ title: "New Milestone", desc: "Briefly describe the objective." });
+            save();
+            render();
+        }
+
+        function remove(i) {
+            milestones.splice(i, 1);
+            save();
+            render();
+        }
+
+        function move(i, dir) {
+            let target = i + dir;
+            if (target >= 0 && target < milestones.length) {
+                [milestones[i], milestones[target]] = [milestones[target], milestones[i]];
+                save();
+                render();
+            }
+        }
+
+        function toggleLayout() {
+            container.classList.toggle('vertical');
+            container.classList.toggle('horizontal');
+        }
+
+        function clearAll() {
+            if(confirm("Are you sure? This will delete all milestones.")) {
+                milestones = [];
+                save();
+                render();
+            }
+        }
+
+        function applyDashboardTheme(nextTheme) {
+            if (typeof window.applyDashboardThemeVars === 'function') {
+                window.applyDashboardThemeVars(nextTheme || document.body.getAttribute('data-dashboard-theme') || 'fire');
+                return;
+            }
+            document.body.setAttribute('data-dashboard-theme', String(nextTheme || 'fire').trim() || 'fire');
+        }
+
+        function describeCurrentAssets() {
+            const text = JSON.stringify({ milestones }, null, 2);
+            return [{
+                kind: 'text',
+                title: 'Roadmap JSON',
+                fileName: 'roadmap.json',
+                mimeType: 'application/json',
+                textContent: text,
+                previewKind: 'text',
+                previewText: text,
+                sourceDetail: 'Roadmap Builder milestone data.',
+                metadata: { sourceTool: 'roadmap-builder', resourceFormat: 'roadmap-json' }
+            }];
+        }
+
+        window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+        window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+
+        window.addEventListener('message', (event) => {
+            const message = event && event.data;
+            if (message && message.type === 'tool:theme') applyDashboardTheme(message.payload?.theme);
+        });
+
+        applyDashboardTheme(document.body.getAttribute('data-dashboard-theme') || 'fire');
+        render();
+    </script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

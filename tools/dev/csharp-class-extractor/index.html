@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unity C# Class Extractor Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        :root {
+            --tool-bg: #120d0d;
+            --tool-surface: rgba(24, 14, 14, 0.92);
+            --tool-surface-alt: rgba(18, 11, 11, 0.98);
+            --tool-line: rgba(255, 180, 128, 0.18);
+            --tool-line-strong: rgba(255, 180, 128, 0.34);
+            --tool-text: #f6f1ee;
+            --tool-muted: #c8b6ae;
+            --tool-accent: #ff8a4d;
+            --tool-accent-soft: rgba(255, 138, 77, 0.14);
+            --tool-code: #a5d6ff;
+        }
+
+        /* RESET + FULL HEIGHT */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        /* BODY */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--tool-bg);
+            color: var(--tool-text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* THEMES */
+        body[data-dashboard-theme="water"] {
+            --tool-bg: #0d1522;
+            --tool-surface: rgba(12, 21, 37, 0.94);
+            --tool-surface-alt: rgba(10, 17, 29, 0.98);
+            --tool-line: rgba(114, 190, 255, 0.18);
+            --tool-line-strong: rgba(114, 190, 255, 0.34);
+            --tool-text: #eef5ff;
+            --tool-muted: #a9bfd8;
+            --tool-accent: #59b6ff;
+            --tool-accent-soft: rgba(89, 182, 255, 0.14);
+            --tool-code: #7bd0ff;
+        }
+
+        body[data-dashboard-theme="nature"] {
+            --tool-bg: #11170f;
+            --tool-surface: rgba(18, 24, 16, 0.94);
+            --tool-surface-alt: rgba(13, 19, 11, 0.98);
+            --tool-line: rgba(146, 213, 120, 0.18);
+            --tool-line-strong: rgba(146, 213, 120, 0.34);
+            --tool-text: #f2f8ee;
+            --tool-muted: #bccfaf;
+            --tool-accent: #82cd5f;
+            --tool-accent-soft: rgba(130, 205, 95, 0.14);
+            --tool-code: #9ae27b;
+        }
+
+        body[data-dashboard-theme="rock"] {
+            --tool-bg: #151515;
+            --tool-surface: rgba(24, 24, 24, 0.95);
+            --tool-surface-alt: rgba(16, 16, 16, 0.98);
+            --tool-line: rgba(196, 190, 176, 0.18);
+            --tool-line-strong: rgba(196, 190, 176, 0.34);
+            --tool-text: #f2efea;
+            --tool-muted: #b7aea2;
+            --tool-accent: #c4ae8a;
+            --tool-accent-soft: rgba(196, 174, 138, 0.14);
+            --tool-code: #d8c29f;
+        }
+
+        /* APP WRAPPER */
+        .app-wrapper {
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            flex: 1;
+            width: 100%;
+            margin: auto;
+            background: var(--tool-surface);
+            border: 1px solid var(--tool-line);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+
+            display: flex;
+            flex-direction: column;
+
+            min-height: calc(100vh - 40px);
+        }
+
+        /* TYPOGRAPHY */
+        h2 {
+            margin-top: 0;
+        }
+
+        p {
+            color: var(--tool-muted);
+        }
+
+        /* TEXTAREA */
+        textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 350px;
+
+            background: var(--tool-surface-alt);
+            color: var(--tool-text);
+
+            border: 1px solid var(--tool-line-strong);
+            border-radius: 10px;
+
+            padding: 12px;
+
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+
+            resize: vertical;
+        }
+
+        /* CONTROLS */
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        body[data-dashboard-sidebar-externalized] .controls {
+            display: none;
+        }
+
+        /* BUTTONS */
+        button {
+            background: var(--tool-accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            filter: brightness(1.07);
+        }
+
+        button.secondary {
+            background: var(--tool-surface-alt);
+            border: 1px solid var(--tool-line);
+            color: var(--tool-text);
+        }
+
+        button.secondary:hover {
+            background: var(--tool-surface);
+        }
+
+        /* OUTPUT */
+        #output {
+            margin-top: 10px;
+        }
+
+        /* OUTPUT ITEMS */
+        .output-item {
+            background: var(--tool-surface-alt);
+            margin-top: 15px;
+            border: 1px solid var(--tool-line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* FILE NAME BAR */
+        .filename {
+            background: var(--tool-accent-soft);
+            padding: 8px 12px;
+            font-weight: bold;
+            color: var(--tool-accent);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* CODE PREVIEW */
+        pre {
+            padding: 15px;
+            overflow-x: auto;
+            margin: 0;
+            font-size: 13px;
+            color: var(--tool-code);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* STATUS */
+        .status {
+            color: var(--tool-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+
+<div class="app-wrapper">
+<div class="container">
+    <h2>Unity C# Script Splitter</h2>
+    <p>This tool extracts classes, structs, and enums (including those without modifiers) into separate files.</p>
+    
+    <textarea id="inputCode" placeholder="Paste your Unity C# script here..."></textarea>
+    
+    <div class="controls" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Extractor Controls">
+        <button onclick="extractClasses()">Extract & Preview</button>
+        <button class="secondary" onclick="downloadZip()">Download All as .ZIP</button>
+        <span id="status" class="status"></span>
+    </div>
+
+    <div id="output"></div>
+</div>
+</div>
+
+<script>
+    window.registerDashboardThemeSync();
+    let extractedFiles = [];
+
+    function extractClasses() {
+        const code = document.getElementById('inputCode').value;
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+        output.innerHTML = '';
+        extractedFiles = [];
+
+        if (!code.trim()) {
+            status.innerText = "Please paste some code first.";
+            return;
+        }
+
+        // 1. Capture "using" statements
+        const usingRegex = /using\s+[\w.]+;/g;
+        const usings = (code.match(usingRegex) || []).join('\n');
+
+        // 2. Capture Namespace if it exists
+        const namespaceMatch = code.match(/namespace\s+([\w.]+)/);
+        const namespaceHeader = namespaceMatch ? `namespace ${namespaceMatch[1]}\n{\n` : "";
+        const namespaceFooter = namespaceMatch ? `\n}` : "";
+
+        // 3. Updated Regex: Matches optional modifiers + class/struct/enum + Name
+        // The (?:...) groups are non-capturing. 
+        const classStartRegex = /(?:(?:public|internal|private|protected|static|partial|abstract)\s+)*(class|struct|enum)\s+(\w+)/g;
+        
+        let match;
+        while ((match = classStartRegex.exec(code)) !== null) {
+            const type = match[1]; // class, struct, or enum
+            const name = match[2]; // The identifier name
+            const startIndex = match.index;
+            
+            const body = getScope(code, startIndex);
+            
+            if (body) {
+                const fullFileContent = usings + "\n\n" + namespaceHeader + body + namespaceFooter;
+                extractedFiles.push({ name: name + ".cs", content: fullFileContent });
+                displayFile(name + ".cs", fullFileContent);
+            }
+        }
+        status.innerText = `Found ${extractedFiles.length} items.`;
+    }
+
+    function getScope(text, startIdx) {
+        let firstBrace = text.indexOf('{', startIdx);
+        if (firstBrace === -1) return null;
+
+        let count = 1;
+        let i = firstBrace + 1;
+        while (count > 0 && i < text.length) {
+            if (text[i] === '{') count++;
+            else if (text[i] === '}') count--;
+            i++;
+        }
+        return text.substring(startIdx, i);
+    }
+
+    function displayFile(filename, content) {
+        const container = document.createElement('div');
+        container.className = 'output-item';
+        container.innerHTML = `
+            <div class="filename"><span>${filename}</span></div>
+            <pre>${content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+        `;
+        document.getElementById('output').appendChild(container);
+    }
+
+    function downloadZip() {
+        if (extractedFiles.length === 0) {
+            alert("Nothing to download. Click 'Extract' first.");
+            return;
+        }
+        const zip = new JSZip();
+        extractedFiles.forEach(file => {
+            zip.file(file.name, file.content);
+        });
+
+        zip.generateAsync({type:"blob"}).then(function(content) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = "UnityScripts.zip";
+            link.click();
+        });
+    }
+
+    function describeCurrentAssets() {
+        return extractedFiles.map(file => ({
+            kind: 'text',
+            title: file.name,
+            fileName: file.name,
+            mimeType: 'text/x-csharp',
+            textContent: file.content,
+            previewKind: 'text',
+            previewText: file.content,
+            sourceDetail: 'Extracted C# script file.',
+            metadata: { sourceTool: 'csharp-class-extractor', resourceFormat: 'csharp' }
+        }));
+    }
+
+    window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+    window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+</script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+.ask-prompt-command-anchor {
+  position: relative;
+}
+
+.ask-prompt-command-anchor > textarea {
+  width: 100%;
+}
+
+.ask-slash-command-palette {
+  position: absolute;
+  z-index: 40;
+  right: 0;
+  bottom: calc(100% + 0.45rem);
+  left: 0;
+  display: grid;
+  max-height: min(22rem, 50vh);
+  overflow-y: auto;
+  border: 1px solid var(--accent);
+  border-radius: 0.7rem;
+  background: var(--panel);
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 45%);
+  padding: 0.4rem;
+}
+
+.ask-slash-command-heading,
+.ask-slash-command-empty {
+  padding: 0.45rem 0.55rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.ask-slash-command-option {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.35fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  padding: 0.55rem;
+  text-align: left;
+}
+
+.ask-slash-command-option span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ask-slash-command-option:is(:hover, .is-active) {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+}
+
+@media (max-width: 640px) {
+  .ask-slash-command-option {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}

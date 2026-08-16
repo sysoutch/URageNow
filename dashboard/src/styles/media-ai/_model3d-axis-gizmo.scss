@@ -1,0 +1,79 @@
+.model3d-axis-gizmo {
+  position: absolute;
+  z-index: 6;
+  top: 14px;
+  right: 14px;
+  bottom: auto;
+  width: 92px;
+  height: 92px;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 70%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.14), rgba(7, 11, 20, 0.74) 68%);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.model3d-axis-gizmo:active { cursor: grabbing; }
+
+.model3d-axis-gizmo-axis,
+.model3d-axis-gizmo-center {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  max-width: 23px;
+  min-width: 23px;
+  min-height: 23px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.model3d-axis-gizmo-axis:hover,
+.model3d-axis-gizmo-center:hover {
+  filter: brightness(1.22);
+  transform: scale(1.12);
+}
+
+.model3d-axis-gizmo .axis-z-positive { top: 4px; left: 34px; background: #2f6ee5; }
+.model3d-axis-gizmo .axis-z-negative { bottom: 4px; left: 34px; background: #224b9d; }
+.model3d-axis-gizmo .axis-x-positive { right: 4px; top: 34px; background: #dc3e43; }
+.model3d-axis-gizmo .axis-x-negative { left: 4px; top: 34px; background: #982d37; }
+.model3d-axis-gizmo .axis-y-positive { right: 16px; top: 16px; background: #55b765; }
+.model3d-axis-gizmo .axis-y-negative { left: 16px; bottom: 16px; background: #367e48; }
+.model3d-axis-gizmo-center { top: 34px; left: 34px; background: rgba(225, 232, 242, 0.36); }
+
+.model3d-projection-gizmo-button {
+  position: absolute;
+  z-index: 6;
+  top: 114px;
+  right: 43px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  max-width: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  background: rgba(8, 12, 20, 0.78);
+  color: #e5ebf5;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.model3d-projection-gizmo-button[data-projection="orthographic"] {
+  border-color: #55b765;
+  background: color-mix(in srgb, #55b765 24%, rgba(8, 12, 20, 0.84));
+}
+
+.model3d-projection-gizmo-button .button-icon { width: 17px; height: 17px; }

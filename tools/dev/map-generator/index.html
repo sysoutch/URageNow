@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <!-- Shared libs -->
+  <link rel="stylesheet" href="../../shared/libs/fontawesome/css/fontawesome.css">
+  <link rel="stylesheet" href="../../shared/libs/fontawesome/css/brands.css">
+  <link rel="stylesheet" href="../../shared/libs/fontawesome/css/solid.css">
+
+  <!-- Tab bar styles -->
+  <link rel="stylesheet" href="css/tab-bar.css">
+</head>
+<body data-dashboard-theme="fire">
+  <div class="map-generator-app">
+    <!-- Tab Bar -->
+    <div class="tab-bar" role="tablist" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Map Generator Controls" data-dashboard-tool-sidebar-include-nested="active">
+      <button class="tab-btn active" id="tab2d" type="button" role="tab" aria-selected="true" onclick="switchTab('2D')">
+        <i class="fas fa-border-all"></i> 2D Map
+      </button>
+      <button class="tab-btn" id="tab3d" type="button" role="tab" aria-selected="false" onclick="switchTab('3D')">
+        <i class="fas fa-cubes"></i> 3D Map
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+
+      <!-- ==================== 2D MAP PANEL ==================== -->
+      <div id="panel2d" class="tab-panel active">
+        <iframe src="2d/index.html" title="2D Map Generator"></iframe>
+      </div>
+
+      <!-- ==================== 3D MAP PANEL ==================== -->
+      <div id="panel3d" class="tab-panel">
+        <iframe src="3d/index.html" title="3D Map Generator"></iframe>
+      </div>
+
+    </div><!-- /tab-content -->
+  </div><!-- /map-generator-app -->
+
+  <!-- Tab switching logic -->
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+  <script src="../../shared/dashboard-tool-bridge.js"></script>
+  <script src="js/tab-bar.js"></script>
+
+</body>
+</html>

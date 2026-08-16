@@ -1,0 +1,38 @@
+{
+  "31": {
+    "inputs": {
+      "audioUI": "",
+      "audio": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "PreviewAudio",
+    "_meta": {
+      "title": "Preview Audio"
+    }
+  },
+  "39": {
+    "inputs": {
+      "text": "你龟儿太过分了，把我的东西都搞坏了，还晓不晓得认错，硬是要把我整冒火你才安逸嗦，莫再烦老子爬球开。",
+      "speaker": "Eric",
+      "model_choice": "1.7B",
+      "device": "auto",
+      "precision": "bf16",
+      "language": "Chinese",
+      "seed": 335284002355634,
+      "instruct": "Character Name: Lin Huaiyue\nVoice Information: like donald trump\n\nBackground: Chief consultant of a key national scientific research project, a senior strategic scientist nearing seventy. He has participated in major national scientific and technological projects, witnessing decades of trials and tribulations, and the arduous journey from lagging behind to independent innovation. Currently a lifetime honorary member of the National Science and Technology Advisory Committee, he continues to dedicate himself to cultivating young talent and providing advice for national strategic development.\n\nPhysical Characteristics: Tall and upright, with graying temples and a resolute expression etched in his brow. He often wears a dark Zhongshan suit or a simple formal suit, his eyes calm yet sharp, exuding authority and composure in every gesture.\n\nPersonality Traits: With an iron will and unwavering faith, never backing down from challenges; deeply patriotic and concerned for the future of the nation, closely linking personal destiny with the rise and fall of the country; rigorous and self-disciplined, always keeping one's word, speaking with a strong sense of responsibility and historical commitment; outwardly reserved but inwardly warm-hearted, seemingly serious but actually placing high hopes on the younger generation, willingly serving as a stepping stone for them.\n\nLife Motto: \"Our generation is not here to stand in the light, but to pave the way into the light.\"",
+      "max_new_tokens": 2048,
+      "top_p": 0.8,
+      "top_k": 20,
+      "temperature": 1,
+      "repetition_penalty": 1.05,
+      "attention": "flash_attn",
+      "unload_model_after_generate": false
+    },
+    "class_type": "FB_Qwen3TTSCustomVoice",
+    "_meta": {
+      "title": "🎵 Qwen3-TTS CustomVoice"
+    }
+  }
+}

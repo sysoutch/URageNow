@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Agent(Explore)",
+      "Bash(npm run *)",
+      "Bash(findstr *)",
+      "Bash(node *)",
+      "Bash(scripts\\run-dashboard.cmd *)",
+      "Bash(taskkill *)",
+      "Bash(timeout *)"
+    ]
+  },
+  "$version": 4
+}

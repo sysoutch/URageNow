@@ -1,0 +1,12 @@
+[package]
+name = "asset-indexer"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+serde_json.workspace = true
+worker-contracts = { path = "../worker-contracts" }

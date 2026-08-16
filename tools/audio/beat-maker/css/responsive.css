@@ -1,0 +1,43 @@
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 1100px) {
+  body {
+    overflow: auto;
+  }
+  .app {
+    grid-template-columns: 1fr;
+    width: 100%;
+    height: auto;
+  }
+  .sidebar,
+  .content {
+    height: auto;
+    overflow: visible;
+  }
+  .content {
+    display: flex;
+    flex-direction: column;
+  }
+  .panel.sequencer {
+    min-height: 0;
+    height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .lane {
+    grid-template-columns: 180px repeat(16, 1fr);
+  }
+  .step,
+  .lane-info {
+    height: 72px;
+    min-height: 72px;
+  }
+  .stat-grid,
+  .preset-grid,
+  .memory-grid {
+    grid-template-columns: 1fr;
+  }
+}

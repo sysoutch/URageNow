@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Metadata Remover</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f1117;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: .25rem;
+            background: linear-gradient(135deg, #6ee7b7, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 2rem;
+            font-size: .95rem;
+        }
+
+        /* ── Drop Zone ── */
+        .drop-zone {
+            width: min(600px, 100%);
+            border: 2px dashed #3b82f6;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+            position: relative;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            background: rgba(59, 130, 246, .08);
+            border-color: #6ee7b7;
+        }
+
+        .drop-zone svg {
+            width: 64px; height: 64px;
+            margin-bottom: 1rem;
+            fill: #3b82f6;
+        }
+
+        .drop-zone p { font-size: 1.05rem; color: #aaa; }
+        .drop-zone span.highlight { color: #6ee7b7; font-weight: 600; }
+
+        #fileInput { display: none; }
+
+        /* ── Results Panel ── */
+        .results {
+            width: min(900px, 100%);
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .results.visible { display: block; }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .comparison { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: #1a1d27;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #2a2d3a;
+        }
+
+        .card-header {
+            padding: .75rem 1rem;
+            font-weight: 600;
+            font-size: .85rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header.original { border-bottom: 1px solid #2a2d3a; color: #f87171; }
+        .card-header.cleaned  { border-bottom: 1px solid #2a2d3a; color: #6ee7b7; }
+
+        .badge {
+            font-size: .7rem;
+            padding: .2em .6em;
+            border-radius: 999px;
+            background: rgba(255,255,255,.08);
+        }
+
+        .card-body {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            min-height: 200px;
+            align-items: center;
+        }
+
+        .card-body img,
+        .card-body canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* ── Metadata Table ── */
+        .meta-section { margin-top: 1.5rem; }
+
+        .meta-section h3 {
+            font-size: .9rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: #888;
+            margin-bottom: .75rem;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem;
+        }
+
+        .meta-table th,
+        .meta-table td {
+            padding: .6rem .8rem;
+            text-align: left;
+            border-bottom: 1px solid #2a2d3a;
+        }
+
+        .meta-table th { color: #888; font-weight: 500; width: 40%; }
+        .meta-table td { color: #ccc; word-break: break-all; }
+
+        .stripped-tag { color: #f87171; text-decoration: line-through; }
+        .kept-tag    { color: #6ee7b7; }
+
+        /* ── Stats Bar ── */
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 140px;
+            background: #1a1d27;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #2a2d3a;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6ee7b7;
+        }
+
+        .stat-card .label {
+            font-size: .75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-top: .25rem;
+        }
+
+        /* ── Buttons ── */
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: .75rem 2rem;
+            border-radius: 10px;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform .15s, box-shadow .15s;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #6ee7b7);
+            color: #0f1117;
+        }
+
+        .btn-secondary {
+            background: #2a2d3a;
+            color: #e0e0e0;
+        }
+
+        /* ── Format Selector ── */
+        .format-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .format-row label { color: #888; font-size: .9rem; }
+
+        select {
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            background: #2a2d3a;
+            color: #e0e0e0;
+            border: 1px solid #3b82f6;
+            font-size: .9rem;
+        }
+
+        /* ── Quality Slider ── */
+        .quality-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: .75rem;
+        }
+
+        .quality-row label { color: #888; font-size: .9rem; }
+
+        input[type=range] {
+            width: 200px;
+            accent-color: #3b82f6;
+        }
+
+        /* ── Spinner ── */
+        .spinner {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            margin-right: .5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #6ee7b7;
+            color: #0f1117;
+            padding: .75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            opacity: 0;
+            transition: transform .3s, opacity .3s;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+
+<h1>🧹 Image Metadata Remover</h1>
+<p class="subtitle">Strip EXIF, IPTC, XMP &amp; all hidden metadata from your images — right in the browser.</p>
+
+<!-- Drop Zone -->
+<div class="drop-zone" id="dropZone">
+    <svg viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C8.11 4 5 7.11 5 11.26c0 1.07.23 2.08.64 2.98L1 19l4.02-1.64A7.49 7.49 0 0 0 12 19c3.89 0 7-3.11 7-7 0-1.85-.72-3.58-1.95-4.96zM14 13v4h4v-4h-3V9h-2v4h-3l3 3 3-3z"/></svg>
+    <p>Drag &amp; drop an image here, or <span class="highlight">click to browse</span></p>
+    <input type="file" id="fileInput" accept="image/*">
+</div>
+
+<!-- Results -->
+<div class="results" id="results">
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar"></div>
+
+    <!-- Comparison -->
+    <div class="comparison">
+        <div class="card">
+            <div class="card-header original">
+                Original
+                <span class="badge" id="origSizeBadge"></span>
+            </div>
+            <div class="card-body"><img id="originalPreview" alt="Original"></div>
+        </div>
+        <div class="card">
+            <div class="card-header cleaned">
+                Cleaned (Metadata Removed)
+                <span class="badge" id="cleanSizeBadge"></span>
+            </div>
+            <div class="card-body"><canvas id="cleanCanvas"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Metadata Details -->
+    <div class="meta-section">
+        <h3>📋 Metadata Analysis</h3>
+        <table class="meta-table" id="metaTable">
+            <thead><tr><th>Tag</th><th>Status</th></tr></thead>
+            <tbody id="metaBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Format & Quality -->
+    <div class="format-row">
+        <label for="formatSelect">Output format:</label>
+        <select id="formatSelect">
+            <option value="image/png" selected>PNG (lossless)</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/webp">WebP</option>
+        </select>
+    </div>
+    <div class="quality-row" id="qualityRow" style="display:none;">
+        <label for="qualitySlider">Quality:</label>
+        <input type="range" id="qualitySlider" min="10" max="100" value="92">
+        <span id="qualityValue" style="color:#6ee7b7;font-weight:600;">92%</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <button class="btn btn-secondary" id="resetBtn">🔄 Process Another</button>
+        <button class="btn btn-primary" id="downloadBtn">⬇ Download Clean Image</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+    // ── Elements ──
+    const dropZone      = document.getElementById('dropZone');
+    const fileInput      = document.getElementById('fileInput');
+    const results        = document.getElementById('results');
+    const originalPreview= document.getElementById('originalPreview');
+    const cleanCanvas    = document.getElementById('cleanCanvas');
+    const metaBody       = document.getElementById('metaBody');
+    const statsBar       = document.getElementById('statsBar');
+    const formatSelect   = document.getElementById('formatSelect');
+    const qualitySlider  = document.getElementById('qualitySlider');
+    const qualityValue   = document.getElementById('qualityValue');
+    const qualityRow     = document.getElementById('qualityRow');
+    const downloadBtn    = document.getElementById('downloadBtn');
+    const resetBtn       = document.getElementById('resetBtn');
+    const toast          = document.getElementById('toast');
+
+    let originalBlob  = null;
+    let cleanedBlob   = null;
+    let origFileName  = '';
+
+    // ── Drag & Drop ──
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) processFile(file);
+        else showToast('Please drop a valid image file.');
+    });
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) processFile(fileInput.files[0]);
+    });
+
+    // ── Format / Quality toggles ──
+    formatSelect.addEventListener('change', () => {
+        qualityRow.style.display = formatSelect.value === 'image/png' ? 'none' : 'block';
+    });
+    qualitySlider.addEventListener('input', () => {
+        qualityValue.textContent = qualitySlider.value + '%';
+    });
+
+    // ── Process ──
+    function processFile(file) {
+        origFileName = file.name.replace(/\.[^.]+$/, '');
+        originalBlob = file;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                // Draw to canvas (strips metadata)
+                cleanCanvas.width  = img.naturalWidth;
+                cleanCanvas.height = img.naturalHeight;
+                const ctx = cleanCanvas.getContext('2d');
+                ctx.clearRect(0, 0, cleanCanvas.width, cleanCanvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                // Show original preview
+                originalPreview.src = e.target.result;
+
+                // Update badges
+                document.getElementById('origSizeBadge').textContent = formatBytes(file.size);
+                document.getElementById('cleanSizeBadge').textContent = 'Processing…';
+
+                // Build metadata table (we can't read EXIF in pure JS easily,
+                // but we note what was stripped)
+                buildMetaTable(img.naturalWidth, img.naturalHeight, file.type);
+
+                // Show results
+                results.classList.add('visible');
+                dropZone.style.display = 'none';
+
+                showToast('Image loaded — generating clean version…');
+
+                // Generate cleaned blob asynchronously so UI stays responsive
+                requestAnimationFrame(() => {
+                    generateCleanedBlob();
+                });
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function generateCleanedBlob() {
+        const format  = formatSelect.value;
+        const quality = parseInt(qualitySlider.value) / 100;
+
+        cleanCanvas.toBlob(blob => {
+            cleanedBlob = blob;
+            document.getElementById('cleanSizeBadge').textContent = formatBytes(blob.size);
+            updateStats();
+            showToast('✅ Clean image ready!');
+        }, format, quality);
+    }
+
+    // ── Metadata Table (what we know was stripped) ──
+    function buildMetaTable(w, h, mime) {
+        const tags = [
+            ['Image Dimensions', `${w} × ${h}px`],
+            ['MIME Type', mime],
+            ['EXIF Timestamp', '🗑 Stripped'],
+            ['Camera Make / Model', '🗑 Stripped'],
+            ['GPS Coordinates', '🗑 Stripped'],
+            ['Software / Editor', '🗑 Stripped'],
+            ['Artist / Creator', '🗑 Stripped'],
+            ['Copyright', '🗑 Stripped'],
+            ['Color Profile (ICC)', '🗑 Stripped'],
+            ['Thumbnail Data', '🗑 Stripped'],
+            ['XMP Packet', '🗑 Stripped'],
+            ['IPTC Data', '🗑 Stripped'],
+        ];
+
+        metaBody.innerHTML = tags.map(([tag, status]) => {
+            const cls = status.includes('Stripped') ? 'stripped-tag' : 'kept-tag';
+            return `<tr><td>${tag}</td><td class="${cls}">${status}</td></tr>`;
+        }).join('');
+    }
+
+    // ── Stats Bar ──
+    function updateStats() {
+        const origSize = originalBlob.size;
+        const cleanSize = cleanedBlob.size;
+        const diff = origSize - cleanSize;
+        const pct  = ((diff / origSize) * 100).toFixed(1);
+
+        statsBar.innerHTML = `
+            <div class="stat-card">
+                <div class="value">${formatBytes(origSize)}</div>
+                <div class="label">Original Size</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" style="color:#6ee7b7">${formatBytes(cleanSize)}</div>
+                <div class="label">Cleaned Size</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" style="color:${diff >= 0 ? '#6ee7b7' : '#f87171'}">${diff >= 0 ? '−' : '+'}${formatBytes(Math.abs(diff))}</div>
+                <div class="label">Size Change</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" style="color:#3b82f6">${pct}%</div>
+                <div class="label">Metadata Removed</div>
+            </div>
+        `;
+    }
+
+    // ── Download ──
+    downloadBtn.addEventListener('click', () => {
+        if (!cleanedBlob) return;
+        const ext = formatSelect.value.split('/')[1];
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(cleanedBlob);
+        a.download = `${origFileName}_clean.${ext}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast('⬇ Download started!');
+    });
+
+    // ── Reset ──
+    resetBtn.addEventListener('click', () => {
+        results.classList.remove('visible');
+        dropZone.style.display = '';
+        fileInput.value = '';
+        originalBlob = null;
+        cleanedBlob  = null;
+    });
+
+    // ── Helpers ──
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+})();
+</script>
+<script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+.model3d-inspector-lod-results {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.model3d-inspector-lod-result {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.model3d-inspector-lod-result:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}

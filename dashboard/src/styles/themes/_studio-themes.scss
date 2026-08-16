@@ -1,0 +1,186 @@
+// Studio dashboard theme overrides — CSS custom properties per theme
+// Applied via body[data-dashboard-theme="..."] selectors
+
+body[data-dashboard-theme="fire"] {
+  --studio-accent-1: #ffb266;
+  --studio-accent-2: #ff6a35;
+  --studio-accent-3: #ff3d1f;
+  --studio-accent-soft: rgba(255, 126, 68, 0.26);
+  --studio-panel-border: rgba(255, 128, 74, 0.26);
+  --studio-panel-bg: rgba(18, 10, 10, 0.9);
+  --studio-panel-bg-soft: rgba(12, 7, 8, 0.84);
+  --studio-shell-bg-start: #130807;
+  --studio-shell-bg-mid: #2b0e07;
+  --studio-shell-bg-end: #100605;
+  --studio-rail-bg: #190b0a;
+  --studio-surface-bg: #13090a;
+  --studio-shell-radial: rgba(168, 58, 28, 0.2);
+  --studio-button-start: rgba(255, 151, 85, 0.56);
+  --studio-button-end: rgba(255, 90, 48, 0.38);
+  --studio-button-shadow: rgba(110, 35, 20, 0.34);
+}
+
+body[data-dashboard-theme="light"] {
+  --ink: #172b40;
+  --muted: #4e647b;
+  --line: rgba(72, 105, 143, 0.28);
+  --panel: #ffffff;
+  --panel-alt: #edf3fa;
+  --accent: #2e70ad;
+  --accent-2: #1f598d;
+  --accent-3: #b9d6ef;
+  --accent-soft: rgba(46, 112, 173, 0.16);
+  --studio-accent-1: #5b96c8;
+  --studio-accent-2: #2e70ad;
+  --studio-accent-3: #d2e5f6;
+  --studio-accent-soft: rgba(46, 112, 173, 0.16);
+  --studio-panel-border: rgba(72, 105, 143, 0.28);
+  --studio-panel-bg: #ffffff;
+  --studio-panel-bg-soft: #f1f6fb;
+  --studio-shell-bg-start: #f8fafc;
+  --studio-shell-bg-mid: #eaf1f8;
+  --studio-shell-bg-end: #dce8f4;
+  --studio-rail-bg: #e6eef7;
+  --studio-surface-bg: #f3f7fb;
+  --studio-shell-radial: rgba(62, 113, 165, 0.12);
+  --studio-button-start: #4f8bc0;
+  --studio-button-end: #2d679e;
+  --studio-button-shadow: rgba(34, 85, 134, 0.24);
+}
+
+body[data-dashboard-theme="smoke"] {
+  --studio-accent-1: #c4ccd8;
+  --studio-accent-2: #8b93a0;
+  --studio-accent-3: #59606c;
+  --studio-accent-soft: rgba(139, 147, 160, 0.2);
+  --studio-panel-border: rgba(121, 129, 140, 0.24);
+  --studio-panel-bg: rgba(28, 31, 36, 0.92);
+  --studio-panel-bg-soft: rgba(21, 24, 29, 0.88);
+  --studio-shell-bg-start: #1a1d22;
+  --studio-shell-bg-mid: #242930;
+  --studio-shell-bg-end: #13161a;
+  --studio-rail-bg: #191c21;
+  --studio-surface-bg: #1b1f24;
+  --studio-shell-radial: rgba(118, 125, 138, 0.14);
+  --studio-button-start: rgba(151, 161, 177, 0.42);
+  --studio-button-end: rgba(83, 89, 98, 0.34);
+  --studio-button-shadow: rgba(21, 23, 28, 0.34);
+}
+
+body[data-dashboard-theme="blood"] {
+  --studio-accent-1: #ff8a8f;
+  --studio-accent-2: #d31938;
+  --studio-accent-3: #7e0617;
+  --studio-accent-soft: rgba(211, 25, 56, 0.28);
+  --studio-panel-border: rgba(225, 42, 70, 0.32);
+  --studio-panel-bg: rgba(18, 5, 8, 0.92);
+  --studio-panel-bg-soft: rgba(10, 3, 5, 0.86);
+  --studio-shell-bg-start: #0f0305;
+  --studio-shell-bg-mid: #28040b;
+  --studio-shell-bg-end: #070104;
+  --studio-rail-bg: #120306;
+  --studio-surface-bg: #110306;
+  --studio-shell-radial: rgba(170, 0, 28, 0.24);
+  --studio-button-start: rgba(255, 86, 104, 0.58);
+  --studio-button-end: rgba(123, 5, 22, 0.44);
+  --studio-button-shadow: rgba(112, 0, 18, 0.4);
+  --danger: #ff596b;
+  --warm: #f2b56f;
+}
+
+body[data-dashboard-theme="love"] {
+  --studio-accent-1: #ff9bd8;
+  --studio-accent-2: #ec4ca8;
+  --studio-accent-3: #b82b7a;
+  --studio-accent-soft: rgba(236, 76, 168, 0.28);
+  --studio-panel-border: rgba(255, 130, 205, 0.3);
+  --studio-panel-bg: rgba(28, 8, 24, 0.9);
+  --studio-panel-bg-soft: rgba(18, 5, 17, 0.84);
+  --studio-shell-bg-start: #160512;
+  --studio-shell-bg-mid: #32102b;
+  --studio-shell-bg-end: #10030d;
+  --studio-rail-bg: #190614;
+  --studio-surface-bg: #1b0717;
+  --studio-shell-radial: rgba(236, 76, 168, 0.22);
+  --studio-button-start: rgba(255, 150, 216, 0.58);
+  --studio-button-end: rgba(191, 45, 133, 0.4);
+  --studio-button-shadow: rgba(134, 24, 89, 0.36);
+  --danger: #ff7fb9;
+  --warm: #ffc56f;
+}
+
+body[data-dashboard-theme="water"] {
+  --studio-accent-1: #84dcff;
+  --studio-accent-2: #3fb5ff;
+  --studio-accent-3: #2e7de0;
+  --studio-accent-soft: rgba(84, 188, 255, 0.26);
+  --studio-panel-border: rgba(78, 168, 233, 0.26);
+  --studio-panel-bg: rgba(10, 22, 36, 0.9);
+  --studio-panel-bg-soft: rgba(8, 16, 29, 0.84);
+  --studio-shell-bg-start: #08131f;
+  --studio-shell-bg-mid: #0a2438;
+  --studio-shell-bg-end: #06111d;
+  --studio-rail-bg: #081624;
+  --studio-surface-bg: #091827;
+  --studio-shell-radial: rgba(38, 118, 200, 0.22);
+  --studio-button-start: rgba(92, 187, 255, 0.56);
+  --studio-button-end: rgba(48, 128, 224, 0.4);
+  --studio-button-shadow: rgba(22, 68, 128, 0.34);
+}
+
+body[data-dashboard-theme="crystal"] {
+  --studio-accent-1: #d16aff;
+  --studio-accent-2: #a836e6;
+  --studio-accent-3: #7a1db3;
+  --studio-accent-soft: rgba(209, 104, 255, 0.26);
+  --studio-panel-border: rgba(209, 104, 255, 0.26);
+  --studio-panel-bg: rgba(12, 21, 37, 0.9);
+  --studio-panel-bg-soft: rgba(10, 17, 29, 0.84);
+  --studio-shell-bg-start: #080d1c;
+  --studio-shell-bg-mid: #120a2b;
+  --studio-shell-bg-end: #060917;
+  --studio-rail-bg: #090d24;
+  --studio-surface-bg: #0a1129;
+  --studio-shell-radial: rgba(161, 54, 214, 0.22);
+  --studio-button-start: rgba(209, 104, 255, 0.56);
+  --studio-button-end: rgba(168, 54, 214, 0.4);
+  --studio-button-shadow: rgba(78, 25, 128, 0.34);
+}
+
+body[data-dashboard-theme="nature"] {
+  --studio-accent-1: #b0f08f;
+  --studio-accent-2: #56c96b;
+  --studio-accent-3: #2f8f46;
+  --studio-accent-soft: rgba(110, 206, 103, 0.24);
+  --studio-panel-border: rgba(91, 173, 92, 0.26);
+  --studio-panel-bg: rgba(10, 22, 13, 0.9);
+  --studio-panel-bg-soft: rgba(8, 17, 10, 0.84);
+  --studio-shell-bg-start: #08140a;
+  --studio-shell-bg-mid: #112d15;
+  --studio-shell-bg-end: #071008;
+  --studio-rail-bg: #0a170b;
+  --studio-surface-bg: #0b1b0d;
+  --studio-shell-radial: rgba(56, 128, 62, 0.2);
+  --studio-button-start: rgba(114, 203, 98, 0.52);
+  --studio-button-end: rgba(52, 132, 63, 0.38);
+  --studio-button-shadow: rgba(27, 86, 33, 0.3);
+}
+
+body[data-dashboard-theme="rock"] {
+  --studio-accent-1: #d8d3c6;
+  --studio-accent-2: #9f9686;
+  --studio-accent-3: #71695d;
+  --studio-accent-soft: rgba(165, 152, 129, 0.24);
+  --studio-panel-border: rgba(152, 141, 123, 0.26);
+  --studio-panel-bg: rgba(20, 18, 16, 0.9);
+  --studio-panel-bg-soft: rgba(15, 13, 11, 0.84);
+  --studio-shell-bg-start: #131210;
+  --studio-shell-bg-mid: #23201c;
+  --studio-shell-bg-end: #0f0e0c;
+  --studio-rail-bg: #181614;
+  --studio-surface-bg: #141210;
+  --studio-shell-radial: rgba(109, 95, 72, 0.2);
+  --studio-button-start: rgba(167, 155, 129, 0.54);
+  --studio-button-end: rgba(112, 101, 84, 0.38);
+  --studio-button-shadow: rgba(64, 56, 42, 0.32);
+}

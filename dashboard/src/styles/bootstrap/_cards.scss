@@ -1,0 +1,164 @@
+.app-shell {
+  .card {
+    color: var(--ink);
+    border-color: var(--bs-card-border-color);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%),
+      var(--bs-card-bg);
+    box-shadow: var(--bs-box-shadow-sm);
+  }
+
+  .card-header,
+  .card-footer {
+    border-color: var(--bs-card-border-color);
+    background: color-mix(in srgb, var(--bs-card-bg) 82%, black 18%);
+    color: var(--ink);
+  }
+
+  .panel-card,
+  .thread-sidebar,
+  .thread-stage,
+  .detail-card {
+    min-height: 0;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%),
+      var(--panel);
+    box-shadow: 0 22px 44px var(--card-glow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    padding: max(18px, var(--dashboard-cards-padding, 0px));
+    margin: var(--dashboard-cards-margin, 0px);
+    border-radius: var(--dashboard-cards-radius, var(--dashboard-card-radius, 0px));
+  }
+
+  .panel-card {
+    position: relative;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    overflow: hidden;
+  }
+
+  .panel-card::before,
+  .detail-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.16) 48%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .panel-heading {
+    display: grid;
+    gap: 6px;
+  }
+
+  .panel-kicker {
+    color: #95a7cf;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .feature-card {
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 34%),
+      linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent) 0%, color-mix(in srgb, var(--accent) 4%, transparent) 42%, rgba(255, 255, 255, 0.02) 100%),
+      var(--panel);
+  }
+
+  .tool-card {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.01) 100%),
+      var(--panel);
+  }
+
+  .contrast-card {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--panel) 82%, black 18%) 0%, color-mix(in srgb, var(--panel) 90%, black 10%) 100%);
+  }
+
+  .panel-subtitle,
+  .hint,
+  .item-meta {
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  // Note: .chip, .toggle, .detail-line, .item, .message-bubble, .selected-user-card, .info-card
+  // shared surface styles moved to _surfaces.scss to avoid duplication.
+  // Toggle-specific layout kept here because it was tightly coupled with panel context.
+  .toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: max(12px, var(--dashboard-checkboxes-padding, 0px)) max(14px, var(--dashboard-checkboxes-padding, 0px));
+    margin: var(--dashboard-checkboxes-margin, 0px);
+    border: 1px solid rgba(173, 190, 255, 0.08);
+    background: rgba(255, 255, 255, 0.035);
+    border-radius: var(--dashboard-checkboxes-radius, var(--dashboard-control-radius, 0px));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  }
+
+  .toggle:hover,
+  .toggle:focus-within {
+    border-color: color-mix(in srgb, var(--theme-preview-start, #ffb266) 42%, rgba(173, 190, 255, 0.16));
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.015) 100%),
+      color-mix(in srgb, var(--panel-alt, rgba(11, 21, 40, 0.86)) 76%, black 24%);
+  }
+
+  .toggle span {
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: #eef3ff;
+  }
+
+  .toggle input {
+    appearance: none;
+    position: relative;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(173, 190, 255, 0.22);
+    background: linear-gradient(180deg, rgba(31, 39, 54, 0.92) 0%, rgba(12, 18, 29, 0.96) 100%);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.32), 0 1px 0 rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  }
+
+  .toggle input::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffffff 0%, #bfc9de 100%);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.34);
+    transition: transform 160ms ease, background 160ms ease;
+  }
+
+  .toggle input:checked {
+    border-color: color-mix(in srgb, var(--theme-preview-start, #ffb266) 68%, white 10%);
+    background: linear-gradient(180deg, var(--studio-button-start, rgba(255, 151, 85, 0.72)) 0%, var(--studio-button-end, rgba(255, 90, 48, 0.58)) 100%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-preview-start, #ffb266) 18%, transparent), 0 8px 18px color-mix(in srgb, var(--theme-preview-end, #ff5a30) 18%, transparent);
+  }
+
+  .toggle input:checked::before {
+    transform: translateX(16px);
+    background: #fff;
+  }
+
+  .toggle input:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--theme-preview-start, #ffb266) 58%, white 12%);
+    outline-offset: 2px;
+  }
+}

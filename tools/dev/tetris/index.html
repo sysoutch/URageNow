@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-dashboard-theme="fire">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tetris Clone">
+  <title>tetris</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+  <main class="tool-shell">
+    <header class="tool-header"><div><h1>tetris</h1><p>Tetris Clone</p></div></header>
+    <div class="tool-workspace">
+      <aside class="tool-sidebar" data-dashboard-tool-sidebar>
+        <label class="field"><span>Input</span><textarea id="tool-input" placeholder="Just play testris"></textarea></label>
+        <label class="field"><span>Input file</span><input id="tool-file-input" type="file"></label>
+        <button id="tool-run-button" type="button">Run</button>
+        <p id="tool-status" class="tool-status" aria-live="polite">Ready.</p>
+      </aside>
+      <section class="tool-stage" aria-label="Tool result"><canvas id="tool-output" width="900" height="560" aria-label="Generated output"></canvas></section>
+    </div>
+  </main>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+  <script src="../../shared/dashboard-tool-bridge.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

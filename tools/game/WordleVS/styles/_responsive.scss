@@ -1,0 +1,206 @@
+@media (max-height: 940px) {
+    body[data-view="match"] .app-header {
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    body[data-view="match"] #players-wrapper {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 272px), 1fr));
+        gap: 12px;
+    }
+
+    body[data-view="match"] .player-board {
+        gap: 8px;
+        padding: 12px;
+    }
+
+    body[data-view="match"] .board-metric-label {
+        font-size: 0.6rem;
+    }
+
+    body[data-view="match"] .board-metric-value {
+        font-size: 0.82rem;
+    }
+
+    body[data-view="match"] .board-summary {
+        padding: 8px 10px;
+    }
+
+    body[data-view="match"] .board-summary-text {
+        display: none;
+    }
+
+    body[data-view="match"] .wordle-grid {
+        gap: 5px;
+        padding: 6px;
+        border-radius: 16px;
+    }
+
+    body[data-view="match"] .row {
+        gap: 5px;
+    }
+
+    body[data-view="match"] .tile {
+        border-radius: 11px;
+        font-size: clamp(0.9rem, 0.7vw + 0.62rem, 1.16rem);
+    }
+
+    body[data-view="match"] .keyboard {
+        gap: 5px;
+        padding: 6px;
+    }
+
+    body[data-view="match"] .key {
+        min-width: 24px;
+        padding: 7px 5px;
+        font-size: 0.62rem;
+    }
+
+    body[data-view="match"] .team-chat-log {
+        max-height: 180px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .app-header,
+    .setup-shell,
+    .setup-intro {
+        grid-template-columns: 1fr;
+    }
+
+    .setup-sidebar {
+        position: static;
+    }
+
+    body[data-view="setup"] #game-container {
+        grid-template-rows: auto auto auto;
+    }
+
+    body[data-view="setup"] .setup-panel {
+        display: block;
+        overflow: visible;
+    }
+
+    body[data-view="setup"] .setup-main,
+    body[data-view="setup"] .setup-sidebar {
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    body[data-view="match"] .app-header {
+        grid-template-columns: 1fr;
+    }
+
+    .team-chat-composer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 980px) {
+    .builder-toolbar,
+    .setup-mini-grid,
+    .board-metrics,
+    .stats-highlights {
+        grid-template-columns: 1fr;
+    }
+
+    .setup-wizard-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .setup-intro-points {
+        justify-content: flex-start;
+    }
+
+    .brand-lockup {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-mark {
+        width: 64px;
+        height: 64px;
+    }
+}
+
+@media (max-width: 760px) {
+    body {
+        background:
+            radial-gradient(circle at top, rgba(83, 163, 255, 0.15), transparent 36%),
+            linear-gradient(160deg, var(--bg) 0%, var(--bg-deep) 78%);
+    }
+
+    #game-container {
+        width: min(100%, calc(100% - 20px));
+        padding-top: 18px;
+    }
+
+    .brand-block,
+    .panel,
+    .player-board {
+        padding: 20px;
+        border-radius: 22px;
+    }
+
+    #game-info,
+    #players-wrapper,
+    .team-chat-columns,
+    .option-panel,
+    .ai-model-entry {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-heading,
+    .card-heading,
+    .board-header,
+    .stats-recap-intro,
+    .stats-recap-header {
+        flex-direction: column;
+    }
+
+    .setup-intro,
+    .setup-disclosure summary {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .setup-disclosure summary {
+        padding-right: 52px;
+    }
+
+    .setup-disclosure-body {
+        padding: 18px;
+    }
+
+    .setup-wizard-footer,
+    .setup-wizard-actions,
+    .team-chat-composer-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .app-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ai-model-entry-heading {
+        padding-top: 0;
+    }
+
+    .board-state {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    button,
+    .secondary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .stats-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

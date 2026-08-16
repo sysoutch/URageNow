@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Media Converter</title>
+  <meta name="description" content="Convert uploaded video and animated media into GIFs or PNG frame sequences.">
+  <link rel="stylesheet" href="style.css">
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-tool-bridge.js"></script>
+</head>
+<body data-dashboard-theme="fire">
+  <main class="media-converter-app">
+    <section class="hero-card">
+      <div class="section-label">Video</div>
+      <h1>Media Converter</h1>
+      <p>Convert MP4, WebM, MOV, MKV, or GIF uploads into animated GIFs or extracted PNG frame sets.</p>
+      <div class="mode-tabs" role="tablist" aria-label="Media converter mode">
+        <button class="mode-tab active" data-mode="video-to-gif" type="button">Media To GIF</button>
+        <button class="mode-tab" data-mode="video-to-png-frames" type="button">Media To PNG Frames</button>
+      </div>
+    </section>
+    <section class="workspace-grid">
+      <article class="panel-card source-card">
+        <div class="section-label">Source</div>
+        <label class="upload-dropzone" for="media-source-input">
+          <input id="media-source-input" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,image/gif">
+          <span class="upload-dropzone-icon">🎞️</span>
+          <strong>Upload Video Or GIF</strong>
+          <small>MP4, WebM, MOV, MKV, or animated GIF.</small>
+        </label>
+        <div class="control-grid compact-grid">
+          <label>
+            <span>FPS</span>
+            <input id="media-fps-input" type="number" min="1" max="60" step="1" value="12">
+          </label>
+          <label>
+            <span>Width</span>
+            <input id="media-width-input" type="number" min="64" max="2048" step="1" value="512">
+          </label>
+        </div>
+        <div class="source-actions">
+          <button class="primary" id="media-convert-button" type="button">Convert Media</button>
+          <button class="secondary" id="media-clear-button" type="button">Clear</button>
+        </div>
+        <div class="status-line" id="media-status-line">Upload a video or GIF to begin.</div>
+        <div class="source-preview-shell" id="media-source-preview-shell">
+          <video id="media-source-preview" controls playsinline hidden></video>
+          <img id="media-source-gif-preview" alt="Animated source preview" hidden>
+        </div>
+      </article>
+      <article class="panel-card result-card">
+        <div class="result-head">
+          <div>
+            <div class="section-label">Result</div>
+            <h2 id="media-result-title">Converted Output</h2>
+          </div>
+          <div class="result-actions">
+            <button class="secondary hidden" id="media-preview-frames-button" type="button">Preview Frames</button>
+            <a class="secondary hidden" id="media-download-result-link" href="#" download>Download Result</a>
+            <a class="secondary hidden" id="media-download-archive-link" href="#" download>Download Frame ZIP</a>
+          </div>
+        </div>
+        <div class="result-preview-shell" id="media-result-preview-shell">
+          <img id="media-result-image" alt="Converted output preview" hidden>
+        </div>
+        <div class="result-meta" id="media-result-meta">No conversion has run yet.</div>
+        <div class="frames-panel hidden" id="media-frames-panel">
+          <div class="frames-panel-head">
+            <strong>PNG Frames</strong>
+            <span id="media-frame-count">0 frames</span>
+          </div>
+          <div class="frames-grid" id="media-frames-grid"></div>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

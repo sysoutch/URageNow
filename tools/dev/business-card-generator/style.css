@@ -1,0 +1,155 @@
+:root {
+  color-scheme: dark;
+  --card-panel: color-mix(in srgb, var(--urage-panel, #171b26) 92%, transparent);
+  --card-border: var(--urage-border, #56326c);
+  --card-text: var(--urage-text, #f6edf8);
+  --card-muted: var(--urage-text-muted, #c7b8ca);
+  --card-accent: var(--urage-accent, #d46cff);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+  background: var(--urage-bg, #0d1018);
+  color: var(--card-text);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+button,
+select {
+  min-height: 2.4rem;
+  border: 1px solid var(--card-border);
+  border-radius: 0.45rem;
+  background: var(--card-panel);
+  color: var(--card-text);
+}
+
+button {
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--card-accent);
+}
+
+.business-card-app {
+  min-height: 100vh;
+}
+
+.toolbar {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--card-border);
+  background: color-mix(in srgb, var(--urage-bg, #0d1018) 94%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.primary-action {
+  margin-left: auto;
+  border-color: var(--card-accent);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 18rem);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.card-area,
+.panel {
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  background: var(--card-panel);
+}
+
+.card-area {
+  min-width: 0;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.canvas-container {
+  max-width: 100%;
+  margin: auto;
+}
+
+.panel {
+  align-self: start;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.panel h2,
+.panel p {
+  margin: 0;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field span,
+.field > label {
+  color: var(--card-muted);
+  font-size: 0.8rem;
+}
+
+.field select {
+  width: 100%;
+  padding-inline: 0.55rem;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+input[type="color"] {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid var(--card-border);
+  border-radius: 0.4rem;
+  background: transparent;
+}
+
+.card-size {
+  color: var(--card-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .primary-action {
+    margin-left: 0;
+  }
+}

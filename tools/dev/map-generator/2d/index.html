@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map Generator - v0.2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <!-- Shared libs -->
+  <link rel="stylesheet" href="../../../shared/libs/fontawesome/css/fontawesome.css">
+  <link rel="stylesheet" href="../../../shared/libs/fontawesome/css/brands.css">
+  <link rel="stylesheet" href="../../../shared/libs/fontawesome/css/solid.css">
+
+  <!-- CDN CSS (Bootstrap, Slider) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+
+  <!-- Local CSS (same directory) -->
+  <link rel="stylesheet" href="css/app/layout.css">
+</head>
+<body data-dashboard-theme="fire">
+  <div class="app-shell">
+    <aside class="side" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Map Generator Controls">
+      <div class="panel-title">
+        <h2>Generator Tools</h2>
+        <span class="sprite-pill"><i class="fas fa-layer-group"></i> Dynamic Sprites</span>
+      </div>
+
+      <div class="mode-tabs">
+        <button id="topdownModeTab" class="mode-tab active" type="button" onclick="setGeneratorMode('topdown')"><i class="fas fa-border-all"></i> Topdown</button>
+        <button id="isometricModeTab" class="mode-tab" type="button" onclick="setGeneratorMode('isometric')"><i class="fas fa-cubes"></i> Isometric</button>
+        <button id="sidescrollerModeTab" class="mode-tab" type="button" onclick="setGeneratorMode('sidescroller')"><i class="fas fa-mountain"></i> Sidescroller</button>
+      </div>
+
+      <div class="sprite-upload-panel">
+        <h5>Default Sprite Size</h5>
+        <div class="field-row three">
+          <input id="defaultSpriteWidth" type="number" min="1" value="64" onchange="setDefaultSpriteSize()" placeholder="Width">
+          <input id="defaultSpriteHeight" type="number" min="1" value="64" onchange="setDefaultSpriteSize()" placeholder="Height">
+          <button class="btn btn-sm btn-secondary" onclick="applyPlatformSpriteSize()">Use Platform</button>
+        </div>
+        <label class="toggle-row">
+          <input id="autoScaleSprites" type="checkbox" checked onchange="setAutoScaleSprites()">
+          Auto scale sprites to default size
+        </label>
+        <div class="field-row seed-row">
+          <input id="generationSeed" type="text" placeholder="Seed (blank = random every run)" onchange="setGenerationSeed()">
+          <button class="btn btn-sm btn-secondary" type="button" onclick="randomizeGenerationSeed()">Randomize</button>
+          <button class="btn btn-sm btn-secondary" type="button" onclick="clearGenerationSeed()">Clear</button>
+        </div>
+        <small class="field-help">Use a seed to reproduce the same layout with the same settings. Leave it blank for a fresh random result every generation.</small>
+        <div class="field-row config-action-row">
+          <button class="btn btn-sm btn-secondary" type="button" onclick="exportGeneratorSetup()">Export Setup</button>
+          <button class="btn btn-sm btn-secondary" type="button" onclick="openGeneratorSetupImport()">Import Setup</button>
+        </div>
+        <input id="importGeneratorSetupInput" type="file" accept="application/json,.json" class="hidden-assets">
+      </div>
+
+      <div id="topdownModePanel" class="mode-panel">
+      <div class="sprite-upload-panel">
+        <h5>Map Defaults</h5>
+        <div class="settings-grid">
+          <label>Render Style
+            <select id="topdownRenderStyle" onchange="setTopdownRenderStyle()">
+              <option value="topdown" selected>Flat</option>
+              <option value="threequarter">3/4 RPG depth</option>
+            </select>
+          </label>
+          <label>Tiles X<input id="mapTilesX" type="number" min="1" value="13" onchange="setGeneratorOptions()"></label>
+          <label>Tiles Y<input id="mapTilesY" type="number" min="1" value="7" onchange="setGeneratorOptions()"></label>
+          <label>Start X<input id="mapStartX" type="number" value="128" onchange="setGeneratorOptions()"></label>
+          <label>Start Y<input id="mapStartY" type="number" value="122" onchange="setGeneratorOptions()"></label>
+          <label>End Padding X<input id="mapEndX" type="number" min="0" value="96" onchange="setGeneratorOptions()"></label>
+          <label>End Padding Y<input id="mapEndY" type="number" min="0" value="96" onchange="setGeneratorOptions()"></label>
+            <label>Direction
+              <select id="mapDirection" onchange="setGeneratorOptions()">
+                <option value="row-right-down" selected>Rows: left → right, top → bottom</option>
+                <option value="row-left-down" >Rows: right → left, top → bottom</option>
+                <option value="row-right-up" >Rows: left → right, bottom → top</option>
+                <option value="row-left-up" >Rows: right → left, bottom → top</option>
+                <option value="column-down-right" >Columns: top → bottom, left → right</option>
+                <option value="column-up-right" >Columns: bottom → top, left → right</option>
+                <option value="column-down-left" >Columns: top → bottom, right → left</option>
+                <option value="column-up-left" >Columns: bottom → top, right → left</option>
+              </select>
+            </label>
+          <label>Canvas Scale<input id="canvasScale" type="number" min="0.1" max="4" step="0.1" value="0.5" onchange="setGeneratorOptions()"></label>
+          <label>JPEG Quality<input id="exportQuality" type="number" min="1" max="100" value="65" onchange="setGeneratorOptions()"></label>
+        </div>
+        <div class="field-row">
+          <label class="toggle-row"><input id="placePlayers" type="checkbox" checked onchange="setGeneratorOptions()"> Place players</label>
+          <span class="mini-value">Count</span>
+          <input id="topdownPlayerCount" type="number" min="0" value="1" onchange="setGeneratorOptions()">
+        </div>
+        <div class="field-row"><input id="backgroundFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="replaceBackgroundFromDisk(this.files[0], 'topdown')"><span class="mini-value">BG</span></div>
+
+        <div id="threeQuarterModePanel" class="integrated-depth-options" hidden>
+          <div class="settings-divider">3/4 Depth Options</div>
+          <div class="settings-grid">
+            <label>Edge Height<input id="threeQuarterEdgeHeight" type="number" min="0" value="22" onchange="window.ThreeQuarterMapGenerator && window.ThreeQuarterMapGenerator.setOptions()"></label>
+            <label>Edge Depth<input id="threeQuarterEdgeDepth" type="number" min="0" value="16" onchange="window.ThreeQuarterMapGenerator && window.ThreeQuarterMapGenerator.setOptions()"></label>
+          </div>
+          <div class="field-row">
+            <label class="toggle-row"><input id="threeQuarterPlacePlayers" type="checkbox" checked onchange="window.ThreeQuarterMapGenerator && window.ThreeQuarterMapGenerator.setOptions()"> Place players on the first raised tile</label>
+            <span class="mini-value">Count</span>
+            <input id="threeQuarterPlayerCount" type="number" min="0" value="1" onchange="window.ThreeQuarterMapGenerator && window.ThreeQuarterMapGenerator.setOptions()">
+          </div>
+          <label class="toggle-row"><input id="threeQuarterFrameEdges" type="checkbox" checked onchange="window.ThreeQuarterMapGenerator && window.ThreeQuarterMapGenerator.setOptions()"> Force framed outer arena edges</label>
+          <div class="field-row"><input id="threeQuarterBackgroundFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="replaceBackgroundFromDisk(this.files[0], 'threequarter')"><span class="mini-value">3/4 BG</span></div>
+          <small class="field-help">These options only appear for the 3/4 render style. Shared map size, start/end padding, direction, JPEG quality, and mirror settings stay in the normal controls above.</small>
+        </div>
+      </div>
+
+      <div class="sprite-upload-panel">
+        <h5>Mirror Options</h5>
+        <div class="settings-grid">
+          <label>Mirror Pattern
+            <select id="mirrorPattern" onchange="setMirrorOptions()">
+              <option value="xy" selected>Both axes / old default</option>
+              <option value="x">Horizontal only</option>
+              <option value="y">Vertical only</option>
+              <option value="none">No mirroring</option>
+              <option value="diagonal-main">Diagonal TL ↔ BR</option>
+              <option value="diagonal-anti">Diagonal TR ↔ BL</option>
+              <option value="diagonal-both">Both diagonals</option>
+              <option value="all">Axes + both diagonals</option>
+            </select>
+          </label>
+          <label>Horizontal Mirrors<input id="mirrorRepeatX" type="number" min="0" max="12" value="1" onchange="setMirrorOptions()"></label>
+          <label>Vertical Mirrors<input id="mirrorRepeatY" type="number" min="0" max="12" value="1" onchange="setMirrorOptions()"></label>
+          <label>Output Size<input id="mirrorShapePreview" type="text" value="26 x 13" readonly></label>
+        </div>
+        <label class="toggle-row"><input id="mirrorCenterRowOnce" type="checkbox" checked onchange="setMirrorOptions()"> Share center row once</label>
+        <label class="toggle-row"><input id="mirrorCenterColOnce" type="checkbox" onchange="setMirrorOptions()"> Share center column once</label>
+        <small class="field-help">Defaults match the old generator. Increase mirror counts for repeated mirrored blocks. Diagonal modes mirror TL ↔ BR, TR ↔ BL, or both.</small>
+      </div>
+      </div>
+
+      <div id="isometricModePanel" class="mode-panel" hidden>
+        <div class="sprite-upload-panel">
+          <h5>Map Defaults</h5>
+          <div class="settings-grid">
+            <label>Tiles X<input id="isoTilesX" type="number" min="1" value="14" onchange="setIsometricOptions()"></label>
+            <label>Tiles Y<input id="isoTilesY" type="number" min="1" value="10" onchange="setIsometricOptions()"></label>
+            <label>Start X<input id="isoStartX" type="number" value="0" onchange="setIsometricOptions()"></label>
+            <label>Start Y<input id="isoStartY" type="number" value="0" onchange="setIsometricOptions()"></label>
+            <label>End Padding X<input id="isoEndX" type="number" min="0" value="96" onchange="setIsometricOptions()"></label>
+            <label>End Padding Y<input id="isoEndY" type="number" min="0" value="96" onchange="setIsometricOptions()"></label>
+            <label>Direction
+              <select id="isoDirection" onchange="setIsometricOptions()">
+                <option value="row-right-down" selected>Rows: left → right, top → bottom</option>
+                <option value="row-left-down" >Rows: right → left, top → bottom</option>
+                <option value="row-right-up" >Rows: left → right, bottom → top</option>
+                <option value="row-left-up" >Rows: right → left, bottom → top</option>
+                <option value="column-down-right" >Columns: top → bottom, left → right</option>
+                <option value="column-up-right" >Columns: bottom → top, left → right</option>
+                <option value="column-down-left" >Columns: top → bottom, right → left</option>
+                <option value="column-up-left" >Columns: bottom → top, right → left</option>
+              </select>
+            </label>
+            <label>Tile Width<input id="isoTileWidth" type="number" min="16" value="96" onchange="setIsometricOptions()"></label>
+            <label>Tile Height<input id="isoTileHeight" type="number" min="8" value="48" onchange="setIsometricOptions()"></label>
+            <label>Block Height<input id="isoBlockHeight" type="number" min="0" value="34" onchange="setIsometricOptions()"></label>
+            <label>JPEG Quality<input id="isoExportQuality" type="number" min="1" max="100" value="70" onchange="setIsometricOptions()"></label>
+          </div>
+          <div class="field-row">
+            <label class="toggle-row"><input id="isoPlacePlayers" type="checkbox" checked onchange="setIsometricOptions()"> Place players near the center</label>
+            <span class="mini-value">Count</span>
+            <input id="isoPlayerCount" type="number" min="0" value="1" onchange="setIsometricOptions()">
+          </div>
+          <label class="toggle-row"><input id="isoRaisedEdges" type="checkbox" checked onchange="setIsometricOptions()"> Raise outside edges like a floating arena</label>
+          <div class="field-row"><input id="isoBackgroundFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="replaceBackgroundFromDisk(this.files[0], 'isometric')"><span class="mini-value">BG</span></div>
+          <small class="field-help">Isometric maps are the angled 2.5D style: diamond tile tops with visible side faces. Existing item sprites can still appear on the generated tile tops.</small>
+        </div>
+
+        <div class="sprite-upload-panel">
+          <h5>Mirror Options</h5>
+          <div class="settings-grid">
+            <label>Mirror Pattern
+              <select id="isoMirrorPattern" onchange="setIsometricOptions()">
+                <option value="none">None</option>
+                <option value="x">Horizontal</option>
+                <option value="y">Vertical</option>
+                <option value="xy">Horizontal + Vertical</option>
+                <option value="diagonal-main">Diagonal TL ↔ BR</option>
+                <option value="diagonal-anti">Diagonal TR ↔ BL</option>
+                <option value="diagonal-both">Both Diagonals</option>
+                <option value="all">All Mirrors</option>
+              </select>
+            </label>
+            <label>Horizontal Mirrors<input id="isoMirrorRepeatX" type="number" min="0" max="12" value="0" onchange="setIsometricOptions()"></label>
+            <label>Vertical Mirrors<input id="isoMirrorRepeatY" type="number" min="0" max="12" value="0" onchange="setIsometricOptions()"></label>
+            <label>Output Size<input id="isoMirrorShapePreview" type="text" value="14 x 10" readonly></label>
+          </div>
+          <label class="toggle-row"><input id="isoMirrorCenterRowOnce" type="checkbox" onchange="setIsometricOptions()"> Share center row once</label>
+          <label class="toggle-row"><input id="isoMirrorCenterColOnce" type="checkbox" onchange="setIsometricOptions()"> Share center column once</label>
+        </div>
+      </div>
+
+      <div id="sidescrollerModePanel" class="mode-panel" hidden>
+        <div class="sprite-upload-panel">
+          <h5>Map Defaults</h5>
+          <div class="settings-grid">
+            <label>Tiles X<input id="sideTilesX" type="number" min="1" value="26" onchange="setSidescrollerOptions()"></label>
+            <label>Tiles Y<input id="sideTilesY" type="number" min="1" value="13" onchange="setSidescrollerOptions()"></label>
+            <label>Start X<input id="sideStartX" type="number" value="64" onchange="setSidescrollerOptions()"></label>
+            <label>Start Y<input id="sideStartY" type="number" value="64" onchange="setSidescrollerOptions()"></label>
+            <label>End Padding X<input id="sideEndX" type="number" min="0" value="96" onchange="setSidescrollerOptions()"></label>
+            <label>End Padding Y<input id="sideEndY" type="number" min="0" value="64" onchange="setSidescrollerOptions()"></label>
+            <label>Direction
+              <select id="sideDirection" onchange="setSidescrollerOptions()">
+                <option value="row-right-down" >Rows: left → right, top → bottom</option>
+                <option value="row-left-down" >Rows: right → left, top → bottom</option>
+                <option value="row-right-up" >Rows: left → right, bottom → top</option>
+                <option value="row-left-up" >Rows: right → left, bottom → top</option>
+                <option value="column-down-right" >Columns: top → bottom, left → right</option>
+                <option value="column-up-right" selected>Columns: bottom → top, left → right</option>
+                <option value="column-down-left" >Columns: top → bottom, right → left</option>
+                <option value="column-up-left" >Columns: bottom → top, right → left</option>
+              </select>
+            </label>
+            <label>Ground Row<input id="sideGroundRow" type="number" min="0" value="4" onchange="setSidescrollerOptions()"></label>
+            <label>Terrain Variation<input id="sideTerrainVariation" type="number" min="0" max="12" value="3" onchange="setSidescrollerOptions()"></label>
+            <label>Floating Platforms<input id="sideFloatingPlatforms" type="number" min="0" max="100" value="8" onchange="setSidescrollerOptions()"></label>
+            <label>Platform Min Width<input id="sidePlatformMinWidth" type="number" min="1" value="2" onchange="setSidescrollerOptions()"></label>
+            <label>Platform Max Width<input id="sidePlatformMaxWidth" type="number" min="1" value="5" onchange="setSidescrollerOptions()"></label>
+            <label>JPEG Quality<input id="sideExportQuality" type="number" min="1" max="100" value="65" onchange="setSidescrollerOptions()"></label>
+          </div>
+          <label class="toggle-row"><input id="sideFillGround" type="checkbox" checked onchange="setSidescrollerOptions()"> Fill terrain below surface</label>
+          <div class="field-row">
+            <label class="toggle-row"><input id="sidePlacePlayers" type="checkbox" checked onchange="setSidescrollerOptions()"> Place players on safe platforms</label>
+            <span class="mini-value">Count</span>
+            <input id="sidePlayerCount" type="number" min="0" value="1" onchange="setSidescrollerOptions()">
+          </div>
+          <label class="toggle-row"><input id="sideRequireEmptyAbove" type="checkbox" checked onchange="setSidescrollerOptions()"> Place sprites above blocks only when there is empty space</label>
+          <div class="field-row"><input id="sideBackgroundFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="replaceBackgroundFromDisk(this.files[0], 'sidescroller')"><span class="mini-value">BG</span></div>
+          <small class="field-help">Sidescroller mode uses the same sprite types, upload system, scaling, placement rules, and item chance settings, but generates terrain from left to right instead of mirrored quadrants.</small>
+        </div>
+
+        <div class="sprite-upload-panel">
+          <h5>Mirror Options</h5>
+          <div class="settings-grid">
+            <label>Mirror Pattern
+              <select id="sideMirrorPattern" onchange="setSidescrollerOptions()">
+                <option value="none" selected>No mirroring</option>
+                <option value="x">Horizontal / Y-axis</option>
+                <option value="y">Vertical / X-axis</option>
+                <option value="xy">Both axes</option>
+                <option value="diagonal-main">Diagonal TL ↔ BR</option>
+                <option value="diagonal-anti">Diagonal TR ↔ BL</option>
+                <option value="diagonal-both">Both diagonals</option>
+                <option value="all">Axes + both diagonals</option>
+              </select>
+            </label>
+            <label>Horizontal Mirrors<input id="sideMirrorRepeatX" type="number" min="0" max="12" value="0" onchange="setSidescrollerOptions()"></label>
+            <label>Vertical Mirrors<input id="sideMirrorRepeatY" type="number" min="0" max="12" value="0" onchange="setSidescrollerOptions()"></label>
+            <label>Output Size<input id="sideMirrorShapePreview" type="text" value="26 x 13" readonly></label>
+          </div>
+          <label class="toggle-row"><input id="sideMirrorCenterRowOnce" type="checkbox" onchange="setSidescrollerOptions()"> Share center row once</label>
+          <label class="toggle-row"><input id="sideMirrorCenterColOnce" type="checkbox" onchange="setSidescrollerOptions()"> Share center column once</label>
+          <small class="field-help">Use repeats to mirror the generated sidescroller chunk multiple times. Keep "No mirroring" for a normal left-to-right level.</small>
+        </div>
+      </div>
+
+      <div class="sprite-upload-panel add-sprite-panel">
+        <h5>Add Sprite</h5>
+        <div class="add-sprite-row">
+          <input id="newSpriteName" type="text" placeholder="Name, e.g. Coin">
+          <input id="newSpriteFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+          <button class="btn btn-sm btn-primary" onclick="addSpriteTypeFromDisk()">Add</button>
+        </div>
+        <small class="field-help">New sprites appear as their own card below. Replacement is now inside each sprite card.</small>
+      </div>
+
+      <div id="spriteSettingsList"></div>
+    </aside>
+
+    <main class="main">
+      <div class="hidden-assets" id="hiddenAssets">
+        <img src="" id="source_img" alt="Source">
+        <img src="" id="target_img" alt="Target">
+      </div>
+
+      <div id="canvasDiv">
+        <div class="canvas-toolbar">
+          <div class="canvas-toolbar-title">
+            <strong>Map Preview</strong>
+            <small id="canvasScrollHint">Sidescroller maps can be wider than the view. Drag the preview or use the buttons.</small>
+            <div class="preview-stats" id="previewStats"></div>
+          </div>
+          <div class="canvas-scroll-controls">
+            <button type="button" class="canvas-scroll-btn" onclick="scrollCanvasPreview(-1)"><i class="fas fa-chevron-left"></i> Left</button>
+            <button type="button" class="canvas-scroll-btn" onclick="scrollCanvasPreview(1)">Right <i class="fas fa-chevron-right"></i></button>
+            <button type="button" class="canvas-scroll-btn" onclick="centerCanvasPreview()"><i class="fas fa-compress-arrows-alt"></i> Center</button>
+          </div>
+        </div>
+
+        <div id="canvasScrollWrap" class="canvas-scroll-wrap">
+          <canvas id="canvas" width="960" height="540">Your browser does not support the HTML5 canvas tag.</canvas>
+        </div>
+
+        <div id="generateMapButtonDiv">
+          <div class="btn-group" id="generateMap">
+            <button type="button" class="btn btn-success btn-md" onclick="generateMap()"><strong>PRESS</strong> to <i class="fas fa-image"></i> <strong>Generate a Map</strong></button>
+            <button type="button" class="btn btn-success btn-md" onclick="startAutoGenerateMap()"><i class="fas fa-sync"></i></button>
+          </div>
+
+          <div id="stopAutoGenerate" style="display:none">
+            Generate Interval:
+            <input type="number" id="autoGenerateMapIntervalId" min="0" value="1" step="0.5">
+            second
+            <button type="button" class="btn btn-md btn-danger" onclick="stopAutoGenerate()"><i class="fas fa-stop-circle"></i> <strong>Stop Auto Generating</strong></button>
+          </div>
+
+          <button type="button" class="btn btn-md btn-warning" id="saveMapZip" onclick="exportMapZip()"><i class="fas fa-file-archive"></i> <strong>Export ZIP</strong></button>
+          <button type="button" class="btn btn-md btn-secondary" id="saveMapJson" onclick="exportGeneratedMapJson()"><i class="fas fa-file-code"></i> <strong>Export Map JSON</strong></button>
+          <button type="button" class="btn btn-md btn-primary" id="saveMapImage" onclick="makeImageOfCanvas()"><strong>PRESS</strong> to <i class="fas fa-bookmark"></i> <strong>Save Map Image</strong></button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- CDN JS (Bootstrap, Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+
+  <!-- Local JS (same directory) -->
+  <script src="js/export-zip.js"></script>
+  <script src="js/map-export.js"></script>
+  <script src="js/sprite-placement.js"></script>
+  <script src="js/three-quarter-mode.js"></script>
+
+  <!-- Shared dashboard theme -->
+  <script src="../../../shared/dashboard-theme.js"></script>
+
+  <!-- Default sprite catalog (images relative to this file) -->
+  <script id="defaultMapGeneratorCatalog" type="application/json">
+  {
+    "sprites": [
+      { "id": "platform", "name": "Platforms", "imageId": "ground-o", "assetSource": "images/ground.png", "role": "platform", "minPercent": 60, "maxPercent": 100, "confidence": 0.5, "removable": false, "isoBehavior": "surface", "isoSolidSurface": true, "isoColor": "", "isoUseCustomColor": false },
+      { "id": "hole", "name": "Holes", "imageId": "hole-o", "assetSource": "", "role": "hole", "minPercent": 0, "maxPercent": 100, "confidence": 0, "removable": false, "isoBehavior": "surface", "isoSolidSurface": true, "isoColor": "", "isoUseCustomColor": false },
+      { "id": "brick", "name": "Bricks", "imageId": "brick-o", "assetSource": "images/brick.png", "role": "item", "minPercent": 0, "maxPercent": 10, "confidence": 0.75, "removable": false, "placement": "surface", "placeAboveSupport": true, "isoBehavior": "surface", "isoCreateBlock": true, "isoSurfaceScale": 1, "isoBlockHeightScale": 1, "isoSolidSurface": true, "isoColor": "", "isoUseCustomColor": false },
+      { "id": "vase", "name": "Vases", "imageId": "vase-o", "assetSource": "images/vase.png", "role": "item", "minPercent": 0, "maxPercent": 5, "confidence": 0.1, "removable": false, "placement": "surface", "placeAboveSupport": true, "isoBehavior": "billboard" },
+      { "id": "chest", "name": "Chests", "imageId": "chest-o", "assetSource": "images/chest.png", "role": "item", "minPercent": 0, "maxPercent": 3, "confidence": 0.9, "removable": false, "placement": "surface", "placeAboveSupport": true, "isoBehavior": "billboard", "isoHeightScale": 1, "isoSurfaceScale": 1 }
+    ],
+    "playerMarker": {
+      "id": "player-marker",
+      "itemId": "player",
+      "name": "Players",
+      "variantImageIds": ["player-marker-red", "player-marker-blue", "player-marker-green", "player-marker-pink"],
+      "variantNames": ["Player Red", "Player Blue", "Player Green", "Player Pink"],
+      "variantSources": ["images/char-red.png", "images/char-blue.png", "images/char-green.png", "images/char-pink.png"]
+    }
+  }
+  </script>
+
+  <!-- 2D Map Generator scripts (relative to this file) -->
+  <script src="js/app/core/catalog.js"></script>
+  <script src="js/app/core/state.js"></script>
+  <script src="js/app/core/utils.js"></script>
+  <script src="js/app/ui/sidebar.js"></script>
+  <script src="js/app/core/random.js"></script>
+  <script src="js/app/ui/canvas.js"></script>
+  <script src="js/app/ui/options.js"></script>
+  <script src="js/app/generators/mirroring.js"></script>
+  <script src="js/sprite-placement.js"></script>
+  <script src="js/app/ui/sprite-settings.js"></script>
+  <script src="js/app/generators/topdown.js"></script>
+  <script src="js/app/generators/isometric.js"></script>
+  <script src="js/app/export/setup.js"></script>
+  <script src="js/app/generators/sidescroller.js"></script>
+
+  <!-- Shared auto-describe bridge -->
+  <script src="../../../shared/dashboard-current-output-autodescribe.js"></script>
+
+  <!-- Shared dashboard output bridge -->
+  <script src="../../../shared/dashboard-tool-bridge.js"></script>
+  <script src="js/app/dashboard-bridge.js"></script>
+
+</body>
+</html>

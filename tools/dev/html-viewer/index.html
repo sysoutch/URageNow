@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Web Playground</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+    <div class="header">
+        <h1>LIVE PREVIEW</h1>
+        <div class="header-actions">
+            <small id="status" style="color: var(--muted);">Ready</small>
+            <button class="share-btn" onclick="shareProject()">SHARE</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="editors">
+            <div class="editor-group">
+                <label>HTML</label>
+                <textarea id="html-code" spellcheck="false" oninput="debouncedUpdate()"></textarea>
+            </div>
+            
+            <div class="editor-group">
+                <label>CSS</label>
+                <textarea id="css-code" spellcheck="false" oninput="debouncedUpdate()"></textarea>
+            </div>
+            
+            <div class="editor-group">
+                <label>JavaScript</label>
+                <textarea id="js-code" spellcheck="false" oninput="debouncedUpdate()"></textarea>
+            </div>
+        </div>
+
+        <div class="preview-side">
+            <iframe id="output"></iframe>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+
+</body>
+</html>

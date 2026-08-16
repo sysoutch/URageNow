@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Background Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root { --tool-bg: #120d0d; --tool-bg-strong: rgba(18, 11, 11, 0.98); --tool-surface: rgba(24, 14, 14, 0.84); --tool-line: rgba(255, 180, 128, 0.18); --tool-line-strong: rgba(255, 180, 128, 0.34); --tool-text: #f6f1ee; --tool-muted: #c8b6ae; --tool-accent: #ff8a4d; --tool-accent-strong: #ff6136; }
+        body[data-dashboard-theme="water"] { --tool-bg: #0d1522; --tool-bg-strong: rgba(10, 17, 29, 0.98); --tool-surface: rgba(12, 21, 37, 0.84); --tool-line: rgba(114, 190, 255, 0.18); --tool-line-strong: rgba(114, 190, 255, 0.34); --tool-text: #eef5ff; --tool-muted: #a9bfd8; --tool-accent: #59b6ff; --tool-accent-strong: #2f8cf0; }
+        body[data-dashboard-theme="nature"] { --tool-bg: #11170f; --tool-bg-strong: rgba(13, 19, 11, 0.98); --tool-surface: rgba(18, 24, 16, 0.84); --tool-line: rgba(146, 213, 120, 0.18); --tool-line-strong: rgba(146, 213, 120, 0.34); --tool-text: #f2f8ee; --tool-muted: #bccfaf; --tool-accent: #82cd5f; --tool-accent-strong: #58a23c; }
+        body[data-dashboard-theme="rock"] { --tool-bg: #151515; --tool-bg-strong: rgba(16, 16, 16, 0.98); --tool-surface: rgba(24, 24, 24, 0.84); --tool-line: rgba(196, 190, 176, 0.18); --tool-line-strong: rgba(196, 190, 176, 0.34); --tool-text: #f2efea; --tool-muted: #b7aea2; --tool-accent: #c4ae8a; --tool-accent-strong: #9b8563; }
+        body {
+            background: linear-gradient(135deg, var(--tool-bg), var(--tool-accent-strong), var(--tool-bg));
+            color: var(--tool-text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .tool-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .tool-panel {
+            background: var(--tool-surface);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--tool-line);
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            color: var(--tool-accent);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input[type="color"], input[type="range"], select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--tool-line);
+            background: rgba(0, 0, 0, 0.18);
+            color: var(--tool-text);
+            font-size: 1rem;
+        }
+        
+        input[type="color"] {
+            height: 50px;
+            cursor: pointer;
+        }
+        
+        input[type="range"] {
+            padding: 0;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+        
+        .preview-container {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--tool-line);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .preview-box {
+            width: 100%;
+            height: 250px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .code-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .code-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--tool-line);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            overflow: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--tool-accent), var(--tool-accent-strong));
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--tool-accent-strong), var(--tool-accent));
+        }
+        
+        .glass-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .glass-control {
+            flex: 1;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .tool-container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-paint-brush"></i> CSS Background Generator</h1>
+            <p class="subtitle">Create stunning gradients, animations, and background effects for your web projects</p>
+        </header>
+        
+        <div class="tool-container">
+            <div class="tool-panel">
+                <h2 class="panel-title"><i class="fas fa-palette"></i> Gradient Generator</h2>
+                
+                <div class="control-group">
+                    <label for="gradient-type">Gradient Type</label>
+                    <select id="gradient-type">
+                        <option value="linear">Linear Gradient</option>
+                        <option value="radial">Radial Gradient</option>
+                        <option value="conic">Conic Gradient</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="color1">Color 1</label>
+                    <input type="color" id="color1" value="#ff7eb3">
+                </div>
+                
+                <div class="control-group">
+                    <label for="color2">Color 2</label>
+                    <input type="color" id="color2" value="#ff758c">
+                </div>
+                
+                <div class="control-group">
+                    <label for="angle">Angle (for linear)</label>
+                    <input type="range" id="angle" min="0" max="360" value="45">
+                    <span id="angle-value">45°</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="position">Position (for radial)</label>
+                    <select id="position">
+                        <option value="center">Center</option>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Color Palette</label>
+                    <div class="color-palette">
+                        <div class="color-option" style="background-color: #ff7eb3;" data-color="#ff7eb3"></div>
+                        <div class="color-option" style="background-color: #ff758c;" data-color="#ff758c"></div>
+                        <div class="color-option" style="background-color: #6a11cb;" data-color="#6a11cb"></div>
+                        <div class="color-option" style="background-color: #2575fc;" data-color="#2575fc"></div>
+                        <div class="color-option" style="background-color: #00c9ff;" data-color="#00c9ff"></div>
+                        <div class="color-option" style="background-color: #92fe9d;" data-color="#92fe9d"></div>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="generate-btn"><i class="fas fa-sync-alt"></i> Generate</button>
+                    <button id="copy-css"><i class="fas fa-copy"></i> Copy CSS</button>
+                </div>
+            </div>
+            
+            <div class="tool-panel">
+                <h2 class="panel-title"><i class="fas fa-magic"></i> Animation Controls</h2>
+                
+                <div class="control-group">
+                    <label for="animation-type">Animation Type</label>
+                    <select id="animation-type">
+                        <option value="none">None</option>
+                        <option value="pulse">Pulse</option>
+                        <option value="bounce">Bounce</option>
+                        <option value="rotate">Rotate</option>
+                        <option value="slide">Slide</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="duration">Duration (seconds)</label>
+                    <input type="range" id="duration" min="0.5" max="10" step="0.5" value="3">
+                    <span id="duration-value">3s</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="timing">Timing Function</label>
+                    <select id="timing">
+                        <option value="ease">Ease</option>
+                        <option value="linear">Linear</option>
+                        <option value="ease-in">Ease In</option>
+                        <option value="ease-out">Ease Out</option>
+                        <option value="ease-in-out">Ease In Out</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="delay">Delay (seconds)</label>
+                    <input type="range" id="delay" min="0" max="5" step="0.5" value="0">
+                    <span id="delay-value">0s</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="iteration">Iteration Count</label>
+                    <select id="iteration">
+                        <option value="infinite">Infinite</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="animate-btn"><i class="fas fa-play"></i> Apply Animation</button>
+                    <button id="reset-btn"><i class="fas fa-redo"></i> Reset</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tool-panel">
+            <h2 class="panel-title"><i class="fas fa-glass-martini-alt"></i> Glass Effects</h2>
+            
+            <div class="control-group">
+                <label for="blur">Blur Effect (px)</label>
+                <input type="range" id="blur" min="0" max="20" value="10">
+                <span id="blur-value">10px</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="opacity">Opacity</label>
+                <input type="range" id="opacity" min="0" max="1" step="0.1" value="0.7">
+                <span id="opacity-value">70%</span>
+            </div>
+            
+            <div class="glass-controls">
+                <div class="glass-control">
+                    <button id="apply-glass"><i class="fas fa-plus"></i> Apply Glass</button>
+                </div>
+                <div class="glass-control">
+                    <button id="reset-glass"><i class="fas fa-redo"></i> Reset Glass</button>
+                </div>
+            </div>
+            
+            <div class="preview-container">
+                <div class="preview-box" id="preview-box">
+                    Your background preview will appear here
+                </div>
+            </div>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="code-title">Generated CSS</div>
+                    <button class="copy-btn" id="copy-code"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <pre id="css-output">/* Your CSS will appear here */</pre>
+            </div>
+        </div>
+        
+        <footer>
+            <p>CSS Background Generator Tool &copy; 2023 | Create stunning backgrounds for your web projects</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.registerDashboardThemeSync();
+            // Get DOM elements
+            const previewBox = document.getElementById('preview-box');
+            const color1 = document.getElementById('color1');
+            const color2 = document.getElementById('color2');
+            const angle = document.getElementById('angle');
+            const angleValue = document.getElementById('angle-value');
+            const position = document.getElementById('position');
+            const gradientType = document.getElementById('gradient-type');
+            const animationType = document.getElementById('animation-type');
+            const duration = document.getElementById('duration');
+            const durationValue = document.getElementById('duration-value');
+            const timing = document.getElementById('timing');
+            const delay = document.getElementById('delay');
+            const delayValue = document.getElementById('delay-value');
+            const iteration = document.getElementById('iteration');
+            const generateBtn = document.getElementById('generate-btn');
+            const animateBtn = document.getElementById('animate-btn');
+            const copyBtn = document.getElementById('copy-css');
+            const copyCodeBtn = document.getElementById('copy-code');
+            const cssOutput = document.getElementById('css-output');
+            const colorOptions = document.querySelectorAll('.color-option');
+            
+            // Glass effect elements
+            const blur = document.getElementById('blur');
+            const blurValue = document.getElementById('blur-value');
+            const opacity = document.getElementById('opacity');
+            const opacityValue = document.getElementById('opacity-value');
+            const applyGlassBtn = document.getElementById('apply-glass');
+            const resetGlassBtn = document.getElementById('reset-glass');
+            
+            // Initialize
+            updatePreview();
+            
+            // Event listeners
+            color1.addEventListener('input', updatePreview);
+            color2.addEventListener('input', updatePreview);
+            angle.addEventListener('input', function() {
+                angleValue.textContent = this.value + '°';
+                updatePreview();
+            });
+            position.addEventListener('change', updatePreview);
+            gradientType.addEventListener('change', updatePreview);
+            animationType.addEventListener('change', updatePreview);
+            duration.addEventListener('input', function() {
+                durationValue.textContent = this.value + 's';
+                updatePreview();
+            });
+            timing.addEventListener('change', updatePreview);
+            delay.addEventListener('input', function() {
+                delayValue.textContent = this.value + 's';
+                updatePreview();
+            });
+            iteration.addEventListener('change', updatePreview);
+            generateBtn.addEventListener('click', updatePreview);
+            animateBtn.addEventListener('click', applyAnimation);
+            copyBtn.addEventListener('click', copyCSS);
+            copyCodeBtn.addEventListener('click', copyCSSCode);
+            
+            // Color palette click
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const color = this.getAttribute('data-color');
+                    if (this === colorOptions[0]) {
+                        color1.value = color;
+                    } else {
+                        color2.value = color;
+                    }
+                    updatePreview();
+                });
+            });
+            
+            // Glass effect controls
+            blur.addEventListener('input', function() {
+                blurValue.textContent = this.value + 'px';
+                updatePreview();
+            });
+            
+            opacity.addEventListener('input', function() {
+                opacityValue.textContent = Math.round(this.value * 100) + '%';
+                updatePreview();
+            });
+            
+            applyGlassBtn.addEventListener('click', applyGlassEffect);
+            resetGlassBtn.addEventListener('click', resetGlassEffect);
+            
+            // Update preview function
+            function updatePreview() {
+                const type = gradientType.value;
+                const c1 = color1.value;
+                const c2 = color2.value;
+                const ang = angle.value;
+                const pos = position.value;
+                const dur = duration.value;
+                const tm = timing.value;
+                const del = delay.value;
+                const iter = iteration.value;
+                const blurVal = blur.value;
+                const opacityVal = opacity.value;
+                
+                let gradient = '';
+                
+                switch(type) {
+                    case 'linear':
+                        gradient = `linear-gradient(${ang}deg, ${c1}, ${c2})`;
+                        break;
+                    case 'radial':
+                        gradient = `radial-gradient(${pos}, ${c1}, ${c2})`;
+                        break;
+                    case 'conic':
+                        gradient = `conic-gradient(${c1}, ${c2})`;
+                        break;
+                }
+                
+                previewBox.style.background = gradient;
+                
+                // Apply glass effect if active
+                if (previewBox.classList.contains('glass-effect')) {
+                    previewBox.style.backdropFilter = `blur(${blurVal}px)`;
+                    previewBox.style.opacity = opacityVal;
+                }
+                
+                // Update CSS output
+                let animationCSS = '';
+                if (animationType.value !== 'none') {
+                    const animationName = getAnimationName();
+                    animationCSS = `
+    animation: ${animationName} ${dur}s ${tm} ${del}s ${iter};`;
+                }
+                
+                let glassCSS = '';
+                if (previewBox.classList.contains('glass-effect')) {
+                    glassCSS = `
+    backdrop-filter: blur(${blurVal}px);
+    opacity: ${opacityVal};`;
+                }
+                
+                const css = `background: ${gradient};${glassCSS}${animationCSS}`;
+                cssOutput.textContent = css;
+            }
+            
+            // Apply animation
+            function applyAnimation() {
+                const type = animationType.value;
+                const dur = duration.value;
+                const tm = timing.value;
+                const del = delay.value;
+                const iter = iteration.value;
+                
+                if (type === 'none') {
+                    previewBox.style.animation = 'none';
+                    return;
+                }
+                
+                const animationName = getAnimationName();
+                
+                // Create keyframes dynamically
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    @keyframes ${animationName} {
+                        0% { transform: scale(1); }
+                        25% { transform: scale(1.05); }
+                        50% { transform: scale(1); }
+                        75% { transform: scale(0.95); }
+                        100% { transform: scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                previewBox.style.animation = `${animationName} ${dur}s ${tm} ${del}s ${iter}`;
+            }
+            
+            // Get animation name
+            function getAnimationName() {
+                return 'anim_' + Math.floor(Math.random() * 10000);
+            }
+            
+            // Apply glass effect
+            function applyGlassEffect() {
+                previewBox.classList.add('glass-effect');
+                updatePreview();
+            }
+            
+            // Reset glass effect
+            function resetGlassEffect() {
+                previewBox.classList.remove('glass-effect');
+                blur.value = 10;
+                opacity.value = 0.7;
+                blurValue.textContent = '10px';
+                opacityValue.textContent = '70%';
+                updatePreview();
+            }
+            
+            // Copy CSS to clipboard
+            function copyCSS() {
+                const css = cssOutput.textContent;
+                navigator.clipboard.writeText(css).then(() => {
+                    alert('CSS copied to clipboard!');
+                });
+            }
+            
+            // Copy CSS code
+            function copyCSSCode() {
+                const css = cssOutput.textContent;
+                navigator.clipboard.writeText(css).then(() => {
+                    alert('CSS copied to clipboard!');
+                });
+            }
+
+            function describeCurrentAssets() {
+                const css = cssOutput.textContent || '';
+                return [{
+                    kind: 'text',
+                    title: 'Generated CSS Background',
+                    fileName: 'generated-background.css',
+                    mimeType: 'text/css',
+                    textContent: css,
+                    previewKind: 'text',
+                    previewText: css,
+                    sourceDetail: 'Generated CSS background style.',
+                    metadata: { sourceTool: 'css-background-generator', resourceFormat: 'css' }
+                }];
+            }
+
+            window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+            window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+        });
+    </script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

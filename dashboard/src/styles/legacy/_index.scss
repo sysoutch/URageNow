@@ -1,0 +1,17 @@
+// Transitional layer for older broad stylesheets.
+// Move rules out of here into shell/studio/messenger/feature folders as they are touched.
+
+@use "../base-shell";
+@use "../forms";
+@use "../content-layout";
+@use "../network-settings";
+@use "../settings-overlay-navigation";
+@use "../cards-components";
+@use "../tools";
+@use "collection-density";
+@use "../tools-workspace-active";
+@use "../tool-scaffold";
+@use "../media-ai";
+@use "../lists-details";
+@use "../responsive";
+@use "../discord-theme";

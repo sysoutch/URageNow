@@ -1,0 +1,96 @@
+  .field {
+    display: grid;
+    gap: 5px;
+  }
+
+  label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: color-mix(in srgb, var(--muted) 84%, white 16%);
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    border-radius: var(--dashboard-selections-radius, var(--dashboard-control-radius, 0px));
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #1b1d21;
+    color: var(--ink);
+    padding: max(10px, var(--dashboard-selections-padding, 0px)) max(12px, var(--dashboard-selections-padding, 0px));
+    margin: var(--dashboard-selections-margin, 0px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--accent) 72%, white 10%);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 72%, transparent);
+  }
+
+  textarea {
+    resize: none;
+    min-height: 104px;
+  }
+
+  button {
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  }
+
+  .ghost {
+    width: auto;
+    background: color-mix(in srgb, var(--panel-alt) 72%, white 6%);
+    color: var(--ink);
+    padding: max(10px, var(--dashboard-buttons-padding, 0px)) max(12px, var(--dashboard-buttons-padding, 0px));
+    margin: var(--dashboard-buttons-margin, 0px);
+    border: 1px solid var(--line);
+    border-radius: var(--dashboard-buttons-radius, var(--dashboard-control-radius, 0px));
+  }
+
+  .ghost.compact {
+    padding: max(8px, var(--dashboard-buttons-padding, 0px)) max(10px, var(--dashboard-buttons-padding, 0px));
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+  }
+
+  .chip {
+    width: 100%;
+    padding: max(9px, var(--dashboard-selections-padding, 0px)) max(11px, var(--dashboard-selections-padding, 0px));
+    background: color-mix(in srgb, var(--panel-alt) 84%, black 16%);
+    color: var(--muted);
+    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-radius: var(--dashboard-selections-radius, var(--dashboard-control-radius, 0px));
+  }
+
+  .stats-panel .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .stats-panel .stat-row:last-child {
+    border-bottom: none;
+  }
+
+  .stats-panel span {
+    color: var(--muted);
+    font-size: 13px;
+  }

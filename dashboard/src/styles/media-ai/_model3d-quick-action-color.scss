@@ -1,0 +1,61 @@
+@layer components {
+  .model3d-background-color-chooser {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    align-items: center;
+    min-height: 48px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, var(--studio-accent-2, var(--accent)));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--panel) 86%, black 14%);
+  }
+
+  .model3d-background-color-chooser input[type="color"] {
+    width: 58px;
+    min-height: 48px;
+    padding: 5px;
+    cursor: pointer;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .model3d-background-color-chooser output {
+    padding: 0 12px;
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .08em;
+  }
+
+  .model3d-background-color-swatches {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .model3d-background-color-swatches button {
+    min-height: 24px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    border-radius: 5px;
+    background: var(--model3d-background-color, transparent);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  }
+
+  .model3d-background-color-swatches button:nth-child(1) { --model3d-background-color: #111827; }
+  .model3d-background-color-swatches button:nth-child(2) { --model3d-background-color: #320000; }
+  .model3d-background-color-swatches button:nth-child(3) { --model3d-background-color: #193c2b; }
+  .model3d-background-color-swatches button:nth-child(4) { --model3d-background-color: #4a2d11; }
+  .model3d-background-color-swatches button:nth-child(5) { --model3d-background-color: #4c1d95; }
+  .model3d-background-color-swatches button:nth-child(6) { --model3d-background-color: #e7edf7; }
+
+  .model3d-background-color-swatches button:hover,
+  .model3d-background-color-swatches button:focus-visible,
+  .model3d-background-color-swatches button.is-active {
+    outline: 2px solid var(--studio-accent-2, var(--accent));
+    outline-offset: 2px;
+  }
+}

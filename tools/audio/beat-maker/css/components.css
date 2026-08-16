@@ -1,0 +1,493 @@
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  color: var(--text);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.08),
+      rgba(255,255,255,0.03)
+    );
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    opacity .15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.18);
+}
+
+button.active {
+  outline: 2px solid rgba(121,168,255,0.28);
+}
+
+.icon-btn {
+  min-width: 118px;
+  padding: 13px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.icon-btn.primary {
+  background: linear-gradient(135deg, #2e92ff, #7d5cff);
+  border-color: transparent;
+}
+
+.tiny-btn {
+  padding: 8px 10px;
+  min-width: 44px;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px;
+}
+
+.stat,
+.memory-slot {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel-2);
+}
+
+.stat label,
+.memory-slot label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.stat strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+/* =========================================================
+   PRESETS
+========================================================= */
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.preset-card {
+  min-height: 76px;
+  padding: 12px;
+  border-radius: 16px;
+  text-align: left;
+}
+
+.preset-card strong {
+  display: block;
+  font-size: 14px;
+}
+
+.preset-card small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* =========================================================
+   MEMORY
+========================================================= */
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* =========================================================
+   SEQUENCER PANEL
+========================================================= */
+
+.panel.sequencer {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel.sequencer .section-title {
+  flex: 0 0 auto;
+  margin-bottom: 18px;
+}
+
+/* =========================================================
+   LANES CONTAINER
+========================================================= */
+
+#lanes {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 10px;
+  padding-right: 6px;
+}
+
+#lanes::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* =========================================================
+   LANE ROW
+========================================================= */
+
+.lane {
+  display: grid;
+  grid-template-columns: 190px repeat(16, 1fr);
+  gap: 10px;
+  align-items: stretch;
+  flex: 0 0 auto;
+  height: 72px;
+  min-height: 72px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* =========================================================
+   LANE INFO
+========================================================= */
+
+.lane-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.08),
+      rgba(255,255,255,.03)
+    );
+  min-width: 0;
+  overflow: hidden;
+}
+
+.lane-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.emoji {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  font-size: 20px;
+  text-align: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lane-name {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 0;
+}
+
+.lane-name strong {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+  font-size: 13px;
+}
+
+.lane-name span {
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+}
+
+.lane-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.lane-tools input[type="range"] {
+  width: 50px;
+  height: 4px;
+}
+
+.tiny-btn {
+  padding: 3px 6px;
+  min-width: 24px;
+  font-size: 10px;
+  border-radius: 6px;
+}
+
+/* =========================================================
+   STEP CELLS
+========================================================= */
+
+.step {
+  height: 72px;
+  min-height: 72px;
+  width: 100%;
+  border-radius: 10px;
+  background: var(--step-off);
+  border: 1px solid rgba(255,255,255,.06);
+  position: relative;
+}
+
+.step.current {
+  outline: 2px solid rgba(255,255,255,.2);
+  background: var(--step-current);
+}
+
+.step.bar {
+  box-shadow: inset 2px 0 0 rgba(255,255,255,.08);
+}
+
+.step.on.kick {
+  background:
+    color-mix(
+      in srgb,
+      var(--kick) 70%,
+      rgba(255,255,255,.08)
+    );
+}
+
+.step.on.snare {
+  background:
+    color-mix(
+      in srgb,
+      var(--snare) 70%,
+      rgba(255,255,255,.08)
+    );
+}
+
+.step.on.hats {
+  background:
+    color-mix(
+      in srgb,
+      var(--hat) 75%,
+      rgba(255,255,255,.08)
+    );
+}
+
+.step.on.clap {
+  background:
+    color-mix(
+      in srgb,
+      var(--clap) 72%,
+      rgba(255,255,255,.08)
+    );
+}
+
+.step.on.bass {
+  background:
+    color-mix(
+      in srgb,
+      var(--bass) 72%,
+      rgba(255,255,255,.08)
+    );
+}
+
+.step.on.chord {
+  background:
+    color-mix(
+      in srgb,
+      var(--chord) 72%,
+      rgba(255,255,255,.08)
+    );
+}
+
+.step.on.perc {
+  background:
+    color-mix(
+      in srgb,
+      var(--perc) 72%,
+      rgba(255,255,255,.08)
+    );
+}
+
+.step.on.fx {
+  background:
+    color-mix(
+      in srgb,
+      var(--fx) 72%,
+      rgba(255,255,255,.08)
+    );
+}
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+textarea.export-box {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  color: #d9e3ff;
+  font-size: 13px;
+}
+
+/* =========================================================
+   LED
+========================================================= */
+
+.transport-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2c3d58;
+  box-shadow: 0 0 0 rgba(74,255,130,0);
+}
+
+.transport-led.on {
+  background: #4aff82;
+  box-shadow: 0 0 18px rgba(74,255,130,0.7);
+}
+
+/* =========================================================
+   AUTO RANDOM PANEL
+   ========================================================= */
+
+#autoRandomPanel .section-title {
+  margin-bottom: 14px;
+}
+
+#autoRandomStatus {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#autoRandomControls {
+  gap: 10px;
+}
+
+/* Lane intensity sliders */
+#laneIntensitySliders {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lane-intensity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
+
+.lane-intensity-row .li-label {
+  font-size: 12px;
+  min-width: 64px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lane-intensity-row .li-value {
+  font-size: 13px;
+  font-weight: bold;
+  min-width: 32px;
+  text-align: right;
+}
+
+.lane-intensity-row input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+/* Lane lock/selection buttons */
+#arLaneSelector .tiny-btn.active {
+  outline: 2px solid rgba(121,168,255,0.4);
+  background: linear-gradient(135deg, #2e92ff, #7d5cff);
+}
+
+/* Auto random active state */
+#autoRandomBtn.active {
+  outline: 2px solid rgba(121,168,255,0.4);
+  background: linear-gradient(135deg, #2e92ff, #7d5cff);
+}
+
+/* Auto random panel glow when active */
+#autoRandomPanel.active {
+  border-color: rgba(121,168,255,0.25);
+  box-shadow: 0 0 20px rgba(121,168,255,0.08);
+}
+
+/* Cycle counter highlight */
+#arLoopCount {
+  color: var(--accent);
+}
+
+/* Last changed indicator */
+#arLastChanged {
+  font-family: monospace;
+  font-size: 13px;
+}

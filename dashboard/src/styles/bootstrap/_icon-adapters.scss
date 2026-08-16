@@ -1,0 +1,45 @@
+.rail-tools-mark .bi {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.rail-tools-category-icon .bi {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.rail-studio-workflow-icon .bi {
+  font-size: 22px;
+  line-height: 1;
+  filter: drop-shadow(0 0 9px var(--rail-workflow-glow));
+}
+
+.studio-workflow-quick-tile-icon .bi {
+  font-size: 64px;
+  line-height: 1;
+  filter: drop-shadow(0 0 11px var(--studio-icon-glow));
+}
+
+.lazydev-home-chat-icon .bi,
+.lazydev-home-workflow-icon .bi {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, currentColor 62%, transparent));
+}
+
+.desktop-tool-card-file-icon .bi {
+  font-size: 22px;
+  line-height: 1;
+}
+
+@media (max-width: 1580px) {
+  .studio-workflow-quick-tile-icon .bi {
+    font-size: 52px;
+  }
+}
+
+@media (max-height: 940px) and (min-width: 981px), (max-width: 980px) {
+  .studio-workflow-quick-tile-icon .bi {
+    font-size: 42px;
+  }
+}

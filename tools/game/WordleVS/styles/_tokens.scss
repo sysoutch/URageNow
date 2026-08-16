@@ -1,0 +1,119 @@
+:root {
+    --bg: #07111f;
+    --bg-deep: #030814;
+    --panel: rgba(10, 21, 39, 0.78);
+    --panel-strong: rgba(13, 28, 49, 0.92);
+    --panel-soft: rgba(255, 255, 255, 0.05);
+    --border: rgba(165, 191, 255, 0.18);
+    --border-strong: rgba(123, 179, 255, 0.42);
+    --text: #f6f8ff;
+    --muted: #9eabc7;
+    --accent: #7fd0ff;
+    --accent-strong: #4ba7ff;
+    --accent-warm: #ffd47d;
+    --correct-color: #56c28f;
+    --present-color: #d9ab4d;
+    --absent-color: #51627f;
+    --tile-bg: rgba(255, 255, 255, 0.04);
+    --danger: #ff7e86;
+    --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(83, 163, 255, 0.18), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(255, 196, 107, 0.14), transparent 30%),
+        linear-gradient(145deg, var(--bg) 0%, var(--bg-deep) 68%);
+    color: var(--text);
+    font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.ambient {
+    position: fixed;
+    width: 34rem;
+    height: 34rem;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ambient-one {
+    top: -10rem;
+    right: -8rem;
+    background: rgba(72, 132, 255, 0.38);
+}
+
+.ambient-two {
+    bottom: -12rem;
+    left: -8rem;
+    background: rgba(255, 177, 94, 0.26);
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: var(--accent);
+    font-family: "IBM Plex Mono", "Consolas", monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    line-height: 1.02;
+}
+
+h1 {
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    letter-spacing: -0.05em;
+}
+
+h2 {
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    letter-spacing: -0.04em;
+}
+
+h3 {
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+}
+
+.hero-copy,
+.muted-note,
+.card-heading p,
+.sidebar-card p,
+.helper-text,
+.empty-preview {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.hero-copy {
+    margin-top: 16px;
+    max-width: 42rem;
+    font-size: 1rem;
+}
+
+.hidden {
+    display: none !important;
+}

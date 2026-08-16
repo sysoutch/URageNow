@@ -1,0 +1,1901 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sketchfab IO</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <style id="tool-theme-override">
+    html[data-dashboard-theme],
+    body[data-dashboard-theme] {
+      --tool-accent: #7c5cff !important;
+      --tool-accent-strong: #27c3ff !important;
+      --tool-bg: #070b12 !important;
+      --tool-surface: rgba(14, 22, 35, 0.9) !important;
+      --tool-surface-strong: rgba(8, 13, 22, 0.98) !important;
+      --tool-surface-alt: rgba(11, 18, 30, 0.94) !important;
+      --tool-line: rgba(255, 255, 255, 0.11) !important;
+      --tool-line-strong: rgba(255, 255, 255, 0.22) !important;
+      --tool-text: #f6f7fb !important;
+      --tool-muted: #98a6ba !important;
+      --tool-soft: #c9d3e2 !important;
+      --tool-success: #71dd8a !important;
+      --tool-danger: #ef6d6d !important;
+    }
+
+    /* Dashboard shell isolation — prevent dashboard CSS from breaking our layout */
+    body[data-dashboard-theme] #app {
+      grid-template-columns: minmax(280px, 340px) minmax(0, 1fr) minmax(300px, 360px) !important;
+      background: transparent !important;
+    }
+  </style>
+  <script src="../../shared/dashboard-current-output-autodescribe.js" defer></script>
+  <style>
+    :root {
+      --bg: var(--tool-bg, #070b12);
+      --panel: var(--tool-surface, rgba(14, 22, 35, 0.9));
+      --line: var(--tool-line, rgba(255,255,255,.11));
+      --text: var(--tool-text, #f6f7fb);
+      --muted: var(--tool-muted, #98a6ba);
+      --soft: var(--tool-soft, #c9d3e2);
+      --accent: var(--tool-accent, #7c5cff);
+      --accent2: var(--tool-accent-strong, #27c3ff);
+      --shadow: 0 24px 80px rgba(0,0,0,.42);
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body, #app { height: 100%; min-height: 0; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #05070d 0%, #0b1220 100%);
+      color: var(--text);
+      overflow: hidden;
+    }
+    button, input, textarea, select { font: inherit; }
+    button {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .72rem .95rem;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      cursor: pointer;
+    }
+    button:hover { border-color: rgba(255,255,255,.22); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
+      border-color: rgba(255,255,255,.18);
+      font-weight: 800;
+    }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: .78rem .85rem;
+      color: var(--text);
+      background: rgba(7,11,18,.65);
+      outline: none;
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    label { color: var(--muted); font-size: .84rem; }
+    #app {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) minmax(0, 1fr) minmax(300px, 360px) !important;
+      min-height: 0; background: transparent !important;
+    }
+    .left,
+    .right {
+      background: var(--panel);
+      padding: 1rem;
+      overflow: auto;
+      backdrop-filter: blur(18px);
+    }
+    .left { border-right: 1px solid var(--line); width: auto !important; max-width: none !important; min-width: 280px !important; flex: 0 0 auto !important; }
+    .right { border-left: 1px solid var(--line); width: auto !important; max-width: none !important; min-width: 300px !important; flex: 0 0 auto !important; }
+    body[data-dashboard-sidebar-externalized] #app { grid-template-columns: minmax(280px, 340px) minmax(0, 1fr) !important; }
+    body[data-dashboard-sidebar-externalized] .right[data-dashboard-external-sidebar-source] { display: none !important; }
+    body[data-dashboard-sidebar-externalized] .left { display: block !important; }
+    body[data-dashboard-sidebar-externalized] .viewer { height: 100%; min-height: 0; }
+    .brand { display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 1rem; }
+    .brand h1 { margin: 0; font-size: 1.2rem; letter-spacing: -.03em; }
+    .brand p { display: none; }
+    .brand h1::after {
+      content: "Sketchfab search, import, preview, and upload.";
+      display: block;
+      margin-top: .2rem;
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+    .badge {
+      border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
+      padding: .32rem .58rem; font-size: .72rem; color: var(--soft); background: rgba(255,255,255,.055);
+    }
+    .hidden { display: none !important; }
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.032));
+      border-radius: 20px; padding: 1rem; margin-bottom: 1rem; box-shadow: var(--shadow);
+    }
+    .card h2 { margin: 0 0 .75rem; font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; color: var(--soft); }
+    .stack { display: grid; gap: .75rem; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+    .toolbar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+    .check { display: flex; gap: .45rem; align-items: center; color: var(--soft); font-size: .9rem; }
+    .check input { width: auto; }
+    .muted { color: var(--muted); }
+    .results { display: grid; gap: .7rem; }
+    .result {
+      display: grid; grid-template-columns: 82px 1fr; gap: .75rem; padding: .62rem;
+      border-radius: 18px; background: rgba(255,255,255,.043); border: 1px solid var(--line);
+    }
+    .result img { width: 82px; height: 70px; object-fit: cover; border-radius: 14px; background: rgba(0,0,0,.3); }
+    .result strong { display: block; font-size: .9rem; line-height: 1.2; }
+    .result small { display: block; color: var(--muted); margin: .25rem 0 .48rem; }
+    .result button { padding: .42rem .52rem; border-radius: 10px; font-size: .78rem; }
+    .viewer {
+      position: relative; min-width: 0; height: 100%; min-height: 0; overflow: hidden;
+      background: linear-gradient(180deg, #0b111d, #060911) !important;
+    }
+
+    #viewer { width: 100%; height: 100%; display: block; }
+    .viewerTop {
+      position: absolute; top: 1rem; left: 1rem; right: 1rem;
+      display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+      z-index: 4;
+    }
+    .viewerTop > * { pointer-events: auto; }
+    .glass {
+      border: 1px solid var(--line); background: rgba(8,13,22,.68);
+      backdrop-filter: blur(16px); border-radius: 18px; box-shadow: var(--shadow);
+    }
+    .toolset { display: flex; gap: .45rem; padding: .35rem; }
+    .toolset button { white-space: nowrap; }
+    .status {
+      position: absolute; left: 1rem; right: 1rem; bottom: 1rem;
+      color: var(--muted); padding: .75rem .9rem; white-space: pre-wrap;
+      z-index: 4;
+    }
+    .dropzone {
+      position: relative;
+      display: grid;
+      place-items: center;
+      gap: .55rem;
+      min-height: 180px;
+      padding: 1.1rem;
+      border: 2px dashed rgba(124,92,255,.72);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at top, rgba(124,92,255,.18), transparent 18rem),
+        rgba(255,255,255,.035);
+      text-align: center;
+    }
+    .dropzone.dragover {
+      border-color: rgba(39,195,255,.9);
+      background:
+        radial-gradient(circle at top, rgba(39,195,255,.16), transparent 18rem),
+        rgba(255,255,255,.06);
+    }
+    .dropzone input { display: none; }
+    .dropIcon {
+      width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto .35rem;
+      border-radius: 18px; background: linear-gradient(135deg, rgba(124,92,255,.9), rgba(39,195,255,.78));
+      font-size: 1.6rem;
+    }
+    .dropzone strong { display: block; }
+    .dropzone small { display: block; color: var(--muted); margin-bottom: .8rem; }
+    .filePill {
+      display: flex; justify-content: space-between; gap: .75rem; align-items: center;
+      border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.045);
+      padding: .65rem .75rem; color: var(--soft); font-size: .86rem;
+    }
+    .filePill span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .publishBtn { width: 100%; padding: .9rem 1rem; border-radius: 16px; background: linear-gradient(135deg, #7c5cff, #27c3ff); }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .65rem; }
+    .stats div { border: 1px solid var(--line); border-radius: 16px; padding: .85rem; background: rgba(255,255,255,.035); }
+    .stats span { display: block; color: var(--muted); font-size: .78rem; }
+    .stats strong { display: block; margin-top: .25rem; font-size: 1.05rem; }
+
+
+    .warningBox {
+      border: 1px solid rgba(250, 204, 21, .65);
+      background: rgba(250, 204, 21, .12);
+      color: #fde68a;
+      border-radius: 14px;
+      padding: .75rem .85rem;
+      line-height: 1.35;
+      font-size: .86rem;
+    }
+    .successActions {
+      display: none;
+      gap: .55rem;
+      margin-top: .65rem;
+    }
+    .successActions.show {
+      display: grid;
+    }
+    .successActions a {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .72rem .95rem;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      font-weight: 800;
+    }
+
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(7,11,18,.55);
+    }
+    .segmentBtn {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--soft);
+      font-weight: 800;
+    }
+    .segmentBtn + .segmentBtn {
+      border-left: 1px solid var(--line);
+    }
+    .segmentBtn.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(124,92,255,.42), rgba(39,195,255,.22));
+    }
+    .licensePanel {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: .75rem;
+      background: rgba(255,255,255,.035);
+      gap: .55rem;
+    }
+    .licensePanel.show {
+      display: grid;
+    }
+    .licenseCurrent {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .75rem;
+      color: var(--soft);
+    }
+    .licenseCurrent strong {
+      color: var(--text);
+    }
+    .modalBackdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      z-index: 1000;
+      background: rgba(0,0,0,.58);
+      backdrop-filter: blur(8px);
+      padding: 1rem;
+    }
+    .modalBackdrop.show {
+      display: grid;
+    }
+    .licenseModal {
+      width: min(560px, 96vw);
+      max-height: 92vh;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #0f1726;
+      box-shadow: var(--shadow);
+    }
+    .licenseModalHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .licenseModalHeader h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: -.02em;
+    }
+    .licenseModalBody {
+      display: grid;
+      gap: 1rem;
+      padding: 1rem 1.1rem;
+    }
+    .licenseGroupTitle {
+      font-weight: 900;
+      color: var(--text);
+      margin: .25rem 0;
+    }
+    .licenseOption {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: .55rem;
+      align-items: start;
+      color: var(--text);
+      padding: .45rem 0;
+    }
+    .licenseOption input {
+      width: auto;
+      margin-top: .2rem;
+    }
+    .licenseOption strong {
+      display: block;
+    }
+    .licenseOption span {
+      display: block;
+      color: var(--soft);
+      line-height: 1.35;
+      margin-top: .18rem;
+    }
+    .licenseNote {
+      border-left: 3px solid var(--accent2);
+      padding: .65rem .75rem;
+      background: rgba(39,195,255,.08);
+      border-radius: 10px;
+      color: var(--soft);
+      line-height: 1.35;
+    }
+    .modalActions {
+      display: flex;
+      justify-content: flex-end;
+      gap: .55rem;
+      padding: 1rem 1.1rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .switchRow { display:flex; align-items:center; justify-content:space-between; gap:.75rem; border:1px solid var(--line); border-radius:14px; padding:.65rem .75rem; background:rgba(255,255,255,.035); }
+    .switchRow span { color:var(--soft); font-size:.9rem; }
+    .switchRow small { display:block; color:var(--muted); margin-top:.15rem; font-size:.75rem; }
+    .switch { position:relative; width:44px; height:24px; flex:0 0 auto; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,.16); border:1px solid var(--line); border-radius:999px; transition:.15s; }
+    .slider:before { content:""; position:absolute; width:18px; height:18px; left:2px; top:2px; background:white; border-radius:50%; transition:.15s; }
+    .switch input:checked + .slider { background:linear-gradient(135deg, var(--accent), var(--accent2)); }
+    .switch input:checked + .slider:before { transform:translateX(20px); }
+    .categoryGrid { display:grid; grid-template-columns:1fr; gap:.45rem; max-height:210px; overflow:auto; padding-right:.25rem; }
+    .categoryItem { display:flex; gap:.45rem; align-items:center; border:1px solid var(--line); border-radius:12px; padding:.5rem .6rem; background:rgba(255,255,255,.032); color:var(--soft); font-size:.85rem; }
+    .categoryItem input { width:auto; }
+    .proNote { color:#ff6b6b; font-size:.82rem; line-height:1.35; }
+
+    .textureList { display: grid; gap: .4rem; max-height: 160px; overflow:auto; }
+    .textureItem { display:flex; align-items:center; gap:.45rem; font-size:.84rem; color:var(--soft); padding:.35rem .45rem; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.035); }
+    .textureItem input { width: auto; }
+    @media (max-width: 1220px) {
+      body { overflow: auto; }
+      #app { grid-template-columns: 1fr; height: auto; }
+      .viewer { height: 70vh; min-height: 560px; }
+      .left,
+      .right { min-width: 0 !important; border-inline: 0; }
+    }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/",
+        "jszip": "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm"
+      }
+    }
+  </script>
+</head>
+<body data-dashboard-theme="fire">
+  <div id="app">
+    <aside class="left" data-dashboard-tool-sidebar-ignore>
+      <section id="tabSketchfab" class="tabPanel">
+        <div class="card stack">
+          <h2>Sketchfab Search</h2>
+          <input id="queryInput" value="robot" />
+          <div class="row">
+            <select id="sortInput">
+              <option value="-likeCount">Most liked</option>
+              <option value="-viewCount">Most viewed</option>
+              <option value="-publishedAt">Newest</option>
+              <option value="-downloadCount">Most downloaded</option>
+            </select>
+            <label class="check"><input id="downloadableInput" type="checkbox" checked /> Downloadable</label>
+          </div>
+          <button id="searchBtn" class="primary">Search</button>
+        </div>
+        <div id="results" class="results"><p class="muted">Search Sketchfab to show models here.</p></div>
+      </section>
+    </aside>
+
+    <main class="viewer">
+      <canvas id="sketchfab-viewer"></canvas>
+      <div class="viewerTop">
+        <div class="glass toolset">
+          <button id="frameBtn">Frame</button>
+          <button id="wireBtn">Wire</button>
+          <button id="gridBtn">Grid</button>
+        </div>
+      </div>
+      <div id="status" class="status glass">Ready. Choose/drop GLB, glTF, ZIP, or FBX to preview.</div>
+    </main>
+
+    <aside class="right" data-dashboard-tool-sidebar-ignore>
+      <section class="card stack">
+        <h2>Upload / Import Model</h2>
+        <div id="dropzone" class="dropzone">
+          <input id="modelFileInput" type="file" multiple accept=".glb,.gltf,.zip,.fbx,.obj,.mtl,.dae,.stl,.ply,.blend,.png,.jpg,.jpeg,.webp,.tga,.bmp,.gif" />
+          <input id="modelFolderInput" type="file" multiple webkitdirectory directory />
+          <div class="dropIcon">⬆</div>
+          <strong>Drop model here</strong>
+          <small>For FBX textures: choose/drop the entire folder, including the .fbm texture folder.</small>
+          <div class="toolbar" style="justify-content:center">
+            <button id="chooseModelBtn" class="primary" type="button">Choose files</button>
+            <button id="chooseFolderBtn" type="button">Choose folder</button>
+          </div>
+        </div>
+        <div class="filePill">
+          <span id="selectedModelName">No model selected</span>
+          <button id="clearModelBtn">Clear</button>
+        </div>
+      </section>
+
+      <section class="card stack">
+        <h2>FBX Texture Preview</h2>
+        <label>Embedded FBX texture type</label>
+        <select id="embeddedTextureExt">
+          <option value="png" selected>PNG / unknown, try PNG first</option>
+          <option value="jpg">JPEG / JPG</option>
+          <option value="webp">WEBP</option>
+          <option value="bmp">BMP</option>
+          <option value="tga">TGA</option>
+        </select>
+        <small class="muted">For packed FBX files that log “Image type fbm is not supported”. This patches embedded .fbm image references before parsing.</small>
+        <label>Texture assignment mode</label>
+        <select id="textureMode">
+          <option value="force" selected>Force first texture on every FBX material</option>
+          <option value="match">Auto-match by material/mesh name</option>
+          <option value="cycle">Cycle textures across materials</option>
+          <option value="none">Do not override FBX materials</option>
+        </select>
+        <button id="applyTexturesBtn">Apply selected textures now</button>
+        <div id="textureList" class="textureList"><p class="muted">No texture files selected.</p></div>
+      </section>
+
+      <section class="card stack">
+        <h2>API Keys</h2>
+        <label>Sketchfab API token</label>
+        <input id="sketchfabToken" type="password" />
+        <div class="toolbar">
+          <button id="saveKeys" class="primary">Save keys</button>
+          <button id="clearKeys">Clear keys</button>
+        </div>
+      </section>
+
+      <section class="card stack">
+        <h2>Publish Selected Model</h2>
+
+        <input id="uploadName" placeholder="Name" />
+        <textarea id="uploadDescription" placeholder="Description"></textarea>
+        <input id="uploadTags" value="threejs webgl sketchfab" placeholder="Tags, space separated" />
+
+        <label>Categories</label>
+        <div class="toolbar">
+          <button id="refreshCategoriesBtn" type="button">Fetch categories</button>
+          <small id="categoryStatus" class="muted">Categories load from Sketchfab API, with fallback list.</small>
+        </div>
+        <div id="categoryList" class="categoryGrid"></div>
+
+        <label>Visibility</label>
+        <select id="visibilitySelect">
+          <option value="public" selected>Anyone with the link / public</option>
+          <option value="private">Private — Pro plan required on Sketchfab</option>
+        </select>
+        <div class="proNote">Private and password-protected models require Sketchfab Pro. Free accounts should leave this public.</div>
+
+        <div class="switchRow">
+          <div><span>Publish immediately</span><small>Off uploads as draft.</small></div>
+          <label class="switch"><input id="uploadDraft" type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+        <div class="switchRow">
+          <div><span>Allow texture inspection</span><small>Allow people to inspect unwrapped textures in Model Inspector</small></div>
+          <label class="switch"><input id="allowTextureInspection" type="checkbox"><span class="slider"></span></label>
+        </div>
+
+        <div class="switchRow">
+          <div><span>Age-restricted content</span><small>Content that is not appropriate for all audiences, like nudity or suggestive content.</small></div>
+          <label class="switch"><input id="ageRestricted" type="checkbox"><span class="slider"></span></label>
+        </div>
+
+        <div class="switchRow">
+          <div><span>Created with generative AI tools (Open Properties Page after Upload)</span><small>Was this model partly or fully created with generative AI tools?</small></div>
+          <label class="switch"><input id="aiReminderUsed" type="checkbox"><span class="slider"></span></label>
+        </div>
+        <div id="aiWarningBox" class="warningBox">
+          <strong>AI-created model reminder</strong><br>
+          Sketchfab's "Created with generative AI tools" setting is not exposed as a public upload API field.
+          If this model used AI, enable that setting manually in Sketchfab after upload.
+        </div>
+
+        <label>Download</label>
+        <div class="segmented" id="downloadModeControl">
+          <button type="button" class="segmentBtn active" data-download-mode="no">No</button>
+          <button type="button" class="segmentBtn" data-download-mode="free">Free</button>
+          <button type="button" class="segmentBtn" data-download-mode="store">Store</button>
+        </div>
+        <input id="downloadMode" type="hidden" value="no" />
+
+        <div id="freeLicensePanel" class="licensePanel">
+          <div class="licenseCurrent">
+            <div>
+              <span class="muted">License</span><br>
+              <strong id="selectedLicenseLabel">CC Attribution</strong>
+            </div>
+            <button id="changeLicenseBtn" type="button">Change License</button>
+          </div>
+          <small class="muted">Your model will not be downloadable until you publish it.</small>
+        </div>
+
+        <button id="uploadSketchfabBtn" class="primary publishBtn">Upload selected model to Sketchfab</button>
+
+        <div id="postUploadActions" class="successActions">
+          <a id="openModelLink" href="#" target="_blank" rel="noopener">View uploaded model</a>
+          <a id="openPropertiesLink" href="#" target="_blank" rel="noopener">Open model properties</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Scene</h2>
+        <div class="stats">
+          <div><span>Meshes</span><strong id="meshCount">0</strong></div>
+          <div><span>Triangles</span><strong id="triCount">0</strong></div>
+          <div><span>Materials</span><strong id="matCount">0</strong></div>
+          <div><span>Source</span><strong id="sourceName">None</strong></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+    import { TGALoader } from 'three/addons/loaders/TGALoader.js';
+    import JSZip from 'jszip';
+
+    const __originalWarn = console.warn.bind(console);
+    console.warn = (...args) => {
+      const msg = String(args[0] || '');
+      if (msg.includes('FBXLoader: Image type "fbm" is not supported')) {
+        setStatus('FBXLoader reported .fbm image type. Try changing Embedded FBX texture type and reload the FBX.');
+      }
+      __originalWarn(...args);
+    };
+
+    const SKETCHFAB_API = 'https://api.sketchfab.com/v3';
+
+    const state = {
+      sketchfabToken: localStorage.getItem('sketchfab_token') || '',
+      selectedFiles: [],
+      selectedMainFile: null,
+      patchedUploadFile: null,
+      selectedTextures: [],
+      textureUrls: [],
+      results: [],
+      urlMap: new Map(),
+      objectUrls: [],
+      selectedLicense: 'by'
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function setStatus(message) {
+      $('status').textContent = message;
+      window.parent?.postMessage({
+        type: 'dashboard:model3d-share-status',
+        status: String(message || '')
+      }, window.location.origin);
+    }
+
+    function authHeaders() {
+      return state.sketchfabToken ? { Authorization: `Token ${state.sketchfabToken}` } : {};
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, options);
+      let data;
+      try { data = await res.json(); } catch (_) { data = {}; }
+      if (!res.ok) throw new Error(data.detail || data.error || data.message || (await res.text()).trim() || 'API error');
+      return data;
+    }
+
+    function isTextureFile(file) {
+      return /\.(png|jpe?g|webp|bmp|gif|tga)$/i.test(file?.name || '');
+    }
+
+    function isPackageRecommended(file) {
+      const n = file?.name?.toLowerCase() || '';
+      return n.endsWith('.fbx') || n.endsWith('.obj') || n.endsWith('.dae') || n.endsWith('.blend');
+    }
+
+    function pickMainFile(files) {
+      const priority = ['.glb', '.gltf', '.zip', '.fbx', '.obj', '.blend', '.dae', '.stl', '.ply'];
+      for (const ext of priority) {
+        const found = files.find(f => f.name.toLowerCase().endsWith(ext));
+        if (found) return found;
+      }
+      return files[0] || null;
+    }
+
+    function pickPreviewFile(files) {
+      for (const ext of ['.glb', '.gltf', '.zip', '.fbx']) {
+        const found = files.find(f => f.name.toLowerCase().endsWith(ext));
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function clearObjectUrls() {
+      state.objectUrls.forEach(URL.revokeObjectURL);
+      state.objectUrls = [];
+      state.textureUrls = [];
+      state.urlMap = new Map();
+    }
+
+    function buildFileMaps(files) {
+      clearObjectUrls();
+      state.selectedTextures = files.filter(isTextureFile);
+
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        state.objectUrls.push(url);
+
+        if (isTextureFile(file)) {
+          state.textureUrls.push({ file, url, stem: file.name.replace(/\.[^.]+$/, '').toLowerCase() });
+        }
+
+        const rel = (file.webkitRelativePath || file.name).replaceAll('\\', '/');
+        const base = rel.split('/').pop();
+        const parentless = rel.replace(/^.*?\.fbm\//i, '');
+        const stem = base.replace(/\.[^.]+$/, '').toLowerCase();
+
+        const keys = new Set([
+          rel, rel.toLowerCase(),
+          file.name, file.name.toLowerCase(),
+          base, base.toLowerCase(),
+          parentless, parentless.toLowerCase(),
+          stem
+        ]);
+
+        const fbmIndex = rel.toLowerCase().indexOf('.fbm/');
+        if (fbmIndex !== -1) {
+          const fbmSuffix = rel.slice(fbmIndex + 5);
+          keys.add(fbmSuffix);
+          keys.add(fbmSuffix.toLowerCase());
+        }
+
+        for (const key of keys) state.urlMap.set(key, url);
+      }
+
+      renderTextureList();
+    }
+
+    function renderTextureList() {
+      const el = $('textureList');
+      if (!state.selectedTextures.length) {
+        el.innerHTML = '<p class="muted">No texture files selected.</p>';
+        return;
+      }
+
+      el.innerHTML = state.selectedTextures.map((file, index) => `
+        <label class="textureItem">
+          <input type="radio" name="primaryTexture" value="${index}" ${index === 0 ? 'checked' : ''}>
+          ${esc(file.webkitRelativePath || file.name)}
+        </label>
+      `).join('');
+    }
+
+    function getPrimaryTextureIndex() {
+      const checked = document.querySelector('input[name="primaryTexture"]:checked');
+      return checked ? Number(checked.value) : 0;
+    }
+
+    function normalizeAssetPath(value) {
+      return decodeURIComponent(String(value || ''))
+        .replace(/^file:\/\//i, '')
+        .replace(/^https?:\/\/[^/]+\//i, '')
+        .replace(/^blob:null\//i, '')
+        .replace(/^blob:[^/]+\/?/i, '')
+        .replace(/^null\//i, '')
+        .replaceAll('\\', '/')
+        .replace(/^\.?\//, '')
+        .trim();
+    }
+
+    function resolveLocalAssetURL(raw) {
+      const clean = normalizeAssetPath(raw);
+      const base = clean.split('/').pop();
+      const noQueryBase = base?.split('?')[0]?.split('#')[0];
+      const cleanNoQuery = clean.split('?')[0].split('#')[0];
+
+      const candidates = [
+        clean,
+        cleanNoQuery,
+        clean.toLowerCase(),
+        cleanNoQuery.toLowerCase(),
+        base,
+        noQueryBase,
+        base?.toLowerCase(),
+        noQueryBase?.toLowerCase(),
+        clean.replace(/^.*?\.fbm\//i, ''),
+        cleanNoQuery.replace(/^.*?\.fbm\//i, ''),
+        clean.replace(/^.*?\//, ''),
+        cleanNoQuery.replace(/^.*?\//, '')
+      ].filter(Boolean);
+
+      for (const c of candidates) {
+        if (state.urlMap.has(c)) return state.urlMap.get(c);
+      }
+
+      return raw;
+    }
+
+    async function getFilesFromDataTransfer(dataTransfer) {
+      const directFiles = [...(dataTransfer?.files || [])];
+      const items = [...(dataTransfer?.items || [])];
+      const entries = items.map(item => item.webkitGetAsEntry?.()).filter(Boolean);
+
+      if (!entries.length) return directFiles;
+
+      async function readEntry(entry, path = '') {
+        if (entry.isFile) {
+          return new Promise(resolve => {
+            entry.file(file => {
+              Object.defineProperty(file, 'webkitRelativePath', { value: path + file.name, configurable: true });
+              resolve([file]);
+            }, () => resolve([]));
+          });
+        }
+
+        if (entry.isDirectory) {
+          const reader = entry.createReader();
+          const children = [];
+
+          async function readBatch() {
+            const batch = await new Promise(resolve => reader.readEntries(resolve));
+            if (!batch.length) return;
+            children.push(...batch);
+            await readBatch();
+          }
+
+          await readBatch();
+          const nested = await Promise.all(children.map(child => readEntry(child, path + entry.name + '/')));
+          return nested.flat();
+        }
+
+        return [];
+      }
+
+      const nested = await Promise.all(entries.map(entry => readEntry(entry)));
+      const files = nested.flat();
+      return files.length ? files : directFiles;
+    }
+
+    async function makeUploadFile() {
+      if (!state.selectedFiles.length) return null;
+
+      const originalMain = state.selectedMainFile || pickMainFile(state.selectedFiles);
+      if (!originalMain) return null;
+
+      const patchedMain = await makePatchedFbxFileIfNeeded(originalMain);
+      const shouldZip = state.selectedFiles.length > 1 || isPackageRecommended(originalMain);
+
+      // Single packed FBX: upload the same patched FBX that made the preview work.
+      if (!shouldZip) return patchedMain;
+
+      // Multi-file upload: zip everything, replacing the main FBX with the patched copy.
+      const zip = new JSZip();
+
+      for (const file of state.selectedFiles) {
+        const isMain = file === originalMain || file.name === originalMain.name;
+        const fileToAdd = isMain ? patchedMain : file;
+        const originalPath = file.webkitRelativePath || file.name;
+        const path = isMain ? originalPath.replace(/[^/\\]+$/, patchedMain.name) : originalPath;
+        zip.file(path, fileToAdd);
+      }
+
+      if (patchedMain !== originalMain) {
+        zip.file(
+          'README_TEXTURE_PATCH.txt',
+          `This upload includes a patched FBX because the original embedded texture references ended in .fbm.\n` +
+          `Patch target extension: ${getEmbeddedTextureExtensionHint()}\n` +
+          `Original FBX: ${originalMain.name}\n` +
+          `Patched FBX: ${patchedMain.name}\n`
+        );
+      }
+
+      const base = originalMain.name.replace(/\.[^.]+$/, '');
+      const blob = await zip.generateAsync({ type: 'blob' });
+      return new File([blob], `${base}_with_textures.zip`, { type: 'application/zip' });
+    }
+
+    async function selectModelFiles(files, options = {}) {
+      files = [...files].filter(Boolean);
+      if (!files.length) return;
+
+      const main = pickMainFile(files);
+      const preview = pickPreviewFile(files);
+
+      state.selectedFiles = files;
+      state.selectedMainFile = main;
+      state.patchedUploadFile = null;
+      $('postUploadActions')?.classList.remove('show');
+      buildFileMaps(files);
+
+      $('selectedModelName').textContent = files.length > 1
+        ? `${main.name} + ${files.length - 1} support file(s)`
+        : main.name;
+
+      if (!$('uploadName').value) $('uploadName').value = main.name.replace(/\.[^.]+$/, '');
+
+      if (options.preview === false) {
+        setStatus(`${main.name} selected for background upload.`);
+        return;
+      }
+
+      if (preview) {
+        setStatus(`Previewing ${preview.name}…`);
+        try {
+          await viewer.loadLocalFile(preview);
+          setStatus(`Preview loaded: ${preview.name}. Texture files selected: ${state.selectedTextures.length}.`);
+        } catch (err) {
+          setStatus(`Preview failed: ${err.message}`);
+        }
+        return;
+      }
+
+      setStatus(`${main.name} selected. Preview supports GLB/glTF/ZIP/FBX.`);
+    }
+
+
+    function extractSketchfabModelUid(uploadResponseText) {
+      try {
+        const data = JSON.parse(uploadResponseText);
+
+        const candidates = [
+          data.uid,
+          data.id,
+          data.modelId,
+          data.model_id,
+          data.uri,
+          data.url,
+          data.viewerUrl,
+          data.model?.uid,
+          data.model?.id,
+          data.model?.uri,
+          data.model?.url
+        ].filter(Boolean).map(String);
+
+        for (const value of candidates) {
+          const uidMatch = value.match(/[a-f0-9]{32}/i);
+          if (uidMatch) return uidMatch[0];
+        }
+      } catch {}
+
+      const match = String(uploadResponseText || '').match(/[a-f0-9]{32}/i);
+      return match ? match[0] : '';
+    }
+
+    function showPostUploadLinks(uid) {
+      const box = $('postUploadActions');
+      const view = $('openModelLink');
+      const props = $('openPropertiesLink');
+      if (!box || !view || !props || !uid) return;
+
+      const modelUrl = `https://sketchfab.com/3d-models/${uid}`;
+      const propertiesUrl = `${modelUrl}/properties`;
+
+      view.href = modelUrl;
+      props.href = propertiesUrl;
+      box.classList.add('show');
+
+      if ($('aiReminderUsed')?.checked) {
+        setStatus(`Upload accepted. Opening Sketchfab model properties so you can enable the AI disclosure toggle.\n${propertiesUrl}`);
+
+        // Open automatically after upload if AI checkbox enabled.
+        setTimeout(() => {
+          openAiNoticeModal(propertiesUrl);
+        }, 350);
+      }
+    }
+
+
+
+    const LICENSE_LABELS = {
+      'by': 'CC Attribution',
+      'by-sa': 'CC Attribution-ShareAlike',
+      'by-nd': 'CC Attribution-NoDerivatives',
+      'by-nc': 'CC Attribution-NonCommercial',
+      'by-nc-sa': 'CC Attribution-NonCommercial-ShareAlike',
+      'by-nc-nd': 'CC Attribution-NonCommercial-NoDerivatives',
+      'cc0': 'CC0',
+      'free-st': 'Free Standard',
+      'st': 'Standard',
+      'ed': 'Editorial'
+    };
+
+    function setDownloadMode(mode) {
+      const normalized = ['no', 'free', 'store'].includes(mode) ? mode : 'no';
+      $('downloadMode').value = normalized;
+
+      document.querySelectorAll('[data-download-mode]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.downloadMode === normalized);
+      });
+
+      $('freeLicensePanel')?.classList.toggle('show', normalized === 'free');
+
+      if (normalized === 'store') {
+        setStatus('Store uploads cannot be configured through the public Sketchfab upload API. Configure Store/Fab manually after upload.');
+      }
+    }
+
+    function currentModalLicenseSlug() {
+      if ($('licenseFreeStandard')?.checked) return 'free-st';
+
+      const nc = $('licenseNonCommercial')?.checked;
+      const nd = $('licenseNoDerivatives')?.checked;
+      const sa = $('licenseShareAlike')?.checked;
+
+      if (nc && nd) return 'by-nc-nd';
+      if (nc && sa) return 'by-nc-sa';
+      if (nc) return 'by-nc';
+      if (nd) return 'by-nd';
+      if (sa) return 'by-sa';
+      return 'by';
+    }
+
+    function syncLicenseModalFromState() {
+      const slug = state.selectedLicense || 'by';
+
+      if ($('licenseFreeStandard')) $('licenseFreeStandard').checked = slug === 'free-st';
+      if ($('licenseNonCommercial')) $('licenseNonCommercial').checked = slug.includes('-nc');
+      if ($('licenseNoDerivatives')) $('licenseNoDerivatives').checked = slug.includes('-nd');
+      if ($('licenseShareAlike')) $('licenseShareAlike').checked = slug.includes('-sa');
+
+      if (slug !== 'free-st' && $('licenseFreeStandard')) {
+        $('licenseFreeStandard').checked = false;
+      }
+    }
+
+    function updateLicenseLabel() {
+      const label = LICENSE_LABELS[state.selectedLicense] || LICENSE_LABELS.by;
+      if ($('selectedLicenseLabel')) $('selectedLicenseLabel').textContent = label;
+    }
+
+    function openLicenseModal() {
+      syncLicenseModalFromState();
+      $('licenseModalBackdrop')?.classList.add('show');
+      $('licenseModalBackdrop')?.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLicenseModal() {
+      $('licenseModalBackdrop')?.classList.remove('show');
+      $('licenseModalBackdrop')?.setAttribute('aria-hidden', 'true');
+    }
+
+    function selectLicenseFromModal() {
+      state.selectedLicense = currentModalLicenseSlug();
+      updateLicenseLabel();
+      closeLicenseModal();
+    }
+
+    function setupLicenseControls() {
+      document.querySelectorAll('[data-download-mode]').forEach(btn => {
+        btn.onclick = () => setDownloadMode(btn.dataset.downloadMode);
+      });
+
+      $('changeLicenseBtn').onclick = openLicenseModal;
+      $('closeLicenseModalBtn').onclick = closeLicenseModal;
+      $('cancelLicenseBtn').onclick = closeLicenseModal;
+      $('selectLicenseBtn').onclick = selectLicenseFromModal;
+
+      $('licenseModalBackdrop').addEventListener('click', event => {
+        if (event.target === $('licenseModalBackdrop')) closeLicenseModal();
+      });
+
+      $('licenseFreeStandard').addEventListener('change', () => {
+        if ($('licenseFreeStandard').checked) {
+          $('licenseNonCommercial').checked = false;
+          $('licenseNoDerivatives').checked = false;
+          $('licenseShareAlike').checked = false;
+        }
+      });
+
+      ['licenseNonCommercial', 'licenseNoDerivatives', 'licenseShareAlike'].forEach(id => {
+        $(id).addEventListener('change', () => {
+          $('licenseFreeStandard').checked = false;
+          if (id === 'licenseNoDerivatives' && $('licenseNoDerivatives').checked) {
+            $('licenseShareAlike').checked = false;
+          }
+          if (id === 'licenseShareAlike' && $('licenseShareAlike').checked) {
+            $('licenseNoDerivatives').checked = false;
+          }
+        });
+      });
+
+      updateLicenseLabel();
+      setDownloadMode($('downloadMode')?.value || 'no');
+    }
+
+
+    async function uploadToSketchfab() {
+      if (!state.sketchfabToken) {
+        const status = 'Paste and save a Sketchfab API token first.';
+        setStatus(status);
+        return { ok: false, status };
+      }
+      const file = await makeUploadFile();
+      if (!file) {
+        const status = 'Choose or drop a model first.';
+        setStatus(status);
+        return { ok: false, status };
+      }
+
+      const form = new FormData();
+      form.set('modelFile', file);
+      form.set('name', $('uploadName').value || file.name.replace(/\.[^.]+$/, ''));
+      form.set('description', $('uploadDescription').value || '');
+      form.set('tags', $('uploadTags').value || '');
+      const categories = selectedCategories();
+      if (categories.length) {
+        form.set('categories', categories.join(','));
+        form.set('category', categories[0]);
+      }
+
+      const visibility = $('visibilitySelect')?.value || 'public';
+      form.set('private', visibility === 'private' ? '1' : '0');
+
+      const publishNow = $('uploadDraft')?.checked ?? true;
+      form.set('isPublished', publishNow ? '1' : '0');
+
+      const downloadMode = $('downloadMode')?.value || 'no';
+
+      // UI only has No / Free / Store.
+      // Free uses the selected license. Default is CC Attribution => "by".
+      // Store is not exposed by the public upload API and must be configured manually.
+      if (downloadMode === 'free') {
+        form.set('license', state.selectedLicense || 'by');
+      }
+
+      if ($('allowTextureInspection')?.checked) {
+        form.set('isInspectable', '1');
+      } else {
+        form.set('isInspectable', '0');
+      }
+
+      if ($('ageRestricted')?.checked) {
+        form.set('isAgeRestricted', '1');
+      }
+
+      // Website-only toggles:
+      // - Allow comments
+      // - Promotional content
+      // - Created with generative AI tools
+      // They are not documented upload API fields. Do not send fake fields.
+      form.set('source', '3d-model-sharer');
+
+      setStatus(`Uploading ${file.name}${file.name.endsWith('.zip') ? ' packaged with textures / patched FBX if needed' : ''}…`);
+      try {
+        const res = await fetch(`${SKETCHFAB_API}/models`, { method: 'POST', headers: authHeaders(), body: form });
+        const text = await res.text();
+        if (!res.ok) throw new Error(text);
+
+        const uid = extractSketchfabModelUid(text);
+        if (uid) {
+          showPostUploadLinks(uid);
+          const modelUrl = `https://sketchfab.com/3d-models/${uid}`;
+          if (!$('aiReminderUsed')?.checked) {
+            setStatus(`Upload accepted by Sketchfab. Use “Open model properties” to adjust website-only settings if needed.`);
+          }
+          return { ok: true, uid, modelUrl, status: $('status').textContent || 'Upload accepted by Sketchfab.' };
+        } else {
+          setStatus(`Upload accepted by Sketchfab: ${text}\nCould not detect model UID automatically. Use Sketchfab dashboard to edit properties.`);
+          return { ok: true, status: $('status').textContent || 'Upload accepted by Sketchfab.' };
+        }
+      } catch (err) {
+        setStatus(`Upload failed: ${err.message}`);
+        return { ok: false, status: $('status').textContent || `Upload failed: ${err.message}` };
+      }
+    }
+
+    async function fetchDashboardModelFile(modelUrl, fileName) {
+      const res = await fetch(modelUrl);
+      if (!res.ok) throw new Error(`Failed to fetch model from dashboard (${res.status}).`);
+      const blob = await res.blob();
+      return new File([blob], fileName || 'dashboard-model.glb', { type: blob.type || 'model/gltf-binary' });
+    }
+
+    async function shareDashboardModelToTarget(payload) {
+      const target = String(payload?.target || 'sketchfab').toLowerCase();
+      if (target !== 'sketchfab') throw new Error('Only Sketchfab sharing is available right now.');
+      const file = await fetchDashboardModelFile(payload.modelUrl, payload.fileName);
+      await selectModelFiles([file], { preview: false });
+      if (payload.name) $('uploadName').value = payload.name;
+      if (payload.description) $('uploadDescription').value = payload.description;
+      return await uploadToSketchfab();
+    }
+
+    window.addEventListener('message', async event => {
+      const payload = event.data || {};
+      if (!payload || payload.type !== 'dashboard:model3d-share') return;
+      const requestId = payload.requestId || '';
+      try {
+        const result = await shareDashboardModelToTarget(payload);
+        event.source?.postMessage({
+          type: 'dashboard:model3d-share-result',
+          requestId,
+          ...result
+        }, event.origin || window.location.origin);
+      } catch (err) {
+        event.source?.postMessage({
+          type: 'dashboard:model3d-share-result',
+          requestId,
+          ok: false,
+          status: err?.message || '3D model share failed.'
+        }, event.origin || window.location.origin);
+      }
+    });
+
+    async function searchSketchfab() {
+      const params = new URLSearchParams({
+        type: 'models',
+        q: $('queryInput').value.trim() || 'model',
+        sort_by: $('sortInput').value,
+        count: '12'
+      });
+      if ($('downloadableInput').checked) params.set('downloadable', 'true');
+
+      setStatus('Searching Sketchfab…');
+      try {
+        const data = await fetchJson(`${SKETCHFAB_API}/search?${params}`);
+        state.results = data.results || [];
+        renderResults();
+        setStatus(`Found ${state.results.length} Sketchfab models.`);
+      } catch (err) {
+        setStatus(`Search failed: ${err.message}`);
+      }
+    }
+
+    function renderResults() {
+      $('results').innerHTML = state.results.length ? state.results.map(model => `
+        <article class="result">
+          <img src="${esc(model.thumbnails?.images?.[0]?.url || '')}" alt="" />
+          <div>
+            <strong>${esc(model.name)}</strong>
+            <small>${esc(model.user?.displayName || model.user?.username || 'Unknown')}</small>
+            <div class="toolbar">
+              <button data-import="${esc(model.uid)}" ${model.isDownloadable ? '' : 'disabled'}>Import</button>
+              <button data-open="${esc(model.viewerUrl || `https://sketchfab.com/3d-models/${model.uid}`)}">Open</button>
+            </div>
+          </div>
+        </article>
+      `).join('') : '<p class="muted">No results.</p>';
+
+      document.querySelectorAll('[data-import]').forEach(btn => {
+        btn.onclick = () => importSketchfab(btn.dataset.import);
+      });
+      document.querySelectorAll('[data-open]').forEach(btn => {
+        btn.onclick = () => window.open(btn.dataset.open, '_blank', 'noopener');
+      });
+    }
+
+    async function importSketchfab(uid) {
+      if (!state.sketchfabToken) return setStatus('Paste and save a Sketchfab API token first.');
+      const model = state.results.find(r => r.uid === uid);
+      setStatus(`Requesting Sketchfab download for ${model?.name || uid}…`);
+
+      try {
+        const info = await fetchJson(`${SKETCHFAB_API}/models/${uid}/download`, { headers: authHeaders() });
+        const item = info.glb || info.gltf;
+        if (!item?.url) throw new Error('No GLB/glTF URL returned.');
+        await viewer.loadFromSketchfabDownload(item.url, Boolean(info.gltf && !info.glb), model?.name || uid);
+      } catch (err) {
+        setStatus(`Import failed: ${err.message}`);
+      }
+    }
+
+    const FALLBACK_CATEGORIES = [
+      { name: 'Animals & Pets', slug: 'animals-pets' },
+      { name: 'Architecture', slug: 'architecture' },
+      { name: 'Art & Abstract', slug: 'art-abstract' },
+      { name: 'Cars & Vehicles', slug: 'cars-vehicles' },
+      { name: 'Characters & Creatures', slug: 'characters-creatures' },
+      { name: 'Cultural Heritage & History', slug: 'cultural-heritage-history' },
+      { name: 'Electronics & Gadgets', slug: 'electronics-gadgets' },
+      { name: 'Fashion & Style', slug: 'fashion-style' },
+      { name: 'Food & Drink', slug: 'food-drink' },
+      { name: 'Furniture & Home', slug: 'furniture-home' },
+      { name: 'Music', slug: 'music' },
+      { name: 'Nature & Plants', slug: 'nature-plants' },
+      { name: 'News & Politics', slug: 'news-politics' },
+      { name: 'People', slug: 'people' },
+      { name: 'Places & Travel', slug: 'places-travel' },
+      { name: 'Science & Technology', slug: 'science-technology' },
+      { name: 'Sports & Fitness', slug: 'sports-fitness' },
+      { name: 'Weapons & Military', slug: 'weapons-military' }
+    ];
+
+    function normalizeCategory(raw) {
+      return {
+        name: raw.name || raw.label || raw.displayName || raw.slug || raw.uid || 'Category',
+        slug: raw.slug || raw.uid || raw.id || raw.name
+      };
+    }
+
+    function renderCategories(categories = FALLBACK_CATEGORIES) {
+      const el = $('categoryList');
+      if (!el) return;
+      el.innerHTML = categories.map(cat => `
+        <label class="categoryItem">
+          <input type="checkbox" name="category" value="${esc(cat.slug)}">
+          ${esc(cat.name)}
+        </label>
+      `).join('');
+    }
+
+    async function fetchSketchfabCategories() {
+      const status = $('categoryStatus');
+      try {
+        if (status) status.textContent = 'Fetching categories from Sketchfab API…';
+        const res = await fetch(`${SKETCHFAB_API}/categories`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || 'Category fetch failed');
+
+        const raw = data.results || data.categories || data;
+        const categories = Array.isArray(raw) ? raw.map(normalizeCategory) : FALLBACK_CATEGORIES;
+        renderCategories(categories);
+        if (status) status.textContent = `Loaded ${categories.length} categories from API.`;
+      } catch (err) {
+        renderCategories(FALLBACK_CATEGORIES);
+        if (status) status.textContent = `Using fallback categories. API fetch failed: ${err.message}`;
+      }
+    }
+
+    function selectedCategories() {
+      return [...document.querySelectorAll('input[name="category"]:checked')].map(el => el.value);
+    }
+
+
+
+    function setupUI() {
+      $('sketchfabToken').value = state.sketchfabToken;
+      setupLicenseControls();
+
+      fetchSketchfabCategories();
+      $('refreshCategoriesBtn').onclick = fetchSketchfabCategories;
+
+      $('closeAiNoticeBtn').onclick = closeAiNoticeModal;
+      $('continueToPropertiesBtn').onclick = () => {
+        closeAiNoticeModal();
+        window.open(pendingPropertiesUrl, '_blank', 'noopener');
+      };
+
+      $('chooseModelBtn').onclick = () => $('modelFileInput').click();
+      $('chooseFolderBtn').onclick = () => $('modelFolderInput').click();
+      $('modelFileInput').onchange = (e) => selectModelFiles(e.target.files);
+      $('modelFolderInput').onchange = (e) => selectModelFiles(e.target.files);
+
+      const dz = $('dropzone');
+      ['dragenter', 'dragover'].forEach(type => dz.addEventListener(type, e => {
+        e.preventDefault();
+        dz.classList.add('dragover');
+      }));
+      ['dragleave', 'drop'].forEach(type => dz.addEventListener(type, e => {
+        e.preventDefault();
+        dz.classList.remove('dragover');
+      }));
+      dz.addEventListener('drop', async e => {
+        const files = await getFilesFromDataTransfer(e.dataTransfer);
+        selectModelFiles(files);
+      });
+
+      $('clearModelBtn').onclick = () => {
+        state.selectedFiles = [];
+        state.selectedMainFile = null;
+        state.patchedUploadFile = null;
+        state.selectedTextures = [];
+        clearObjectUrls();
+        $('modelFileInput').value = '';
+        $('modelFolderInput').value = '';
+        $('selectedModelName').textContent = 'No model selected';
+        $('uploadName').value = '';
+        renderTextureList();
+        setStatus('Selection cleared.');
+      };
+
+      $('applyTexturesBtn').onclick = () => viewer.applySelectedTextures();
+
+      $('saveKeys').onclick = () => {
+        state.sketchfabToken = $('sketchfabToken').value.trim();
+        localStorage.setItem('sketchfab_token', state.sketchfabToken);
+        setStatus('Sketchfab token saved locally.');
+      };
+
+      $('clearKeys').onclick = () => {
+        state.sketchfabToken = '';
+        $('sketchfabToken').value = '';
+        localStorage.removeItem('sketchfab_token');
+        setStatus('Sketchfab token cleared.');
+      };
+
+      $('searchBtn').onclick = searchSketchfab;
+      $('queryInput').onkeydown = e => { if (e.key === 'Enter') searchSketchfab(); };
+      $('uploadSketchfabBtn').onclick = uploadToSketchfab;
+      $('frameBtn').onclick = () => viewer.frame();
+      $('wireBtn').onclick = () => viewer.toggleWireframe();
+      $('gridBtn').onclick = () => viewer.toggleGrid();
+
+      // Dynamic warning box text based on AI checkbox state.
+      const aiWarningBox = $('aiWarningBox');
+      const aiReminderUsed = $('aiReminderUsed');
+      function updateAiWarning() {
+        if (aiReminderUsed.checked) {
+          aiWarningBox.innerHTML = '<strong>AI-created model reminder</strong><br>' +
+            'Sketchfab\'s "Created with generative AI tools" setting is not exposed as a public upload API field.' +
+            '<br>If this model used AI, enable that setting manually in Sketchfab after upload.';
+        } else {
+          const btnHtml = '<button id="openAiPropertiesBtn" type="button" style="margin-left:.25rem;padding:.2rem .45rem;font-size:.78rem;">Open Properties</button>';
+          aiWarningBox.innerHTML = 'Note: If you used AI in your process, enable <em>Created with generative AI tools</em> ' + btnHtml + ' after upload.';
+          const btn = aiWarningBox.querySelector('#openAiPropertiesBtn');
+          if (btn) {
+            btn.onclick = () => {
+              window.open('https://sketchfab.com/settings/properties', '_blank', 'noopener');
+            };
+          }
+        }
+      }
+      aiReminderUsed.addEventListener('change', updateAiWarning);
+      updateAiWarning();
+    }
+
+
+    function getEmbeddedTextureExtensionHint() {
+      const el = $('embeddedTextureExt');
+      return (el?.value || 'png').toLowerCase();
+    }
+
+    function extensionToFourChars(ext) {
+      // FBX binary string properties include fixed lengths, so replacement must stay 4 chars.
+      // .png, .jpg, .tga, .bmp are 4 chars. .webp is 5, so use .png as a parser-safe fallback.
+      if (ext === 'jpg' || ext === 'jpeg') return '.jpg';
+      if (ext === 'tga') return '.tga';
+      if (ext === 'bmp') return '.bmp';
+      return '.png';
+    }
+
+    function patchFbxFbmTextureReferences(arrayBuffer, extHint = 'png') {
+      const replacement = extensionToFourChars(extHint);
+      const input = new Uint8Array(arrayBuffer);
+      const output = new Uint8Array(input);
+      const repl = replacement.split('').map(ch => ch.charCodeAt(0));
+      const patterns = [
+        [46, 102, 98, 109], // .fbm
+        [46, 70, 66, 77],   // .FBM
+        [46, 70, 98, 109],  // .Fbm
+      ];
+      let replacements = 0;
+
+      for (let i = 0; i <= output.length - 4; i++) {
+        for (const p of patterns) {
+          if (output[i] === p[0] && output[i + 1] === p[1] && output[i + 2] === p[2] && output[i + 3] === p[3]) {
+            output[i] = repl[0];
+            output[i + 1] = repl[1];
+            output[i + 2] = repl[2];
+            output[i + 3] = repl[3];
+            replacements++;
+            break;
+          }
+        }
+      }
+
+      return { buffer: output.buffer, replacements, replacement };
+    }
+
+    async function makePatchedFbxFileIfNeeded(file) {
+      if (!file || !file.name.toLowerCase().endsWith('.fbx')) return file;
+
+      if (state.patchedUploadFile && state.patchedUploadFile.name.toLowerCase().endsWith('.fbx')) {
+        return state.patchedUploadFile;
+      }
+
+      const originalBuffer = await file.arrayBuffer();
+      const patch = patchFbxFbmTextureReferences(originalBuffer, getEmbeddedTextureExtensionHint());
+
+      if (!patch.replacements) return file;
+
+      const patchedName = file.name.replace(/\.fbx$/i, `_patched_${patch.replacement.slice(1)}.fbx`);
+      const patched = new File([patch.buffer], patchedName, {
+        type: file.type || 'application/octet-stream',
+        lastModified: file.lastModified
+      });
+
+      state.patchedUploadFile = patched;
+      return patched;
+    }
+
+    let pendingPropertiesUrl = '';
+
+    function closeAiNoticeModal() {
+      $('aiNoticeModal')?.classList.remove('show');
+      $('aiNoticeModal')?.setAttribute('aria-hidden', 'true');
+    }
+
+    function openAiNoticeModal(propertiesUrl) {
+      pendingPropertiesUrl = propertiesUrl;
+      $('aiNoticeModal')?.classList.add('show');
+      $('aiNoticeModal')?.setAttribute('aria-hidden', 'false');
+      const countdownEl = $('aiCountdownInline');
+      let countdown = 3;
+      if (countdownEl) {
+        countdownEl.textContent = `(${countdown})`;
+      }
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          if (countdownEl) {
+            countdownEl.textContent = `(${countdown})`;
+          }
+        } else {
+          clearInterval(interval);
+          if (countdownEl) {
+            countdownEl.textContent = '';
+          }
+          window.open(propertiesUrl, '_blank', 'noopener');
+        }
+      }, 1000);
+    }
+
+    function createViewer() {
+      const canvas = $('sketchfab-viewer');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x070b12);
+
+      const camera = new THREE.PerspectiveCamera(52, 1, 0.01, 5000);
+      camera.position.set(3.2, 2.2, 4.4);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x172033, 2.5));
+      const key = new THREE.DirectionalLight(0xffffff, 2.4);
+      key.position.set(4, 7, 4);
+      scene.add(key);
+      const rim = new THREE.DirectionalLight(0x8fb6ff, 1.2);
+      rim.position.set(-4, 3, -5);
+      scene.add(rim);
+
+      const grid = new THREE.GridHelper(12, 24, 0x4c5bff, 0x1c2638);
+      grid.position.y = -0.01;
+      scene.add(grid);
+
+      let currentModel = null;
+      let wireframe = false;
+      let modelUrls = [];
+      let materialIndex = 0;
+
+      function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+        renderer.setSize(rect.width, rect.height, false);
+        camera.aspect = rect.width / rect.height;
+        camera.updateProjectionMatrix();
+      }
+
+      function disposeModel() {
+        if (!currentModel) return;
+        scene.remove(currentModel);
+        currentModel.traverse(obj => {
+          obj.geometry?.dispose?.();
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material].filter(Boolean);
+          mats.forEach(mat => {
+            if (mat.map) mat.map.dispose?.();
+            mat?.dispose?.();
+          });
+        });
+        currentModel = null;
+        modelUrls.forEach(URL.revokeObjectURL);
+        modelUrls = [];
+        materialIndex = 0;
+      }
+
+      function frame() {
+        if (!currentModel) return;
+        const box = new THREE.Box3().setFromObject(currentModel);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const distance = maxDim / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * .5))) * 1.6;
+        camera.position.copy(center).addScaledVector(new THREE.Vector3(1.1, .72, 1).normalize(), distance);
+        camera.near = Math.max(distance / 1000, .001);
+        camera.far = distance * 1000;
+        camera.updateProjectionMatrix();
+        controls.target.copy(center);
+        controls.update();
+      }
+
+      function setWire(root, enabled) {
+        root?.traverse(obj => {
+          if (!obj.isMesh) return;
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          mats.forEach(m => { if (m) m.wireframe = enabled; });
+        });
+      }
+
+      function inspect(name) {
+        let meshes = 0, tris = 0, mats = new Set();
+        currentModel?.traverse(obj => {
+          if (!obj.isMesh) return;
+          meshes++;
+          if (obj.geometry?.index) tris += obj.geometry.index.count / 3;
+          else if (obj.geometry?.attributes?.position) tris += obj.geometry.attributes.position.count / 3;
+          const matList = Array.isArray(obj.material) ? obj.material : [obj.material];
+          matList.filter(Boolean).forEach(m => mats.add(m.uuid));
+        });
+        $('meshCount').textContent = meshes;
+        $('triCount').textContent = Math.round(tris).toLocaleString();
+        $('matCount').textContent = mats.size;
+        $('sourceName').textContent = name.slice(0, 18);
+      }
+
+      function makeLocalManager() {
+        const manager = new THREE.LoadingManager();
+        manager.setURLModifier(resolveLocalAssetURL);
+        manager.addHandler(/\.tga$/i, new TGALoader(manager));
+        return manager;
+      }
+
+      function scoreTextureForTarget(textureInfo, targetName) {
+        const target = String(targetName || '').toLowerCase();
+        if (!target) return 0;
+
+        let score = 0;
+        if (textureInfo.stem === target) score += 100;
+        if (textureInfo.stem.includes(target)) score += 40;
+        if (target.includes(textureInfo.stem)) score += 40;
+        if (textureInfo.stem.includes('diffuse') || textureInfo.stem.includes('albedo') || textureInfo.stem.includes('basecolor') || textureInfo.stem.includes('base_color')) score += 15;
+        return score;
+      }
+
+      function chooseTextureForMaterial(mat, meshName, index) {
+        if (!state.textureUrls.length) return null;
+
+        const mode = $('textureMode').value;
+        if (mode === 'none') return null;
+
+        if (mode === 'force') {
+          return state.textureUrls[getPrimaryTextureIndex()] || state.textureUrls[0];
+        }
+
+        if (mode === 'cycle') {
+          return state.textureUrls[index % state.textureUrls.length];
+        }
+
+        let best = null;
+        let bestScore = -1;
+        for (const tex of state.textureUrls) {
+          const score =
+            scoreTextureForTarget(tex, mat?.name) +
+            scoreTextureForTarget(tex, meshName);
+
+          if (score > bestScore) {
+            best = tex;
+            bestScore = score;
+          }
+        }
+
+        return best || state.textureUrls[getPrimaryTextureIndex()] || state.textureUrls[0];
+      }
+
+      function loadTextureFromInfo(info, manager) {
+        const ext = info.file.name.toLowerCase().split('.').pop();
+        const loader = ext === 'tga' ? new TGALoader(manager) : new THREE.TextureLoader(manager);
+        const texture = loader.load(info.url);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.flipY = true;
+        return texture;
+      }
+
+      function applySelectedTextures() {
+        if (!currentModel) {
+          setStatus('No model loaded.');
+          return;
+        }
+
+        if (!state.textureUrls.length) {
+          setStatus('No texture files selected. Choose/drop the FBX folder or select the FBX plus image files.');
+          return;
+        }
+
+        const manager = makeLocalManager();
+        let applied = 0;
+        let index = 0;
+
+        currentModel.traverse(obj => {
+          if (!obj.isMesh || !obj.material) return;
+
+          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+
+          for (const mat of materials) {
+            const chosen = chooseTextureForMaterial(mat, obj.name, index++);
+            if (!chosen) continue;
+
+            try {
+              if (mat.map) mat.map.dispose?.();
+
+              const tex = loadTextureFromInfo(chosen, manager);
+              mat.map = tex;
+
+              if (mat.color) mat.color.set(0xffffff);
+              if ('roughness' in mat) mat.roughness = 0.75;
+              if ('metalness' in mat) mat.metalness = 0.0;
+
+              mat.needsUpdate = true;
+              applied++;
+            } catch (err) {
+              console.warn('Could not apply texture', chosen.file.name, err);
+            }
+          }
+        });
+
+        setStatus(`Applied ${applied} texture map(s) from selected files.`);
+      }
+
+      async function loadGltfUrl(url, name = 'Model', manager = undefined) {
+        const loader = new GLTFLoader(manager);
+        await new Promise((resolve, reject) => {
+          loader.load(url, gltf => {
+            disposeModel();
+            currentModel = gltf.scene || gltf.scenes[0];
+            scene.add(currentModel);
+            setWire(currentModel, wireframe);
+            frame();
+            inspect(name);
+            resolve();
+          }, undefined, reject);
+        });
+      }
+
+      async function loadFbxFile(file, name = 'FBX Model', manager = undefined) {
+        const loader = new FBXLoader(manager);
+        const originalBuffer = await file.arrayBuffer();
+
+        // Some packed FBX files expose embedded texture names as "something.fbm".
+        // FBXLoader treats the extension as the image type and refuses to decode it.
+        // Patch the binary before parsing so embedded images are attempted as PNG/JPG/etc.
+        const patch = patchFbxFbmTextureReferences(originalBuffer, getEmbeddedTextureExtensionHint());
+        const bufferToParse = patch.replacements ? patch.buffer : originalBuffer;
+
+        if (patch.replacements) {
+          state.patchedUploadFile = new File(
+            [patch.buffer],
+            file.name.replace(/\.fbx$/i, `_patched_${patch.replacement.slice(1)}.fbx`),
+            { type: file.type || 'application/octet-stream', lastModified: file.lastModified }
+          );
+        }
+
+        await new Promise((resolve, reject) => {
+          try {
+            disposeModel();
+            currentModel = loader.parse(bufferToParse, '');
+            scene.add(currentModel);
+            setWire(currentModel, wireframe);
+            frame();
+            inspect(name);
+
+            if (typeof applySelectedTextures === 'function' && state.selectedTextures?.length) {
+              applySelectedTextures();
+            }
+
+            setStatus(
+              patch.replacements
+                ? `Preview loaded: ${name}. Patched ${patch.replacements} embedded .fbm texture reference(s) to ${patch.replacement}.`
+                : `Preview loaded: ${name}. No embedded .fbm references found to patch.`
+            );
+
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+
+      async function loadZipFromBlob(blob, name) {
+        const zip = await JSZip.loadAsync(blob);
+        const files = Object.values(zip.files).filter(f => !f.dir);
+        const glb = files.find(f => f.name.toLowerCase().endsWith('.glb'));
+        const gltf = files.find(f => f.name.toLowerCase().endsWith('.gltf'));
+
+        if (glb) {
+          const url = URL.createObjectURL(await glb.async('blob'));
+          modelUrls.push(url);
+          return loadGltfUrl(url, name);
+        }
+        if (!gltf) throw new Error('Zip did not contain .glb or .gltf');
+
+        const map = new Map();
+        for (const entry of files) {
+          const url = URL.createObjectURL(await entry.async('blob'));
+          modelUrls.push(url);
+          map.set(entry.name, url);
+          map.set(entry.name.split('/').pop(), url);
+        }
+
+        const base = gltf.name.slice(0, gltf.name.lastIndexOf('/') + 1);
+        const manager = new THREE.LoadingManager();
+        manager.setURLModifier(raw => {
+          const clean = normalizeAssetPath(raw);
+          return map.get(clean) || map.get(base + clean) || map.get(clean.split('/').pop()) || raw;
+        });
+
+        const loader = new GLTFLoader(manager);
+        const text = await gltf.async('text');
+        await new Promise((resolve, reject) => {
+          loader.parse(text, '', parsed => {
+            disposeModel();
+            currentModel = parsed.scene || parsed.scenes[0];
+            scene.add(currentModel);
+            frame();
+            inspect(name);
+            resolve();
+          }, reject);
+        });
+      }
+
+      async function loadLocalFile(file) {
+        const n = file.name.toLowerCase();
+        const manager = makeLocalManager();
+
+        if (n.endsWith('.zip')) return loadZipFromBlob(file, file.name);
+        if (n.endsWith('.fbx')) return loadFbxFile(file, file.name, manager);
+
+        const url = URL.createObjectURL(file);
+        modelUrls.push(url);
+        return loadGltfUrl(url, file.name, manager);
+      }
+
+      async function loadFromSketchfabDownload(url, zipped, name) {
+        if (!zipped) return loadGltfUrl(url, name);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        return loadZipFromBlob(await res.blob(), name);
+      }
+
+      const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null;
+      resizeObserver?.observe(canvas.parentElement);
+      addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      return {
+        loadLocalFile,
+        loadUrl: loadGltfUrl,
+        loadFromSketchfabDownload,
+        frame,
+        applySelectedTextures,
+        toggleGrid: () => { grid.visible = !grid.visible; },
+        toggleWireframe: () => { wireframe = !wireframe; setWire(currentModel, wireframe); },
+      };
+    }
+
+    const viewer = createViewer();
+    setupUI();
+  </script>
+
+  <div id="licenseModalBackdrop" class="modalBackdrop" aria-hidden="true">
+    <div class="licenseModal" role="dialog" aria-modal="true" aria-labelledby="licenseModalTitle">
+      <div class="licenseModalHeader">
+        <h2 id="licenseModalTitle">Choose a Free License</h2>
+        <button id="closeLicenseModalBtn" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="licenseModalBody">
+        <div>
+          <div class="licenseGroupTitle">Standard</div>
+          <label class="licenseOption">
+            <input type="radio" name="licensePreset" id="licenseFreeStandard" value="free-st">
+            <div>
+              <strong>Free Standard</strong>
+              <span>Others can use your work worldwide, commercially or not, and in all types of derivative works.</span>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <div class="licenseGroupTitle">Creative Commons</div>
+          <div class="licenseNote">Note: NoAI tagging may not be compatible with CC licenses.</div>
+          <p class="muted" style="margin:.75rem 0 .25rem">Select what others can and can't do with your model:</p>
+
+          <label class="licenseOption">
+            <input type="checkbox" id="licenseAttribution" checked disabled>
+            <div>
+              <strong>Attribution</strong>
+              <span>Others can distribute, remix, tweak, and build upon your work as long as they credit you for the original creation.</span>
+            </div>
+          </label>
+
+          <label class="licenseOption">
+            <input type="checkbox" id="licenseNonCommercial">
+            <div>
+              <strong>Non Commercial</strong>
+              <span>Others can not use your work commercially.</span>
+            </div>
+          </label>
+
+          <label class="licenseOption">
+            <input type="checkbox" id="licenseNoDerivatives">
+            <div>
+              <strong>No derivatives</strong>
+              <span>Others can redistribute as long as it is passed along unchanged and in whole.</span>
+            </div>
+          </label>
+
+          <label class="licenseOption">
+            <input type="checkbox" id="licenseShareAlike">
+            <div>
+              <strong>Share alike</strong>
+              <span>Others can remix, tweak, and build upon your work as long as they license their new creations under the identical terms.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="modalActions">
+        <button id="cancelLicenseBtn" type="button">Cancel</button>
+        <button id="selectLicenseBtn" type="button" class="primary">Select</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="aiNoticeModal" class="modalBackdrop" aria-hidden="true">
+    <div class="licenseModal" role="dialog" aria-modal="true">
+      <div class="licenseModalHeader">
+        <h2>Set AI disclosure on Sketchfab</h2>
+        <button id="closeAiNoticeBtn" type="button">×</button>
+      </div>
+
+      <div class="licenseModalBody">
+        <p class="muted">
+          On the Sketchfab properties page, enable the “Created with generative AI tools” toggle.
+        </p>
+        <img src="ai-notice.png" alt="Where to enable AI disclosure on Sketchfab" style="width:100%;border-radius:14px;border:1px solid var(--line)">
+      </div>
+
+      <div class="modalActions">
+        <button id="continueToPropertiesBtn" class="primary" type="button">
+          Open Model Properties <span id="aiCountdownInline">(3)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

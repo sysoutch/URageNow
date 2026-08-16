@@ -1,0 +1,312 @@
+// Category cards establish the rail hierarchy; compact rows carry destinations.
+// This visual layer keeps the existing click and keyboard routing intact.
+
+$rail-category-views: ".view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active, .view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active";
+
+// URage Now is the theme-aware home card, not the legacy fire-orange brand.
+body:is(#{$rail-category-views}) [data-rail-category="studio"] { --rail-category-color: var(--rail-sidebar-accent); }
+body:is(#{$rail-category-views}) [data-rail-category="workflow"] { --rail-category-color: #c16cff; }
+body:is(#{$rail-category-views}) [data-rail-category="tools"] { --rail-category-color: #f5a83d; }
+body:is(#{$rail-category-views}) [data-rail-category="blender-addons"] { --rail-category-color: #bb72ff; }
+body:is(#{$rail-category-views}) [data-rail-category="assets"] { --rail-category-color: #5be4a1; }
+body:is(#{$rail-category-views}) [data-rail-category="bots"] { --rail-category-color: #75a9ff; }
+
+@media (min-width: 981px) {
+  // A category rail must keep one geometry regardless of the active view.
+  // The older messenger-specific 164px value made Bots narrower than every
+  // other expanded category and clipped its nested messenger destinations.
+  body:is(#{$rail-category-views}).studio-rail-expanded {
+    --server-rail-width: 224px !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-home-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    align-content: initial !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  // Keep the workflow list in normal document flow. Flattening it into the
+  // rail grid makes later Music/Video entries overlap the Tools category.
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-studio-workflows {
+    display: grid !important;
+    flex: 0 0 auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] {
+    --category-edge: color-mix(in srgb, var(--rail-category-color) 66%, transparent);
+    position: relative !important;
+    min-height: 56px !important;
+    height: 56px !important;
+    grid-template-columns: 38px minmax(0, 1fr) 20px !important;
+    gap: 10px !important;
+    padding: 8px 14px 8px 16px !important;
+    border: 1px solid var(--category-edge) !important;
+    border-radius: 0 !important;
+    background: linear-gradient(105deg, color-mix(in srgb, var(--rail-category-color) 19%, #121522 81%), color-mix(in srgb, var(--rail-sidebar-panel, var(--panel)) 94%, black 6%)) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 8%, transparent), 0 9px 20px color-mix(in srgb, var(--rail-category-color) 10%, transparent) !important;
+    color: color-mix(in srgb, var(--rail-category-color) 72%, white 28%) !important;
+    isolation: isolate;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category]::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -1px auto -1px -1px;
+    width: 4px;
+    background: linear-gradient(180deg, color-mix(in srgb, white 26%, var(--rail-category-color)), var(--rail-category-color));
+    box-shadow: 0 0 13px color-mix(in srgb, var(--rail-category-color) 68%, transparent);
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category]::after {
+    content: "\f285";
+    font-family: "bootstrap-icons";
+    justify-self: end;
+    color: color-mix(in srgb, var(--rail-category-color) 82%, white 18%);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    transition: color 180ms ease;
+  }
+
+  // URage NOW is the rail's home destination, not a collapsible group.
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category="studio"] {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category="studio"]::after {
+    content: none;
+  }
+
+  body.view-ai-active.studio-workflow-home-active [data-rail-category="workflow"]::after,
+  body.view-ai-active.studio-workflow-focused [data-rail-category="workflow"]::after,
+  body.view-tools-active [data-rail-category="tools"]::after,
+  body.view-blender-addons-active [data-rail-category="blender-addons"]::after,
+  body.view-assets-active [data-rail-category="assets"]::after,
+  body.view-dashboard-active [data-rail-category="bots"]::after,
+  body.studio-rail-hover-active[data-studio-rail-hover-group="workflow"] [data-rail-category="workflow"]::after,
+  body.studio-rail-hover-active[data-studio-rail-hover-group="tools"] [data-rail-category="tools"]::after,
+  body.studio-rail-hover-active[data-studio-rail-hover-group="blender-addons"] [data-rail-category="blender-addons"]::after,
+  body.studio-rail-hover-active[data-studio-rail-hover-group="assets"] [data-rail-category="assets"]::after,
+  body.studio-rail-hover-active[data-studio-rail-hover-group="bots"] [data-rail-category="bots"]::after {
+    content: "\f282";
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] .rail-home-label,
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] .rail-tools-label,
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] .rail-profile-label,
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] .rail-blender-addons-label,
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] .rail-assets-label {
+    display: block !important;
+    color: inherit !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: .1em !important;
+    line-height: 1.1 !important;
+    text-transform: uppercase !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] :is(.rail-home-mark, .rail-tools-mark, .rail-profile-mark) {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] :is(svg, .bi) {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections) {
+    position: relative;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections)::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 26px;
+    width: 1px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--line) 18%, transparent), color-mix(in srgb, var(--rail-sidebar-accent) 50%, transparent), color-mix(in srgb, var(--line) 18%, transparent));
+    pointer-events: none;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button) {
+    position: relative !important;
+    z-index: 1;
+    min-height: 38px !important;
+    height: 38px !important;
+    grid-template-columns: 24px minmax(0, 1fr) !important;
+    gap: 9px !important;
+    padding: 5px 14px 5px 48px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: color-mix(in srgb, var(--ink) 78%, var(--muted) 22%) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: .01em !important;
+    line-height: 1 !important;
+    text-transform: none !important;
+  }
+
+  // Every expanded destination uses the same compact geometry. Individual
+  // destinations provide only their accent token, never a separate icon box,
+  // font scale, or border system.
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) {
+    width: 24px !important;
+    height: 24px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    flex: 0 0 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--rail-icon-color, var(--rail-workflow-color, var(--accent))) !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) :is(svg, .bi) {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    color: var(--rail-icon-color, var(--rail-workflow-color, var(--accent))) !important;
+    stroke: var(--rail-icon-color, var(--rail-workflow-color, var(--accent))) !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) svg [fill]:not([fill="none"]) {
+    fill: var(--rail-icon-color, var(--rail-workflow-color, var(--accent))) !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button)::before {
+    content: "";
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    width: 10px;
+    height: 1px;
+    background: color-mix(in srgb, var(--rail-icon-color, var(--accent)) 68%, transparent);
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button):hover {
+    background: color-mix(in srgb, var(--rail-icon-color, var(--accent)) 10%, transparent) !important;
+    color: var(--ink) !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button):is(.active, .active-focus) {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--rail-icon-color, var(--accent)) 20%, transparent), transparent 72%) !important;
+    box-shadow: inset 3px 0 0 var(--rail-icon-color, var(--accent)), 0 0 16px color-mix(in srgb, var(--rail-icon-color, var(--accent)) 18%, transparent) !important;
+    color: var(--ink) !important;
+  }
+
+  // Workflow icons communicate their medium even while they live under the
+  // purple LazyDev category. Never inherit the category accent into them.
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-studio-workflow-button.is-chat { --rail-icon-color: var(--rail-icon-chat) !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-studio-workflow-button.is-image { --rail-icon-color: var(--rail-icon-image) !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-studio-workflow-button.is-model3d { --rail-icon-color: var(--rail-icon-model3d) !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-studio-workflow-button.is-audio { --rail-icon-color: var(--rail-icon-audio) !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-studio-workflow-button.is-music { --rail-icon-color: var(--rail-icon-music) !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-studio-workflow-button.is-video { --rail-icon-color: var(--rail-icon-video) !important; }
+
+  // Resource and messenger entries use the same child-row component. Unlike
+  // workflow rows, their legacy markup had no color token, so declare one at
+  // the source instead of allowing neutral text color to leak into the icon.
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-3d-suite="blender"] { --rail-icon-color: #ff7a38 !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-3d-suite="3ds-max"] { --rail-icon-color: #be7cff !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-3d-suite="houdini"] { --rail-icon-color: #75e2a0 !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-3d-suite="cinema-4d"] { --rail-icon-color: #b785ff !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-messenger="discord"] { --rail-icon-color: #8ba8ff !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-messenger="telegram"] { --rail-icon-color: #58c5ff !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-messenger="matrix"] { --rail-icon-color: #67dfa1 !important; }
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-section-button[data-messenger="whatsapp"] { --rail-icon-color: #56dd82 !important; }
+
+  // Bots is a flat application switcher, not a tree. Keep legacy messenger
+  // styles from reintroducing a separate border, inset, or tree connectors.
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-sections[data-resource-rail-group="bots"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-sections[data-resource-rail-group="bots"]::before,
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-resource-sections[data-resource-rail-group="bots"] .rail-resource-section-button::before {
+    content: none !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-bottom {
+    gap: 0 !important;
+    padding: 10px 0 0 !important;
+    border-top: 0 !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-bottom::before {
+    content: "";
+    display: block;
+    height: 1px;
+    margin: 0 14px 8px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--line-strong) 70%, transparent), transparent);
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-settings-button {
+    min-height: 38px !important;
+    height: 38px !important;
+    grid-template-columns: 26px minmax(0, 1fr) !important;
+    gap: 9px !important;
+    padding: 5px 16px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body:is(#{$rail-category-views}).studio-rail-expanded .rail-settings-button:hover {
+    background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+    transform: none !important;
+  }
+
+  // The dark rail uses a metallic near-black base. Reusing that base in the
+  // light theme turned every category into a heavy grey slab, so light gets a
+  // quiet paper surface with color reserved for the edge and icon.
+  body[data-dashboard-theme="light"]:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category] {
+    --category-edge: color-mix(in srgb, var(--rail-category-color) 44%, #94a9bf 56%);
+    background: linear-gradient(
+      105deg,
+      color-mix(in srgb, var(--rail-category-color) 8%, #ffffff 92%),
+      color-mix(in srgb, var(--studio-rail-bg) 48%, #ffffff 52%)
+    ) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94), 0 2px 7px rgba(37, 67, 97, .08) !important;
+    color: color-mix(in srgb, var(--rail-category-color) 62%, #172b40 38%) !important;
+  }
+
+  body[data-dashboard-theme="light"]:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category]::before {
+    box-shadow: 0 0 6px color-mix(in srgb, var(--rail-category-color) 34%, transparent);
+  }
+
+  body[data-dashboard-theme="light"]:is(#{$rail-category-views}).studio-rail-expanded [data-rail-category]::after {
+    color: color-mix(in srgb, var(--rail-category-color) 68%, #31465d 32%);
+  }
+
+  body[data-dashboard-theme="light"]:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button):hover {
+    background: color-mix(in srgb, var(--rail-icon-color, var(--accent)) 8%, transparent) !important;
+  }
+
+  body[data-dashboard-theme="light"]:is(#{$rail-category-views}).studio-rail-expanded :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button):is(.active, .active-focus) {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--rail-icon-color, var(--accent)) 14%, transparent), transparent 76%) !important;
+    box-shadow: inset 3px 0 0 var(--rail-icon-color, var(--accent)) !important;
+  }
+}

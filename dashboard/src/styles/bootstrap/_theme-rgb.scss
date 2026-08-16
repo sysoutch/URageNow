@@ -1,0 +1,32 @@
+body[data-dashboard-theme="light"] {
+  --dashboard-bootstrap-primary-rgb: 122, 147, 186;
+}
+
+body[data-dashboard-theme="smoke"] {
+  --dashboard-bootstrap-primary-rgb: 111, 121, 136;
+}
+
+body[data-dashboard-theme="water"] {
+  --dashboard-bootstrap-primary-rgb: 63, 181, 255;
+}
+
+body[data-dashboard-theme="blood"] {
+  --dashboard-bootstrap-primary-rgb: 211, 25, 56;
+}
+
+body[data-dashboard-theme="love"] {
+  --dashboard-bootstrap-primary-rgb: 236, 76, 168;
+}
+
+body[data-dashboard-theme="purple"],
+body[data-dashboard-theme="crystal"] {
+  --dashboard-bootstrap-primary-rgb: 178, 105, 255;
+}
+
+body[data-dashboard-theme="nature"] {
+  --dashboard-bootstrap-primary-rgb: 92, 201, 132;
+}
+
+body[data-dashboard-theme="rock"] {
+  --dashboard-bootstrap-primary-rgb: 164, 161, 154;
+}

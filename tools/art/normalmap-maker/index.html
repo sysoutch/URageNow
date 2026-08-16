@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Normal map generator for textures, sprites, and materials." />
+  <title>Normal Map Generator</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-tool-bridge.js"></script>
+  <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+  <main class="app">
+    <header>
+      <div>
+        <h1>Normal Map Generator</h1>
+        <p class="subtitle">Generate tangent-space normal maps from height, luminance, or alpha textures directly in the browser. Supports per-image output or multi-texture blending, live preview, adjustable kernels, blur, tiling, inversion, and production export.</p>
+      </div>
+      <div class="badge">⚡ Client-side normal workflow</div>
+    </header>
+
+    <section class="grid">
+      <aside class="panel stack" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Normal Map Controls">
+        <section class="stack">
+          <h2>Source textures</h2>
+          <div class="upload-card-wrapper">
+            <label class="upload-card" for="fileInput">
+              <span class="upload-card-icon arrow-icon">&#8595;</span>
+              <strong>Drop images here or click to browse</strong>
+              <small>PNG, JPG, WebP, AVIF. Use one image at a time or batch several and switch between individual normals.</small>
+              <input id="fileInput" type="file" accept="image/*" multiple hidden />
+            </label>
+          </div>
+          <div class="row">
+            <button class="btn" id="addBtn">Add textures</button>
+            <button class="btn danger" id="clearBtn">Clear</button>
+          </div>
+          <div class="texture-list" id="textureList"></div>
+        </section>
+
+        <section class="stack">
+          <h2>Normal generation</h2>
+          <div class="field">
+            <label for="multiMode">Multiple images</label>
+            <select id="multiMode">
+              <option value="each" selected>Generate each image separately</option>
+              <option value="combined">Blend all images into one normal map</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="heightSource">Height source</label>
+            <select id="heightSource">
+              <option value="luminance">Luminance / grayscale</option>
+              <option value="alpha">Alpha channel</option>
+              <option value="red">Red channel</option>
+              <option value="green">Green channel</option>
+              <option value="blue">Blue channel</option>
+              <option value="max">Max RGB channel</option>
+              <option value="min">Min RGB channel</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="row spread"><label for="strength">Strength</label><span id="strengthVal">1.00</span></div>
+            <div class="range-line"><input id="strength" type="range" min="0" max="10" value="2" step="0.01"><input id="strengthNum" type="number" min="0" max="10" value="2" step="0.01"></div>
+          </div>
+
+          <div class="field">
+            <div class="row spread"><label for="zDepth">Z depth</label><span id="zDepthVal">1.00</span></div>
+            <input id="zDepth" type="range" min="0.1" max="5" value="1" step="0.01">
+          </div>
+
+          <div class="field">
+            <label for="kernel">Gradient kernel</label>
+            <select id="kernel">
+              <option value="central">Central difference</option>
+              <option value="sobel">Sobel 3×3</option>
+              <option value="scharr">Scharr 3×3</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="row spread"><label for="blur">Pre-blur radius</label><span id="blurVal">0 px</span></div>
+            <input id="blur" type="range" min="0" max="8" value="0" step="1">
+          </div>
+
+          <div class="row">
+            <div class="check"><input id="invertX" type="checkbox"><label for="invertX">Invert X / red</label></div>
+            <div class="check"><input id="invertY" type="checkbox"><label for="invertY">Invert Y / green</label></div>
+            <div class="check"><input id="tile" type="checkbox" checked><label for="tile">Tile edges</label></div>
+            <div class="check"><input id="normalizeTextures" type="checkbox" checked><label for="normalizeTextures">Average texture count</label></div>
+          </div>
+        </section>
+
+        <section class="stack">
+          <h2>Output</h2>
+          <div class="field">
+            <label for="sizeMode">Canvas size</label>
+            <select id="sizeMode">
+              <option value="base">Base texture size</option>
+              <option value="512">512 × 512</option>
+              <option value="1024">1024 × 1024</option>
+              <option value="2048">2048 × 2048</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="row" id="customSizeRow" hidden>
+            <input id="customW" type="number" min="1" max="8192" value="1024" aria-label="Custom width">
+            <input id="customH" type="number" min="1" max="8192" value="1024" aria-label="Custom height">
+          </div>
+          <div class="field">
+            <label for="format">Export format</label>
+            <select id="format">
+              <option value="image/png">PNG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="generateBtn">Generate</button>
+            <button class="btn" id="downloadBtn" disabled>Download normal map</button>
+            <button class="btn ghost" id="copyBtn" disabled>Copy PNG</button>
+          </div>
+          <p class="help">Tip: use Sobel or Scharr for sharper surfaces, blur for smoother fabric/organic maps, and tile edges for seamless textures.</p>
+        </section>
+      </aside>
+
+      <section class="stack">
+        <div class="panel">
+          <div class="preview-grid">
+            <article class="canvas-card"><h3>Base texture</h3><canvas id="baseCanvas"></canvas></article>
+            <article class="canvas-card"><h3>Height preview</h3><canvas id="heightCanvas"></canvas></article>
+            <article class="canvas-card"><h3>Normal map</h3><canvas id="normalCanvas"></canvas></article>
+          </div>
+        </div>
+        <div class="panel stats" id="stats">
+          <div class="stat"><span>Textures</span><b id="statTextures">0</b></div>
+          <div class="stat"><span>Output</span><b id="statSize">—</b></div>
+          <div class="stat"><span>Kernel</span><b id="statKernel">Central</b></div>
+          <div class="stat"><span>Status</span><b id="statStatus">Ready</b></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

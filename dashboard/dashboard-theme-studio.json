@@ -1,0 +1,35 @@
+{
+  "themes": {
+    "blood": { "label": "UDead", "imagePath": "/assets/dashboard-theme-logo.png?theme=blood" },
+    "fire": { "label": "URage", "imagePath": "/assets/dashboard-theme-logo.png?theme=fire" },
+    "light": { "label": "ULight", "imagePath": "/assets/dashboard-theme-logo.png?theme=light" },
+    "smoke": { "label": "USmoke", "imagePath": "/assets/dashboard-theme-logo.png?theme=smoke" },
+    "nature": { "label": "UDope", "imagePath": "/assets/dashboard-theme-logo.png?theme=nature" },
+    "water": { "label": "UCool", "imagePath": "/assets/dashboard-theme-logo.png?theme=water" },
+    "love": { "label": "ULove", "imagePath": "/assets/dashboard-theme-logo.png?theme=love" },
+    "crystal": { "label": "UChill", "imagePath": "/assets/dashboard-theme-logo.png?theme=crystal" },
+    "purple": { "label": "UChill", "imagePath": "/assets/dashboard-theme-logo.png?theme=crystal" },
+    "rock": { "label": "URock", "imagePath": "/assets/dashboard-theme-logo.png?theme=rock" }
+  },
+  "variables": {
+    "--bg": "#0f1620",
+    "--bg-2": "#162231",
+    "--rail": "#121a27",
+    "--sidebar": "#1b2a3b",
+    "--surface": "#1f3144",
+    "--panel": "#24384d",
+    "--panel-alt": "#1a2c3f",
+    "--line": "rgba(117,206,255,0.2)",
+    "--line-strong": "rgba(117,206,255,0.34)",
+    "--ink": "#f1f8ff",
+    "--muted": "#a7c2d9",
+    "--accent": "#35b8ff",
+    "--accent-2": "#2199de",
+    "--accent-3": "#83d8ff",
+    "--accent-soft": "rgba(53,184,255,0.2)",
+    "--card-glow": "rgba(5,31,54,0.24)",
+    "--shell-radius": "14px",
+    "--panel-radius": "14px",
+    "--font-family-base": "\"Trebuchet MS\", \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif"
+  }
+}

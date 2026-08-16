@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFX Generator</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+    <div class="app-wrapper">
+        <div class="container">
+            <h1>URage Pulse</h1>
+            
+            <span class="section-label">Presets</span>
+            <div class="button-group">
+                <button onclick="applyPreset('jump')">🚀 Jump</button>
+                <button onclick="applyPreset('explosion')">💥 Boom</button>
+                <button onclick="applyPreset('blip')">✨ Blip</button>
+                <button onclick="applyPreset('laser')">🔫 Laser</button>
+                <button onclick="applyPreset('powerup')">⚡ Powerup</button>
+                <button onclick="applyPreset('shoot')">🎯 Shoot</button>
+                <button onclick="applyPreset('hit')">💥 Hit</button>
+                <button onclick="applyPreset('bounce')">🏀 Bounce</button>
+            </div>
+
+            <span class="section-label">Waveform</span>
+            <div class="button-group" id="waveSelectors">
+                <button onclick="setWave('square', this)" class="active">Square</button>
+                <button onclick="setWave('sawtooth', this)">Saw</button>
+                <button onclick="setWave('sine', this)">Sine</button>
+                <button onclick="setWave('triangle', this)">Tri</button>
+                <button class="lock-btn" id="lock-wave" onclick="toggleLock(this)">� Lock Waveform</button>
+            </div>
+
+
+            <div class="visualizer-container">
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <button class="btn-random" onclick="randomize()">🎲 Randomize Params</button>
+
+            <div class="controls" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="SFX Controls">
+                <div class="control-group">
+                    <div class="control-header">
+                        <label>Freq</label>
+                    </div>
+                    <input type="range" id="freq" min="50" max="2000" value="440">
+                    <button class="lock-btn" id="lock-freq" onclick="toggleLock(this)">🔓</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label>Length</label>
+                    </div>
+                    <input type="range" id="duration" min="0.05" max="2.0" step="0.05" value="0.3">
+                    <button class="lock-btn" id="lock-duration" onclick="toggleLock(this)">🔓</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label>Slide</label>
+                    </div>
+                    <input type="range" id="slide" min="-1000" max="1000" step="10" value="-400">
+                    <button class="lock-btn" id="lock-slide" onclick="toggleLock(this)">🔓</button>
+                </div>
+
+                <span class="section-label">Envelope (ADSR)</span>
+                <div class="adsr-grid">
+                    <div class="control-group">
+                        <label>Atk</label>
+                        <input type="range" id="attack" min="0" max="0.5" step="0.01" value="0.01">
+                        <button class="lock-btn" id="lock-attack" onclick="toggleLock(this)">🔓</button>
+                    </div>
+                    <div class="control-group">
+                        <label>Dec</label>
+                        <input type="range" id="decay" min="0" max="0.5" step="0.01" value="0.1">
+                        <button class="lock-btn" id="lock-decay" onclick="toggleLock(this)">🔓</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-actions">
+                <button class="btn-play" onclick="playSFX()">🔊 PLAY</button>
+                <button class="btn-download" onclick="downloadSFX()">💾 WAV</button>
+                <button class="btn-save" onclick="savePreset()">💾 Save Preset</button>
+                <button class="btn-load" onclick="loadPresets()">📂 Load Preset</button>
+            </div>
+        </div>
+
+        <div class="presets-sidebar">
+            <h3>Saved Presets</h3>
+            <div id="presets-container">
+                <!-- Presets will be displayed here -->
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

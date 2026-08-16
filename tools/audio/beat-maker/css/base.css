@@ -1,0 +1,156 @@
+:root {
+  --bg: #07111f;
+  --panel: rgba(10, 20, 36, 0.84);
+  --panel-2: rgba(16, 28, 48, 0.92);
+  --line: rgba(255,255,255,0.08);
+  --text: #e8eefc;
+  --muted: #90a0c0;
+  --accent: #79a8ff;
+  --step-off: rgba(255,255,255,0.05);
+  --step-current: rgba(255,255,255,0.12);
+  --kick: #ff6b7a;
+  --snare: #45b6ff;
+  --hat: #ffd84a;
+  --clap: #b06cff;
+  --bass: #36d399;
+  --chord: #7c8cff;
+  --perc: #ff9f43;
+  --fx: #6ee7ff;
+}
+
+/* =========================================================
+   THEMES
+========================================================= */
+
+body[data-dashboard-theme="fire"] {
+  --bg: #120806;
+  --panel: rgba(27, 15, 13, 0.92);
+  --panel-2: rgba(38, 22, 18, 0.96);
+  --text: #f8f2ee;
+  --muted: #c3b1a8;
+  --accent: #ff7b42;
+}
+
+body[data-dashboard-theme="water"] {
+  --bg: #07111f;
+  --panel: rgba(10, 20, 36, 0.92);
+  --panel-2: rgba(16, 28, 48, 0.96);
+  --text: #e8eefc;
+  --muted: #90a0c0;
+  --accent: #79a8ff;
+}
+
+body[data-dashboard-theme="nature"] {
+  --bg: #0a140d;
+  --panel: rgba(18, 29, 20, 0.92);
+  --panel-2: rgba(24, 37, 27, 0.96);
+  --text: #eff8ee;
+  --muted: #a9c0a2;
+  --accent: #8fd36b;
+}
+
+body[data-dashboard-theme="rock"] {
+  --bg: #14100d;
+  --panel: rgba(29, 24, 20, 0.92);
+  --panel-2: rgba(38, 31, 25, 0.96);
+  --text: #f4efe8;
+  --muted: #bcae9e;
+  --accent: #d1c2ad;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--accent) 26%, transparent),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 24%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--bg) 86%, black),
+      var(--bg) 48%,
+      color-mix(in srgb, var(--bg) 82%, var(--accent))
+    );
+}
+
+/* =========================================================
+   SCROLLBARS
+========================================================= */
+
+.sidebar::-webkit-scrollbar,
+.content::-webkit-scrollbar,
+#lanes::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.content::-webkit-scrollbar-track,
+#lanes::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb,
+#lanes::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.14);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.content::-webkit-scrollbar-thumb:hover,
+#lanes::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,.24);
+}
+
+/* =========================================================
+   HERO (unused but kept for compatibility)
+========================================================= */
+
+.hero {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 46px);
+  letter-spacing: -.03em;
+}
+
+.hero p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}

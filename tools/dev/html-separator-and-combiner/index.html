@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>HTML Separator & Combiner | URage Dev Tools</title>
+    <meta name="description" content="Effortlessly split HTML files into separate CSS and JS files, or merge multiple web assets into a single, portable HTML file.">
+    <link rel="canonical" href="https://tools.urage.net/dev/html-separator-and-combiner">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tools.urage.net/dev/html-separator-and-combiner">
+    <meta property="og:title" content="HTML Separator & Combiner - Clean Your Web Code">
+    <meta property="og:description" content="Extract CSS and JS from HTML or combine them back into a single file instantly. Perfect for web developers and code cleaning.">
+    <meta property="og:image" content="https://tools.urage.net/dev/html-separator-and-combiner/thumbnail.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="HTML Separator & Combiner">
+    <meta name="twitter:description" content="Split or merge HTML, CSS, and JS files with one click.">
+    <meta name="twitter:image" content="https://tools.urage.net/dev/html-separator-and-combiner/thumbnail.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="/tools/shared/css/upload-btn.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+<div class="app-wrapper">
+<div class="container">
+    <header>
+        <h1>HTML Separator & Combiner</h1>
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-sep" onclick="switchTab('separator')">SEPARATE FILES</button>
+            <button class="tab-btn" id="tab-comb" onclick="switchTab('combiner')">COMBINE INTO ONE</button>
+        </div>
+    </header>
+    
+    <div id="separator" class="mode-section active">
+        <div class="card">
+            <label class="upload-btn" for="fileInput" id="dropArea">
+                <span class="upload-btn-icon">📄</span>
+                <span class="upload-btn-text">Drag & Drop HTML file or click to upload</span>
+                <input type="file" id="fileInput" accept=".html,.htm" hidden>
+            </label>
+            <textarea id="sepInput" placeholder="Paste full HTML here...">
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;Test Page&lt;/title&gt;
+
+&lt;style&gt;
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+h1 {
+    color: #333;
+    text-align: center;
+}
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+button:hover {
+    background-color: #0056b3;
+}
+.message {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    display: none;
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class=&quot;container&quot;&gt;
+        &lt;h1&gt;Test Page&lt;/h1&gt;
+        &lt;button id=&quot;testBtn&quot;&gt;Click Me!&lt;/button&gt;
+        &lt;div class=&quot;message&quot; id=&quot;message&quot;&gt;
+            Button was clicked!
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+&lt;script&gt;
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('testBtn');
+    const message = document.getElementById('message');
+    
+    btn.addEventListener('click', function() {
+        message.style.display = 'block';
+        message.style.backgroundColor = '#d4edda';
+        message.style.borderColor = '#c3e6cb';
+        
+        setTimeout(function() {
+            message.style.display = 'none';
+        }, 3000);
+    });
+});
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+            <button class="btn btn-action" onclick="runSeparator()">Separate Components</button>
+        </div>
+
+        <div class="output-grid">
+            <div class="code-box">
+                <div class="code-header"><span>index.html</span><div class="header-btns"><button class="btn btn-copy" onclick="copy('html', this)">Copy</button><button class="btn btn-download" onclick="download('html')">Download</button></div></div>
+                <pre><code class="language-markup" id="outHtml"></code></pre>
+            </div>
+            <div class="code-box">
+                <div class="code-header"><span>style.css</span><div class="header-btns"><button class="btn btn-copy" onclick="copy('css', this)">Copy</button><button class="btn btn-download" onclick="download('css')">Download</button></div></div>
+                <pre><code class="language-css" id="outCss"></code></pre>
+            </div>
+            <div class="code-box">
+                <div class="code-header"><span>script.js</span><div class="header-btns"><button class="btn btn-copy" onclick="copy('js', this)">Copy</button><button class="btn btn-download" onclick="download('js')">Download</button></div></div>
+                <pre><code class="language-javascript" id="outJs"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="combiner" class="mode-section">
+        <div class="card">
+            <div class="combiner-grid">
+                <textarea id="combHtml" placeholder="Paste HTML structure..."></textarea>
+                <textarea id="combCss" placeholder="Paste CSS..."></textarea>
+                <textarea id="combJs" placeholder="Paste Javascript..."></textarea>
+            </div>
+            <button class="btn btn-action" onclick="runCombiner()">Merge into Single File</button>
+        </div>
+        <div class="code-box" style="max-width: 1100px; margin: auto;">
+            <div class="code-header"><span>Project-Single.html</span><div class="header-btns"><button class="btn btn-copy" onclick="copy('combined', this)">Copy</button><button class="btn btn-download" onclick="download('combined')">Download</button></div></div>
+            <pre><code class="language-markup" id="outCombined"></code></pre>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+</div>
+<script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

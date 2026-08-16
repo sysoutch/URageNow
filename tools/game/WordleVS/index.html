@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" data-dashboard-theme="urage">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordleVS - Competitive Wordle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <div id="game-container">
+        <header class="app-header">
+            <div class="brand-block">
+                <div class="brand-lockup">
+                    <div class="brand-mark" aria-hidden="true">
+                        <svg viewBox="0 0 64 64" role="presentation" focusable="false">
+                            <defs>
+                                <linearGradient id="brandGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffd47d"></stop>
+                                    <stop offset="100%" stop-color="#4ba7ff"></stop>
+                                </linearGradient>
+                            </defs>
+                            <rect x="6" y="6" width="52" height="52" rx="16" fill="rgba(7, 17, 31, 0.88)" stroke="url(#brandGlow)" stroke-width="2.5"></rect>
+                            <rect x="14" y="16" width="10" height="10" rx="3" fill="#56c28f"></rect>
+                            <rect x="27" y="16" width="10" height="10" rx="3" fill="#d9ab4d"></rect>
+                            <rect x="40" y="16" width="10" height="10" rx="3" fill="#4ba7ff"></rect>
+                            <path d="M16 40L23 48L32 31L41 48L48 40" fill="none" stroke="url(#brandGlow)" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"></path>
+                        </svg>
+                    </div>
+                    <div class="brand-copy">
+                        <p class="eyebrow">Local Ollama Word Arena</p>
+                        <h1>WordleVS</h1>
+                        <p class="hero-copy">Competitive Wordle with AI rivals, reusable sources, and prompt-guided Wordle inference.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-info" class="info-ribbon">
+                <div id="timer" class="info-chip">Time <span id="time-left">0</span>s</div>
+                <div id="mode-info" class="info-chip">Mode <span id="current-mode">Standard</span></div>
+                <div id="round-info" class="info-chip">Round <span id="round-number">0</span></div>
+                <div id="status-info" class="info-chip status-chip">Status <span id="round-status">Setup</span></div>
+            </div>
+        </header>
+
+        <section id="setup-screen" class="panel setup-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Match Setup</p>
+                    <h2>Build the next round</h2>
+                </div>
+            </div>
+
+            <div class="setup-intro">
+                <div class="setup-intro-copy">
+                    <span class="pill">Setup Wizard</span>
+                    <h3>Set up the match without scrolling</h3>
+                    <p>Move through one setup section at a time. The navigation stays fixed at the bottom, so the next action is always visible.</p>
+                </div>
+                <div class="setup-intro-points">
+                    <div class="intro-point" id="setup-step-count"><span>1</span> Step 1 of 4</div>
+                    <div class="intro-point" id="setup-step-hint"><span>2</span> Players and mode</div>
+                </div>
+            </div>
+
+            <div class="setup-wizard-tabs" role="tablist" aria-label="Setup steps">
+                <button type="button" class="setup-wizard-tab is-active" data-step-key="basics">Match</button>
+                <button type="button" class="setup-wizard-tab" data-step-key="engine">Engine</button>
+                <button type="button" class="setup-wizard-tab" data-step-key="ai">AI</button>
+                <button type="button" class="setup-wizard-tab" data-step-key="sources">Sources</button>
+            </div>
+
+            <div class="setup-shell">
+                <div class="setup-main">
+                <section class="setup-card setup-card-primary setup-hero-card setup-step is-active" data-step-key="basics">
+                    <div class="card-heading">
+                        <div>
+                            <p class="eyebrow">Essentials</p>
+                            <h3>Quick match</h3>
+                        </div>
+                        <p>Fresh generation is the default path. Open the advanced panels only when this round needs more control.</p>
+                    </div>
+
+                    <div class="preset-strip">
+                        <button type="button" id="preset-you-vs-ai" class="preset-btn secondary-btn">You vs AI</button>
+                        <button type="button" id="preset-ai-vs-ai" class="preset-btn secondary-btn">AI vs AI</button>
+                    </div>
+
+                    <div class="setup-mini-grid">
+                        <div class="setup-group">
+                            <label for="human-player-count">Human Players</label>
+                            <select id="human-player-count">
+                                <option value="0">0 Humans</option>
+                                <option value="1">1 Human</option>
+                                <option value="2" selected>2 Humans</option>
+                                <option value="3">3 Humans</option>
+                                <option value="4">4 Humans</option>
+                            </select>
+                        </div>
+
+                        <div class="setup-group">
+                            <label for="ai-player-count">AI Players</label>
+                            <select id="ai-player-count">
+                                <option value="0" selected>0 AIs</option>
+                                <option value="1">1 AI</option>
+                                <option value="2">2 AIs</option>
+                                <option value="3">3 AIs</option>
+                                <option value="4">4 AIs</option>
+                            </select>
+                            <div class="helper-text">Use `0 humans + N AIs` for AI vs AI matches.</div>
+                        </div>
+
+                        <div class="setup-group">
+                            <label for="game-mode">Game Mode</label>
+                            <select id="game-mode">
+                                <option value="standard">Standard</option>
+                                <option value="timed">X games in Y seconds</option>
+                                <option value="elimination">Elimination</option>
+                            </select>
+                        </div>
+
+                        <div class="setup-group">
+                            <label for="peek-mode">Peek Mode</label>
+                            <select id="peek-mode">
+                                <option value="open" selected>Open letters</option>
+                                <option value="colors">Only green / yellow / grey</option>
+                                <option value="none">No peek</option>
+                            </select>
+                            <div class="helper-text">Controls how much of the other boards stays visible during the round.</div>
+                        </div>
+
+                        <div class="setup-group">
+                            <label for="game-language">Language</label>
+                            <select id="game-language">
+                                <option value="English" selected>English</option>
+                                <option value="German">German</option>
+                                <option value="French">French</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="custom">Custom...</option>
+                            </select>
+                            <input type="text" id="custom-language" class="hidden" placeholder="Enter language name">
+                        </div>
+
+                        <div class="setup-group">
+                            <label for="word-length">Word Length</label>
+                            <input type="number" id="word-length" value="5" min="3" max="12">
+                        </div>
+                    </div>
+
+                    <div class="option-panel">
+                        <label class="option-panel-copy" for="team-mode-enabled">
+                            <span class="option-panel-title">Enable team mode</span>
+                            <span class="helper-text">Split boards into two teams, keep a shared hint chat per team, and show team labels during the match.</span>
+                        </label>
+                        <input type="checkbox" id="team-mode-enabled">
+                    </div>
+
+                    <div id="timed-options" class="hidden inset-group">
+                        <div class="subsection-heading">
+                            <h4>Timed match rules</h4>
+                            <p>Define the win target and total clock.</p>
+                        </div>
+                        <div class="setup-mini-grid">
+                            <div class="setup-group">
+                                <label for="target-games">Target Games</label>
+                                <input type="number" id="target-games" value="5" min="0">
+                                <div class="helper-text">Use `0` for unlimited rounds until the timer expires.</div>
+                            </div>
+                            <div class="setup-group">
+                                <label for="time-limit">Time Limit (s)</label>
+                                <input type="number" id="time-limit" value="300" min="10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="elimination-options" class="hidden inset-group">
+                        <div class="subsection-heading">
+                            <h4>Elimination checkpoints</h4>
+                            <p>Each round uses a survival clock. Players must reach the required green-letter count at each checkpoint or they are eliminated.</p>
+                        </div>
+                        <div class="setup-mini-grid">
+                            <div class="setup-group">
+                                <label for="elimination-round-time">Round Time (s)</label>
+                                <input type="number" id="elimination-round-time" value="30" min="5">
+                            </div>
+                            <div class="setup-group">
+                                <label for="elimination-checkpoints">Checkpoints</label>
+                                <input type="number" id="elimination-checkpoints" value="3" min="1" max="6">
+                                <div class="helper-text">Requirements scale automatically from early progress to a final solve checkpoint.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-start-panel">
+                        <div class="quick-start-copy">
+                            <h4>Default round source</h4>
+                            <p>Rounds start from a fresh LLM-built candidate pool. Expand "Reusable sources and builder" to switch to uploaded lists or stored LLM memory.</p>
+                        </div>
+                        <p class="quick-start-note">During the match, click a human board to route keyboard input there. AI-only matches run on their own.</p>
+                    </div>
+                </section>
+
+                <div class="setup-disclosures">
+                    <details class="setup-disclosure setup-step" data-step-key="engine" open>
+                        <summary>
+                            <div class="setup-disclosure-heading">
+                                <span class="pill">Round engine</span>
+                                <h3>Model and candidate rules</h3>
+                            </div>
+                            <p>Choose how the word pool is generated and how strict the allowed answers should be.</p>
+                        </summary>
+                        <div class="setup-disclosure-body">
+                            <div class="setup-mini-grid">
+                                <div class="setup-group">
+                                    <label for="word-model">Word Generator Model</label>
+                                    <select id="word-model">
+                                        <option value="llama3.1:8b" selected>llama3.1:8b</option>
+                                        <option value="llama3.2:3b">llama3.2:3b</option>
+                                        <option value="mistral">mistral</option>
+                                        <option value="custom">Custom...</option>
+                                    </select>
+                                    <input type="text" id="custom-word-model" class="hidden" placeholder="Enter word-generator model name">
+                                </div>
+
+                                <div class="setup-group">
+                                    <label for="word-pool-size">Candidate Pool Size</label>
+                                    <input type="number" id="word-pool-size" value="50" min="10" max="150">
+                                    <div class="helper-text">The model returns this many candidates, then the app picks randomly.</div>
+                                </div>
+                            </div>
+
+                            <div class="inset-group">
+                                <div class="subsection-heading">
+                                    <h4>Word style</h4>
+                                    <p>Control how strict and how local the generated candidate pool should feel.</p>
+                                </div>
+                                <div class="setup-check">
+                                    <input type="checkbox" id="word-style-singular">
+                                    <label for="word-style-singular">Only singular words (noun singular)</label>
+                                </div>
+                                <div class="setup-check">
+                                    <input type="checkbox" id="word-style-extended">
+                                    <label for="word-style-extended">Allow language-specific letters (for example AE/OE style alphabets with diacritics)</label>
+                                </div>
+                                <div class="setup-group">
+                                    <label for="word-style-custom">Custom style prompt</label>
+                                    <textarea id="word-style-custom" rows="3" placeholder="Example: prefer everyday words, avoid archaic terms"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details id="ai-options" class="setup-disclosure setup-step hidden" data-step-key="ai">
+                        <summary>
+                            <div class="setup-disclosure-heading">
+                                <span class="pill">AI players</span>
+                                <h3>Shared AI behavior</h3>
+                            </div>
+                            <p>Keep tactics shared, but assign models per AI board.</p>
+                        </summary>
+                        <div class="setup-disclosure-body">
+                            <div class="setup-mini-grid">
+                                <div class="setup-group">
+                                    <label for="ai-tactic">AI Tactic</label>
+                                    <select id="ai-tactic">
+                                        <option value="calm">Calm (Strategic, thinks more)</option>
+                                        <option value="impatient">Impatient (Fast, reckless)</option>
+                                        <option value="balanced" selected>Balanced</option>
+                                    </select>
+                                </div>
+
+                                <div class="setup-group">
+                                    <label for="ai-backend">AI Backend</label>
+                                    <select id="ai-backend">
+                                        <option value="llm" selected>LLM (Ollama)</option>
+                                        <option value="computer">Computer (local heuristic)</option>
+                                    </select>
+                                    <div class="helper-text">`Computer` uses only app-side logic and the known word universe. No Ollama calls.</div>
+                                </div>
+
+                                <div class="setup-group">
+                                    <label for="ai-word-knowledge">AI Word Knowledge</label>
+                                    <select id="ai-word-knowledge">
+                                        <option value="sample" selected>Give 1 random possible word, then decide on its own</option>
+                                        <option value="full">Give all possible words</option>
+                                        <option value="free">Let AI guess on its own</option>
+                                    </select>
+                                    <div class="helper-text">`sample` gives one seeded candidate from the known pool and lets the model reason from there. `full` uses the whole pool. `free` removes that direct word list entirely.</div>
+                                </div>
+
+                                <div class="setup-group" id="ai-decision-group">
+                                    <label for="ai-decision-mode">AI Decision Style</label>
+                                    <select id="ai-decision-mode">
+                                        <option value="llm" selected>LLM-led memory and source choices</option>
+                                        <option value="hybrid">Hybrid: app ranks local sources</option>
+                                        <option value="assisted">App-assisted memory picks</option>
+                                    </select>
+                                    <div class="helper-text">`LLM-led` keeps memory as advisory prompt context. `Hybrid` lets the app rank obvious local shortlist picks. `App-assisted` restores the older memory-first app help.</div>
+                                </div>
+
+                                <div class="setup-group">
+                                    <label for="ai-guess-pool-target">AI Candidate Suggestions</label>
+                                    <input type="number" id="ai-guess-pool-target" value="12" min="4" max="24">
+                                    <div class="helper-text">How many raw candidate guesses each AI asks its model for before the app filters and ranks them.</div>
+                                </div>
+
+                                <div class="setup-group" id="ai-model-group">
+                                    <label>Per-AI Models</label>
+                                    <div id="ai-model-list" class="ai-model-list"></div>
+                                    <div class="helper-text">Each row maps directly to the AI boards in this match.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="setup-disclosure setup-step" data-step-key="sources">
+                        <summary>
+                            <div class="setup-disclosure-heading">
+                                <span class="pill">Reusable sources</span>
+                                <h3>Sources and builder</h3>
+                            </div>
+                            <p>Upload prepared lists, keep LLM memory, or generate a reusable bank for the active language and length.</p>
+                        </summary>
+                        <div class="setup-disclosure-body">
+                            <div class="setup-source-tabs" role="tablist" aria-label="Reusable source tools">
+                                <button type="button" class="setup-source-tab is-active" data-source-panel="upload">Word source</button>
+                                <button type="button" class="setup-source-tab" data-source-panel="memory">Memory bank</button>
+                                <button type="button" class="setup-source-tab" data-source-panel="builder">Builder</button>
+                            </div>
+                            <div class="setup-stack">
+                                <div id="setup-source-upload" class="inset-group setup-source-panel is-active">
+                                    <div class="subsection-heading">
+                                        <h4>Reusable wordlist</h4>
+                                        <p>Upload a prepared list or use one generated below.</p>
+                                    </div>
+                                    <div class="option-panel">
+                                        <label class="option-panel-copy" for="use-uploaded-words">
+                                            <span class="option-panel-title">Use reusable word source</span>
+                                            <span class="helper-text">Rounds will prefer the uploaded or generated list for the current language and length.</span>
+                                        </label>
+                                        <input type="checkbox" id="use-uploaded-words">
+                                    </div>
+                                    <input type="file" id="word-file-input" accept=".json,.xml,.csv,.txt">
+                                    <div id="word-file-status" class="source-status">No word file loaded.</div>
+                                </div>
+
+                                <div id="setup-source-memory" class="inset-group setup-source-panel hidden">
+                                    <div class="subsection-heading">
+                                        <h4>LLM memory</h4>
+                                        <p>Let the app keep a rolling bank of valid words plus clue-state guess memories per model and language.</p>
+                                    </div>
+                                    <div class="option-panel">
+                                        <label class="option-panel-copy" for="enable-llm-memory">
+                                            <span class="option-panel-title">Enable memory bank</span>
+                                            <span class="helper-text">Useful if you want the models to reuse confirmed words and good follow-up guesses from similar board states.</span>
+                                        </label>
+                                        <input type="checkbox" id="enable-llm-memory">
+                                    </div>
+                                    <button type="button" id="reset-llm-memory" class="secondary-btn">Reset LLM Memory</button>
+                                    <div class="helper-text">Turn both source options off for fresh LLM generation on every round.</div>
+                                </div>
+
+                                <div id="setup-source-builder" class="inset-group setup-source-panel hidden">
+                                    <div class="subsection-heading">
+                                        <h4>LLM wordlist builder</h4>
+                                        <p>Create a reusable list for the selected language and length, then feed it back into rounds.</p>
+                                    </div>
+
+                                    <div class="builder-toolbar">
+                                        <div class="setup-group">
+                                            <label for="wordlist-target-size">Wordlist Size</label>
+                                            <input type="number" id="wordlist-target-size" value="120" min="20" max="500">
+                                        </div>
+                                        <div class="setup-group builder-action">
+                                            <label for="generate-wordlist">Generate Wordlist</label>
+                                            <button type="button" id="generate-wordlist">Generate with LLM</button>
+                                        </div>
+                                        <div class="setup-group builder-action">
+                                            <label for="download-wordlist">Export Current List</label>
+                                            <button type="button" id="download-wordlist" class="secondary-btn" disabled>Download Current Wordlist</button>
+                                        </div>
+                                    </div>
+
+                                    <div id="wordlist-status" class="helper-text">No generated wordlist yet for the current selection.</div>
+                                    <div id="wordlist-preview" class="wordlist-preview">
+                                        <div class="empty-preview">Generated words will appear here.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+                </div>
+
+                <aside class="setup-sidebar">
+                    <section class="sidebar-card sidebar-card-primary setup-summary-card">
+                        <div class="card-heading">
+                            <div>
+                                <p class="eyebrow">Live Summary</p>
+                                <h3>Match snapshot</h3>
+                            </div>
+                        </div>
+                        <div class="setup-summary-list">
+                            <div class="setup-summary-row">
+                                <span class="setup-summary-label">Roster</span>
+                                <strong id="setup-summary-roster" class="setup-summary-value">2 humans / 0 AIs</strong>
+                            </div>
+                            <div class="setup-summary-row">
+                                <span class="setup-summary-label">Mode</span>
+                                <strong id="setup-summary-mode" class="setup-summary-value">Standard · Open letters</strong>
+                            </div>
+                            <div class="setup-summary-row">
+                                <span class="setup-summary-label">Format</span>
+                                <strong id="setup-summary-format" class="setup-summary-value">English · 5 letters</strong>
+                            </div>
+                            <div class="setup-summary-row">
+                                <span class="setup-summary-label">AI</span>
+                                <strong id="setup-summary-ai" class="setup-summary-value">No AI players</strong>
+                            </div>
+                            <div class="setup-summary-row">
+                                <span class="setup-summary-label">Source</span>
+                                <strong id="setup-summary-source" class="setup-summary-value">Fresh LLM pool</strong>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sidebar-card setup-guidance-card">
+                        <div class="card-heading">
+                            <div>
+                                <p class="eyebrow">Current Step</p>
+                                <h3 id="setup-sidebar-step-title">Players, mode, and board rules.</h3>
+                            </div>
+                        </div>
+                        <p id="setup-sidebar-step-copy">Choose the match basics, then continue.</p>
+                        <div class="setup-sidebar-points">
+                            <div class="intro-point"><span>1</span> Wizard stays pinned</div>
+                            <div class="intro-point"><span>2</span> Summary updates live</div>
+                            <div class="intro-point"><span>3</span> Start button is always visible</div>
+                        </div>
+                    </section>
+                </aside>
+            </div>
+
+            <div class="setup-wizard-footer">
+                <div class="setup-wizard-footer-copy">
+                    <p class="eyebrow">Ready</p>
+                    <div id="setup-summary-line">Choose the match basics, then continue.</div>
+                </div>
+                <div class="setup-wizard-actions">
+                    <button type="button" id="setup-prev" class="secondary-btn">Back</button>
+                    <button type="button" id="setup-next" class="secondary-btn">Next</button>
+                    <button id="start-game">Start Match</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="players-wrapper" class="hidden">
+            <!-- Player boards will be injected here -->
+        </section>
+
+        <section id="team-panel" class="hidden panel team-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Team Mode</p>
+                    <h2>Team hints and chat</h2>
+                </div>
+            </div>
+            <div id="team-summary-strip" class="team-summary-strip"></div>
+            <div id="team-chat-columns" class="team-chat-columns"></div>
+            <div class="team-chat-composer">
+                <div class="team-chat-composer-copy">
+                    <p class="eyebrow">Focused Player Team</p>
+                    <div id="team-chat-target">Select a human board to send a team hint.</div>
+                </div>
+                <div class="team-chat-composer-controls">
+                    <input type="text" id="team-chat-input" placeholder="Type a short hint for your team" maxlength="160">
+                    <button type="button" id="team-chat-send" class="secondary-btn">Send Hint</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="stats-screen" class="hidden panel stats-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Results</p>
+                    <h2>Match summary</h2>
+                </div>
+            </div>
+            <div id="stats-content"></div>
+            <button id="restart-game">Play Again</button>
+        </section>
+
+        <footer class="app-footer">
+            <div class="app-footer-copy">
+                <span>Local-first Wordle arena for humans and models.</span>
+                <span>Setup wizard, reusable sources, memory bank, and live match recaps.</span>
+            </div>
+            <div class="app-footer-note">WordleVS</div>
+        </footer>
+    </div>
+
+    <script type="module" src="game.js"></script>
+    <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+    <script src="../../shared/dashboard-theme.js"></script>
+</body>
+</html>

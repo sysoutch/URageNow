@@ -1,0 +1,1204 @@
+  @media (max-width: 1580px) {
+    .studio-workflow-quick-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .messenger-connection-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .messenger-dashboard-stat-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .messenger-dashboard-main-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .studio-workflow-quick-tile {
+      min-height: 190px;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .studio-workflow-quick-tile-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 2px;
+    }
+
+    .studio-workflow-quick-tile-icon svg {
+      width: 58px;
+      height: 58px;
+    }
+
+    .studio-workflow-quick-tile h4 {
+      font-size: 28px;
+    }
+    .studio-workflow-quick-tile.is-tool h4 {
+      font-size: 19px;
+    }
+
+    .studio-workflow-quick-tile .panel-subtitle {
+      min-height: 58px;
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 1380px) and (min-width: 981px) {
+    body:not(.view-ai-active) .app-shell {
+      grid-template-columns: var(--server-rail-width, 84px) minmax(0, 1fr);
+    }
+
+    body:not(.view-ai-active).workspace-collapsed .app-shell,
+    body:not(.view-ai-active).details-collapsed .app-shell,
+    body:not(.view-ai-active).workspace-collapsed.details-collapsed .app-shell {
+      grid-template-columns: var(--server-rail-width, 84px) minmax(0, 1fr);
+    }
+
+    body:not(.view-ai-active) .workspace-sidebar,
+    body:not(.view-ai-active) .side-panel.side-panel-left,
+    body:not(.view-ai-active) .details-pane,
+    body:not(.view-ai-active) .side-panel.side-panel-right {
+      position: fixed;
+      top: 20px;
+      bottom: 20px;
+      width: min(360px, calc(100vw - 132px));
+      border-radius: 28px;
+      border: 1px solid rgba(173,190,255,0.12);
+      box-shadow: 0 28px 54px rgba(2,6,12,0.3);
+      z-index: 80;
+    }
+
+    body:not(.view-ai-active) .workspace-sidebar,
+    body:not(.view-ai-active) .side-panel.side-panel-left {
+      left: calc(var(--server-rail-width, 84px) + 16px);
+    }
+
+    body:not(.view-ai-active) .details-pane,
+    body:not(.view-ai-active) .side-panel.side-panel-right {
+      right: 20px;
+    }
+
+    body:not(.view-ai-active).workspace-collapsed .workspace-sidebar,
+    body:not(.view-ai-active).workspace-collapsed .side-panel.side-panel-left {
+      transform: translateX(calc(-100% - 20px));
+    }
+
+    body:not(.view-ai-active).details-collapsed .details-pane,
+    body:not(.view-ai-active).details-collapsed .side-panel.side-panel-right {
+      transform: translateX(calc(100% + 20px));
+    }
+
+    body.view-ai-active .details-pane,
+    body.view-ai-active .side-panel.side-panel-right {
+      position: relative;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      width: auto;
+      border-radius: 0;
+      box-shadow: none;
+      z-index: auto;
+    }
+  }
+
+  @media (max-width: 1620px) and (min-width: 981px) {
+    body.view-ai-active {
+      --studio-workflow-sidebar-width: 0px !important;
+    }
+
+    body.view-ai-active .studio-workflow-sidebar {
+      display: none !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-open.studio-workflow-sidebar-sticky {
+      --studio-workflow-sidebar-width: var(--studio-workflow-sidebar-pin-width, 280px) !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-open .studio-workflow-sidebar {
+      display: block !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-floaty .studio-workflow-sidebar {
+      position: absolute !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      left: calc(var(--server-rail-width, 84px) - 1px) !important;
+      width: var(--studio-workflow-sidebar-pin-width, 280px) !important;
+    }
+  }
+
+  @media (max-height: 940px) and (min-width: 981px) {
+    .view[data-view-panel="ai"].active {
+      gap: 10px;
+    }
+
+    .studio-view-shell {
+      gap: 12px;
+    }
+
+    .studio-view-hero-card {
+      padding: 18px;
+    }
+
+    .studio-view-hero-card h3 {
+      font-size: clamp(28px, 3.1vw, 40px);
+    }
+
+    .studio-hero-grid {
+      gap: 14px;
+    }
+
+    .studio-view-hero-card .studio-hero-logo {
+      width: 124px;
+      height: 124px;
+      min-width: 124px;
+      max-width: 124px;
+      min-height: 124px;
+      max-height: 124px;
+      aspect-ratio: 1 / 1;
+      border-radius: 28px;
+    }
+
+    .studio-workflow-quick-card h3 {
+      font-size: 23px;
+    }
+
+    .studio-workflow-quick-head {
+      margin-bottom: 8px;
+    }
+
+    .studio-workflow-quick-open-all {
+      min-height: 34px;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .studio-workflow-quick-grid {
+      gap: 8px;
+    }
+
+    .studio-workflow-quick-tile {
+      min-height: 154px;
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .studio-workflow-quick-tile-icon {
+      width: 52px;
+      height: 52px;
+      margin-bottom: 0;
+    }
+
+    .studio-workflow-quick-tile-icon svg {
+      width: 46px;
+      height: 46px;
+    }
+
+    .studio-workflow-quick-tile h4 {
+      font-size: 24px;
+    }
+    .studio-workflow-quick-tile.is-tool h4 {
+      font-size: 17px;
+    }
+
+    .studio-workflow-quick-tile .panel-subtitle {
+      min-height: 36px;
+      font-size: 12px;
+      line-height: 1.25;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .studio-workflow-quick-tile-open {
+      min-height: 30px;
+      font-size: 13px;
+    }
+
+    .messenger-connections-card {
+      margin-top: 12px;
+    }
+
+    .messenger-connection-grid {
+      gap: 8px;
+    }
+
+    .messenger-connection-tile {
+      min-height: 126px;
+      gap: 6px;
+      padding: 8px;
+    }
+
+    .messenger-connection-tile .studio-workflow-quick-tile-icon {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 0;
+    }
+
+    .messenger-connection-tile .studio-workflow-quick-tile-icon img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .messenger-connection-tile h4 {
+      font-size: 18px;
+    }
+
+    .messenger-connection-tile .panel-subtitle {
+      min-height: 30px;
+      font-size: 11px;
+      line-height: 1.22;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  @media (max-width: 1520px) {
+    body.view-ai-active.studio-workflow-focused .workflow-sidebar-toggle-button {
+      display: none !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused .ask-rod-workspace,
+    body.view-ai-active.studio-workflow-focused .studio-workflow-layout,
+    body.view-ai-active.studio-workflow-focused .model3d-studio-workspace,
+    body.view-ai-active.studio-workflow-focused .image-studio-workspace,
+    body.view-ai-active.studio-workflow-focused .audio-studio-workspace,
+    body.view-ai-active.studio-workflow-focused .music-studio-workspace,
+    body.view-ai-active.studio-workflow-focused .video-studio-workspace {
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-template-rows: auto;
+    }
+
+    // Preserve every workflow's local inspector; the global Messenger pane is
+    // not a Studio-sidebar host. Compact the local columns instead of removing
+    // them at ordinary desktop widths.
+    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-workspace {
+      grid-template-columns: 48px minmax(0, 1fr) minmax(280px, 320px) !important;
+      grid-template-rows: minmax(0, 1fr) !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-chat-tabs {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      display: grid !important;
+      min-width: 48px !important;
+      width: 48px !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-main {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-side {
+      display: grid !important;
+      grid-column: 3 !important;
+      grid-row: 1 !important;
+      min-width: 0 !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused #ask-rod-card .studio-workflow-side-resizer {
+      display: none !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused :is(#model3d-studio-card .model3d-studio-workspace, #image-studio-card .image-studio-workspace, #audio-studio-card .audio-studio-workspace, #music-studio-card .music-studio-workspace, #video-studio-card .video-studio-workspace) {
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 320px) !important;
+      grid-template-rows: minmax(0, 1fr) !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused :is(.model3d-studio-side, .image-studio-side, .audio-studio-side, .music-studio-side, .video-studio-side) {
+      display: grid !important;
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      min-width: 0 !important;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .app-shell {
+      margin: 10px;
+      width: calc(100vw - 20px);
+      height: calc(100vh - 20px);
+      border-radius: 22px;
+    }
+
+    body.view-ai-active .app-shell {
+      grid-template-columns: 68px minmax(0, 1fr) !important;
+      height: calc(100vh - 20px);
+      min-height: 0;
+      overflow: hidden;
+    }
+    body.view-ai-active .details-pane,
+    body.view-ai-active .side-panel.side-panel-right {
+      display: none !important;
+    }
+
+    body.view-ai-active .server-rail,
+    body.view-ai-active .side-nav {
+      position: relative;
+      top: auto;
+      z-index: auto;
+      grid-auto-flow: row;
+      grid-auto-columns: initial;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      justify-content: start;
+      gap: 8px;
+      padding: 10px 8px;
+      border-right: 1px solid var(--studio-panel-border);
+      border-bottom: none;
+    }
+
+    body.view-ai-active .rail-app-button,
+    body.view-ai-active .rail-home,
+    body.view-ai-active .rail-tools-button,
+    body.view-ai-active .rail-profile-button,
+    body.view-ai-active .rail-studio-workflow-button,
+    body.view-ai-active .rail-theme-button {
+      width: 48px;
+    }
+
+    body.view-ai-active .rail-app-button,
+    body.view-ai-active .rail-home,
+    body.view-ai-active .rail-tools-button,
+    body.view-ai-active .rail-profile-button {
+      min-height: 62px;
+      padding: 6px;
+      border-radius: 14px;
+    }
+
+    body.view-ai-active .rail-home-label {
+      display: none;
+    }
+
+    body.view-ai-active .rail-studio-workflows {
+      grid-auto-flow: row;
+      grid-auto-columns: initial;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-right: 0;
+    }
+
+    body.view-ai-active .rail-theme-switcher {
+      margin-top: 4px;
+      gap: 6px;
+    }
+
+    body.view-ai-active.studio-rail-expanded {
+      --server-rail-width: 68px;
+    }
+
+    body.view-ai-active.studio-rail-expanded .rail-studio-workflow-button {
+      width: 48px;
+      justify-content: center;
+      gap: 0;
+      padding: 0;
+    }
+
+    body.view-ai-active.studio-rail-expanded .rail-studio-workflow-label {
+      display: none;
+    }
+
+    body.view-ai-active .studio-workflow-sidebar {
+      display: none !important;
+    }
+
+    body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-open .studio-workflow-sidebar {
+      display: block !important;
+      position: absolute !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      left: calc(var(--server-rail-width, 58px) - 1px) !important;
+      width: min(var(--studio-workflow-sidebar-pin-width, 280px), calc(100vw - var(--server-rail-width, 58px))) !important;
+      z-index: 64 !important;
+    }
+
+    body.view-ai-active .content-shell,
+    body.view-ai-active .view[data-view-panel="ai"].active {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .studio-hero-grid {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .studio-hero-grid .panel-heading {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .studio-view-hero-card .studio-hero-logo {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: start;
+      align-self: start;
+      width: 88px;
+      height: 88px;
+      min-width: 88px;
+      max-width: 88px;
+      min-height: 88px;
+      max-height: 88px;
+      aspect-ratio: 1 / 1;
+      border-radius: 20px;
+      font-size: 34px;
+    }
+
+    .studio-theme-picker {
+      max-width: 100%;
+    }
+
+    .studio-theme-picker-options {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .studio-theme-option {
+      min-height: 36px;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+
+    .studio-workflow-quick-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .messenger-connection-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .messenger-connection-tile {
+      min-height: 148px;
+      padding: 9px;
+    }
+
+    .messenger-connection-tile .studio-workflow-quick-tile-icon {
+      width: 50px;
+      height: 50px;
+    }
+
+    .messenger-connection-tile .studio-workflow-quick-tile-icon img {
+      width: 26px;
+      height: 26px;
+    }
+
+    .messenger-connection-tile h4 {
+      font-size: 20px;
+    }
+
+    .studio-workflow-quick-tile {
+      min-height: 172px;
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .studio-workflow-quick-tile-icon {
+      width: 52px;
+      height: 52px;
+    }
+
+    .studio-workflow-quick-tile-icon svg {
+      width: 46px;
+      height: 46px;
+    }
+
+    .studio-workflow-quick-tile h4 {
+      font-size: 24px;
+    }
+
+    .studio-workflow-quick-tile .panel-subtitle {
+      min-height: 48px;
+      font-size: 12px;
+      line-height: 1.28;
+    }
+
+    .studio-workflow-quick-tile-open {
+      min-height: 32px;
+      font-size: 13px;
+    }
+
+    body.studio-workflow-focused .chat-composer-grid button,
+    body.studio-workflow-focused .ask-rod-composer button {
+      min-height: 48px;
+    }
+
+    .messenger-dashboard-stat-grid,
+    .messenger-dashboard-detail-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .messenger-dashboard-copy h3 {
+      font-size: 24px;
+    }
+
+    .messenger-dashboard-head-actions {
+      width: 100%;
+    }
+
+    .messenger-dashboard-head-actions button {
+      flex: 1 1 0;
+    }
+
+    .messenger-dashboard-fetch-buttons button {
+      flex: 1 1 0;
+    }
+  }
+
+  @media (max-width: 760px) {
+    body.view-ai-active .app-shell {
+      grid-template-columns: 60px minmax(0, 1fr) !important;
+      width: calc(100vw - 12px);
+      height: calc(100vh - 12px);
+      margin: 6px;
+      border-radius: 18px;
+    }
+
+    body.view-ai-active .server-rail,
+    body.view-ai-active .side-nav {
+      padding: 8px 6px;
+      gap: 6px;
+    }
+
+    body.view-ai-active .rail-home,
+    body.view-ai-active .rail-tools-button,
+    body.view-ai-active .rail-profile-button,
+    body.view-ai-active .rail-studio-workflow-button,
+    body.view-ai-active .rail-theme-button {
+      width: 46px !important;
+      min-height: 42px;
+    }
+
+    body.view-ai-active .rail-home,
+    body.view-ai-active .rail-tools-button,
+    body.view-ai-active .rail-profile-button {
+      min-height: 48px;
+      padding: 5px;
+    }
+
+    body.view-ai-active .rail-app-button .rail-home-mark,
+    body.view-ai-active .rail-home-mark,
+    body.view-ai-active .rail-tools-mark,
+    body.view-ai-active .rail-profile-mark {
+      width: 24px;
+      height: 24px;
+    }
+
+    body.view-ai-active .rail-theme-switcher,
+    body.view-ai-active .rail-bottom {
+      gap: 5px;
+    }
+
+    .studio-view-hero-card,
+    .studio-workflow-quick-card,
+    .messenger-connections-card,
+    .ai-detail-card {
+      padding: 12px;
+      border-radius: 14px;
+    }
+
+    .studio-hero-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .studio-hero-grid .panel-heading,
+    .studio-view-hero-card .studio-hero-logo {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .studio-view-hero-card .studio-hero-logo {
+      width: 64px;
+      height: 64px;
+      min-width: 64px;
+      min-height: 64px;
+      border-radius: 16px;
+    }
+
+    .studio-workflow-quick-grid,
+    .messenger-connection-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .studio-workflow-quick-tile,
+    .messenger-connection-tile {
+      min-height: 126px;
+    }
+
+    .studio-workflow-quick-tile h4,
+    .messenger-connection-tile h4 {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 980px) {
+    body.view-ai-active,
+    body.view-tools-active,
+    body.view-dashboard-active,
+    body.view-blender-addons-active,
+    body.view-assets-active {
+      padding-bottom: 10px;
+    }
+
+    body.view-ai-active .app-shell,
+    body.view-tools-active .app-shell,
+    body.view-dashboard-active .app-shell,
+    body.view-blender-addons-active .app-shell,
+    body.view-assets-active .app-shell {
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-template-rows: auto minmax(0, 1fr);
+      width: calc(100vw - 20px);
+      height: calc(100vh - 20px);
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    body.view-ai-active .server-rail,
+    body.view-ai-active .side-nav,
+    body.view-tools-active .server-rail,
+    body.view-tools-active .side-nav,
+    body.view-dashboard-active .server-rail,
+    body.view-dashboard-active .side-nav,
+    body.view-blender-addons-active .server-rail,
+    body.view-blender-addons-active .side-nav,
+    body.view-assets-active .server-rail,
+    body.view-assets-active .side-nav {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      grid-auto-flow: column;
+      grid-auto-columns: 50px;
+      grid-template-rows: none !important;
+      align-items: center;
+      justify-content: start;
+      gap: 8px;
+      min-width: 0;
+      width: 100%;
+      max-height: 72px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-right: 0;
+      border-bottom: 1px solid var(--studio-panel-border);
+      scrollbar-width: none;
+    }
+
+    body.view-ai-active .server-rail::-webkit-scrollbar,
+    body.view-ai-active .side-nav::-webkit-scrollbar,
+    body.view-tools-active .server-rail::-webkit-scrollbar,
+    body.view-tools-active .side-nav::-webkit-scrollbar,
+    body.view-dashboard-active .server-rail::-webkit-scrollbar,
+    body.view-dashboard-active .side-nav::-webkit-scrollbar,
+    body.view-blender-addons-active .server-rail::-webkit-scrollbar,
+    body.view-blender-addons-active .side-nav::-webkit-scrollbar,
+    body.view-assets-active .server-rail::-webkit-scrollbar,
+    body.view-assets-active .side-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    body.view-ai-active .rail-home-wrap,
+    body.view-ai-active .rail-studio-workflows,
+    body.view-ai-active .rail-theme-switcher,
+    body.view-tools-active .rail-home-wrap,
+    body.view-tools-active .rail-tools-categories,
+    body.view-tools-active .rail-theme-switcher,
+    body.view-dashboard-active .rail-home-wrap,
+    body.view-dashboard-active .rail-tools-categories,
+    body.view-dashboard-active .rail-resource-sections,
+    body.view-dashboard-active .rail-theme-switcher,
+    body.view-blender-addons-active .rail-home-wrap,
+    body.view-blender-addons-active .rail-resource-sections,
+    body.view-blender-addons-active .rail-theme-switcher,
+    body.view-assets-active .rail-home-wrap,
+    body.view-assets-active .rail-resource-sections,
+    body.view-assets-active .rail-theme-switcher {
+      display: contents;
+    }
+
+    body.view-ai-active .rail-home,
+    body.view-ai-active .rail-tools-button,
+    body.view-ai-active .rail-profile-button,
+    body.view-ai-active .rail-studio-workflow-button,
+    body.view-ai-active .rail-theme-button,
+    body.view-tools-active .rail-app-button,
+    body.view-tools-active .rail-home,
+    body.view-tools-active .rail-tools-button,
+    body.view-tools-active .rail-profile-button,
+    body.view-tools-active .rail-tools-category-button,
+    body.view-tools-active .rail-theme-button,
+    body.view-dashboard-active .rail-app-button,
+    body.view-dashboard-active .rail-home,
+    body.view-dashboard-active .rail-tools-button,
+    body.view-dashboard-active .rail-profile-button,
+    body.view-dashboard-active .rail-studio-workflow-button,
+    body.view-dashboard-active .rail-theme-button,
+    body.view-blender-addons-active .rail-home,
+    body.view-blender-addons-active .rail-tools-button,
+    body.view-blender-addons-active .rail-profile-button,
+    body.view-blender-addons-active .rail-blender-addons-button,
+    body.view-blender-addons-active .rail-theme-button,
+    body.view-assets-active .rail-home,
+    body.view-assets-active .rail-tools-button,
+    body.view-assets-active .rail-profile-button,
+    body.view-assets-active .rail-assets-button,
+    body.view-assets-active .rail-theme-button {
+      width: 48px !important;
+      height: 48px;
+      min-height: 48px !important;
+      padding: 0;
+      flex: 0 0 48px;
+    }
+
+    body.view-ai-active .rail-bottom,
+    body.view-ai-active .rail-divider,
+    body.view-tools-active .rail-bottom,
+    body.view-tools-active .rail-divider,
+    body.view-ai-active .mobile-bottom-nav,
+    body.view-tools-active .mobile-bottom-nav {
+      display: none !important;
+    }
+
+    body.view-ai-active .content-shell,
+    body.view-tools-active .content-shell,
+    body.view-dashboard-active .content-shell,
+    body.view-blender-addons-active .content-shell,
+    body.view-assets-active .content-shell {
+      grid-column: 1 !important;
+      grid-row: 2 !important;
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    body.view-ai-active .app-shell {
+      grid-template-columns: 58px minmax(0, 1fr) !important;
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    body.view-ai-active .server-rail,
+    body.view-ai-active .side-nav {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      grid-auto-flow: row;
+      grid-auto-columns: initial;
+      grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+      align-items: stretch;
+      justify-items: center;
+      width: 58px;
+      height: 100%;
+      max-height: none;
+      padding: 8px 6px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      border-right: 1px solid var(--studio-panel-border);
+      border-bottom: 0;
+    }
+
+    body.view-ai-active .content-shell {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+    }
+
+    body.view-ai-active .rail-home-wrap,
+    body.view-ai-active .rail-studio-workflows,
+    body.view-ai-active .rail-theme-switcher {
+      display: grid;
+    }
+
+    body.view-ai-active .rail-studio-workflows {
+      grid-auto-flow: row;
+      grid-auto-columns: initial;
+      max-height: none;
+      overflow-x: hidden;
+      overflow-y: visible;
+      padding: 4px 0 2px;
+    }
+
+    body.view-ai-active .rail-theme-switcher {
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    body.view-ai-active .view[data-view-panel="ai"].active,
+    body.view-tools-active .view[data-view-panel="tools"].active,
+    body.view-dashboard-active .view[data-view-panel="dashboard"].active,
+    body.view-blender-addons-active .view[data-view-panel="blender-addons"].active,
+    body.view-assets-active .view[data-view-panel="assets"].active {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-ai-active .view[data-view-panel="ai"].active {
+      grid-template-rows: auto;
+      padding: 12px;
+    }
+
+    body.view-ai-active.studio-workflow-focused .content-shell {
+      min-height: 0;
+      padding: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    body.view-ai-active.studio-workflow-focused .view[data-view-panel="ai"].active {
+      height: auto;
+      min-height: min-content;
+      padding: 12px;
+      overflow: visible;
+    }
+
+    body.view-ai-active.studio-workflow-focused .view[data-view-panel="ai"].active .ai-grid,
+    body.view-ai-active.studio-workflow-focused .ai-grid.ai-focused-mode {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-ai-active.studio-workflow-focused .ai-grid.ai-focused-mode .ai-detail-card,
+    body.view-ai-active.studio-workflow-focused .ai-detail-card {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-ai-active .ai-grid.ai-focused-mode,
+    body.view-ai-active .ai-grid.ai-focused-mode .ai-detail-card,
+    body.view-ai-active .ask-rod-chat-card {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-ai-active .ask-rod-workspace,
+    body.view-ai-active .studio-workflow-layout,
+    body.view-ai-active .model3d-studio-workspace,
+    body.view-ai-active .image-studio-workspace,
+    body.view-ai-active .audio-studio-workspace,
+    body.view-ai-active .music-studio-workspace,
+    body.view-ai-active .video-studio-workspace,
+    body.view-ai-active.studio-right-sidebar-active .ask-rod-workspace,
+    body.view-ai-active.studio-right-sidebar-active .model3d-studio-workspace,
+    body.view-ai-active.studio-right-sidebar-active .image-studio-workspace,
+    body.view-ai-active.studio-right-sidebar-active .audio-studio-workspace,
+    body.view-ai-active.studio-right-sidebar-active .music-studio-workspace,
+    body.view-ai-active.studio-right-sidebar-active .video-studio-workspace {
+      grid-template-columns: minmax(0, 1fr);
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-ai-active .studio-workflow-main,
+    body.view-ai-active .ask-rod-main,
+    body.view-ai-active .ask-rod-side,
+    body.view-ai-active .model3d-studio-side,
+    body.view-ai-active .image-studio-side,
+    body.view-ai-active .audio-studio-side,
+    body.view-ai-active .music-studio-side,
+    body.view-ai-active .video-studio-side {
+      min-height: 0;
+      overflow: visible;
+      padding-right: 0;
+    }
+
+    body.view-ai-active .chat-header-topline,
+    body.view-ai-active .studio-card-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    body.view-ai-active .chat-header-actions,
+    body.view-ai-active .studio-card-header-actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    body.view-ai-active .chat-header-actions button,
+    body.view-ai-active .studio-card-header-actions button {
+      width: 100%;
+      min-width: 0;
+    }
+
+    body.view-ai-active .ask-rod-composer,
+    body.view-ai-active .chat-composer-grid {
+      grid-template-columns: minmax(0, 1fr);
+      overflow: visible;
+    }
+
+    body.view-ai-active .ask-chat-tabs,
+    body.view-ai-active .studio-workflow-tabs {
+      width: 100%;
+    }
+
+    body.view-ai-active .ask-chat-tab,
+    body.view-ai-active .studio-workflow-tabs > .ghost {
+      min-width: 0;
+      flex: 1 1 0;
+    }
+
+    body.view-tools-active .view[data-view-panel="tools"].active {
+      padding: 0;
+    }
+
+    body.view-tools-active .tools-layout {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-tools-active .tools-catalog-card {
+      order: 1;
+      max-height: min(54vh, 520px);
+      overflow: hidden;
+      border-width: 0 0 1px 0;
+    }
+
+    body.view-tools-active .tools-workspace-card {
+      order: 2;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-tools-active .tools-catalog-scroll {
+      min-height: 0;
+      max-height: none;
+      overflow: auto;
+    }
+
+    body.view-tools-active .tools-workspace-home {
+      overflow: visible;
+    }
+
+    body.view-tools-active .tools-workspace-frame-wrap,
+    body.view-tools-active .tools-workspace-empty {
+      min-height: 220px;
+    }
+
+    body.view-dashboard-active .resource-hub-layout,
+    body.view-blender-addons-active .resource-hub-layout,
+    body.view-assets-active .resource-hub-layout {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-dashboard-active .resource-hub-sidebar,
+    body.view-blender-addons-active .resource-hub-sidebar,
+    body.view-assets-active .resource-hub-sidebar {
+      order: 1;
+      max-height: min(54vh, 520px);
+      overflow: hidden;
+      border-width: 0 0 1px 0;
+    }
+
+    body.view-dashboard-active .resource-hub-main,
+    body.view-blender-addons-active .resource-hub-main,
+    body.view-assets-active .resource-hub-main {
+      order: 2;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    body.view-dashboard-active .resource-hub-content-wrap,
+    body.view-blender-addons-active .resource-hub-content-wrap,
+    body.view-assets-active .resource-hub-content-wrap {
+      min-height: 0;
+      overflow: visible;
+      padding: 10px;
+    }
+
+    body.view-dashboard-active .resource-hub-home-hero,
+    body.view-blender-addons-active .resource-hub-home-hero,
+    body.view-assets-active .resource-hub-home-hero,
+    body.view-dashboard-active .resource-manager-toolbar,
+    body.view-blender-addons-active .resource-manager-toolbar,
+    body.view-assets-active .resource-manager-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    body.view-dashboard-active .resource-hub-home-stats,
+    body.view-blender-addons-active .resource-hub-home-stats,
+    body.view-assets-active .resource-hub-home-stats {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.view-dashboard-active .resource-hub-home-grid,
+    body.view-blender-addons-active .resource-hub-home-grid,
+    body.view-assets-active .resource-hub-home-grid,
+    body.view-dashboard-active .resource-hub-grid,
+    body.view-blender-addons-active .resource-hub-grid,
+    body.view-assets-active .resource-hub-grid,
+    body.view-dashboard-active .resource-recommendation-grid,
+    body.view-blender-addons-active .resource-recommendation-grid,
+    body.view-assets-active .resource-recommendation-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.view-dashboard-active .resource-hub-card,
+    body.view-blender-addons-active .resource-hub-card,
+    body.view-assets-active .resource-hub-card {
+      grid-template-columns: 38px minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    body.view-ai-active .app-shell,
+    body.view-tools-active .app-shell,
+    body.view-dashboard-active .app-shell,
+    body.view-blender-addons-active .app-shell,
+    body.view-assets-active .app-shell {
+      width: calc(100vw - 12px);
+      height: calc(100vh - 12px);
+      margin: 6px;
+      border-radius: 18px;
+    }
+
+    body.view-ai-active .app-shell {
+      grid-template-columns: 52px minmax(0, 1fr) !important;
+    }
+
+    body.view-dashboard-active .app-shell,
+    body.view-blender-addons-active .app-shell,
+    body.view-assets-active .app-shell {
+      grid-template-columns: 52px minmax(0, 1fr) !important;
+    }
+
+    body.view-ai-active .server-rail,
+    body.view-ai-active .side-nav,
+    body.view-tools-active .server-rail,
+    body.view-tools-active .side-nav,
+    body.view-dashboard-active .server-rail,
+    body.view-dashboard-active .side-nav,
+    body.view-blender-addons-active .server-rail,
+    body.view-blender-addons-active .side-nav,
+    body.view-assets-active .server-rail,
+    body.view-assets-active .side-nav {
+      grid-auto-columns: 44px;
+      max-height: 64px;
+      padding: 8px;
+    }
+
+    body.view-ai-active .server-rail,
+    body.view-ai-active .side-nav {
+      width: 52px;
+      height: 100%;
+      max-height: none;
+      padding: 7px 5px;
+    }
+
+    body.view-ai-active .rail-app-button,
+    body.view-ai-active .rail-home,
+    body.view-ai-active .rail-tools-button,
+    body.view-ai-active .rail-profile-button,
+    body.view-ai-active .rail-studio-workflow-button,
+    body.view-ai-active .rail-theme-button,
+    body.view-tools-active .rail-app-button,
+    body.view-tools-active .rail-home,
+    body.view-tools-active .rail-tools-button,
+    body.view-tools-active .rail-profile-button,
+    body.view-tools-active .rail-tools-category-button,
+    body.view-tools-active .rail-theme-button,
+    body.view-dashboard-active .rail-app-button,
+    body.view-dashboard-active .rail-home,
+    body.view-dashboard-active .rail-tools-button,
+    body.view-dashboard-active .rail-profile-button,
+    body.view-dashboard-active .rail-studio-workflow-button,
+    body.view-dashboard-active .rail-theme-button,
+    body.view-blender-addons-active .rail-home,
+    body.view-blender-addons-active .rail-tools-button,
+    body.view-blender-addons-active .rail-profile-button,
+    body.view-blender-addons-active .rail-blender-addons-button,
+    body.view-blender-addons-active .rail-theme-button,
+    body.view-assets-active .rail-home,
+    body.view-assets-active .rail-tools-button,
+    body.view-assets-active .rail-profile-button,
+    body.view-assets-active .rail-assets-button,
+    body.view-assets-active .rail-theme-button {
+      width: 44px !important;
+      height: 44px;
+      min-height: 44px !important;
+      flex-basis: 44px;
+    }
+
+    body.view-ai-active .view[data-view-panel="ai"].active {
+      padding: 10px;
+    }
+
+    body.view-dashboard-active .view[data-view-panel="dashboard"].active,
+    body.view-blender-addons-active .view[data-view-panel="blender-addons"].active,
+    body.view-assets-active .view[data-view-panel="assets"].active {
+      padding: 10px;
+    }
+
+    body.view-ai-active .chat-header-actions,
+    body.view-ai-active .studio-card-header-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.view-dashboard-active .resource-hub-content-wrap,
+    body.view-blender-addons-active .resource-hub-content-wrap,
+    body.view-assets-active .resource-hub-content-wrap {
+      padding: 8px;
+      gap: 8px;
+    }
+
+    body.view-dashboard-active .resource-manager-toolbar,
+    body.view-blender-addons-active .resource-manager-toolbar,
+    body.view-assets-active .resource-manager-toolbar,
+    body.view-dashboard-active .resource-manager-inline-form,
+    body.view-blender-addons-active .resource-manager-inline-form,
+    body.view-assets-active .resource-manager-inline-form {
+      flex-direction: column;
+      align-items: stretch;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.view-dashboard-active .resource-manager-panel,
+    body.view-blender-addons-active .resource-manager-panel,
+    body.view-assets-active .resource-manager-panel {
+      padding: 10px;
+    }
+
+    body.view-dashboard-active .resource-manager-panel-head,
+    body.view-blender-addons-active .resource-manager-panel-head,
+    body.view-assets-active .resource-manager-panel-head {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    body.view-dashboard-active .resource-hub-home-grid,
+    body.view-blender-addons-active .resource-hub-home-grid,
+    body.view-assets-active .resource-hub-home-grid,
+    body.view-dashboard-active .resource-hub-grid,
+    body.view-blender-addons-active .resource-hub-grid,
+    body.view-assets-active .resource-hub-grid,
+    body.view-dashboard-active .resource-recommendation-grid,
+    body.view-blender-addons-active .resource-recommendation-grid,
+    body.view-assets-active .resource-recommendation-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.view-dashboard-active .resource-hub-card,
+    body.view-blender-addons-active .resource-hub-card,
+    body.view-assets-active .resource-hub-card {
+      grid-template-columns: 38px minmax(0, 1fr);
+    }
+
+  }
+

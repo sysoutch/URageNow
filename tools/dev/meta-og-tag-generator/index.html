@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Tag & OG Generator | URage Tools</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --accent: #5865f2; /* Discord Blue */
+            --text-main: #e0e0e0;
+            --text-dim: #b9bbbe;
+            --code-bg: #000000;
+            --link-color: #00a8fc;
+        }
+
+        body[data-dashboard-theme="fire"] { --bg-dark: #120d0d; --card-bg: rgba(24, 14, 14, 0.92); --accent: #ff8a4d; --text-main: #f6f1ee; --text-dim: #c8b6ae; --code-bg: rgba(18, 11, 11, 0.98); --link-color: #59b6ff; }
+        body[data-dashboard-theme="water"] { --bg-dark: #0d1522; --card-bg: rgba(12, 21, 37, 0.94); --accent: #59b6ff; --text-main: #eef5ff; --text-dim: #a9bfd8; --code-bg: rgba(10, 17, 29, 0.98); --link-color: #7bd0ff; }
+        body[data-dashboard-theme="nature"] { --bg-dark: #11170f; --card-bg: rgba(18, 24, 16, 0.94); --accent: #82cd5f; --text-main: #f2f8ee; --text-dim: #bccfaf; --code-bg: rgba(13, 19, 11, 0.98); --link-color: #9ae27b; }
+        body[data-dashboard-theme="rock"] { --bg-dark: #151515; --card-bg: rgba(24, 24, 24, 0.95); --accent: #c4ae8a; --text-main: #f2efea; --text-dim: #b7aea2; --code-bg: rgba(16, 16, 16, 0.98); --link-color: #d8c29f; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background:
+                radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 38%),
+                linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+                var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body[data-dashboard-sidebar-externalized] .container {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        body[data-dashboard-sidebar-externalized] .input-section {
+            display: none;
+        }
+
+        h1, h3 { margin-top: 0; }
+
+        .input-section, .preview-section {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            background: #2b2d31;
+            border: 1px solid #1e1f22;
+            border-radius: 6px;
+            color: white;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus, textarea:focus {
+            outline: 2px solid var(--accent);
+            border-color: transparent;
+        }
+
+        textarea { height: 80px; resize: none; }
+
+        /* Social Card Styling */
+        .social-card {
+            background: #2f3136; /* Discord Specific Gray */
+            border-left: 4px solid var(--accent);
+            padding: 16px;
+            border-radius: 4px;
+            max-width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .card-site-name { color: var(--text-dim); font-size: 12px; margin-bottom: 4px; }
+        .card-title { color: var(--link-color); font-weight: 700; font-size: 16px; margin-bottom: 8px; cursor: pointer; }
+        .card-title:hover { text-decoration: underline; }
+        .card-desc { color: var(--text-dim); font-size: 14px; margin-bottom: 12px; line-height: 1.4; }
+        .card-image { width: 100%; border-radius: 4px; display: block; background: #202225; min-height: 200px; object-fit: cover; }
+
+        /* Code Block */
+        .code-container {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .code-header {
+            background: #222;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #copyBtn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        #copyBtn:hover { opacity: 0.9; }
+
+        pre {
+            padding: 15px;
+            margin: 0;
+            color: #a6e22e; /* Monokai Green */
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        @media (max-width: 850px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+
+<div class="container">
+    <div class="input-section" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Meta Controls">
+        <h3>SEO Configurator</h3>
+        <div class="control-group">
+            <label>Page Title</label>
+            <input type="text" id="metaTitle" placeholder="e.g. URage Tools | Pro Web Utilities" oninput="updateMeta()">
+        </div>
+        <div class="control-group">
+            <label>Description</label>
+            <textarea id="metaDesc" placeholder="Describe your page for search engines and social media..." oninput="updateMeta()"></textarea>
+        </div>
+        <div class="control-group">
+            <label>Canonical URL</label>
+            <input type="text" id="metaUrl" placeholder="https://urage.net/tools" oninput="updateMeta()">
+        </div>
+        <div class="control-group">
+            <label>OG Image URL (Thumbnail)</label>
+            <input type="text" id="metaImg" placeholder="https://urage.net/og-image.png" oninput="updateMeta()">
+        </div>
+    </div>
+
+    <div class="preview-section">
+        <h3>Live Embed Preview</h3>
+        
+        
+        <div class="social-card">
+            <div class="card-site-name">Website Preview</div>
+            <div class="card-title" id="previewTitle">Page Title Goes Here</div>
+            <div class="card-desc" id="previewDesc">Your site description will appear here when you share your link on Discord, Slack, or Facebook. Make it catchy!</div>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='315' viewBox='0 0 600 315'%3E%3Crect width='600' height='315' fill='%23202225'/%3E%3Ctext x='300' y='160' text-anchor='middle' fill='%235865f2' font-family='sans-serif' font-size='28'%3EOG Image Preview%3C/text%3E%3C/svg%3E" id="previewImg" class="card-image">
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span style="font-size: 12px; font-weight: bold;">HTML META TAGS</span>
+                <button id="copyBtn" onclick="copyCode()">Copy Code</button>
+            </div>
+            <pre id="metaOutput"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateMeta() {
+        // Values
+        const title = document.getElementById('metaTitle').value || 'Page Title Goes Here';
+        const desc = document.getElementById('metaDesc').value || 'Your site description will appear here when you share your link on Discord, Slack, or Facebook. Make it catchy!';
+        const url = document.getElementById('metaUrl').value || 'https://yoursite.com';
+        const img = document.getElementById('metaImg').value || document.getElementById('previewImg').src;
+
+        // Update Preview
+        document.getElementById('previewTitle').textContent = title;
+        document.getElementById('previewDesc').textContent = desc;
+        document.getElementById('previewImg').src = img;
+
+        // Generate Meta Tags
+        const tags = `<title>${title}</title>
+<meta name="title" content="${title}">
+<meta name="description" content="${desc}">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="${url}">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="${desc}">
+<meta property="og:image" content="${img}">
+
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="${url}">
+<meta property="twitter:title" content="${title}">
+<meta property="twitter:description" content="${desc}">
+<meta property="twitter:image" content="${img}">`;
+
+        document.getElementById('metaOutput').textContent = tags;
+    }
+
+    function copyCode() {
+        const code = document.getElementById('metaOutput').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = 'Copied!';
+            btn.style.background = '#43b581'; // Success Green
+            setTimeout(() => {
+                btn.textContent = 'Copy Code';
+                btn.style.background = '#5865f2';
+            }, 2000);
+        });
+    }
+
+    if (window.registerDashboardThemeSync) window.registerDashboardThemeSync();
+
+    function describeCurrentAssets() {
+        const text = document.getElementById('metaOutput').textContent || '';
+        return [{
+            kind: 'text',
+            title: 'Meta OG Tags',
+            fileName: 'meta-og-tags.html',
+            mimeType: 'text/html',
+            textContent: text,
+            previewKind: 'text',
+            previewText: text,
+            sourceDetail: 'Generated Open Graph and Twitter card meta tags.',
+            metadata: { sourceTool: 'meta-og-tag-generator', resourceFormat: 'html-meta' }
+        }];
+    }
+
+    window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+    window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+
+    // Initialize on load
+    updateMeta();
+</script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+
+</body>
+</html>

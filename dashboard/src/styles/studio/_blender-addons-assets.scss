@@ -1,0 +1,581 @@
+// 3D Suites / Assets use the far-left workflow rail like LazyDev and Tools.
+
+.rail-resource-sections {
+  display: none;
+  width: 100%;
+  min-width: 0;
+}
+
+body.view-blender-addons-active .rail-resource-sections[data-resource-rail-group="blender-addons"],
+body.view-assets-active .rail-resource-sections[data-resource-rail-group="assets"] {
+  display: grid !important;
+}
+
+body:is(.view-blender-addons-active, .view-assets-active):not(.studio-rail-expanded) {
+  .rail-resource-section-label,
+  .rail-resource-section-sub {
+    display: none !important;
+  }
+}
+
+body:is(.view-blender-addons-active, .view-assets-active) {
+  .rail-resource-section-sub {
+    display: none !important;
+  }
+
+  .resource-hub-view {
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .resource-hub-layout-shell {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  .resource-hub-main {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .resource-hub-main.blender-addon-manager {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden !important;
+  }
+
+  .blender-workspace-tabs {
+    position: relative;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-content: center;
+    width: 100%;
+    gap: 6px;
+    padding: 8px 14px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    background: color-mix(in srgb, var(--studio-surface-bg, var(--panel)) 94%, black 6%);
+  }
+
+  .blender-workspace-tabs .dashboard-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 8px 14px 11px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--ink) 70%, var(--muted) 30%);
+    box-shadow: none;
+    opacity: 0.82;
+    white-space: nowrap;
+    transition: color 160ms ease, opacity 160ms ease;
+    cursor: pointer;
+  }
+
+  .blender-workspace-tabs .dashboard-tab::after {
+    content: "";
+    position: absolute;
+    right: 12px;
+    bottom: -1px;
+    left: 12px;
+    height: 3px;
+    background: var(--studio-accent-1, var(--accent));
+    opacity: 0;
+    transform: scaleX(0.35);
+    transform-origin: center;
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+
+  .blender-workspace-tabs .dashboard-tab:hover {
+    color: var(--ink);
+    opacity: 1;
+  }
+
+  .blender-workspace-tabs .dashboard-tab.active {
+    color: var(--ink);
+    opacity: 1;
+  }
+
+  .blender-workspace-tabs .dashboard-tab.active::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .blender-workspace-tabs .dashboard-tab svg {
+    width: 16px;
+    height: 16px;
+    color: currentColor;
+  }
+
+  .resource-hub-content-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // Level 1 panels (Projects/Addons) - fill available space
+  .blender-tab-panel {
+    display: none;
+    height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .blender-tab-panel.hidden {
+    display: none !important;
+  }
+
+  .blender-tab-panel.active {
+    display: flex;
+    height: auto;
+  }
+
+  // Global suite tabs panels - full width stretch
+  .global-suite-tabs {
+    width: 100%;
+  }
+
+  .global-projects-panel,
+  .global-addons-panel,
+  .global-scripts-panel {
+    display: none;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  // JS toggles the hidden class - show when NOT hidden (regardless of body class)
+  .global-projects-panel:not(.hidden),
+  .global-addons-panel:not(.hidden),
+  .global-scripts-panel:not(.hidden) {
+    display: flex !important;
+  }
+
+  .global-projects-panel.hidden,
+  .global-addons-panel.hidden,
+  .global-scripts-panel.hidden {
+    display: none !important;
+  }
+
+  // Blender addon manager inside global addons panel - full height stretch
+  .global-addons-panel [data-blender-addon-manager] {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  // Subtabs inside addons panel - shrink only, don't grow
+  .global-addons-panel [data-blender-addon-manager] > .blender-subtabs {
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  // Content panels inside subtabs - stretch to fill remaining space
+  .global-addons-panel [data-blender-addon-manager] > .blender-tab-panel {
+    display: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .global-addons-panel [data-blender-addon-manager] > .blender-tab-panel.active {
+    display: flex;
+  }
+
+  // Sub-panel content inside addons - stretch full width and height
+  .global-addons-panel [data-blender-addon-manager] > .blender-tab-panel > .resource-hub-content-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  // Blender sub-panels inside content wrap - stretch properly
+  .global-addons-panel [data-blender-addon-manager] > .blender-tab-panel > .resource-hub-content-wrap > .blender-sub-panel {
+    display: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    width: 100%;
+  }
+
+  .global-addons-panel [data-blender-addon-manager] > .blender-tab-panel > .resource-hub-content-wrap > .blender-sub-panel.active {
+    display: block;
+  }
+
+  // Level 2 subtabs container (hidden when Projects selected, shown when Addons selected)
+  .blender-subtabs {
+    position: relative;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-content: center;
+    width: 100%;
+    gap: 6px;
+    padding: 8px 14px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    background: color-mix(in srgb, var(--studio-surface-bg, var(--panel)) 92%, black 8%);
+    flex-shrink: 0;
+  }
+
+  .blender-subtabs .dashboard-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    padding: 6px 12px 9px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--ink) 65%, var(--muted) 35%);
+    box-shadow: none;
+    opacity: 0.82;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: color 160ms ease, opacity 160ms ease;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .blender-subtabs .dashboard-tab::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    bottom: -1px;
+    left: 10px;
+    height: 2px;
+    background: var(--studio-accent-1, var(--accent));
+    opacity: 0;
+    transform: scaleX(0.35);
+    transform-origin: center;
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+
+  .blender-subtabs .dashboard-tab:hover {
+    color: var(--ink);
+    opacity: 1;
+  }
+
+  .blender-subtabs .dashboard-tab.active {
+    color: var(--ink);
+    opacity: 1;
+  }
+
+  .blender-subtabs .dashboard-tab.active::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .blender-subtabs .dashboard-tab svg {
+    width: 14px;
+    height: 14px;
+    color: currentColor;
+  }
+
+  // Level 2 sub-panels container (fills remaining space)
+  .resource-hub-content-wrap > section[data-blender-addon-section] {
+    display: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px;
+  }
+
+  // Direct child sub-panels (when inside addons panel)
+  .blender-tab-panel > .resource-hub-content-wrap > section[data-blender-addon-section] {
+    display: none;
+  }
+
+  .blender-sub-panel {
+    display: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px;
+  }
+
+  .blender-sub-panel.hidden {
+    display: none !important;
+  }
+
+  .blender-sub-panel.active {
+    display: block;
+  }
+
+  // Projects panel content area
+  #blender-projects-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px;
+  }
+
+  .resource-hub-main.asset-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden !important;
+  }
+
+  .asset-manager > .workspace-tabs-new {
+    flex: 0 0 auto;
+  }
+
+  .asset-manager .game-engine-workspace-panel {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;
+    align-self: auto;
+    display: grid;
+    grid-auto-rows: max-content;
+    align-content: start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+}
+
+.workspace-tabs-new {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  z-index: 4;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 14px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  background: color-mix(in srgb, var(--studio-surface-bg, var(--panel)) 94%, black 6%);
+}
+
+.workspace-tabs-new .dashboard-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 14px 11px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--ink) 70%, var(--muted) 30%);
+  box-shadow: none;
+  opacity: 0.82;
+  white-space: nowrap;
+  transition: color 160ms ease, opacity 160ms ease;
+}
+
+.workspace-tabs-new .dashboard-tab::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: -1px;
+  left: 12px;
+  height: 3px;
+  background: var(--studio-accent-1, var(--accent));
+  opacity: 0;
+  transform: scaleX(0.35);
+  transform-origin: center;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.workspace-tabs-new .dashboard-tab:hover {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  opacity: 1;
+  box-shadow: none;
+}
+
+.workspace-tabs-new .dashboard-tab.active {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  opacity: 1;
+  box-shadow: none;
+}
+
+.workspace-tabs-new .dashboard-tab.active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.workspace-tabs-new .dashboard-tab svg {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+.game-engine-workspace-panel {
+  width: 100%;
+}
+
+.game-engine-project-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
+  align-items: end;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  background: color-mix(in srgb, var(--panel-alt) 84%, black 16%);
+}
+
+.game-engine-project-toolbar .toggle {
+  min-height: 42px;
+}
+
+.game-engine-project-toolbar > button {
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.game-engine-project-status {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 4px 14px;
+  color: var(--muted);
+  font-size: 11px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 64%, transparent);
+}
+
+.game-engine-project-status[data-tone="ok"] {
+  color: var(--green);
+}
+
+.game-engine-project-status[data-tone="error"] {
+  color: var(--danger);
+}
+
+.game-engine-project-status[data-tone="busy"] {
+  color: var(--warm);
+}
+
+.game-engine-project-list {
+  display: grid;
+  gap: 10px;
+}
+
+.game-engine-project-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel) 82%, black 18%);
+}
+
+.game-engine-project-card[data-available="false"] {
+  border-color: color-mix(in srgb, var(--danger) 36%, var(--line));
+}
+
+.game-engine-project-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--studio-accent-3, var(--accent-3));
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  background: color-mix(in srgb, var(--panel-alt) 78%, black 22%);
+}
+
+.game-engine-project-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.game-engine-project-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.game-engine-project-copy h4 {
+  margin: 0;
+}
+
+.game-engine-project-copy code,
+.game-engine-project-copy small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-engine-project-copy small {
+  color: var(--muted);
+}
+
+.game-engine-project-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 1180px) {
+  .game-engine-project-toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+  }
+
+  .game-engine-scan-path-field {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .workspace-tabs-new {
+    gap: 4px;
+    padding-inline: 8px;
+  }
+
+  .workspace-tabs-new .dashboard-tab {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .game-engine-project-card {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .game-engine-project-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-engine-project-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

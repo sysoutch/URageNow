@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toon Image Shader</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-tool-bridge.js"></script>
+  <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(17, 24, 39, 0.82);
+      --panel-strong: #111827;
+      --line: rgba(255,255,255,0.10);
+
+      --text: #f8fafc;
+      --muted: #94a3b8;
+
+      --accent: #7c3aed;
+      --accent-2: #06b6d4;
+
+      --danger: #fb7185;
+      --ok: #34d399;
+
+      --shadow:
+        0 24px 80px rgba(0,0,0,.35);
+    }
+
+    /* =========================================================
+      RESET
+    ========================================================= */
+
+    * {
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+
+      overflow: hidden;
+
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      color: var(--text);
+
+      background:
+        radial-gradient(
+          circle at 20% 5%,
+          rgba(124,58,237,.34),
+          transparent 26rem
+        ),
+        radial-gradient(
+          circle at 84% 8%,
+          rgba(6,182,212,.24),
+          transparent 23rem
+        ),
+        linear-gradient(
+          135deg,
+          #070a12 0%,
+          #0b1020 50%,
+          #111827 100%
+        );
+    }
+
+    /* =========================================================
+      APP LAYOUT
+    ========================================================= */
+
+    main {
+      width: 100%;
+      height: calc(100vh - 48px);
+      display: grid;
+      grid-template-columns: 420px minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    /* =========================================================
+      HEADER
+    ========================================================= */
+
+    header {
+      display: none;
+    }
+
+    /* =========================================================
+      SIDEBAR
+    ========================================================= */
+
+    .panel {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 24px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.04),
+          rgba(255,255,255,.02)
+        ),
+        var(--panel);
+
+      backdrop-filter: blur(18px);
+
+      box-shadow: var(--shadow);
+
+      scrollbar-gutter: stable;
+    }
+
+    /* =========================================================
+      RIGHT STAGE
+    ========================================================= */
+
+    .stage {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 24px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.03),
+          rgba(255,255,255,.015)
+        ),
+        rgba(0,0,0,.08);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+
+    /* =========================================================
+      SCROLLBARS
+    ========================================================= */
+
+    .panel::-webkit-scrollbar,
+    .stage::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .panel::-webkit-scrollbar-thumb,
+    .stage::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,.14);
+
+      border-radius: 999px;
+    }
+
+    .panel::-webkit-scrollbar-thumb:hover,
+    .stage::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,.24);
+    }
+
+    /* =========================================================
+      DROPZONE
+    ========================================================= */
+
+    #upload-card-wrapper {
+      width: 100%;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+
+    /* =========================================================
+      CONTROLS
+    ========================================================= */
+
+    .control {
+      padding: 14px;
+
+      border-radius: 18px;
+
+      border: 1px solid rgba(255,255,255,.08);
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.04),
+          rgba(255,255,255,.02)
+        );
+
+      margin-top: 12px;
+    }
+
+    .row {
+      display: grid;
+
+      grid-template-columns: 1fr auto;
+
+      gap: 12px;
+
+      align-items: center;
+
+      margin-bottom: 10px;
+    }
+
+    label {
+      color: #dbeafe;
+
+      font-size: .92rem;
+
+      font-weight: 800;
+    }
+
+    .value {
+      color: #7dd3fc;
+
+      font-size: .84rem;
+
+      font-weight: 900;
+
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================
+      INPUTS
+    ========================================================= */
+
+    input[type="range"] {
+      width: 100%;
+
+      accent-color: var(--accent-2);
+    }
+
+    select,
+    input[type="color"] {
+      width: 100%;
+
+      border-radius: 14px;
+
+      border: 1px solid rgba(255,255,255,.12);
+
+      background: rgba(255,255,255,.08);
+
+      color: var(--text);
+
+      padding: 10px 12px;
+
+      font-weight: 800;
+    }
+
+    input[type="color"] {
+      height: 42px;
+
+      padding: 4px;
+    }
+
+    option {
+      color: #111827;
+    }
+
+    /* =========================================================
+      BUTTONS
+    ========================================================= */
+
+    button {
+      appearance: none;
+
+      border: 1px solid rgba(255,255,255,.11);
+
+      border-radius: 16px;
+
+      padding: 11px 12px;
+
+      cursor: pointer;
+
+      color: var(--text);
+
+      background: rgba(255,255,255,.08);
+
+      font-weight: 800;
+
+      transition:
+        transform .16s ease,
+        border-color .16s ease,
+        background .16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+
+      border-color: rgba(255,255,255,.22);
+    }
+
+    .primary {
+      background:
+        linear-gradient(
+          135deg,
+          #38bdf8,
+          #7c3aed
+        );
+    }
+
+    .danger {
+      background: rgba(251,113,133,.14);
+
+      color: #fecdd3;
+    }
+
+    /* =========================================================
+      BUTTON GRIDS
+    ========================================================= */
+
+    .presets,
+    .actions,
+    .switches,
+    .color-grid {
+      display: grid;
+
+      grid-template-columns: repeat(2, minmax(0,1fr));
+
+      gap: 10px;
+
+      margin-top: 14px;
+    }
+
+    /* =========================================================
+      TOGGLES
+    ========================================================= */
+
+    .toggle {
+      display: flex;
+
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 8px;
+
+      padding: 11px 12px;
+
+      border-radius: 16px;
+
+      background: rgba(255,255,255,.06);
+
+      border: 1px solid rgba(255,255,255,.10);
+
+      user-select: none;
+
+      cursor: pointer;
+
+      font-weight: 800;
+
+      color: #e2e8f0;
+    }
+
+    .toggle input {
+      accent-color: var(--accent-2);
+    }
+
+    /* =========================================================
+      TOOLBAR
+    ========================================================= */
+
+    .toolbar {
+      flex: 0 0 auto;
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 12px;
+
+      padding-bottom: 18px;
+
+      border-bottom: 1px solid var(--line);
+    }
+
+    .status {
+      color: var(--muted);
+
+      font-size: .92rem;
+    }
+
+    /* =========================================================
+      CANVAS AREA
+    ========================================================= */
+
+    .canvas-wrap {
+      flex: 1 1 auto;
+
+      min-height: 0;
+
+      position: relative;
+
+      display: grid;
+      place-items: center;
+
+      overflow: auto;
+
+      border-radius: 22px;
+
+      border: 1px solid rgba(255,255,255,.08);
+
+      background:
+        linear-gradient(
+          45deg,
+          rgba(255,255,255,.035) 25%,
+          transparent 25%
+        ),
+        linear-gradient(
+          -45deg,
+          rgba(255,255,255,.035) 25%,
+          transparent 25%
+        ),
+        linear-gradient(
+          45deg,
+          transparent 75%,
+          rgba(255,255,255,.035) 75%
+        ),
+        linear-gradient(
+          -45deg,
+          transparent 75%,
+          rgba(255,255,255,.035) 75%
+        );
+
+      background-size: 28px 28px;
+
+      background-position:
+        0 0,
+        0 14px,
+        14px -14px,
+        -14px 0;
+    }
+
+    /* =========================================================
+      CANVAS
+    ========================================================= */
+
+    canvas {
+      max-width: none;
+
+      border-radius: 12px;
+
+      image-rendering: auto;
+    }
+
+    /* =========================================================
+      PLACEHOLDER
+    ========================================================= */
+
+    .placeholder {
+      position: absolute;
+
+      inset: 0;
+
+      display: grid;
+      place-items: center;
+
+      text-align: center;
+
+      padding: 30px;
+
+      color: var(--muted);
+
+      pointer-events: none;
+    }
+
+    .placeholder h2 {
+      margin: 0 0 10px;
+
+      color: var(--text);
+
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+
+      letter-spacing: -.04em;
+    }
+
+    /* =========================================================
+      FOOTER
+    ========================================================= */
+
+    .footer-note,
+    .mini {
+      color: var(--muted);
+
+      font-size: .86rem;
+
+      line-height: 1.45;
+    }
+
+    .footer-note {
+      flex: 0 0 auto;
+
+      padding-top: 14px;
+    }
+
+    .mini {
+      margin-top: 14px;
+    }
+
+    /* =========================================================
+      MOBILE
+    ========================================================= */
+
+    @media (max-width: 1100px) {
+      body {
+        overflow: auto;
+
+        padding: 16px;
+      }
+
+      main {
+        height: auto;
+
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .stage {
+        height: auto;
+
+        overflow: visible;
+      }
+
+      .canvas-wrap {
+        min-height: 420px;
+      }
+
+      .presets,
+      .actions,
+      .switches,
+      .color-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    body[data-dashboard-sidebar-externalized] main {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body[data-dashboard-sidebar-externalized] .panel {
+      display: none;
+    }
+  </style>
+</head>
+<body data-dashboard-theme="fire">
+  <header>
+    <section class="title">
+      <h1>Toon Image<br/>Shader Lab</h1>
+      <p>Drop in an image and convert it to cel-shaded, posterized, outlined toon art with browser-only HTML5 canvas processing.</p>
+    </section>
+    <div class="badge">✦ Cel bands · Ink width · Shadow shaping · Rim glow</div>
+  </header>
+
+  <main>
+    <aside class="panel" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Toon Controls">
+      <div id="upload-card-wrapper">
+        <label class="upload-card" for="fileInput">
+          <span class="upload-card-icon arrow-icon">&#8595;</span>
+          <strong>Drop or choose an image</strong>
+          <span>PNG, JPG, WebP, GIF still frame</span>
+          <input id="fileInput" type="file" accept="image/*" hidden />
+        </label>
+      </div>
+
+      <label class="row" style="margin-bottom:0"><span>Style preset</span></label>
+      <div class="presets">
+        <button data-preset="softAnime">Soft Anime</button>
+        <button data-preset="comicInk">Comic Ink</button>
+        <button data-preset="flatCel">Flat Cel</button>
+        <button data-preset="mangaMono">Manga Mono</button>
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="levels">Cel bands</label><span class="value" id="levelsVal"></span></div>
+        <input id="levels" type="range" min="2" max="14" step="1" value="10" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="outline">Ink outline</label><span class="value" id="outlineVal"></span></div>
+        <input id="outline" type="range" min="0" max="100" step="1" value="54" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="inkWidth">Ink width</label><span class="value" id="inkWidthVal"></span></div>
+        <input id="inkWidth" type="range" min="1" max="6" step="1" value="1" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="smoothing">Paint smoothing</label><span class="value" id="smoothingVal"></span></div>
+        <input id="smoothing" type="range" min="0" max="8" step="1" value="3" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="sat">Color boost</label><span class="value" id="satVal"></span></div>
+        <input id="sat" type="range" min="0" max="220" step="1" value="161" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="contrast">Contrast</label><span class="value" id="contrastVal"></span></div>
+        <input id="contrast" type="range" min="40" max="200" step="1" value="112" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="shadowShape">Shadow shape</label><span class="value" id="shadowShapeVal"></span></div>
+        <input id="shadowShape" type="range" min="0" max="100" step="1" value="30" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="edgeDetail">Edge detail</label><span class="value" id="edgeDetailVal"></span></div>
+        <input id="edgeDetail" type="range" min="0" max="100" step="1" value="55" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="rim">Rim light</label><span class="value" id="rimVal"></span></div>
+        <input id="rim" type="range" min="0" max="100" step="1" value="18" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="paper">Paper grain</label><span class="value" id="paperVal"></span></div>
+        <input id="paper" type="range" min="0" max="100" step="1" value="8" />
+      </div>
+
+      <div class="control">
+        <div class="row"><label for="toneMode">Tone mode</label></div>
+        <select id="toneMode">
+          <option value="color">Full color</option>
+          <option value="warm">Warm anime</option>
+          <option value="cool">Cool comic</option>
+          <option value="mono">Manga mono</option>
+        </select>
+      </div>
+
+      <div class="color-grid">
+        <div><label for="inkColor">Ink color</label><input id="inkColor" type="color" value="#111827" /></div>
+        <div><label for="rimColor">Rim color</label><input id="rimColor" type="color" value="#8bdcff" /></div>
+      </div>
+
+      <div class="switches">
+        <label class="toggle">Split view <input id="split" type="checkbox" /></label>
+        <label class="toggle">Dither <input id="dither" type="checkbox" checked /></label>
+        <label class="toggle">Halftone <input id="halftone" type="checkbox" /></label>
+        <label class="toggle">Transparent BG <input id="transparentBg" type="checkbox" /></label>
+      </div>
+
+      <div class="actions">
+        <button class="danger" id="resetBtn">Reset</button>
+        <button class="primary" id="downloadBtn">Export PNG</button>
+      </div>
+
+      <p class="mini">Tip: higher ink outlines work best on photos with clear silhouettes. More cel bands keeps detail; fewer bands gives a flatter cartoon look.</p>
+    </aside>
+
+    <section class="stage">
+      <div class="toolbar">
+        <div>
+          <strong id="filename">No image loaded</strong>
+          <div class="status" id="status">Canvas engine ready.</div>
+        </div>
+        <button id="sampleBtn">Load Sample Gradient</button>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="canvas"></canvas>
+        <div class="placeholder" id="placeholder">
+          <div>
+            <h2>Make photos look like toon-shaded game art</h2>
+            <p>Upload an image, then tune cel bands, ink outline, ink width, shadow shape, smoothing, tone, grain, halftone, and rim lighting.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">Processing happens locally in your browser. No image is uploaded anywhere. The export uses the current full-resolution processed canvas.</div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const placeholder = document.getElementById('placeholder');
+    const fileInput = document.getElementById('fileInput');
+    const statusEl = document.getElementById('status');
+    const filenameEl = document.getElementById('filename');
+
+    function applyDashboardTheme(themeName) {
+      document.body.setAttribute('data-dashboard-theme', String(themeName || 'fire').trim() || 'fire');
+    }
+
+    const controls = {
+      levels: document.getElementById('levels'),
+      outline: document.getElementById('outline'),
+      inkWidth: document.getElementById('inkWidth'),
+      smoothing: document.getElementById('smoothing'),
+      sat: document.getElementById('sat'),
+      contrast: document.getElementById('contrast'),
+      shadowShape: document.getElementById('shadowShape'),
+      edgeDetail: document.getElementById('edgeDetail'),
+      rim: document.getElementById('rim'),
+      paper: document.getElementById('paper'),
+      toneMode: document.getElementById('toneMode'),
+      inkColor: document.getElementById('inkColor'),
+      rimColor: document.getElementById('rimColor'),
+      split: document.getElementById('split'),
+      dither: document.getElementById('dither'),
+      halftone: document.getElementById('halftone'),
+      transparentBg: document.getElementById('transparentBg'),
+    };
+
+    const valueEls = {
+      levels: document.getElementById('levelsVal'),
+      outline: document.getElementById('outlineVal'),
+      inkWidth: document.getElementById('inkWidthVal'),
+      smoothing: document.getElementById('smoothingVal'),
+      sat: document.getElementById('satVal'),
+      contrast: document.getElementById('contrastVal'),
+      shadowShape: document.getElementById('shadowShapeVal'),
+      edgeDetail: document.getElementById('edgeDetailVal'),
+      rim: document.getElementById('rimVal'),
+      paper: document.getElementById('paperVal'),
+    };
+
+    let originalCanvas = document.createElement('canvas');
+    let originalCtx = originalCanvas.getContext('2d', { willReadFrequently: true });
+    let hasImage = false;
+    let renderQueued = false;
+
+    const presets = {
+      softAnime: { levels: 10, outline: 54, inkWidth: 1, smoothing: 3, sat: 161, contrast: 112, shadowShape: 30, edgeDetail: 55, rim: 18, paper: 8, toneMode: 'warm', dither: true, halftone: false, inkColor: '#1f2937', rimColor: '#9be7ff' },
+      comicInk: { levels: 5, outline: 78, inkWidth: 3, smoothing: 1, sat: 132, contrast: 150, shadowShape: 64, edgeDetail: 78, rim: 8, paper: 14, toneMode: 'cool', dither: false, halftone: true, inkColor: '#06070a', rimColor: '#ffffff' },
+      flatCel: { levels: 3, outline: 42, inkWidth: 2, smoothing: 5, sat: 118, contrast: 125, shadowShape: 88, edgeDetail: 36, rim: 10, paper: 0, toneMode: 'color', dither: false, halftone: false, inkColor: '#111827', rimColor: '#d8f3ff' },
+      mangaMono: { levels: 4, outline: 86, inkWidth: 4, smoothing: 0, sat: 0, contrast: 174, shadowShape: 72, edgeDetail: 84, rim: 0, paper: 28, toneMode: 'mono', dither: false, halftone: true, inkColor: '#000000', rimColor: '#ffffff' },
+    };
+
+    function updateLabels() {
+      valueEls.levels.textContent = controls.levels.value;
+      valueEls.outline.textContent = controls.outline.value;
+      valueEls.inkWidth.textContent = controls.inkWidth.value;
+      valueEls.smoothing.textContent = controls.smoothing.value;
+      valueEls.sat.textContent = controls.sat.value + '%';
+      valueEls.contrast.textContent = (Number(controls.contrast.value) - 100) + '%';
+      valueEls.shadowShape.textContent = controls.shadowShape.value + '%';
+      valueEls.edgeDetail.textContent = controls.edgeDetail.value + '%';
+      valueEls.rim.textContent = controls.rim.value + '%';
+      valueEls.paper.textContent = controls.paper.value + '%';
+    }
+
+    function clamp(v, min = 0, max = 255) { return Math.max(min, Math.min(max, v)); }
+    function luminance(r, g, b) { return 0.2126 * r + 0.7152 * g + 0.0722 * b; }
+    function hexToRgb(hex) {
+      const v = parseInt(hex.slice(1), 16);
+      return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+    }
+    function adjustSaturation(r, g, b, sat) {
+      const gray = luminance(r, g, b);
+      return [gray + (r - gray) * sat, gray + (g - gray) * sat, gray + (b - gray) * sat];
+    }
+    function adjustContrast(v, c) { return (v - 128) * c + 128; }
+    function bayerDither(x, y) {
+      const matrix = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+      return (matrix[y & 3][x & 3] / 16 - 0.5) * 18;
+    }
+    function hashNoise(x, y) {
+      const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+      return (n - Math.floor(n)) - 0.5;
+    }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function queueRender() {
+      updateLabels();
+      if (!hasImage || renderQueued) return;
+      renderQueued = true;
+      requestAnimationFrame(() => {
+        renderQueued = false;
+        renderToon();
+      });
+    }
+
+    function getSmoothedSource(src, w, h, radius) {
+      if (radius <= 0) return src.data;
+      const temp = new Uint8ClampedArray(src.data.length);
+      const data = src.data;
+      const step = Math.max(1, Math.min(5, radius));
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let r = 0, g = 0, b = 0, a = 0, count = 0;
+          for (let oy = -step; oy <= step; oy++) {
+            for (let ox = -step; ox <= step; ox++) {
+              const nx = Math.max(0, Math.min(w - 1, x + ox));
+              const ny = Math.max(0, Math.min(h - 1, y + oy));
+              const idx = (ny * w + nx) * 4;
+              r += data[idx]; g += data[idx + 1]; b += data[idx + 2]; a += data[idx + 3]; count++;
+            }
+          }
+          const idx = (y * w + x) * 4;
+          const mix = radius / 8;
+          temp[idx] = lerp(data[idx], r / count, mix);
+          temp[idx + 1] = lerp(data[idx + 1], g / count, mix);
+          temp[idx + 2] = lerp(data[idx + 2], b / count, mix);
+          temp[idx + 3] = a / count;
+        }
+      }
+      return temp;
+    }
+
+    function renderToon() {
+      const w = originalCanvas.width;
+      const h = originalCanvas.height;
+      if (!w || !h) return;
+
+      const levels = Number(controls.levels.value);
+      const outlinePower = Number(controls.outline.value) / 100;
+      const inkWidth = Number(controls.inkWidth.value);
+      const smoothing = Number(controls.smoothing.value);
+      const sat = Number(controls.sat.value) / 100;
+      const contrast = Number(controls.contrast.value) / 100;
+      const shadowShape = Number(controls.shadowShape.value) / 100;
+      const edgeDetail = Number(controls.edgeDetail.value) / 100;
+      const rim = Number(controls.rim.value) / 100;
+      const paper = Number(controls.paper.value) / 100;
+      const split = controls.split.checked;
+      const useDither = controls.dither.checked;
+      const halftone = controls.halftone.checked;
+      const transparentBg = controls.transparentBg.checked;
+      const toneMode = controls.toneMode.value;
+      const inkRgb = hexToRgb(controls.inkColor.value);
+      const rimRgb = hexToRgb(controls.rimColor.value);
+
+      canvas.width = w;
+      canvas.height = h;
+      const src = originalCtx.getImageData(0, 0, w, h);
+      const source = getSmoothedSource(src, w, h, smoothing);
+      const out = ctx.createImageData(w, h);
+      const s = src.data;
+      const d = out.data;
+      const lum = new Float32Array(w * h);
+      const edgeMap = new Float32Array(w * h);
+
+      for (let i = 0, p = 0; i < source.length; i += 4, p++) lum[p] = luminance(source[i], source[i + 1], source[i + 2]);
+
+      const threshold = 30 - edgeDetail * 24;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let maxEdge = 0;
+          for (let oy = -inkWidth; oy <= inkWidth; oy++) {
+            for (let ox = -inkWidth; ox <= inkWidth; ox++) {
+              const nx = Math.max(0, Math.min(w - 1, x + ox));
+              const ny = Math.max(0, Math.min(h - 1, y + oy));
+              const left = lum[ny * w + Math.max(0, nx - 1)];
+              const right = lum[ny * w + Math.min(w - 1, nx + 1)];
+              const up = lum[Math.max(0, ny - 1) * w + nx];
+              const down = lum[Math.min(h - 1, ny + 1) * w + nx];
+              maxEdge = Math.max(maxEdge, Math.abs(right - left) + Math.abs(down - up));
+            }
+          }
+          edgeMap[y * w + x] = clamp((maxEdge - threshold) / 92, 0, 1);
+        }
+      }
+
+      const bandScale = 255 / Math.max(1, levels - 1);
+      const gamma = lerp(1.35, 0.62, shadowShape);
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          const p = y * w + x;
+          let r = source[idx], g = source[idx + 1], b = source[idx + 2], a = source[idx + 3];
+
+          if (transparentBg && a < 245) { d[idx + 3] = a; continue; }
+
+          let [sr, sg, sb] = adjustSaturation(r, g, b, sat);
+          sr = adjustContrast(sr, contrast);
+          sg = adjustContrast(sg, contrast);
+          sb = adjustContrast(sb, contrast);
+
+          const l = clamp(luminance(sr, sg, sb)) / 255;
+          const shaped = Math.pow(l, gamma);
+          const shade = lerp(0.72, 1.18, Math.round(shaped * (levels - 1)) / (levels - 1));
+
+          const noise = useDither ? bayerDither(x, y) : 0;
+          sr = Math.round(clamp(sr * shade + noise) / bandScale) * bandScale;
+          sg = Math.round(clamp(sg * shade + noise) / bandScale) * bandScale;
+          sb = Math.round(clamp(sb * shade + noise) / bandScale) * bandScale;
+
+          if (toneMode === 'warm') { sr *= 1.06; sg *= 1.01; sb *= 0.95; }
+          if (toneMode === 'cool') { sr *= 0.94; sg *= 1.02; sb *= 1.08; }
+          if (toneMode === 'mono') {
+            const m = luminance(sr, sg, sb);
+            sr = sg = sb = m;
+          }
+
+          const ink = edgeMap[p] * outlinePower;
+          let tr = lerp(sr, inkRgb[0], ink);
+          let tg = lerp(sg, inkRgb[1], ink);
+          let tb = lerp(sb, inkRgb[2], ink);
+
+          const rimMask = clamp(edgeMap[p] * rim, 0, 1);
+          tr = lerp(tr, rimRgb[0], rimMask);
+          tg = lerp(tg, rimRgb[1], rimMask);
+          tb = lerp(tb, rimRgb[2], rimMask);
+
+          if (halftone) {
+            const dot = ((x % 8) - 4) ** 2 + ((y % 8) - 4) ** 2;
+            const dotStrength = dot < 7 ? 0.12 + shadowShape * 0.18 : 0;
+            tr = lerp(tr, inkRgb[0], dotStrength * (1 - l));
+            tg = lerp(tg, inkRgb[1], dotStrength * (1 - l));
+            tb = lerp(tb, inkRgb[2], dotStrength * (1 - l));
+          }
+
+          if (paper > 0) {
+            const grain = hashNoise(x, y) * 38 * paper;
+            tr += grain; tg += grain; tb += grain;
+          }
+
+          if (split && x < w / 2) { tr = s[idx]; tg = s[idx + 1]; tb = s[idx + 2]; }
+
+          d[idx] = clamp(tr);
+          d[idx + 1] = clamp(tg);
+          d[idx + 2] = clamp(tb);
+          d[idx + 3] = a;
+        }
+      }
+
+      ctx.putImageData(out, 0, 0);
+      if (split) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,.92)';
+        ctx.lineWidth = Math.max(2, w * 0.004);
+        ctx.beginPath();
+        ctx.moveTo(w / 2, 0);
+        ctx.lineTo(w / 2, h);
+        ctx.stroke();
+        ctx.restore();
+      }
+      statusEl.textContent = `${w} × ${h}px · toon render updated`;
+    }
+
+    function fitImageToCanvas(img, name = 'Uploaded image') {
+      const maxSide = 2200;
+      let w = img.naturalWidth || img.width;
+      let h = img.naturalHeight || img.height;
+      const scale = Math.min(1, maxSide / Math.max(w, h));
+      w = Math.round(w * scale);
+      h = Math.round(h * scale);
+      originalCanvas.width = w;
+      originalCanvas.height = h;
+      originalCtx.clearRect(0, 0, w, h);
+      originalCtx.drawImage(img, 0, 0, w, h);
+      hasImage = true;
+      placeholder.style.display = 'none';
+      filenameEl.textContent = name;
+      queueRender();
+    }
+
+    function loadFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const img = new Image();
+      img.onload = () => {
+        fitImageToCanvas(img, file.name);
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(file);
+    }
+
+    function loadImageSource(source, name = 'Dashboard image') {
+      return new Promise((resolve, reject) => {
+        const normalizedSource = String(source || '').trim();
+        if (!normalizedSource) {
+          reject(new Error('No image source was provided.'));
+          return;
+        }
+        const img = new Image();
+        img.onload = () => {
+          fitImageToCanvas(img, name);
+          resolve();
+        };
+        img.onerror = () => reject(new Error('Failed to load image.'));
+        img.src = normalizedSource;
+      });
+    }
+
+    function loadSample() {
+      const w = 1400, h = 900;
+      originalCanvas.width = w;
+      originalCanvas.height = h;
+      const g = originalCtx.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, '#f97316');
+      g.addColorStop(.35, '#a855f7');
+      g.addColorStop(.72, '#06b6d4');
+      g.addColorStop(1, '#22c55e');
+      originalCtx.fillStyle = g;
+      originalCtx.fillRect(0, 0, w, h);
+      originalCtx.globalAlpha = .92;
+      for (let i = 0; i < 18; i++) {
+        originalCtx.beginPath();
+        originalCtx.fillStyle = `hsl(${i * 22}, 88%, ${42 + (i % 5) * 8}%)`;
+        originalCtx.arc(120 + i * 72, 180 + Math.sin(i) * 120, 90 + (i % 4) * 28, 0, Math.PI * 2);
+        originalCtx.fill();
+      }
+      originalCtx.globalAlpha = 1;
+      originalCtx.fillStyle = 'rgba(255,255,255,.86)';
+      originalCtx.font = '900 120px system-ui';
+      originalCtx.fillText('TOON', 90, 720);
+      originalCtx.font = '700 48px system-ui';
+      originalCtx.fillText('shader bands + outlines', 100, 790);
+      hasImage = true;
+      placeholder.style.display = 'none';
+      filenameEl.textContent = 'Sample Gradient Scene';
+      queueRender();
+    }
+
+    fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+    const uploadWrapper = document.getElementById('upload-card-wrapper');
+    if (uploadWrapper) {
+      ['dragenter', 'dragover'].forEach(eventName => uploadWrapper.addEventListener(eventName, e => { e.preventDefault(); }));
+      ['dragleave', 'drop'].forEach(eventName => uploadWrapper.addEventListener(eventName, e => { e.preventDefault(); }));
+      uploadWrapper.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+    }
+    Object.values(controls).forEach(control => control.addEventListener('input', queueRender));
+
+    document.querySelectorAll('[data-preset]').forEach(button => {
+      button.addEventListener('click', () => {
+        const preset = presets[button.dataset.preset];
+        Object.entries(preset).forEach(([key, value]) => {
+          if (typeof value === 'boolean') controls[key].checked = value;
+          else controls[key].value = value;
+        });
+        queueRender();
+      });
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      if (!hasImage) return loadSample();
+      const link = document.createElement('a');
+      link.download = 'toon-shaded-image.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      Object.entries(presets.softAnime).forEach(([key, value]) => {
+        if (typeof value === 'boolean') controls[key].checked = value;
+        else controls[key].value = value;
+      });
+      controls.split.checked = false;
+      queueRender();
+    });
+
+    document.getElementById('sampleBtn').addEventListener('click', loadSample);
+    updateLabels();
+    applyDashboardTheme(document.body.getAttribute('data-dashboard-theme') || 'fire');
+    function describeCurrentAsset() {
+      if (!hasImage || !canvas.width || !canvas.height) throw new Error('Load an image first.');
+      const dataUrl = canvas.toDataURL('image/png');
+      return {
+        kind: 'image',
+        title: 'Toon Shaded Image',
+        fileName: 'toon-shaded-image.png',
+        mimeType: 'image/png',
+        dataUrl,
+        width: canvas.width,
+        height: canvas.height,
+        previewKind: 'image',
+        previewUrl: dataUrl,
+        sourceDetail: 'Processed toon-shaded image.',
+        metadata: { sourceTool: 'toon-image-shader' }
+      };
+    }
+    if (window.registerDashboardToolBridge) {
+      window.registerDashboardToolBridge({
+        onTheme: applyDashboardTheme,
+        onLoadAsset: payload => loadImageSource(payload && (payload.dataUrl || payload.imageUrl || payload.previewImageUrl || payload.url), payload && (payload.fileName || payload.imageFileName || 'Dashboard image')),
+        onExportImage: describeCurrentAsset,
+        onDescribeCurrentAsset: describeCurrentAsset
+      });
+    }
+  </script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "id": "dev",
+  "label": "Development",
+  "icon": "code-slash",
+  "description": "Developer utilities and content-authoring helpers."
+}

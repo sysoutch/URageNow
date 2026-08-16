@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URage Pulse | Multi-View Visualizer</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="/tools/shared/css/sidebar-scrollview.css">
+    <link rel="stylesheet" href="/tools/shared/css/upload-btn.css">
+    <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body data-dashboard-theme="fire">
+
+<div class="app-layout">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Visualizer Controls">
+    <div class="sidebar-section">
+      <h3>File</h3>
+      <label class="upload-btn" for="audioUpload">
+        <span class="upload-btn-icon">🎵</span>
+        <span class="upload-btn-text">Open Audio</span>
+        <input type="file" id="audioUpload" accept="audio/*" hidden>
+      </label>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Visual Settings</h3>
+      <div class="visual-settings">
+        <label>View Type:
+          <select id="viewType" onchange="changeView()">
+            <option value="bars">Bars</option>
+            <option value="circular">Circular</option>
+            <option value="waveform">Waveform</option>
+            <option value="spectrum">Spectrum</option>
+            <option value="orbs">Orbs</option>
+          </select>
+        </label>
+
+        <label>Pixel Size: 
+          <select id="pixelSize" onchange="initCanvas()">
+            <option value="16">16-Bit (Smooth)</option>
+            <option value="32" selected>8-Bit (Chunky)</option>
+            <option value="64">4-Bit (Extreme)</option>
+          </select>
+        </label>
+
+        <label>Color Mode:
+          <select id="colorMode" onchange="updateColorMode()">
+            <option value="spectrum">Spectrum</option>
+            <option value="mono-green">Mono Green</option>
+            <option value="mono-cyan">Mono Cyan</option>
+            <option value="gradient">Gradient</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="sidebar-section sidebar-footer">
+      <span class="status-text" id="status">Ready to Rock</span>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div id="visualizer-container">
+      <canvas id="visualizerCanvas"></canvas>
+    </div>
+
+    <!-- PLAYBACK CONTROLS -->
+    <div class="playback-controls-main">
+      <button class="control-btn" id="playBtn" onclick="togglePlayPause()" disabled>▶ Play</button>
+      <button class="control-btn" id="stopBtn" onclick="stopPlayback()" disabled>⏹ Stop</button>
+      <div class="time-display-main">
+        <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+      </div>
+
+      <!-- VOLUME TOGGLE + PANEL GROUP -->
+      <div class="volume-group">
+        <button class="volume-toggle-btn" id="volumeToggleBtn" title="Volume Control">🔊</button>
+        <div class="volume-panel-main" id="volumePanelMain">
+          <div class="volume-slider-container">
+            <button class="mute-btn" id="muteBtn" title="Mute/Unmute">🔊</button>
+            <span id="volumeValueDisplay">70%</span>
+            <input type="range" id="volumeControl" min="0" max="100" value="70" onchange="setVolume()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="js/visualizer.js"></script>
+<script src="js/player.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+
+</body>
+</html>

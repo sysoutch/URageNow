@@ -1,0 +1,26 @@
+[workspace]
+members = [
+  "crates/asset-indexer",
+  "crates/asset-validator",
+  "crates/media-probe",
+  "crates/model-inspector",
+  "crates/native-application-broker",
+  "crates/worker-contracts",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "UNLICENSED"
+publish = false
+version = "0.1.0"
+
+[workspace.dependencies]
+anyhow = "1"
+clap = { version = "4.5.39", features = ["derive"] }
+gltf = "1.4"
+image = { version = "0.25", default-features = true, features = ["gif", "jpeg", "png", "webp"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+symphonia = { version = "0.5.4", default-features = false, features = ["aac", "flac", "isomp4", "mp3", "ogg", "pcm", "vorbis", "wav"] }
+tobj = "4.0"

@@ -1,0 +1,147 @@
+{
+  "14": {
+    "inputs": {
+      "tags": "anime, soft female vocals, kawaii pop, j-pop, childish, piano, guitar, synthesizer, fast, happy, cheerful, lighthearted\t\n",
+      "lyrics": "[inst]\n\n[verse]\nWeich wie Wolken, die Ohren fliegen,\nTanzend im Wind, die Welt zieht vorbei.\nGlitzernd die Augen, der Blick so klar,\nSchaut auf die Welt, ein funkelnder Stern.\n\n[verse]\nDer Schwanz bewegt sich, sanft und frei,\nWellen im Wind, er fliegt wie ein Traum.\nGoldene Haare im Sonnenlicht,\nWeht durch die Luft, ein sanfter Duft.\n\n[verse]\nDu bist der Schutz, mein treuer Begleiter,\nIn deinem Herzen, da find' ich Frieden.\nLächelnd in einem Pulli, so zart,\nZeigst du mir die Welt, mit deinem Blick, so stark.\n\n[verse]\nBlau der Rock, der Mantel schwarz,\nGoldene Muster, so schön wie der Tag.\nLicht, das alles in Liebe hüllt,\nDu bist der Traum, der in mir lebt.\n\n[Verse]\nWeich wie Federn, du hörst die Stille,\nFlüsterst mir zu, was mein Herz begreift.\n„Ich bin bei dir“, das klingt so klar,\nMit dir an meiner Seite, bin ich nie allein.",
+      "lyrics_strength": 0.9900000000000002,
+      "clip": [
+        "40",
+        1
+      ]
+    },
+    "class_type": "TextEncodeAceStepAudio",
+    "_meta": {
+      "title": "TextEncodeAceStepAudio"
+    }
+  },
+  "17": {
+    "inputs": {
+      "seconds": 120,
+      "batch_size": 1
+    },
+    "class_type": "EmptyAceStepLatentAudio",
+    "_meta": {
+      "title": "EmptyAceStepLatentAudio"
+    }
+  },
+  "18": {
+    "inputs": {
+      "samples": [
+        "52",
+        0
+      ],
+      "vae": [
+        "40",
+        2
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAEDecodeAudio"
+    }
+  },
+  "40": {
+    "inputs": {
+      "ckpt_name": "ace_step_v1_3.5b.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "44": {
+    "inputs": {
+      "conditioning": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "49": {
+    "inputs": {
+      "model": [
+        "51",
+        0
+      ],
+      "operation": [
+        "50",
+        0
+      ]
+    },
+    "class_type": "LatentApplyOperationCFG",
+    "_meta": {
+      "title": "LatentApplyOperationCFG"
+    }
+  },
+  "50": {
+    "inputs": {
+      "multiplier": 1.0000000000000002
+    },
+    "class_type": "LatentOperationTonemapReinhard",
+    "_meta": {
+      "title": "LatentOperationTonemapReinhard"
+    }
+  },
+  "51": {
+    "inputs": {
+      "shift": 5.000000000000001,
+      "model": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "ModelSamplingSD3"
+    }
+  },
+  "52": {
+    "inputs": {
+      "seed": 489450691171922,
+      "steps": 50,
+      "cfg": 5,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "49",
+        0
+      ],
+      "positive": [
+        "14",
+        0
+      ],
+      "negative": [
+        "44",
+        0
+      ],
+      "latent_image": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "59": {
+    "inputs": {
+      "filename_prefix": "audio/ComfyUI",
+      "quality": "V0",
+      "audioUI": "",
+      "audio": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "SaveAudioMP3",
+    "_meta": {
+      "title": "Save Audio (MP3)"
+    }
+  }
+}

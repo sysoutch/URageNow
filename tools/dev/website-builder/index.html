@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudioHTML5 | Professional Production Builder</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://unpkg.com/grapesjs"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-basic"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="../../shared/dashboard-theme.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+    <div id="back-to-editor" onclick="editor.runCommand('preview')">
+        <i class="fa fa-pencil"></i> Back to Editor
+    </div>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">STUDIO<span>HTML5</span></div>
+            <div id="device-switcher"></div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="editor.runCommand('preview')"><i class="fa fa-eye"></i> Preview</button>
+                <button class="btn btn-secondary" onclick="editor.runCommand('open-templates')"><i class="fa fa-cubes"></i> Templates</button>
+                <button class="btn btn-secondary" onclick="editor.runCommand('save-to-library')"><i class="fa fa-bookmark"></i> Save to Lib</button>
+                <button class="btn btn-secondary" onclick="toggleImportHtmlPanel()"><i class="fa fa-file-import"></i> Import HTML</button>
+                <button class="btn btn-blue" id="global-settings-trigger"><i class="fa fa-gear"></i> Settings</button>
+                <button class="btn btn-green" onclick="editor.runCommand('publish-site')"><i class="fa fa-cloud-arrow-down"></i> Publish</button>
+            </div>
+        </header>
+
+        <aside class="sidebar-left">
+            <div class="panel-label">Blocks Library</div>
+            <div id="blocks"></div>
+            <div class="panel-label">Layers</div>
+            <div id="layers-container"></div>
+        </aside>
+
+        <main id="gjs"></main>
+
+        <aside class="sidebar-right">
+            <div class="panel-label">Style Manager</div>
+            <div id="styles-container"></div>
+            <div class="panel-label">Traits / Settings</div>
+            <div id="traits-container"></div>
+        </aside>
+    </div>
+
+    <!-- Import HTML Panel -->
+    <div id="import-html-div" class="import-html-div">
+        <div class="panel-header">
+            <h3>Import HTML</h3>
+            <button class="btn btn-secondary" onclick="toggleImportHtmlPanel()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <div class="import-html-content">
+                <p>Upload your HTML file to import it into the editor:</p>
+                <input type="file" id="html-file-input" accept=".html,.htm" style="margin: 10px 0;">
+                <button class="btn btn-blue" onclick="importHtmlFile()">Import HTML</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

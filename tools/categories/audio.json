@@ -1,0 +1,6 @@
+{
+  "id": "audio",
+  "label": "Audio",
+  "icon": "soundwave",
+  "description": "Audio editing, synthesis, and analysis tools."
+}

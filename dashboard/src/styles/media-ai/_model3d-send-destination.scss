@@ -1,0 +1,349 @@
+.studio-send-destination-backdrop {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  background: rgba(3, 5, 10, 0.72);
+}
+
+.studio-send-destination-backdrop.hidden {
+  display: none !important;
+}
+
+.studio-send-destination-panel {
+  position: fixed;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 0;
+  width: min(720px, calc(100vw - 40px));
+  max-height: min(640px, calc(100vh - 40px));
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 44%, var(--line));
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 8%, transparent), transparent 42%),
+    color-mix(in srgb, var(--panel, var(--surface)) 88%, black 12%);
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(255, 255, 255, 0.035) inset;
+  transform: translate(-50%, -50%);
+  isolation: isolate;
+  color: var(--ink);
+  font-family: var(--dashboard-font-family, inherit);
+}
+
+.studio-send-destination-panel.hidden,
+.studio-send-destination-pane.hidden {
+  display: none !important;
+}
+
+.studio-send-destination-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  background: color-mix(in srgb, var(--panel-alt, var(--panel, var(--surface))) 84%, black 16%);
+}
+
+.studio-send-destination-header>div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.studio-send-destination-header strong {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.studio-send-destination-header small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.studio-send-destination-panel .studio-send-destination-header>.icon-button {
+  flex: 0 0 34px;
+  width: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  padding: 0;
+  border-radius: 8px !important;
+}
+
+.studio-send-destination-panel .button-icon {
+  display: inline-flex;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  color: currentColor;
+  font-size: 18px;
+  line-height: 1;
+}
+
+// The shared appearance layer gives generic *-tabs selectors double-class specificity.
+body .studio-send-destination-panel .studio-send-destination-tabs.studio-send-destination-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  box-sizing: border-box;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 66%, transparent);
+  background: color-mix(in srgb, var(--panel, var(--surface)) 78%, black 22%);
+}
+
+body .studio-send-destination-panel .studio-send-destination-tabs.studio-send-destination-tabs>button {
+  min-width: 0 !important;
+  min-height: 46px !important;
+  padding: 8px 10px !important;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  color: var(--muted);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  text-transform: none !important;
+}
+
+body .studio-send-destination-panel .studio-send-destination-tabs.studio-send-destination-tabs>button.active {
+  color: var(--ink);
+  border-bottom-color: var(--studio-accent-1, var(--accent)) !important;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 12%, transparent));
+}
+
+.studio-send-destination-content {
+  min-height: 0;
+  padding: 18px;
+  overflow: auto;
+}
+
+.studio-send-destination-content,
+.studio-send-destination-pane {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.studio-send-destination-pane>p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+// These panels are mounted at document level, outside a studio card.  Give
+// their controls the active dashboard palette explicitly instead of falling
+// back to the legacy blue surface defaults.
+.studio-send-destination-panel :is(input, select, textarea) {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--line) 78%, transparent);
+  background: color-mix(in srgb, var(--panel-alt, var(--panel, var(--surface))) 82%, black 18%);
+}
+
+.studio-send-destination-panel :is(input, select, textarea):focus {
+  border-color: var(--studio-accent-1, var(--accent));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--studio-accent-1, var(--accent)) 46%, transparent);
+}
+
+.studio-send-destination-actions {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.9fr) minmax(240px, 1.1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.studio-send-destination-actions>.studio-tool-picker,
+.studio-send-destination-actions>.studio-tool-picker>button,
+.studio-send-destination-actions>button,
+.studio-send-destination-pane>.studio-send-destination-primary-action {
+  width: 100%;
+  min-width: 0;
+}
+
+.studio-send-destination-panel .studio-send-destination-actions>.studio-tool-picker>button,
+.studio-send-destination-panel .studio-send-destination-actions>button,
+.studio-send-destination-panel .studio-send-destination-pane>.studio-send-destination-primary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 8px 14px !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.studio-send-destination-actions-two {
+  grid-template-columns: minmax(180px, 0.9fr) minmax(240px, 1.1fr);
+}
+
+.studio-send-destination-primary-action {
+  justify-self: start;
+  max-width: 320px;
+}
+
+.model3d-print-executable-field small {
+  overflow-wrap: anywhere;
+}
+
+.model3d-print-send-control {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.studio-send-destination-panel .model3d-print-send-control>button {
+  width: 100%;
+}
+
+.studio-send-destination-panel .model3d-print-send-control>.model3d-print-mode-toggle {
+  min-width: 42px;
+  padding: 0;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.model3d-print-mode-menu {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: calc(100% + 6px);
+  display: grid;
+  min-width: 235px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--panel, var(--surface));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+}
+
+.model3d-print-mode-menu.hidden {
+  display: none;
+}
+
+.model3d-print-mode-menu button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.model3d-print-mode-menu button:last-child {
+  border-bottom: 0;
+}
+
+.model3d-print-mode-menu button:hover,
+.model3d-print-mode-menu button.active {
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 16%, transparent);
+}
+
+#model3d-print-send-status.error {
+  color: var(--danger);
+}
+
+.website-model-import-overlay {
+  position: fixed;
+  z-index: 260;
+  background: color-mix(in srgb, var(--editor-bg-deep, #060812) 76%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.website-model-import-panel {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.website-model-import-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.website-model-import-heading h3,
+.website-model-import-heading p {
+  margin: 0;
+}
+
+.website-model-import-heading p,
+.website-model-import-notice {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.website-model-import-details {
+  display: grid;
+  grid-template-columns: minmax(88px, auto) minmax(0, 1fr);
+  gap: 8px 14px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 76%, transparent);
+  background: color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 82%, black 18%);
+}
+
+.website-model-import-details dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.website-model-import-details dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.website-model-import-actions {
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .studio-send-destination-panel {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+  }
+
+  body .studio-send-destination-panel .studio-send-destination-tabs.studio-send-destination-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    padding: 0 12px !important;
+  }
+
+  .studio-send-destination-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  body .studio-send-destination-panel .studio-send-destination-tabs.studio-send-destination-tabs {
+    grid-template-columns: 1fr !important;
+  }
+}

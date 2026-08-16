@@ -1,0 +1,205 @@
+// Studio rail theming — consolidated view-* active selectors from _core.scss
+// This file extracts the duplicated rail button/label/state blocks into one place.
+// Usage: @use "styles/studio/rail-state-mixins"; then @include mixins.studio-rail-view-states { ... }
+
+/// Rail buttons (non-gradient home) for all view states — extracted from _core.scss lines 222-236
+body.view-tools-active .rail-home,
+body.view-tools-active .rail-tools-button,
+body.view-tools-active .rail-profile-button,
+body.view-profile-active .rail-home,
+body.view-profile-active .rail-tools-button,
+body.view-profile-active .rail-profile-button,
+body.view-blender-addons-active .rail-home,
+body.view-blender-addons-active .rail-tools-button,
+body.view-blender-addons-active .rail-blender-addons-button,
+body.view-blender-addons-active .rail-assets-button,
+body.view-blender-addons-active .rail-profile-button,
+body.view-assets-active .rail-home,
+body.view-assets-active .rail-tools-button,
+body.view-assets-active .rail-blender-addons-button,
+body.view-assets-active .rail-assets-button,
+body.view-assets-active .rail-profile-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-home,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-tools-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-blender-addons-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-assets-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-profile-button {
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.16) 0%, transparent 42%),
+    linear-gradient(180deg, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 36%, transparent) 0%, color-mix(in srgb, var(--studio-accent-3, var(--accent-3)) 18%, transparent) 100%),
+    color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 82%, black 18%);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--studio-accent-3, var(--accent-3)) 18%, transparent);
+}
+
+/// Rail buttons compact sizes — extracted from _core.scss lines 304-310
+body.view-ai-active .rail-home,
+body.view-ai-active .rail-tools-button,
+body.view-ai-active .rail-profile-button,
+body.view-tools-active .rail-home,
+body.view-tools-active .rail-tools-button,
+body.view-tools-active .rail-profile-button,
+body.view-profile-active .rail-home,
+body.view-profile-active .rail-tools-button,
+body.view-profile-active .rail-profile-button,
+body.view-blender-addons-active .rail-home,
+body.view-blender-addons-active .rail-tools-button,
+body.view-blender-addons-active .rail-blender-addons-button,
+body.view-blender-addons-active .rail-assets-button,
+body.view-blender-addons-active .rail-profile-button,
+body.view-assets-active .rail-home,
+body.view-assets-active .rail-tools-button,
+body.view-assets-active .rail-blender-addons-button,
+body.view-assets-active .rail-assets-button,
+body.view-assets-active .rail-profile-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-home,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-tools-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-blender-addons-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-assets-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-profile-button {
+  width: 50px;
+  min-height: 50px;
+  padding: 7px 5px;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 84%, transparent);
+  border-radius: 14px;
+}
+
+/// Rail mark icons — extracted from _core.scss lines 312-327
+body.view-ai-active .rail-home-mark,
+body.view-ai-active .rail-tools-mark,
+body.view-ai-active .rail-profile-mark,
+body.view-tools-active .rail-home-mark,
+body.view-tools-active .rail-tools-mark,
+body.view-tools-active .rail-profile-mark,
+body.view-profile-active .rail-home-mark,
+body.view-profile-active .rail-tools-mark,
+body.view-profile-active .rail-profile-mark,
+body.view-blender-addons-active .rail-home-mark,
+body.view-blender-addons-active .rail-tools-mark,
+body.view-blender-addons-active .rail-resource-section-icon,
+body.view-blender-addons-active .rail-profile-mark,
+body.view-assets-active .rail-home-mark,
+body.view-assets-active .rail-tools-mark,
+body.view-assets-active .rail-resource-section-icon,
+body.view-assets-active .rail-profile-mark,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-home-mark,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-tools-mark,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-resource-section-icon,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-profile-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+}
+
+/// Rail label hiding — extracted from _core.scss lines 329-358
+body.view-ai-active .rail-home-label,
+body.view-ai-active .rail-tools-label,
+body.view-ai-active .rail-profile-label,
+body.view-ai-active .rail-blender-addon-label,
+body.view-ai-active .rail-asset-label,
+body.view-tools-active .rail-home-label,
+body.view-tools-active .rail-tools-label,
+body.view-tools-active .rail-profile-label,
+body.view-tools-active .rail-blender-addon-label,
+body.view-tools-active .rail-asset-label,
+body.view-profile-active .rail-home-label,
+body.view-profile-active .rail-tools-label,
+body.view-profile-active .rail-profile-label,
+body.view-profile-active .rail-blender-addon-label,
+body.view-profile-active .rail-asset-label,
+body.view-blender-addons-active .rail-home-label,
+body.view-blender-addons-active .rail-tools-label,
+body.view-blender-addons-active .rail-profile-label,
+body.view-blender-addons-active .rail-blender-addon-label,
+body.view-blender-addons-active .rail-asset-label,
+body.view-assets-active .rail-home-label,
+body.view-assets-active .rail-tools-label,
+body.view-assets-active .rail-profile-label,
+body.view-assets-active .rail-blender-addon-label,
+body.view-assets-active .rail-asset-label,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-home-label,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-tools-label,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-profile-label {
+  display: none;
+}
+
+/// Rail home-wrap collapsed — extracted from _core.scss lines 360-367
+body.view-ai-active .rail-home-wrap,
+body.view-tools-active .rail-home-wrap,
+body.view-profile-active .rail-home-wrap,
+body.view-blender-addons-active .rail-home-wrap,
+body.view-assets-active .rail-home-wrap,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-home-wrap {
+  min-height: 0;
+  align-content: start;
+  overflow: hidden;
+}
+
+/// Rail theme switcher grid row — extracted from _core.scss lines 473-480
+body.view-ai-active .rail-theme-switcher,
+body.view-tools-active .rail-theme-switcher,
+body.view-profile-active .rail-theme-switcher,
+body.view-blender-addons-active .rail-theme-switcher,
+body.view-assets-active .rail-theme-switcher,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-theme-switcher {
+  grid-row: 3;
+  width: 100%;
+  justify-items: center;
+}
+
+/// Rail bottom row — extracted from _core.scss lines 482-493
+body.view-ai-active .rail-bottom,
+body.view-tools-active .rail-bottom,
+body.view-profile-active .rail-bottom,
+body.view-blender-addons-active .rail-bottom,
+body.view-assets-active .rail-bottom,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-bottom {
+  grid-row: 4;
+  padding-top: 8px;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  justify-items: center;
+  align-content: end;
+  overflow: visible;
+}
+
+/// Rail settings button size — extracted from _core.scss lines 495-501
+body.view-ai-active .rail-settings-button,
+body.view-tools-active .rail-settings-button,
+body.view-profile-active .rail-settings-button,
+body.view-blender-addons-active .rail-settings-button,
+body.view-assets-active .rail-settings-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-settings-button {
+  width: 36px;
+  min-height: 36px;
+}
+
+/// Rail expanded state — extracted from _core.scss lines 580-595
+body.view-ai-active.studio-rail-expanded,
+body.view-tools-active.studio-rail-expanded,
+body.view-profile-active.studio-rail-expanded,
+body.view-blender-addons-active.studio-rail-expanded,
+body.view-assets-active.studio-rail-expanded {
+  --server-rail-width: 164px;
+}
+
+body.view-ai-active.studio-rail-expanded .server-rail,
+body.view-ai-active.studio-rail-expanded .side-nav,
+body.view-tools-active.studio-rail-expanded .server-rail,
+body.view-tools-active.studio-rail-expanded .side-nav,
+body.view-profile-active.studio-rail-expanded .server-rail,
+body.view-profile-active.studio-rail-expanded .side-nav,
+body.view-blender-addons-active.studio-rail-expanded .server-rail,
+body.view-blender-addons-active.studio-rail-expanded .side-nav,
+body.view-assets-active.studio-rail-expanded .server-rail,
+body.view-assets-active.studio-rail-expanded .side-nav {
+  justify-items: stretch;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/// Rail expanded workflow list — extracted from _core.scss lines 597-599
+body.view-ai-active.studio-rail-expanded .rail-studio-workflows,
+body.view-blender-addons-active.studio-rail-expanded .rail-studio-workflows,
+body.view-assets-active.studio-rail-expanded .rail-studio-workflows {
+  gap: 8px;
+}

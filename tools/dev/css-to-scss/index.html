@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSS Architect Pro v5</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        :root { --accent: #ff8a4d; --accent-strong: #ff6136; --bg: #120d0d; --bg-alt: rgba(18, 11, 11, 0.98); --panel: rgba(24, 14, 14, 0.92); --border: rgba(255, 180, 128, 0.18); --border-strong: rgba(255, 180, 128, 0.34); --text: #f6f1ee; --muted: #c8b6ae; --blue: #59b6ff; }
+        body[data-dashboard-theme="water"] { --accent: #59b6ff; --accent-strong: #2f8cf0; --bg: #0d1522; --bg-alt: rgba(10, 17, 29, 0.98); --panel: rgba(12, 21, 37, 0.94); --border: rgba(114, 190, 255, 0.18); --border-strong: rgba(114, 190, 255, 0.34); --text: #eef5ff; --muted: #a9bfd8; --blue: #7bd0ff; }
+        body[data-dashboard-theme="nature"] { --accent: #82cd5f; --accent-strong: #58a23c; --bg: #11170f; --bg-alt: rgba(13, 19, 11, 0.98); --panel: rgba(18, 24, 16, 0.94); --border: rgba(146, 213, 120, 0.18); --border-strong: rgba(146, 213, 120, 0.34); --text: #f2f8ee; --muted: #bccfaf; --blue: #9ae27b; }
+        body[data-dashboard-theme="rock"] { --accent: #c4ae8a; --accent-strong: #9b8563; --bg: #151515; --bg-alt: rgba(16, 16, 16, 0.98); --panel: rgba(24, 24, 24, 0.95); --border: rgba(196, 190, 176, 0.18); --border-strong: rgba(196, 190, 176, 0.34); --text: #f2efea; --muted: #b7aea2; --blue: #d8c29f; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        header { background: var(--panel); padding: 10px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .main { display: flex; flex: 1; overflow: hidden; }
+        
+        .column { display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+        #input-col { width: 28%; padding: 15px; }
+        #explorer-col { width: 22%; padding: 15px; background: var(--bg-alt); border-right: 1px solid var(--border); }
+        #preview-col { flex: 1; padding: 15px; background: var(--bg); position: relative; }
+
+        textarea, pre { background: var(--bg-alt); color: var(--blue); border: 1px solid var(--border); padding: 12px; border-radius: 10px; flex: 1; font-family: 'Fira Code', monospace; font-size: 13px; overflow: auto; }
+        
+        /* Interactive Variable List */
+        .var-edit-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; background: var(--panel); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border); }
+        .var-edit-row input { background: var(--bg); color: var(--accent); border: 1px solid var(--border-strong); padding: 2px 6px; border-radius: 6px; font-family: monospace; width: 100px; }
+        .var-val { font-size: 11px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .file-tab { padding: 8px 12px; cursor: pointer; border-radius: 8px; margin-bottom: 4px; font-size: 13px; display: flex; justify-content: space-between; transition: 0.2s; border: 1px solid transparent; }
+        .file-tab:hover { background: rgba(255,255,255,0.04); border-color: var(--border); }
+        .file-tab.active { background: rgba(255, 138, 77, 0.14); border-color: var(--accent); color: var(--accent); font-weight: bold; }
+
+        .build-box { background: var(--panel); border: 1px solid var(--border); padding: 12px; border-radius: 12px; margin-top: 10px; }
+        select { background: var(--bg); color: white; border: 1px solid var(--border); padding: 6px; border-radius: 8px; width: 100%; margin-bottom: 10px; }
+        
+        .toggle-container { display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: var(--muted); }
+        
+        button { background: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        button:disabled { background: rgba(255,255,255,0.12); cursor: not-allowed; }
+        h3 { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-top: 15px; margin-bottom: 8px; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+
+<header>
+    <h2 style="margin:0; font-size:18px; color: var(--accent);">CSS Architect <span style="color:#fff">Refactor Pro</span></h2>
+    <div>
+        <button onclick="processCSS()">Analyze CSS</button>
+        <button id="dlBtn" style="background:var(--blue); margin-left:10px;" onclick="downloadZip()" disabled>Download ZIP</button>
+    </div>
+</header>
+
+<div class="main">
+    <div class="column" id="input-col">
+        <h3 style="margin-top:0">Raw CSS Input</h3>
+        <textarea id="cssInput" placeholder="Paste CSS here..."></textarea>
+        
+        <div class="build-box">
+            <h3 style="margin-top:0">Options</h3>
+            <div class="toggle-container">
+                <span>Production Minify</span>
+                <input type="checkbox" id="minifyToggle" onchange="generateScript()" checked>
+            </div>
+            <div class="toggle-container">
+                <span>Auto-Var Spacing/Fonts</span>
+                <input type="checkbox" id="autoVarToggle" checked>
+            </div>
+            
+            <h3>Compiler Script</h3>
+            <select id="langSelect" onchange="generateScript()">
+                <option value="npm">NPM / Package.json</option>
+                <option value="bash">Terminal (Sass CLI)</option>
+                <option value="python">Python (libsass)</option>
+            </select>
+            <pre id="scriptOutput" style="font-size:11px; height:60px; flex:none; color:#d1d1d1;"></pre>
+        </div>
+    </div>
+
+    <div class="column" id="explorer-col" style="overflow-y: auto;">
+        <h3 style="margin-top:0">Detected Variables</h3>
+        <div id="varExplorer"></div>
+        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+        <h3>SCSS Modules</h3>
+        <div id="fileExplorer"></div>
+    </div>
+
+    <div class="column" id="preview-col">
+        <h3 id="currentFileName">Preview</h3>
+        <pre id="filePreview">/* Awaiting Analysis... */</pre>
+    </div>
+</div>
+
+<script>
+window.registerDashboardThemeSync();
+let processedFiles = {};
+let activeFile = '';
+let currentVars = []; // Array of { id: '$name', val: 'value', type: 'color|size' }
+
+function processCSS() {
+    let css = document.getElementById('cssInput').value;
+    if (!css.trim()) return;
+
+    currentVars = [];
+    const varMap = new Map();
+
+    // 1. Extract Colors
+    const colors = [...new Set(css.match(/#(?:[0-9a-f]{3}){1,2}|rgba?\([^\)]+\)|hsla?\([^\)]+\)/gi))];
+    colors.forEach((c, i) => {
+        const id = `$color-${i + 1}`;
+        currentVars.push({ id, val: c, type: 'color' });
+    });
+
+    // 2. Extract Spacing
+    if (document.getElementById('autoVarToggle').checked) {
+        const spacingRegex = /(?<=:\s?)(?!(?:0|1px|100%)\b)(\d+(?:\.\d+)?(?:px|rem|em|vh|vw))/g;
+        const spacing = [...new Set(css.match(spacingRegex))];
+        spacing.forEach((s, i) => {
+            const id = `$size-${i + 1}`;
+            currentVars.push({ id, val: s, type: 'size' });
+        });
+    }
+
+    applyRefactor();
+}
+
+function applyRefactor() {
+    const css = document.getElementById('cssInput').value;
+    processedFiles = {
+        '_variables.scss': "// Variables\n",
+        '_reset.scss': "// Base\n",
+        '_typography.scss': "// Typography\n",
+        '_layout.scss': "// Layout\n",
+        '_components.scss': "// Components\n",
+        'main.scss': ""
+    };
+
+    // Update _variables.scss and create local map
+    currentVars.forEach(v => {
+        processedFiles['_variables.scss'] += `${v.id}: ${v.val};\n`;
+    });
+
+    const blocks = css.split('}');
+    blocks.forEach(block => {
+        if (!block.trim()) return;
+        let content = block.trim() + "}";
+        
+        // Use the variable list to replace raw values
+        currentVars.forEach(v => {
+            content = content.split(v.val).join(v.id);
+        });
+
+        const selector = content.split('{')[0].trim();
+        if (selector.match(/^(html|body|\*|audio|video)/)) processedFiles['_reset.scss'] += content + "\n\n";
+        else if (selector.match(/^(h[1-6]|p|a|span|blockquote|li|ul|ol)/)) processedFiles['_typography.scss'] += content + "\n\n";
+        else if (selector.match(/(\.container|\.grid|\.row|\.col|header|footer|nav)/)) processedFiles['_layout.scss'] += content + "\n\n";
+        else processedFiles['_components.scss'] += content + "\n\n";
+    });
+
+    let imports = "/** Manifest **/\n\n";
+    Object.keys(processedFiles).forEach(f => {
+        if (f !== 'main.scss' && processedFiles[f].split('\n').length > 2) {
+            imports += `@import '${f.replace('.scss', '').replace('_', '')}';\n`;
+        }
+    });
+    processedFiles['main.scss'] = imports;
+
+    renderUI();
+    document.getElementById('dlBtn').disabled = false;
+    if (!activeFile) activeFile = 'main.scss';
+    selectFile(activeFile);
+}
+
+function renderUI() {
+    // Render Variables Explorer
+    const varExplorer = document.getElementById('varExplorer');
+    varExplorer.innerHTML = "";
+    currentVars.forEach((v, index) => {
+        const row = document.createElement('div');
+        row.className = "var-edit-row";
+        row.innerHTML = `
+            <input type="text" value="${v.id}" onchange="renameVar(${index}, this.value)">
+            <div class="var-val">${v.val}</div>
+        `;
+        varExplorer.appendChild(row);
+    });
+
+    // Render File Explorer
+    const explorer = document.getElementById('fileExplorer');
+    explorer.innerHTML = "";
+    Object.keys(processedFiles).forEach(name => {
+        if (processedFiles[name].split('\n').length <= 2 && name !== 'main.scss') return;
+        const div = document.createElement('div');
+        div.className = `file-tab ${activeFile === name ? 'active' : ''}`;
+        div.innerText = name;
+        div.onclick = () => selectFile(name);
+        explorer.appendChild(div);
+    });
+    generateScript();
+}
+
+function renameVar(index, newName) {
+    if (!newName.startsWith('$')) newName = '$' + newName;
+    currentVars[index].id = newName;
+    applyRefactor(); // Re-run categorization with new names
+}
+
+function selectFile(name) {
+    activeFile = name;
+    document.getElementById('currentFileName').innerText = name;
+    document.getElementById('filePreview').innerText = processedFiles[name];
+    renderUI();
+}
+
+function generateScript() {
+    const lang = document.getElementById('langSelect').value;
+    const isMinify = document.getElementById('minifyToggle').checked;
+    const style = isMinify ? "--style=compressed" : "--style=expanded";
+    const scripts = {
+        npm: `"build": "sass scss/main.scss dist/style.css ${style}"`,
+        bash: `sass scss/main.scss:dist/style.css ${style} --watch`,
+        python: `sass.compile(filename='scss/main.scss', output_style='${isMinify ? 'compressed' : 'expanded'}')`
+    };
+    document.getElementById('scriptOutput').innerText = scripts[lang] || "";
+}
+
+async function downloadZip() {
+    const zip = new JSZip();
+    const folder = zip.folder("scss");
+    for (const [name, content] of Object.entries(processedFiles)) {
+        if (content.split('\n').length > 1) folder.file(name, content);
+    }
+    const blob = await zip.generateAsync({type:"blob"});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "refactored-scss.zip";
+    link.click();
+}
+
+function describeCurrentAssets() {
+    return Object.entries(processedFiles)
+        .filter(([, content]) => String(content || '').trim())
+        .map(([name, content]) => ({
+            kind: 'text',
+            title: name,
+            fileName: name,
+            mimeType: 'text/x-scss',
+            textContent: content,
+            previewKind: 'text',
+            previewText: content,
+            sourceDetail: 'Refactored SCSS output.',
+            metadata: { sourceTool: 'css-to-scss', resourceFormat: 'scss' }
+        }));
+}
+
+window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+</script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

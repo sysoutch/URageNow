@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Analytics Pro | Advanced Data View</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        body[data-dashboard-theme="fire"] {
+            --tool-bg: #120d0d;
+            --tool-surface: rgba(24, 14, 14, 0.92);
+            --tool-surface-alt: rgba(18, 11, 11, 0.98);
+            --tool-line: rgba(255, 180, 128, 0.18);
+            --tool-text: #f6f1ee;
+            --tool-muted: #c8b6ae;
+            --tool-accent: #ff8a4d;
+        }
+        body[data-dashboard-theme="water"] {
+            --tool-bg: #0d1522;
+            --tool-surface: rgba(12, 21, 37, 0.94);
+            --tool-surface-alt: rgba(10, 17, 29, 0.98);
+            --tool-line: rgba(114, 190, 255, 0.18);
+            --tool-text: #eef5ff;
+            --tool-muted: #a9bfd8;
+            --tool-accent: #59b6ff;
+        }
+        body[data-dashboard-theme="nature"] {
+            --tool-bg: #11170f;
+            --tool-surface: rgba(18, 24, 16, 0.94);
+            --tool-surface-alt: rgba(13, 19, 11, 0.98);
+            --tool-line: rgba(146, 213, 120, 0.18);
+            --tool-text: #f2f8ee;
+            --tool-muted: #bccfaf;
+            --tool-accent: #82cd5f;
+        }
+        body[data-dashboard-theme="rock"] {
+            --tool-bg: #151515;
+            --tool-surface: rgba(24, 24, 24, 0.95);
+            --tool-surface-alt: rgba(16, 16, 16, 0.98);
+            --tool-line: rgba(196, 190, 176, 0.18);
+            --tool-text: #f2efea;
+            --tool-muted: #b7aea2;
+            --tool-accent: #c4ae8a;
+        }
+        body[data-dashboard-theme] {
+            background:
+                radial-gradient(circle at top right, color-mix(in srgb, var(--tool-accent) 16%, transparent) 0%, transparent 38%),
+                linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+                var(--tool-bg) !important;
+            color: var(--tool-text) !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--tool-accent) 30%, transparent); border-radius: 10px; }
+        .sort-icon { display: inline-block; width: 14px; height: 14px; margin-left: 4px; vertical-align: middle; opacity: 0.3; }
+        .sorted-asc .sort-icon { transform: rotate(180deg); opacity: 1; color: var(--tool-accent); }
+        .sorted-desc .sort-icon { opacity: 1; color: var(--tool-accent); }
+        body[data-dashboard-theme] .bg-white { background: var(--tool-surface) !important; border-color: var(--tool-line) !important; color: var(--tool-text) !important; }
+        body[data-dashboard-theme] .bg-slate-100,
+        body[data-dashboard-theme] .bg-slate-50 { background: var(--tool-surface-alt) !important; border-color: var(--tool-line) !important; color: var(--tool-text) !important; }
+        body[data-dashboard-theme] .text-slate-800,
+        body[data-dashboard-theme] .text-slate-700,
+        body[data-dashboard-theme] .text-slate-900 { color: var(--tool-text) !important; }
+        body[data-dashboard-theme] .text-slate-500,
+        body[data-dashboard-theme] .text-slate-400,
+        body[data-dashboard-theme] .text-slate-600 { color: var(--tool-muted) !important; }
+        body[data-dashboard-theme] .text-blue-600,
+        body[data-dashboard-theme] .text-blue-500 { color: var(--tool-accent) !important; }
+        body[data-dashboard-theme] .bg-blue-600,
+        body[data-dashboard-theme] .hover\:bg-blue-700:hover { background: var(--tool-accent) !important; }
+        body[data-dashboard-theme] .border-slate-200,
+        body[data-dashboard-theme] .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--tool-line) !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen pb-12" data-dashboard-theme="fire">
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-slate-800">Project <span class="text-blue-600">Analytics</span></h1>
+                <p class="text-slate-500 text-sm mt-1">Advanced sorting, grouping, and SLOC analysis.</p>
+            </div>
+            
+            <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
+            
+            <button id="scanBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-md flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="icons.svg#folder"></use></svg>
+                Select Directory
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+            <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Files</p>
+                    <p id="statFiles" class="text-2xl font-bold mt-1 text-slate-800">0</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total SLOC</p>
+                    <p id="statLines" class="text-2xl font-bold mt-1 text-blue-600">0</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Size</p>
+                    <p id="statSize" class="text-2xl font-bold mt-1 text-slate-800">0 KB</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">System Status</p>
+                    <p id="statStatus" class="text-sm font-bold mt-2 text-slate-400">Awaiting input...</p>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                        <div id="progressBar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-center items-center h-full min-h-[140px]">
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-t-xl border border-slate-200 border-b-0 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="relative w-full md:w-1/3">
+                <input type="text" id="searchInput" placeholder="Search files..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all">
+                <svg class="absolute left-3 top-2.5 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="icons.svg#search"></use></svg>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <label class="text-sm font-medium text-slate-500 whitespace-nowrap">Group By:</label>
+                <select id="groupBySelect" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none">
+                    <option value="none">None (Flat List)</option>
+                    <option value="ext">File Extension</option>
+                    <option value="folder">Top Level Folder</option>
+                </select>
+                <button id="exportBtn" class="ml-2 text-sm font-medium text-slate-600 hover:text-blue-600 px-4 py-2 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 transition-colors shadow-sm">Export CSV</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-b-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto max-h-[600px] custom-scrollbar">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead class="bg-slate-100 sticky top-0 z-10 shadow-sm text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4 cursor-pointer hover:bg-slate-200 transition-colors sortable" data-sort="name">
+                                File Path <svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="icons.svg#chevron-down"></use></svg>
+                            </th>
+                            <th class="px-6 py-4 cursor-pointer hover:bg-slate-200 transition-colors sortable" data-sort="ext">
+                                Type <svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="icons.svg#chevron-down"></use></svg>
+                            </th>
+                            <th class="px-6 py-4 cursor-pointer hover:bg-slate-200 transition-colors sortable text-right sorted-desc" data-sort="lines">
+                                Lines <svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="icons.svg#chevron-down"></use></svg>
+                            </th>
+                            <th class="px-6 py-4 cursor-pointer hover:bg-slate-200 transition-colors sortable text-right" data-sort="size">
+                                Size <svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="icons.svg#chevron-down"></use></svg>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody" class="divide-y divide-slate-100">
+                        <tr><td colspan="4" class="text-center py-12 text-slate-400">Click "Select Directory" to begin analysis</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let typeChartInstance = null;
+        let currentSort = { column: 'lines', direction: 'desc' };
+        
+        const els = {
+            scanBtn: document.getElementById('scanBtn'),
+            folderInput: document.getElementById('folderInput'),
+            resultsBody: document.getElementById('resultsBody'),
+            statStatus: document.getElementById('statStatus'),
+            progressBar: document.getElementById('progressBar'),
+            searchInput: document.getElementById('searchInput'),
+            groupBySelect: document.getElementById('groupBySelect'),
+            sortHeaders: document.querySelectorAll('.sortable')
+        };
+
+        els.scanBtn.addEventListener('click', () => els.folderInput.click());
+        els.searchInput.addEventListener('input', renderView);
+        els.groupBySelect.addEventListener('change', renderView);
+        
+        els.sortHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.dataset.sort;
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'desc';
+                }
+                
+                els.sortHeaders.forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+                header.classList.add(`sorted-${currentSort.direction}`);
+                
+                renderView();
+            });
+        });
+
+        els.folderInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            allData = [];
+            els.statStatus.innerText = 'Reading files...';
+            els.statStatus.className = 'text-sm font-bold mt-2 text-blue-500 animate-pulse';
+            els.resultsBody.innerHTML = '';
+            
+            const totalFiles = files.length;
+            let processed = 0;
+
+            const textExtensions = ['js', 'ts', 'html', 'css', 'txt', 'md', 'json', 'py', 'php', 'c', 'cpp', 'java', 'jsx', 'tsx', 'vue', 'rb', 'go', 'sql'];
+
+            for (const file of files) {
+                if (processed % 50 === 0) {
+                    els.progressBar.style.width = `${(processed / totalFiles) * 100}%`;
+                    els.statStatus.innerText = `Processing ${processed} / ${totalFiles}`;
+                    await new Promise(r => setTimeout(r, 0)); 
+                }
+
+                if (file.webkitRelativePath.includes('/.') || file.webkitRelativePath.includes('node_modules/') || file.webkitRelativePath.includes('dist/')) {
+                    processed++;
+                    continue;
+                }
+
+                const ext = file.name.split('.').pop().toLowerCase();
+                const isText = textExtensions.includes(ext);
+                
+                let lines = 0;
+                if (isText && file.size < 5000000) { 
+                    try {
+                        const text = await file.text();
+                        for (let i = 0; i < text.length; i++) {
+                            if (text[i] === '\n') lines++;
+                        }
+                        if (text.length > 0) lines++; 
+                    } catch (err) { lines = 0; }
+                }
+
+                const pathParts = file.webkitRelativePath.split('/');
+                const topFolder = pathParts.length > 1 ? pathParts[0] : 'Root';
+
+                allData.push({
+                    name: file.name,
+                    path: file.webkitRelativePath,
+                    folder: topFolder,
+                    ext: ext || 'unknown',
+                    lines: lines,
+                    size: file.size
+                });
+
+                processed++;
+            }
+
+            els.progressBar.style.width = '100%';
+            els.statStatus.innerText = 'Analysis Complete';
+            els.statStatus.className = 'text-sm font-bold mt-2 text-green-600';
+            setTimeout(() => els.progressBar.style.width = '0%', 1000);
+            
+            updateStats(allData);
+            updateChart(allData);
+            renderView();
+        });
+
+        function renderView() {
+            if (!allData.length) return;
+
+            let processedData = [...allData];
+
+            const query = els.searchInput.value.toLowerCase();
+            if (query) {
+                processedData = processedData.filter(item => 
+                    item.path.toLowerCase().includes(query) || 
+                    item.ext.toLowerCase().includes(query)
+                );
+            }
+
+            processedData.sort((a, b) => {
+                let valA = a[currentSort.column];
+                let valB = b[currentSort.column];
+                
+                if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+                
+                if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            const groupBy = els.groupBySelect.value;
+            let html = '';
+
+            if (groupBy === 'none') {
+                html = processedData.map(item => createRow(item)).join('');
+            } else {
+                const groups = {};
+                processedData.forEach(item => {
+                    const key = item[groupBy];
+                    if (!groups[key]) groups[key] = { items: [], lines: 0, size: 0 };
+                    groups[key].items.push(item);
+                    groups[key].lines += item.lines;
+                    groups[key].size += item.size;
+                });
+
+                for (const [groupName, groupData] of Object.entries(groups)) {
+                    html += `
+                        <tr class="bg-slate-100 border-t-2 border-slate-200">
+                            <td colspan="4" class="px-6 py-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-slate-700 uppercase tracking-wide text-xs">
+                                        ${groupBy === 'ext' ? 'Extension:' : 'Folder:'} ${groupName} 
+                                        <span class="ml-2 px-2 py-0.5 bg-slate-200 text-slate-600 rounded-full text-[10px]">${groupData.items.length} files</span>
+                                    </span>
+                                    <div class="text-xs text-slate-500 font-semibold space-x-4">
+                                        <span class="text-blue-600">${groupData.lines.toLocaleString()} SLOC</span>
+                                        <span>${formatBytes(groupData.size)}</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    html += groupData.items.map(item => createRow(item)).join('');
+                }
+            }
+
+            els.resultsBody.innerHTML = html;
+        }
+
+        function createRow(item) {
+            return `
+                <tr class="hover:bg-blue-50/50 transition-colors group">
+                    <td class="px-6 py-3 text-sm font-medium text-slate-800">
+                        <span class="text-[10px] text-slate-400 block font-normal uppercase tracking-wider group-hover:text-blue-400 transition-colors">${item.path.replace('/' + item.name, '')}</span>
+                        ${item.name}
+                    </td>
+                    <td class="px-6 py-3 text-xs font-mono uppercase text-slate-500">${item.ext}</td>
+                    <td class="px-6 py-3 text-sm text-right font-semibold ${item.lines > 1000 ? 'text-amber-600' : 'text-slate-700'}">${item.lines.toLocaleString()}</td>
+                    <td class="px-6 py-3 text-sm text-right text-slate-500">${formatBytes(item.size)}</td>
+                </tr>
+            `;
+        }
+
+        function updateStats(data) {
+            const totals = data.reduce((acc, curr) => {
+                acc.lines += curr.lines;
+                acc.size += curr.size;
+                return acc;
+            }, { lines: 0, size: 0 });
+
+            document.getElementById('statFiles').innerText = data.length.toLocaleString();
+            document.getElementById('statLines').innerText = totals.lines.toLocaleString();
+            document.getElementById('statSize').innerText = formatBytes(totals.size);
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function updateChart(data) {
+            const ctx = document.getElementById('typeChart').getContext('2d');
+            const counts = {};
+            data.forEach(i => counts[i.ext] = (counts[i.ext] || 0) + i.lines); 
+
+            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 4); 
+            
+            if (typeChartInstance) typeChartInstance.destroy();
+            typeChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sorted.map(i => i[0].toUpperCase()),
+                    datasets: [{
+                        data: sorted.map(i => i[1]),
+                        backgroundColor: ['#2563eb', '#8b5cf6', '#f43f5e', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 }, color: getComputedStyle(document.body).getPropertyValue('--tool-text').trim() || '#f6f1ee' } },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toLocaleString()} Lines` } }
+                    } 
+                }
+            });
+        }
+
+        function applyDashboardTheme(nextTheme) {
+            document.body.setAttribute('data-dashboard-theme', nextTheme || 'fire');
+            if (allData.length) updateChart(allData);
+        }
+
+        function describeCurrentAssets() {
+            const text = JSON.stringify({ files: allData, sort: currentSort }, null, 2);
+            return [{
+                kind: 'text',
+                title: 'File Analysis JSON',
+                fileName: 'file-analysis.json',
+                mimeType: 'application/json',
+                textContent: text,
+                previewKind: 'text',
+                previewText: text,
+                sourceDetail: 'Workspace file analysis data.',
+                metadata: { sourceTool: 'filer', resourceFormat: 'file-analysis-json' }
+            }];
+        }
+
+        window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+        window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+
+        window.addEventListener('message', (event) => {
+            const message = event && event.data;
+            if (message && message.type === 'tool:theme') applyDashboardTheme(message.payload?.theme);
+        });
+
+        applyDashboardTheme(document.body.getAttribute('data-dashboard-theme') || 'fire');
+    </script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

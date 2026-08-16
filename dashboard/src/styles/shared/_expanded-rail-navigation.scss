@@ -1,0 +1,530 @@
+// Final desktop-expanded rail contract. Keep this file after the legacy rail
+// layers so their competing sizing and disclosure rules resolve here once.
+$collapsed-rail-views: ".view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active, .view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active";
+@media (min-width: 981px) {
+  body.studio-rail-expanded[class] { --server-rail-width: 252px; }
+
+  body.studio-rail-expanded[class][class] :is(.server-rail, .side-nav) {
+    position: relative !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    background:
+      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--rail-sidebar-accent) 12%, transparent), transparent 32%),
+      linear-gradient(180deg, color-mix(in srgb, var(--rail-sidebar-bg) 96%, black 4%), var(--rail-sidebar-bg)) !important;
+  }
+
+  body.studio-rail-expanded[class] #rail-workflow-expand-button {
+    position: absolute !important;
+    z-index: 3;
+    top: 20px;
+    right: 10px;
+    width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] #rail-workflow-expand-button:hover {
+    background: color-mix(in srgb, var(--rail-sidebar-accent) 7%, transparent) !important;
+    box-shadow: inset 2px 0 0 var(--rail-sidebar-accent) !important;
+  }
+
+  body.studio-rail-expanded[class][class] .rail-home-wrap {
+    min-height: 0 !important;
+    align-content: start !important;
+    gap: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+  }
+
+  body.studio-rail-expanded[class] .rail-home-wrap > :is(
+    .rail-nav-button,
+    .rail-studio-workflows,
+    .rail-tools-categories,
+    .rail-resource-sections
+  ) {
+    flex: 0 0 auto !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-app-button {
+    width: 100% !important;
+    min-height: 88px !important;
+    padding: 12px 44px 12px 18px !important;
+    display: grid !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    align-items: center !important;
+    justify-items: start !important;
+    gap: 12px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-app-button .rail-home-mark {
+    width: 56px !important;
+    height: 56px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-app-button .rail-home-mark-logo {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  // The Studio home button must use the same shared hover treatment in every
+  // rail view (Bots, tools, messengers, and AI), rather than the old AI-only
+  // theme rule.
+  body.studio-rail-expanded[class] .rail-app-button:is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+    background: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 5%, transparent) !important;
+    box-shadow: inset 2px 0 0 var(--rail-nav-color, var(--rail-sidebar-accent)) !important;
+    color: var(--rail-nav-color, var(--ink)) !important;
+  }
+
+  body.studio-rail-expanded[class][class] .dashboard-wordmark {
+    display: inline !important;
+    font-size: 21px !important;
+    letter-spacing: -0.035em !important;
+    text-transform: none !important;
+  }
+
+  body.studio-rail-expanded[class] :is(.rail-home, .rail-tools-button, .rail-3d-suites-button, .rail-assets-button, .rail-profile-button) {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 52px !important;
+    margin: 0 !important;
+    padding: 7px 12px !important;
+    display: grid !important;
+    grid-template-columns: 32px minmax(0, 1fr) 18px !important;
+    align-items: center !important;
+    justify-items: start !important;
+    gap: 10px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: color-mix(in srgb, var(--ink) 88%, var(--muted) 12%) !important;
+  }
+
+  body.studio-rail-expanded[class] :is(.rail-home, .rail-tools-button, .rail-3d-suites-button, .rail-assets-button, .rail-profile-button):is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+    background: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 5%, transparent) !important;
+    box-shadow: none !important;
+    color: var(--rail-nav-color, var(--ink)) !important;
+  }
+
+  // Category rails own their disclosure arrow with ::after.  Keep that
+  // pseudo-element intact on hover/selection and render the active marker as
+  // an inset instead, otherwise the marker replaces the arrow.
+  body.studio-rail-expanded[class] :is(.rail-home, .rail-tools-button, .rail-3d-suites-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button):is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+    box-shadow: inset 2px 0 0 var(--rail-nav-color, var(--rail-sidebar-accent)) !important;
+  }
+
+  body.studio-rail-expanded[class] :is(.rail-home-mark, .rail-tools-category-icon, .rail-studio-workflow-icon, .rail-resource-section-icon) {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] :is(.rail-home-mark, .rail-tools-category-icon, .rail-studio-workflow-icon, .rail-resource-section-icon) :is(svg, .bi) {
+    color: var(--rail-icon-color, currentColor) !important;
+    stroke: var(--rail-icon-color, currentColor) !important;
+    filter: drop-shadow(0 0 7px color-mix(in srgb, var(--rail-icon-color, currentColor) 34%, transparent)) !important;
+  }
+
+  body.studio-rail-expanded[class][class] :is(.rail-home-label, .rail-tools-label, .rail-3d-suites-label, .rail-assets-label, .rail-profile-label) {
+    display: inline !important;
+    min-width: 0 !important;
+    color: currentColor !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body.studio-rail-expanded[class][class] :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections) {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 2px 0 4px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class][class] :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections)::before {
+    left: 20px !important;
+  }
+
+  body.view-ai-active.studio-rail-expanded[class] .rail-studio-workflows,
+  body.view-tools-active.studio-rail-expanded[class] .rail-tools-categories,
+  body.view-blender-addons-active.studio-rail-expanded[class] .rail-resource-sections[data-resource-rail-group="blender-addons"],
+  body.view-assets-active.studio-rail-expanded[class] .rail-resource-sections[data-resource-rail-group="assets"],
+  body.view-dashboard-active.studio-rail-expanded[class] .rail-resource-sections[data-resource-rail-group="bots"] {
+    display: grid !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+
+  // URage Now Home is the top-level overview, not a LazyDev destination.
+  // The general AI rail rule above makes its workflow list visible, so close
+  // it again here unless the user is deliberately previewing LazyDev by hover.
+  body.view-ai-active.studio-rail-expanded.studio-home-active:not(.studio-rail-hover-active) .rail-studio-workflows,
+  body.view-ai-active.studio-rail-expanded.studio-home-active.studio-rail-hover-active:not([data-studio-rail-hover-group="workflow"]):not([data-studio-rail-hover-leaving-group="workflow"]) .rail-studio-workflows {
+    display: none !important;
+  }
+
+  body.studio-rail-expanded[class][class] :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button) {
+    position: relative;
+    width: 100% !important;
+    min-height: 42px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 5px 8px 5px 36px !important;
+    display: grid !important;
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+    align-items: center !important;
+    justify-items: start !important;
+    gap: 10px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class][class] :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button)::before {
+    left: 20px !important;
+    width: 10px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  body.studio-rail-expanded[class] :is(.rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button):is(:hover, .active, .active-focus) {
+    background: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 7%, transparent) !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] :is(.rail-studio-workflow-label, .rail-tools-category-label, .rail-resource-section-label, .rail-blender-addon-label, .rail-asset-label) {
+    display: inline !important;
+    min-width: 0 !important;
+    color: color-mix(in srgb, var(--ink) 91%, var(--muted) 9%) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-tools-category-count,
+  body.studio-rail-expanded[class] :is(.rail-resource-section-sub, .rail-blender-addon-sub) {
+    display: none !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-theme-picker {
+    width: 100% !important;
+    flex: 0 0 auto;
+    border-top: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 66%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 66%, transparent);
+  }
+
+  body.studio-rail-expanded[class] .rail-theme-picker-summary {
+    min-height: 52px;
+    padding: 0 18px;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 10px;
+    color: color-mix(in srgb, var(--ink) 88%, var(--muted) 12%);
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    list-style: none;
+  }
+
+  body.studio-rail-expanded[class] .rail-theme-picker-summary::-webkit-details-marker { display: none; }
+
+  body.studio-rail-expanded[class] .rail-theme-picker-summary > span:first-child {
+    color: var(--rail-sidebar-accent);
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  body.studio-rail-expanded[class] .rail-theme-picker-chevron {
+    justify-self: end;
+    color: var(--muted);
+    transition: transform 160ms ease;
+  }
+
+  body.studio-rail-expanded[class] .rail-theme-picker[open] .rail-theme-picker-chevron { transform: rotate(90deg); }
+
+  body.studio-rail-expanded[class] .rail-theme-switcher {
+    width: 100% !important;
+    min-height: 0 !important;
+    grid-template-columns: repeat(9, 18px) !important;
+    grid-auto-rows: 18px !important;
+    justify-content: start !important;
+    justify-items: stretch !important;
+    gap: 5px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-theme-button {
+    width: 18px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    padding: 0 !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-bottom {
+    width: 100% !important;
+    flex: 0 0 auto;
+    gap: 0 !important;
+    padding: 10px 0 6px !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-bottom .rail-settings-button {
+    width: 100% !important;
+    min-height: 40px !important;
+    padding: 6px 10px !important;
+    display: grid !important;
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+    align-items: center !important;
+    justify-items: start !important;
+    gap: 10px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.studio-rail-expanded[class] .rail-bottom-label {
+    display: inline !important;
+    color: color-mix(in srgb, var(--ink) 86%, var(--muted) 14%) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+}
+
+// Collapsed desktop rail contract.  The rail has several historical view
+// families (Studio, Bots, Messenger); they must remain visually identical
+// when collapsed instead of each applying their own card treatment.
+@media (min-width: 981px) {
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) {
+    --server-rail-width: 84px;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(.server-rail, .side-nav) {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(
+    .rail-home,
+    .rail-tools-button,
+    .rail-3d-suites-button,
+    .rail-blender-addons-button,
+    .rail-assets-button,
+    .rail-profile-button,
+    .rail-studio-workflow-button,
+    .rail-tools-category-button,
+    .rail-resource-section-button,
+    .rail-settings-button
+  ) {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 62px !important;
+    padding: 6px 4px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 30px minmax(14px, auto) !important;
+    place-items: center !important;
+    gap: 2px !important;
+    border: 0 !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 72%, transparent) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: center !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(
+    .rail-home,
+    .rail-tools-button,
+    .rail-3d-suites-button,
+    .rail-blender-addons-button,
+    .rail-assets-button,
+    .rail-profile-button,
+    .rail-studio-workflow-button,
+    .rail-tools-category-button,
+    .rail-resource-section-button,
+    .rail-settings-button
+  ):is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+    background: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 10%, transparent) !important;
+    box-shadow: inset 3px 0 0 var(--rail-nav-color, var(--rail-sidebar-accent)) !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(
+    .rail-home-mark,
+    .rail-tools-mark,
+    .rail-3d-suites-mark,
+    .rail-blender-addons-mark,
+    .rail-assets-mark,
+    .rail-profile-mark,
+    .rail-studio-workflow-icon,
+    .rail-tools-category-icon,
+    .rail-resource-section-icon
+  ) {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(
+    .rail-home-mark,
+    .rail-tools-mark,
+    .rail-3d-suites-mark,
+    .rail-blender-addons-mark,
+    .rail-assets-mark,
+    .rail-profile-mark,
+    .rail-studio-workflow-icon,
+    .rail-tools-category-icon,
+    .rail-resource-section-icon
+  ) :is(svg, .bi) {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 20px !important;
+    color: var(--rail-icon-color, var(--rail-nav-color, var(--rail-sidebar-accent))) !important;
+    stroke: var(--rail-icon-color, var(--rail-nav-color, var(--rail-sidebar-accent))) !important;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rail-icon-color, var(--rail-nav-color, var(--rail-sidebar-accent))) 38%, transparent)) !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(
+    .rail-home-mark,
+    .rail-tools-mark,
+    .rail-3d-suites-mark,
+    .rail-blender-addons-mark,
+    .rail-assets-mark,
+    .rail-profile-mark,
+    .rail-studio-workflow-icon,
+    .rail-tools-category-icon,
+    .rail-resource-section-icon
+  ) svg [fill]:not([fill="none"]) {
+    fill: var(--rail-icon-color, var(--rail-nav-color, var(--rail-sidebar-accent))) !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) .rail-app-button {
+    min-height: 76px !important;
+    grid-template-rows: 42px minmax(14px, auto) !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) .rail-app-button .rail-home-mark {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(
+    .rail-home-label,
+    .rail-tools-label,
+    .rail-3d-suites-label,
+    .rail-blender-addons-label,
+    .rail-assets-label,
+    .rail-profile-label,
+    .rail-studio-workflow-label,
+    .rail-tools-category-label,
+    .rail-resource-section-label,
+    .rail-bottom-label
+  ) {
+    display: block !important;
+    max-width: 74px !important;
+    overflow: hidden !important;
+    color: color-mix(in srgb, var(--ink) 88%, var(--muted) 12%) !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections) {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections)::before {
+    display: none !important;
+  }
+
+  // Expanded rails use this pseudo-element as a disclosure arrow. In the
+  // compact two-row grid it becomes a third, stray glyph below the label.
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) [data-rail-category]::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  // The legacy Theme glyph was mojibake and rendered as a tiny dot. Hide the
+  // source text and draw a stable, theme-coloured symbol instead.
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) .rail-theme-picker-summary > span:first-child {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    color: var(--rail-sidebar-accent);
+    font-size: 0;
+    line-height: 1;
+  }
+
+  body:is(#{$collapsed-rail-views}):not(.studio-rail-expanded) .rail-theme-picker-summary > span:first-child::after {
+    content: "\25d0";
+    font-size: 24px;
+    line-height: 1;
+  }
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SVG Editor - Final Stable</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <script src="../../shared/dashboard-tool-bridge.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+<div id="toolbar">
+    <button class="tool-btn active" id="tool-select" onclick="setTool('select')">↖</button>
+    <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">█</button>
+    <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">●</button>
+    <button class="tool-btn" id="tool-ellipse" onclick="setTool('ellipse')">◉</button>
+    <button class="tool-btn" id="tool-text" onclick="setTool('text')">T</button>
+</div>
+
+<div id="code-side">
+    <div style="padding:10px; background:#252526; font-size:12px;">XML SOURCE</div>
+    <textarea id="svgInput" spellcheck="false"><svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"></svg></textarea>
+</div>
+
+<div id="canvas-side" tabindex="0">
+    <div id="svg-render"></div>
+    <div id="h-tl" class="handle" style="cursor:nw-resize; display:none;"></div>
+    <div id="h-tr" class="handle" style="cursor:ne-resize; display:none;"></div>
+    <div id="h-bl" class="handle" style="cursor:sw-resize; display:none;"></div>
+    <div id="h-br" class="handle" style="cursor:se-resize; display:none;"></div>
+</div>
+
+<div id="inspector-side">
+    <h3>Inspector</h3>
+    <div style="display:flex; gap:5px; margin-bottom:15px;">
+        <button class="action-btn" onclick="undo()">Undo</button>
+        <button class="action-btn" onclick="redo()">Redo</button>
+    </div>
+    <div id="sel-count" style="font-size:12px; color:var(--accent);">0 selected</div>
+    <div id="controls" style="display:none; margin-top:15px;">
+        <label style="font-size:10px;">FILL</label>
+        <input type="color" id="fillPicker" style="width:100%;">
+        <label style="font-size:10px; margin-top:10px;">STROKE</label>
+        <input type="color" id="strokePicker" style="width:100%;">
+		<label style="font-size:10px; margin-top:10px; display:block;">STROKE WIDTH</label>
+		<input type="range" id="strokeWidth" min="0" max="20" step="1" style="width:100%;">
+        <button class="action-btn" style="margin-top:15px;" onclick="moveLayer('front')">Front</button>
+        <button class="action-btn" onclick="moveLayer('back')">Back</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

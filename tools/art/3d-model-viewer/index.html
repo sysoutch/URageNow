@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>URage Toolset | 3D Viewer Pro</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="/tools/shared/css/upload-btn.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+<div id="app-container">
+    <div id="viewport">
+        <div id="loading">
+            <div class="spinner"></div>
+            <div style="font-weight: 600; letter-spacing: 1px;">OPTIMIZING MESH...</div>
+        </div>
+    </div>
+
+    <aside id="sidebar" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="3D Viewer Controls">
+        <div class="header">
+            <div class="logo"><i data-lucide="box" color="white" size="22"></i></div>
+            <div class="logo-text">3D Model Viewer</div>
+        </div>
+
+        <div class="upload-area" id="drop-zone">
+            <i data-lucide="upload-cloud" size="38" style="margin-bottom: 16px; color: var(--accent);"></i>
+            <div style="font-size: 15px; font-weight: 600;">Import Model</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">GLB, GLTF, or OBJ</div>
+        </div>
+
+        <div class="upload-area" id="hdr-zone">
+            <i data-lucide="image" size="38" style="margin-bottom: 16px; color: var(--accent);"></i>
+            <div style="font-size: 15px; font-weight: 600;">Import HDR Background</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">HDR File (.hdr)</div>
+        </div>
+
+        <div class="control-group">
+            <label>Environment Exposure</label>
+            <input type="range" id="exposure" min="0" max="2" step="0.05" value="1">
+        </div>
+
+        <div class="control-group">
+            <label>Scene Toolbar</label>
+            <div class="btn-row">
+                <button class="icon-btn" id="reset-cam" title="Center View"><i data-lucide="maximize"></i></button>
+                <button class="icon-btn" id="toggle-grid" title="Toggle Floor"><i data-lucide="layers"></i></button>
+                <button class="icon-btn" id="download-img" title="Capture Render"><i data-lucide="camera"></i></button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Model Controls</label>
+            <div class="control-row">
+                <button class="icon-btn" id="zoom-in" title="Zoom In"><i data-lucide="zoom-in"></i></button>
+                <button class="icon-btn" id="zoom-out" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
+                <button class="icon-btn" id="rotate" title="Rotate Model"><i data-lucide="rotate-cw"></i></button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Light Controls</label>
+            <div class="control-row">
+                <button class="icon-btn" id="light-rotate" title="Rotate Light"><i data-lucide="rotate-cw"></i></button>
+                <button class="icon-btn" id="light-intensity" title="Adjust Intensity"><i data-lucide="sun"></i></button>
+            </div>
+            <div class="slider-group">
+                <label>Light Intensity: <span id="light-intensity-value">1.2</span></label>
+                <input type="range" id="light-intensity-slider" min="0" max="2" step="0.05" value="1.2">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Material Properties</label>
+            <div class="control-row">
+                <button class="icon-btn" id="flat-shading" title="Flat Shading"><i data-lucide="square"></i></button>
+                <button class="icon-btn" id="metallic" title="Metallic"><i data-lucide="zap"></i></button>
+                <button class="icon-btn" id="roughness" title="Roughness"><i data-lucide="sliders"></i></button>
+            </div>
+            <div class="slider-group">
+                <label>Flat Shading: <span id="flat-shading-value">Off</span></label>
+                <input type="range" id="flat-shading-slider" min="0" max="1" step="1" value="0">
+            </div>
+            <div class="slider-group">
+                <label>Metallic: <span id="metallic-value">0.5</span></label>
+                <input type="range" id="metallic-slider" min="0" max="1" step="0.05" value="0.5">
+            </div>
+            <div class="slider-group">
+                <label>Roughness: <span id="roughness-value">0.5</span></label>
+                <input type="range" id="roughness-slider" min="0" max="1" step="0.05" value="0.5">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Display Modes</label>
+            <div class="control-row">
+                <button class="icon-btn" id="solid-mode" title="Solid"><i data-lucide="square"></i></button>
+                <button class="icon-btn" id="material-mode" title="Material"><i data-lucide="layers"></i></button>
+                <button class="icon-btn" id="wireframe-mode" title="Wireframe"><i data-lucide="grid"></i></button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Model Position</label>
+            <div class="control-row">
+                <button class="icon-btn" id="position-x" title="Move X"><i data-lucide="move"></i></button>
+                <button class="icon-btn" id="position-y" title="Move Y"><i data-lucide="move-vertical"></i></button>
+                <button class="icon-btn" id="position-z" title="Move Z"><i data-lucide="move-horizontal"></i></button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Rotation</label>
+            <div class="control-row">
+                <button class="icon-btn" id="rotate-x" title="Rotate X"><i data-lucide="rotate-ccw"></i></button>
+                <button class="icon-btn" id="rotate-y" title="Rotate Y"><i data-lucide="rotate-cw"></i></button>
+                <button class="icon-btn" id="rotate-z" title="Rotate Z"><i data-lucide="rotate-ccw"></i></button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Camera Settings</label>
+            <div class="slider-group">
+                <label>Field of View: <span id="fov-value">45</span>°</label>
+                <input type="range" id="fov-slider" min="10" max="120" step="1" value="45">
+            </div>
+            <div class="slider-group">
+                <label>Near Clip: <span id="near-value">0.1</span></label>
+                <input type="range" id="near-slider" min="0.01" max="1" step="0.01" value="0.1">
+            </div>
+            <div class="slider-group">
+                <label>Far Clip: <span id="far-value">1000</span></label>
+                <input type="range" id="far-slider" min="100" max="5000" step="10" value="1000">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Render Quality</label>
+            <div class="slider-group">
+                <label>Antialiasing: <span id="aa-value">On</span></label>
+                <input type="range" id="aa-slider" min="0" max="1" step="1" value="1">
+            </div>
+            <div class="slider-group">
+                <label>Resolution Scale: <span id="resolution-value">100</span>%</label>
+                <input type="range" id="resolution-slider" min="25" max="200" step="5" value="100">
+            </div>
+        </div>
+
+        <div style="flex-grow: 1;"></div>
+        <div style="font-size: 10px; color: var(--text-dim); text-align: center; padding: 10px 0;">
+            ENGINE: THREE.JS R165 • v1.2
+        </div>
+    </aside>
+</div>
+
+<!-- HDR Drop Zone -->
+<div id="hdr-drop-zone" class="upload-area">
+    <div class="drop-zone-content">
+        <i data-lucide="image" class="drop-zone-icon"></i>
+        <p>Drop HDR Environment Map Here</p>
+        <p class="drop-zone-subtext">(.hdr files only)</p>
+    </div>
+</div>
+
+<input type="file" id="file-input" style="display:none" accept=".glb,.gltf,.obj">
+<script type="importmap">
+{
+    "imports": {
+        "three": "/vendor/three/build/three.module.js",
+        "three/addons/": "/vendor/three/examples/jsm/"
+    }
+}
+</script>
+<script type="module" src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

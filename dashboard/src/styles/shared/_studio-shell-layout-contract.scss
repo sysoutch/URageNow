@@ -1,0 +1,199 @@
+// Final layout ownership for the Studio rail. This deliberately sits after
+// legacy responsive layers so sections never become nested scroll containers.
+
+$studio-rail-views: ".view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active, .view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active";
+
+// The rail home wrapper is the sole vertical scroller. Expanded sections stay
+// in normal flow so their rows cannot produce a second, competing scrollbar.
+body:is(#{$studio-rail-views}) .rail-home-wrap {
+  display: grid !important;
+  align-content: start !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  // Reserving a permanent scrollbar gutter created the visible right-side
+  // blank strip even when this is the only rail scroller and it has nothing
+  // to scroll. Let the browser reserve space only while it is needed.
+  scrollbar-gutter: auto !important;
+}
+
+// Keep expanded rail rows flush with the rail edges. Padding belongs inside
+// the button label, not around the list where it makes categories look like
+// a second, misaligned sidebar.
+body:is(#{$studio-rail-views}).studio-rail-expanded :is(.server-rail, .side-nav),
+body:is(#{$studio-rail-views}).studio-rail-expanded .rail-home-wrap {
+  padding-inline: 0 !important;
+}
+
+body:is(#{$studio-rail-views}) :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections) {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+// A collapsed workflow list must leave the layout altogether. The older
+// transition-only rule retained an invisible grid item on non-AI pages, which
+// is the large false gap between LazyDev and Tools in the expanded rail.
+body:is(#{$studio-rail-views}):not(.view-ai-active) .rail-studio-workflows {
+  display: none !important;
+}
+
+body:is(#{$studio-rail-views}) :is(.rail-studio-workflows, .rail-tools-categories, .rail-resource-sections)[data-resource-rail-group],
+body.view-ai-active .rail-studio-workflows,
+body.view-tools-active .rail-tools-categories {
+  overflow: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+body.view-ai-active:not(.studio-home-active) .rail-studio-workflows,
+body.view-tools-active .rail-tools-categories,
+body.view-blender-addons-active .rail-resource-sections[data-resource-rail-group="blender-addons"],
+body.view-assets-active .rail-resource-sections[data-resource-rail-group="assets"],
+body.view-dashboard-active .rail-resource-sections[data-resource-rail-group="bots"] {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+
+// Hover previews use the same outer rail scroller as an explicitly selected
+// section. Giving a preview its own clipped/scrolling box made expanded-rail
+// hover look broken and hid the lower messenger rows.
+@media (min-width: 981px) {
+  body:is(#{$studio-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="workflow"], [data-studio-rail-hover-leaving-group="workflow"]) .rail-studio-workflows,
+  body:is(#{$studio-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="tools"], [data-studio-rail-hover-leaving-group="tools"]) .rail-tools-categories,
+  body:is(#{$studio-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="blender-addons"], [data-studio-rail-hover-leaving-group="blender-addons"]) .rail-resource-sections[data-resource-rail-group="blender-addons"],
+  body:is(#{$studio-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="assets"], [data-studio-rail-hover-leaving-group="assets"]) .rail-resource-sections[data-resource-rail-group="assets"],
+  body:is(#{$studio-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="bots"], [data-studio-rail-hover-leaving-group="bots"]) .rail-resource-sections[data-resource-rail-group="bots"] {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+// The focused-workflow layer loads before this final shell contract. Keep
+// Chat's local three-column workspace intact at compact desktop widths.
+@media (min-width: 981px) and (max-width: 1520px) {
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-workspace {
+    grid-template-columns: 48px minmax(0, 1fr) minmax(280px, 320px) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-workspace.workflow-side-collapsed {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-chat-tabs {
+    display: grid !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 48px !important;
+    min-width: 48px !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-main {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-side {
+    display: grid !important;
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    scrollbar-gutter: stable !important;
+  }
+}
+
+// On phones and high zoom, keep the same local inspector in normal document
+// flow below its workflow instead of silently removing it or borrowing the
+// global Messenger details pane.
+@media (max-width: 980px) {
+  body.view-ai-active.studio-workflow-focused [data-workflow-sidebar-panel] {
+    display: grid !important;
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+// Chat used to retain its older card-grid gap while the other Studios had
+// already moved to the shared foldout stack. Keep all Studio inspectors as a
+// single continuous accordion, including at high browser zoom.
+body.view-ai-active #ask-rod-sidebar-panel {
+  align-content: start !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel > .chat-sidebar-foldout {
+  margin: 0 !important;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel > .chat-sidebar-foldout + .chat-sidebar-foldout {
+  margin-top: -1px !important;
+}
+
+// Bots is another rail category, not a second kind of navigation. Its rows
+// stay in the primary rail's scroll flow and inherit the same flush geometry
+// as Tools, 3D Suites, and Game Engines.
+body.view-dashboard-active .rail-bot-sections {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  align-content: start !important;
+}
+
+// Image, Audio, and Video previously reintroduced their old panel treatment
+// after the shared focused-shell reset. Keep their editor canvas flush with
+// the app shell; component cards inside each studio retain their own spacing.
+body.view-ai-active.studio-workflow-focused :is(#image-studio-card, #audio-studio-card, #video-studio-card).ai-detail-card {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-workspace, #audio-studio-card .audio-studio-workspace, #video-studio-card .video-studio-workspace) {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+// These three Studios are full editor surfaces, just like the 3D Studio.
+// Keeping them in the overview grid leaves the grid's outer inset visible as
+// an empty strip around the editor at desktop widths.
+@media (min-width: 981px) {
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card, #audio-studio-card, #video-studio-card).ai-detail-card {
+    position: fixed !important;
+    inset: 0 0 0 calc(var(--server-rail-width, 84px) + var(--studio-workflow-sidebar-width, 0px)) !important;
+    z-index: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+}

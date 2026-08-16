@@ -1,0 +1,569 @@
+// Rail workflow & category button lists — collapsible sections in server-rail
+// Handles expand/collapse state, theme variants per workflow type
+
+.rail-studio-workflows {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  align-content: start;
+  min-height: 0;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-8px) scaleY(0.96);
+  transform-origin: top;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  padding: 0;
+  border-block: 1px solid color-mix(in srgb, var(--line) 64%, transparent);
+  pointer-events: none;
+  transition: max-height 240ms ease, opacity 180ms ease, transform 240ms ease, padding 240ms ease;
+}
+
+body.view-ai-active .rail-studio-workflows {
+  max-height: min(43vh, 360px);
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  overflow-y: auto;
+  padding: 4px 0 2px;
+  pointer-events: auto;
+}
+
+.rail-studio-workflow-button {
+  --rail-workflow-color: color-mix(in srgb, var(--ink) 82%, var(--muted) 18%);
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-workflow-color) 54%, transparent);
+  width: 50px;
+  height: 46px;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 84%, transparent);
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 28%, transparent) 0%, transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.012) 100%),
+    color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 88%, black 12%);
+  color: var(--rail-workflow-color);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  &:hover {
+    border-radius: 14px;
+    transform: translateY(-1px);
+    background:
+      radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 48%, transparent) 0%, transparent 52%),
+      linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.015) 100%),
+      color-mix(in srgb, var(--studio-panel-bg, var(--panel-alt)) 88%, black 12%);
+  }
+
+  &.active-focus {
+    background:
+      radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 48%, transparent) 0%, transparent 52%),
+      linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.015) 100%),
+      color-mix(in srgb, var(--studio-panel-bg, var(--panel-alt)) 88%, black 12%);
+    color: color-mix(in srgb, var(--rail-workflow-color) 86%, var(--button-primary-fg, var(--ink)) 14%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--studio-accent-2, var(--accent)) 18%, transparent);
+  }
+
+  svg { color: currentColor; }
+}
+
+// Workflow type color variants
+.rail-studio-workflow-button.is-chat {
+  --rail-workflow-color: var(--studio-accent-1, var(--accent));
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-workflow-color) 58%, transparent);
+}
+.rail-studio-workflow-button.is-image {
+  --rail-workflow-color: var(--green);
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-workflow-color) 58%, transparent);
+}
+.rail-studio-workflow-button.is-model3d {
+  --rail-workflow-color: var(--studio-accent-3, var(--accent-3));
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-workflow-color) 58%, transparent);
+}
+.rail-studio-workflow-button.is-audio {
+  --rail-workflow-color: var(--warm);
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-workflow-color) 58%, transparent);
+}
+.rail-studio-workflow-button.is-music {
+  --rail-workflow-color: var(--danger);
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-workflow-color) 58%, transparent);
+}
+.rail-studio-workflow-button.is-video {
+  --rail-workflow-color: var(--studio-accent-2, var(--accent-2));
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-workflow-color) 58%, transparent);
+}
+
+.rail-studio-workflow-label {
+  display: none;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.rail-studio-workflow-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 9px var(--rail-workflow-glow));
+  }
+}
+
+// Tools categories list (tools view rail section)
+.rail-tools-categories {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  align-content: start;
+  min-height: 0;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-8px) scaleY(0.96);
+  transform-origin: top;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  padding: 0;
+  border-block: 1px solid color-mix(in srgb, var(--line) 64%, transparent);
+  pointer-events: none;
+  transition: max-height 240ms ease, opacity 180ms ease, transform 240ms ease, padding 240ms ease;
+}
+
+body.view-tools-active .rail-tools-categories {
+  max-height: 520px;
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  overflow: visible;
+  padding: 4px 0 2px;
+  pointer-events: auto;
+}
+
+.rail-tools-category-button {
+  --rail-category-color: #ff7a38;
+  --rail-category-surface: color-mix(in srgb, var(--rail-category-color) 18%, var(--studio-panel-bg, var(--panel)) 82%);
+  width: 50px;
+  min-height: 46px;
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 84%, transparent);
+  background:
+    radial-gradient(circle at 26% 16%, color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 64%, transparent) 0%, transparent 54%),
+    linear-gradient(180deg, rgba(255,255,255,0.075) 0%, rgba(255,255,255,0.018) 100%),
+    color-mix(in srgb, var(--studio-panel-bg, var(--panel-alt)) 84%, black 16%);
+  color: var(--rail-category-color);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+
+  &:hover,
+  &.active {
+    border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent-3)) 62%, white 18%);
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,0.16) 0%, transparent 44%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--studio-button-start, var(--studio-accent-soft)) 88%, transparent) 0%,
+        color-mix(in srgb, var(--studio-button-end, var(--studio-accent-soft)) 78%, rgba(255,255,255,0.02)) 100%
+      ),
+      color-mix(in srgb, var(--studio-panel-bg, var(--panel-alt)) 88%, black 12%);
+    color: #fff7ee;
+    box-shadow: 0 12px 24px var(--studio-button-shadow, rgba(93, 32, 20, 0.28));
+    transform: translateY(-1px);
+  }
+}
+
+.rail-tools-category-button[data-tools-filter="image"] { --rail-category-color: var(--rail-icon-image, #65e19f); }
+.rail-tools-category-button[data-tools-filter="model3d"] { --rail-category-color: var(--rail-icon-model3d, #67d0ff); }
+.rail-tools-category-button[data-tools-filter="audio"] { --rail-category-color: var(--rail-icon-audio, #ffbd6a); }
+.rail-tools-category-button[data-tools-filter="music"] { --rail-category-color: var(--rail-icon-music, #ff80c4); }
+.rail-tools-category-button[data-tools-filter="video"] { --rail-category-color: var(--rail-icon-video, #bc9cff); }
+.rail-tools-category-button[data-tools-filter="art"] { --rail-category-color: var(--rail-icon-art, #ff72bf); }
+.rail-tools-category-button[data-tools-filter="dev"] { --rail-category-color: var(--rail-icon-dev, #46d6ff); }
+.rail-tools-category-button[data-tools-filter="game"] { --rail-category-color: var(--rail-icon-game, #8cff9c); }
+.rail-tools-category-button[data-tools-filter="plan"] { --rail-category-color: var(--rail-icon-plan, #c69cff); }
+
+.rail-tools-category-icon {
+  width: 26px;
+  height: 24px;
+  border-radius: 9px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--rail-category-color);
+  background: var(--rail-category-surface);
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 82%, transparent);
+
+  svg {
+    width: 15px;
+    height: 15px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.rail-tools-category-label,
+.rail-tools-category-count { display: none; }
+
+// Blender addon & asset labels (hidden by default)
+.rail-blender-addon-label,
+.rail-blender-addon-sub,
+.rail-asset-label { display: none; }
+
+// Expand/collapse toggle button
+#rail-workflow-expand-button span {
+  transition: transform 180ms ease;
+}
+
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active) #rail-workflow-expand-button {
+  display: none;
+}
+
+body.view-ai-active.studio-rail-expanded #rail-workflow-expand-button span,
+body.view-tools-active.studio-rail-expanded #rail-workflow-expand-button span,
+body.view-profile-active.studio-rail-expanded #rail-workflow-expand-button span,
+body.view-dashboard-active.studio-rail-expanded #rail-workflow-expand-button span,
+body.view-blender-addons-active.studio-rail-expanded #rail-workflow-expand-button span,
+body.view-assets-active.studio-rail-expanded #rail-workflow-expand-button span {
+  transform: rotate(90deg);
+}
+
+.rail-tools-category-button:is(:hover, .active) .rail-tools-category-icon {
+  color: color-mix(in srgb, var(--rail-category-color) 82%, white 18%);
+}
+
+// Expanded rail state — wider sidebar with labels visible
+body.view-ai-active.studio-rail-expanded,
+body.view-tools-active.studio-rail-expanded,
+body.view-profile-active.studio-rail-expanded {
+  --server-rail-width: 164px;
+}
+
+body.view-ai-active.studio-rail-expanded .server-rail,
+body.view-ai-active.studio-rail-expanded .side-nav,
+body.view-tools-active.studio-rail-expanded .server-rail,
+body.view-tools-active.studio-rail-expanded .side-nav,
+body.view-profile-active.studio-rail-expanded .server-rail,
+body.view-profile-active.studio-rail-expanded .side-nav {
+  justify-items: stretch;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+// Expanded workflow buttons — full width with labels
+body.view-ai-active.studio-rail-expanded .rail-studio-workflow-button {
+  width: 100%;
+  height: 46px;
+  border-radius: 14px;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 0 12px;
+}
+
+body.view-ai-active.studio-rail-expanded .rail-studio-workflow-label { display: inline; }
+
+// Expanded category buttons — full width with labels & counts
+body.view-tools-active.studio-rail-expanded .rail-tools-category-button {
+  width: 100%;
+  min-height: 42px;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  justify-items: start;
+  gap: 9px;
+  padding: 7px 9px;
+}
+
+body.view-tools-active.studio-rail-expanded .rail-tools-category-label,
+body.view-tools-active.studio-rail-expanded .rail-tools-category-count { display: inline; }
+
+body.view-tools-active.studio-rail-expanded .rail-tools-category-label {
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.view-tools-active.studio-rail-expanded .rail-tools-category-count {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+// Blender addon & asset expanded labels
+body.view-blender-addons-active.studio-rail-expanded .rail-blender-addon-label,
+body.view-assets-active.studio-rail-expanded .rail-asset-label { display: inline; }
+
+body.view-blender-addons-active.studio-rail-expanded .rail-blender-addon-label,
+body.view-assets-active.studio-rail-expanded .rail-asset-label {
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.view-blender-addons-active.studio-rail-expanded .rail-blender-addon-sub,
+body.view-assets-active.studio-rail-expanded {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+// Expanded rail nav buttons — full width with labels
+body.view-ai-active.studio-rail-expanded .rail-app-button,
+body.view-ai-active.studio-rail-expanded .rail-home,
+body.view-ai-active.studio-rail-expanded .rail-tools-button,
+body.view-ai-active.studio-rail-expanded .rail-profile-button,
+body.view-tools-active.studio-rail-expanded .rail-app-button,
+body.view-tools-active.studio-rail-expanded .rail-home,
+body.view-tools-active.studio-rail-expanded .rail-tools-button,
+body.view-tools-active.studio-rail-expanded .rail-profile-button,
+body.view-profile-active.studio-rail-expanded .rail-app-button,
+body.view-profile-active.studio-rail-expanded .rail-home,
+body.view-profile-active.studio-rail-expanded .rail-tools-button,
+body.view-profile-active.studio-rail-expanded .rail-profile-button {
+  width: 100%;
+  min-height: 58px;
+  border-radius: 14px;
+  padding: 8px 10px;
+  justify-items: start;
+  align-content: center;
+  grid-auto-flow: column;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+}
+
+body.view-ai-active.studio-rail-expanded .rail-home-label,
+body.view-ai-active.studio-rail-expanded .rail-tools-label,
+body.view-ai-active.studio-rail-expanded .rail-profile-label,
+body.view-tools-active.studio-rail-expanded .rail-home-label,
+body.view-tools-active.studio-rail-expanded .rail-tools-label,
+body.view-tools-active.studio-rail-expanded .rail-profile-label,
+body.view-profile-active.studio-rail-expanded .rail-home-label,
+body.view-profile-active.studio-rail-expanded .rail-tools-label,
+body.view-profile-active.studio-rail-expanded .rail-profile-label {
+  display: inline;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+// Expanded rail bottom — settings button full width
+body.view-ai-active.studio-rail-expanded .rail-bottom,
+body.view-tools-active.studio-rail-expanded .rail-bottom,
+body.view-profile-active.studio-rail-expanded .rail-bottom {
+  justify-content: center;
+  justify-items: stretch;
+}
+
+body.view-ai-active.studio-rail-expanded .rail-settings-button,
+body.view-tools-active.studio-rail-expanded .rail-settings-button,
+body.view-profile-active.studio-rail-expanded .rail-settings-button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  gap: 9px;
+  padding: 0 10px;
+}
+
+body.view-ai-active.studio-rail-expanded .rail-bottom-label,
+body.view-tools-active.studio-rail-expanded .rail-bottom-label,
+body.view-profile-active.studio-rail-expanded .rail-bottom-label {
+  display: inline;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// Expanded rail theme switcher
+body.view-ai-active.studio-rail-expanded .rail-theme-switcher,
+body.view-tools-active.studio-rail-expanded .rail-theme-switcher,
+body.view-profile-active.studio-rail-expanded .rail-theme-switcher {
+  justify-items: stretch;
+}
+
+body.view-ai-active.studio-rail-expanded .rail-theme-button,
+body.view-tools-active.studio-rail-expanded .rail-theme-button,
+body.view-profile-active.studio-rail-expanded .rail-theme-button {
+  width: 100%;
+}
+
+// Non-expanded rail — compact grid rows
+body.view-ai-active .server-rail,
+body.view-ai-active .side-nav,
+body.view-tools-active .server-rail,
+body.view-tools-active .side-nav,
+body.view-profile-active .server-rail,
+body.view-profile-active .side-nav {
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+  padding: 10px 9px;
+  align-content: stretch;
+}
+
+// Compact rail nav buttons — smaller size
+body.view-ai-active .rail-home,
+body.view-ai-active .rail-tools-button,
+body.view-ai-active .rail-profile-button,
+body.view-tools-active .rail-home,
+body.view-tools-active .rail-tools-button,
+body.view-tools-active .rail-profile-button,
+body.view-profile-active .rail-home,
+body.view-profile-active .rail-tools-button,
+body.view-profile-active .rail-profile-button {
+  width: 50px;
+  min-height: 50px;
+  padding: 7px 5px;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 84%, transparent);
+  border-radius: 14px;
+}
+
+body.view-ai-active .rail-home-mark,
+body.view-ai-active .rail-tools-mark,
+body.view-ai-active .rail-profile-mark,
+body.view-tools-active .rail-home-mark,
+body.view-tools-active .rail-tools-mark,
+body.view-tools-active .rail-profile-mark,
+body.view-profile-active .rail-home-mark,
+body.view-profile-active .rail-tools-mark,
+body.view-profile-active .rail-profile-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+}
+
+// Compact rail — hide labels
+body.view-ai-active .rail-home-label,
+body.view-ai-active .rail-tools-label,
+body.view-ai-active .rail-profile-label,
+body.view-tools-active .rail-home-label,
+body.view-tools-active .rail-tools-label,
+body.view-tools-active .rail-profile-label,
+body.view-profile-active .rail-home-label,
+body.view-profile-active .rail-tools-label,
+body.view-profile-active .rail-profile-label {
+  display: none;
+}
+
+// Compact rail — default button styling (non-accented)
+body.view-ai-active .rail-home,
+body.view-ai-active .rail-tools-button,
+body.view-ai-active .rail-profile-button,
+body.view-tools-active .rail-home,
+body.view-tools-active .rail-tools-button,
+body.view-tools-active .rail-profile-button,
+body.view-profile-active .rail-home,
+body.view-profile-active .rail-tools-button,
+body.view-profile-active .rail-profile-button {
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.16) 0%, transparent 42%),
+    linear-gradient(180deg, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 36%, transparent) 0%, color-mix(in srgb, var(--studio-accent-3, var(--accent-3)) 18%, transparent) 100%),
+    color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 82%, black 18%);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--studio-accent-3, var(--accent-3)) 18%, transparent);
+}
+
+// Active/expanded rail buttons — accent styling
+body.view-tools-active .rail-home,
+body.view-tools-active .rail-tools-button,
+body.view-profile-active .rail-home,
+body.view-profile-active .rail-tools-button {
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.18) 0%, transparent 40%),
+    linear-gradient(180deg, var(--studio-button-start, rgba(255, 151, 85, 0.56)) 0%, var(--studio-button-end, rgba(255, 90, 48, 0.38)) 100%),
+    color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 80%, black 20%);
+  color: #fff7ee;
+  border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent-3)) 55%, white 18%);
+  box-shadow: 0 16px 30px var(--studio-button-shadow, rgba(110, 32, 20, 0.34));
+}
+
+// Expanded rail bottom positioning
+body.view-ai-active.studio-rail-expanded .rail-bottom,
+body.view-tools-active.studio-rail-expanded .rail-bottom,
+body.view-profile-active.studio-rail-expanded .rail-bottom {
+  grid-row: 4;
+  padding-top: 8px;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  justify-items: center;
+  align-content: end;
+  overflow: visible;
+}
+
+body.view-ai-active.studio-rail-expanded .rail-settings-button,
+body.view-tools-active.studio-rail-expanded .rail-settings-button,
+body.view-profile-active.studio-rail-expanded .rail-settings-button {
+  width: 100%;
+}
+
+// Expanded rail home wrap
+body.view-ai-active.studio-rail-expanded .rail-home-wrap,
+body.view-tools-active.studio-rail-expanded .rail-home-wrap,
+body.view-profile-active.studio-rail-expanded .rail-home-wrap {
+  width: 100%;
+}
+
+// Theme switcher positioning in compact mode
+body.view-ai-active .rail-theme-switcher,
+body.view-tools-active .rail-theme-switcher,
+body.view-profile-active .rail-theme-switcher {
+  grid-row: 3;
+  width: 100%;
+  justify-items: center;
+}
+
+body.view-ai-active .rail-bottom,
+body.view-tools-active .rail-bottom,
+body.view-profile-active .rail-bottom {
+  grid-row: 4;
+  padding-top: 8px;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  justify-items: center;
+  align-content: end;
+  overflow: visible;
+}
+
+body.view-ai-active .rail-settings-button,
+body.view-tools-active .rail-settings-button,
+body.view-profile-active .rail-settings-button {
+  width: 36px;
+  min-height: 36px;
+}
+
+// Expanded rail home wrap — min height reset
+body.view-ai-active .rail-home-wrap,
+body.view-tools-active .rail-home-wrap,
+body.view-profile-active .rail-home-wrap {
+  min-height: 0;
+  align-content: start;
+  overflow: hidden;
+}

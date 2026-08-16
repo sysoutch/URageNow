@@ -1,0 +1,9 @@
+{
+  "suite": "cinema4d",
+  "displayName": "Cinema 4D",
+  "scripts": [
+    {"id": "scene-report", "path": "scene/scene_report.py", "title": "Scene Report", "kind": "python"},
+    {"id": "freeze-selected-transforms", "path": "transform/freeze_selected_transforms.py", "title": "Freeze Selected Transforms", "kind": "python"},
+    {"id": "export-selected-fbx", "path": "export/export_selected_fbx.py", "title": "Export Selected FBX", "kind": "python"}
+  ]
+}

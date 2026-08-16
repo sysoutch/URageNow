@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" data-dashboard-theme="fire">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GIF Viewer</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-tool-bridge.js"></script>
+  <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-dashboard-theme="fire">
+  <section class="gif-player" id="gifPlayer">
+    <header class="gif-player__head">
+      <div>
+        <div class="gif-player__kicker">HTML5 tool</div>
+        <h1 class="gif-player__title">GIF Viewer</h1>
+      </div>
+      <div class="gif-player__meta" id="gifMeta">0 frames</div>
+    </header>
+
+    <div class="gif-player__toolbar">
+      <div id="gif-upload-wrapper">
+        <label class="upload-card" for="gifFile">
+          <span class="upload-card-icon arrow-icon">&#8595;</span>
+          <strong>Open a GIF</strong>
+          <span>or drag it here.</span>
+          <input id="gifFile" type="file" accept="image/gif" hidden />
+        </label>
+      </div>
+      <button class="gif-player__button" id="downloadGif" type="button">Download GIF</button>
+      <button class="gif-player__button" id="downloadFrames" type="button">Download Frames ZIP</button>
+    </div>
+
+    <div class="gif-player__stage">
+      <canvas id="gifCanvas"></canvas>
+      <div class="gif-player__empty">Open a GIF to inspect frames.</div>
+    </div>
+
+    <div class="gif-player__playback">
+      <button class="gif-player__button gif-player__button--primary" id="playPause" type="button">Play</button>
+      <button class="gif-player__button" id="restart" type="button">Restart</button>
+      <input class="gif-player__range" id="scrubber" type="range" min="0" max="0" value="0" />
+
+      <select class="gif-player__speed" id="speed" aria-label="Playback speed">
+        <option value="0.25">0.25×</option>
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+        <option value="4">4×</option>
+      </select>
+
+      <button class="gif-player__button" id="flipFrames" type="button">
+        Flip Frames
+      </button>
+
+      <select class="gif-player__speed" id="mirrorPosition" aria-label="Mirror insert position">
+        <option value="after" selected>Mirror After</option>
+        <option value="before">Mirror Before</option>
+      </select>
+
+      <button class="gif-player__button" id="mirrorFrames" type="button">
+        Mirror Frames
+      </button>
+
+      <label class="gif-player__toggle">
+        <input id="pingpong" type="checkbox" />
+        <span>Pingpong</span>
+      </label>
+    </div>
+
+    <div class="gif-player__markers">
+      <label class="gif-player__field">
+        <span>Start</span>
+        <input id="startFrame" type="number" min="0" value="0" />
+      </label>
+      <label class="gif-player__field">
+        <span>End</span>
+        <input id="endFrame" type="number" min="0" value="0" />
+      </label>
+      <button class="gif-player__button" id="setStart" type="button">Set Start Here</button>
+      <button class="gif-player__button" id="setEnd" type="button">Set End Here</button>
+      <button class="gif-player__button" id="clearMarkers" type="button">Full Range</button>
+    </div>
+
+    <div class="gif-player__timeline-card">
+      <div class="gif-player__section-label">Frames</div>
+      <div class="gif-player__timeline-wrap">
+        <div class="gif-player__timeline" id="frameTimeline"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

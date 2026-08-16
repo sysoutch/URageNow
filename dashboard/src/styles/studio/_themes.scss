@@ -1,0 +1,608 @@
+// Studio themes — rail theme switcher, body[data-dashboard-theme] overrides, transitions, border-glow animation
+// Theme variable blocks extracted to themes/_studio-themes.scss for reuse.
+
+.rail-theme-switcher {
+  display: none;
+  gap: 8px;
+  align-content: start;
+  justify-items: center;
+  margin-top: 8px;
+}
+
+body.view-ai-active .rail-theme-switcher,
+body.view-tools-active .rail-theme-switcher,
+body.view-profile-active .rail-theme-switcher,
+body.view-blender-addons-active .rail-theme-switcher,
+body.view-assets-active .rail-theme-switcher,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-theme-switcher {
+  display: grid;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+body.view-ai-active .rail-theme-button,
+body.view-tools-active .rail-theme-button,
+body.view-profile-active .rail-theme-button,
+body.view-blender-addons-active .rail-theme-button,
+body.view-assets-active .rail-theme-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-theme-button {
+  width: 50px;
+  min-height: 30px;
+  border-radius: 10px;
+}
+
+.rail-theme-button {
+  width: 56px;
+  min-height: 34px;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 82%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 100%),
+    color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 86%, black 14%);
+  color: color-mix(in srgb, var(--ink) 84%, var(--studio-accent-1, var(--accent)) 16%);
+  display: inline-grid;
+  place-items: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.rail-theme-button span {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.rail-theme-button.active {
+  border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 58%, white 12%);
+  background:
+    linear-gradient(180deg, var(--studio-accent-soft, rgba(255, 142, 78, 0.34)) 0%, rgba(255,255,255,0.04) 100%),
+    color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 84%, black 16%);
+  color: #fff7ee;
+  box-shadow: 0 10px 18px var(--studio-button-shadow, rgba(93, 32, 20, 0.34));
+}
+
+body.view-ai-active,
+body.view-ai-active .app-shell,
+body.view-ai-active .server-rail,
+body.view-ai-active .side-nav,
+body.view-ai-active .workspace-sidebar,
+body.view-ai-active .details-pane,
+body.view-ai-active .content-shell,
+body.view-ai-active .panel-card,
+body.view-ai-active .detail-card,
+body.view-ai-active .fold-card,
+body.view-ai-active .studio-workflow-quick-tile,
+body.view-ai-active .messenger-connection-tile,
+body.view-ai-active .runtime-launcher,
+body.view-ai-active .rail-app-button,
+body.view-ai-active .rail-home,
+body.view-ai-active .rail-tools-button,
+body.view-ai-active .rail-profile-button,
+body.view-ai-active .rail-studio-workflow-button,
+body.view-ai-active .rail-theme-button,
+body.view-tools-active .rail-theme-button,
+body.view-ai-active button {
+  transition:
+    background 320ms ease,
+    border-color 320ms ease,
+    box-shadow 320ms ease,
+    color 240ms ease,
+    fill 240ms ease;
+}
+
+body.theme-transition-disabled.view-ai-active,
+body.theme-transition-disabled.view-ai-active .app-shell,
+body.theme-transition-disabled.view-ai-active .server-rail,
+body.theme-transition-disabled.view-ai-active .side-nav,
+body.theme-transition-disabled.view-ai-active .workspace-sidebar,
+body.theme-transition-disabled.view-ai-active .details-pane,
+body.theme-transition-disabled.view-ai-active .content-shell,
+body.theme-transition-disabled.view-ai-active .panel-card,
+body.theme-transition-disabled.view-ai-active .detail-card,
+body.theme-transition-disabled.view-ai-active .fold-card,
+body.theme-transition-disabled.view-ai-active .studio-workflow-quick-tile,
+body.theme-transition-disabled.view-ai-active .messenger-connection-tile,
+body.theme-transition-disabled.view-ai-active .runtime-launcher,
+body.theme-transition-disabled.view-ai-active .rail-app-button,
+body.theme-transition-disabled.view-ai-active .rail-home,
+body.theme-transition-disabled.view-ai-active .rail-tools-button,
+body.theme-transition-disabled.view-ai-active .rail-profile-button,
+body.theme-transition-disabled.view-ai-active .rail-studio-workflow-button,
+body.theme-transition-disabled.view-ai-active .rail-theme-button,
+body.theme-transition-disabled.view-tools-active .rail-theme-button,
+body.theme-transition-disabled.view-ai-active button {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.view-ai-active,
+  body.view-ai-active .app-shell,
+  body.view-ai-active .server-rail,
+  body.view-ai-active .side-nav,
+  body.view-ai-active .workspace-sidebar,
+  body.view-ai-active .details-pane,
+  body.view-ai-active .content-shell,
+  body.view-ai-active .panel-card,
+  body.view-ai-active .detail-card,
+  body.view-ai-active .fold-card,
+  body.view-ai-active .studio-workflow-quick-tile,
+  body.view-ai-active .messenger-connection-tile,
+  body.view-ai-active .runtime-launcher,
+  body.view-ai-active .rail-app-button,
+  body.view-ai-active .rail-home,
+  body.view-ai-active .rail-tools-button,
+  body.view-ai-active .rail-profile-button,
+  body.view-ai-active .rail-studio-workflow-button,
+  body.view-ai-active .rail-theme-button,
+  body.view-tools-active .rail-theme-button,
+  body.view-ai-active button {
+    transition: none !important;
+  }
+}
+
+// Theme variable blocks — extracted from original file, now also available in themes/_studio-themes.scss
+body[data-dashboard-theme="fire"] {
+  --studio-accent-1: #ffb266;
+  --studio-accent-2: #ff6a35;
+  --studio-accent-3: #ff3d1f;
+  --studio-accent-soft: rgba(255, 126, 68, 0.26);
+  --studio-panel-border: rgba(255, 128, 74, 0.26);
+  --studio-panel-bg: rgba(18, 10, 10, 0.9);
+  --studio-panel-bg-soft: rgba(12, 7, 8, 0.84);
+  --studio-shell-bg-start: #130807;
+  --studio-shell-bg-mid: #2b0e07;
+  --studio-shell-bg-end: #100605;
+  --studio-rail-bg: #190b0a;
+  --studio-surface-bg: #13090a;
+  --studio-shell-radial: rgba(168, 58, 28, 0.2);
+  --studio-button-start: rgba(255, 151, 85, 0.56);
+  --studio-button-end: rgba(255, 90, 48, 0.38);
+  --studio-button-shadow: rgba(110, 35, 20, 0.34);
+}
+
+body[data-dashboard-theme="light"] {
+  --ink: #1a2432;
+  --muted: #5c6b80;
+  --line: rgba(125, 144, 174, 0.24);
+  --panel: rgba(248, 251, 255, 0.92);
+  --panel-alt: rgba(236, 242, 249, 0.88);
+  --accent: #7a93ba;
+  --accent-2: #5f7ca8;
+  --accent-3: #c5d3e9;
+  --accent-soft: rgba(122, 147, 186, 0.18);
+  --studio-accent-1: #8fa8ce;
+  --studio-accent-2: #6f8db8;
+  --studio-accent-3: #d9e3f5;
+  --studio-accent-soft: rgba(122, 147, 186, 0.18);
+  --studio-panel-border: rgba(124, 145, 177, 0.24);
+  --studio-panel-bg: rgba(250, 252, 255, 0.94);
+  --studio-panel-bg-soft: rgba(240, 245, 251, 0.92);
+  --studio-shell-bg-start: #f4f7fb;
+  --studio-shell-bg-mid: #e7edf6;
+  --studio-shell-bg-end: #dce4ef;
+  --studio-rail-bg: #edf2f8;
+  --studio-surface-bg: #f3f6fb;
+  --studio-shell-radial: rgba(127, 151, 191, 0.14);
+  --studio-button-start: rgba(168, 189, 222, 0.82);
+  --studio-button-end: rgba(121, 145, 186, 0.66);
+  --studio-button-shadow: rgba(127, 148, 181, 0.22);
+}
+
+body[data-dashboard-theme="smoke"] {
+  --studio-accent-1: #c4ccd8;
+  --studio-accent-2: #8b93a0;
+  --studio-accent-3: #59606c;
+  --studio-accent-soft: rgba(139, 147, 160, 0.2);
+  --studio-panel-border: rgba(121, 129, 140, 0.24);
+  --studio-panel-bg: rgba(28, 31, 36, 0.92);
+  --studio-panel-bg-soft: rgba(21, 24, 29, 0.88);
+  --studio-shell-bg-start: #1a1d22;
+  --studio-shell-bg-mid: #242930;
+  --studio-shell-bg-end: #13161a;
+  --studio-rail-bg: #191c21;
+  --studio-surface-bg: #1b1f24;
+  --studio-shell-radial: rgba(118, 125, 138, 0.14);
+  --studio-button-start: rgba(151, 161, 177, 0.42);
+  --studio-button-end: rgba(83, 89, 98, 0.34);
+  --studio-button-shadow: rgba(21, 23, 28, 0.34);
+}
+
+body[data-dashboard-theme="blood"] {
+  --studio-accent-1: #ff8a8f;
+  --studio-accent-2: #d31938;
+  --studio-accent-3: #7e0617;
+  --studio-accent-soft: rgba(211, 25, 56, 0.28);
+  --studio-panel-border: rgba(225, 42, 70, 0.32);
+  --studio-panel-bg: rgba(18, 5, 8, 0.92);
+  --studio-panel-bg-soft: rgba(10, 3, 5, 0.86);
+  --studio-shell-bg-start: #0f0305;
+  --studio-shell-bg-mid: #28040b;
+  --studio-shell-bg-end: #070104;
+  --studio-rail-bg: #120306;
+  --studio-surface-bg: #110306;
+  --studio-shell-radial: rgba(170, 0, 28, 0.24);
+  --studio-button-start: rgba(255, 86, 104, 0.58);
+  --studio-button-end: rgba(123, 5, 22, 0.44);
+  --studio-button-shadow: rgba(112, 0, 18, 0.4);
+  --danger: #ff596b;
+  --warm: #f2b56f;
+}
+
+body[data-dashboard-theme="love"] {
+  --studio-accent-1: #ff9bd8;
+  --studio-accent-2: #ec4ca8;
+  --studio-accent-3: #b82b7a;
+  --studio-accent-soft: rgba(236, 76, 168, 0.28);
+  --studio-panel-border: rgba(255, 130, 205, 0.3);
+  --studio-panel-bg: rgba(28, 8, 24, 0.9);
+  --studio-panel-bg-soft: rgba(18, 5, 17, 0.84);
+  --studio-shell-bg-start: #160512;
+  --studio-shell-bg-mid: #32102b;
+  --studio-shell-bg-end: #10030d;
+  --studio-rail-bg: #190614;
+  --studio-surface-bg: #1b0717;
+  --studio-shell-radial: rgba(236, 76, 168, 0.22);
+  --studio-button-start: rgba(255, 150, 216, 0.58);
+  --studio-button-end: rgba(191, 45, 133, 0.4);
+  --studio-button-shadow: rgba(134, 24, 89, 0.36);
+  --danger: #ff7fb9;
+  --warm: #ffc56f;
+}
+
+body[data-dashboard-theme="water"] {
+  --studio-accent-1: #84dcff;
+  --studio-accent-2: #3fb5ff;
+  --studio-accent-3: #2e7de0;
+  --studio-accent-soft: rgba(84, 188, 255, 0.26);
+  --studio-panel-border: rgba(78, 168, 233, 0.26);
+  --studio-panel-bg: rgba(10, 22, 36, 0.9);
+  --studio-panel-bg-soft: rgba(8, 16, 29, 0.84);
+  --studio-shell-bg-start: #08131f;
+  --studio-shell-bg-mid: #0a2438;
+  --studio-shell-bg-end: #06111d;
+  --studio-rail-bg: #081624;
+  --studio-surface-bg: #091827;
+  --studio-shell-radial: rgba(38, 118, 200, 0.22);
+  --studio-button-start: rgba(92, 187, 255, 0.56);
+  --studio-button-end: rgba(48, 128, 224, 0.4);
+  --studio-button-shadow: rgba(22, 68, 128, 0.34);
+}
+
+body[data-dashboard-theme="crystal"] {
+  --studio-accent-1: #d16aff;
+  --studio-accent-2: #a836e6;
+  --studio-accent-3: #7a1db3;
+  --studio-accent-soft: rgba(209, 104, 255, 0.26);
+  --studio-panel-border: rgba(209, 104, 255, 0.26);
+  --studio-panel-bg: rgba(12, 21, 37, 0.9);
+  --studio-panel-bg-soft: rgba(10, 17, 29, 0.84);
+  --studio-shell-bg-start: #080d1c;
+  --studio-shell-bg-mid: #120a2b;
+  --studio-shell-bg-end: #060917;
+  --studio-rail-bg: #090d24;
+  --studio-surface-bg: #0a1129;
+  --studio-shell-radial: rgba(161, 54, 214, 0.22);
+  --studio-button-start: rgba(209, 104, 255, 0.56);
+  --studio-button-end: rgba(168, 54, 214, 0.4);
+  --studio-button-shadow: rgba(78, 25, 128, 0.34);
+}
+
+body[data-dashboard-theme="nature"] {
+  --studio-accent-1: #b0f08f;
+  --studio-accent-2: #56c96b;
+  --studio-accent-3: #2f8f46;
+  --studio-accent-soft: rgba(110, 206, 103, 0.24);
+  --studio-panel-border: rgba(91, 173, 92, 0.26);
+  --studio-panel-bg: rgba(10, 22, 13, 0.9);
+  --studio-panel-bg-soft: rgba(8, 17, 10, 0.84);
+  --studio-shell-bg-start: #08140a;
+  --studio-shell-bg-mid: #112d15;
+  --studio-shell-bg-end: #071008;
+  --studio-rail-bg: #0a170b;
+  --studio-surface-bg: #0b1b0d;
+  --studio-shell-radial: rgba(56, 128, 62, 0.2);
+  --studio-button-start: rgba(114, 203, 98, 0.52);
+  --studio-button-end: rgba(52, 132, 63, 0.38);
+  --studio-button-shadow: rgba(27, 86, 33, 0.3);
+}
+
+body[data-dashboard-theme="rock"] {
+  --studio-accent-1: #d8d3c6;
+  --studio-accent-2: #9f9686;
+  --studio-accent-3: #71695d;
+  --studio-accent-soft: rgba(165, 152, 129, 0.24);
+  --studio-panel-border: rgba(152, 141, 123, 0.26);
+  --studio-panel-bg: rgba(20, 18, 16, 0.9);
+  --studio-panel-bg-soft: rgba(15, 13, 11, 0.84);
+  --studio-shell-bg-start: #131210;
+  --studio-shell-bg-mid: #23201c;
+  --studio-shell-bg-end: #0f0e0c;
+  --studio-rail-bg: #181614;
+  --studio-surface-bg: #141210;
+  --studio-shell-radial: rgba(109, 95, 72, 0.2);
+  --studio-button-start: rgba(167, 155, 129, 0.54);
+  --studio-button-end: rgba(112, 101, 84, 0.38);
+  --studio-button-shadow: rgba(64, 56, 42, 0.32);
+}
+
+@keyframes studio-border-glow {
+  0%, 100% {
+    border-color: var(--studio-panel-border, var(--line));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 0 0 color-mix(in srgb, var(--studio-accent-1, var(--accent)) 0%, transparent);
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 46%, var(--studio-panel-border, var(--line)));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 22px color-mix(in srgb, var(--studio-accent-2, var(--accent-2)) 14%, transparent);
+  }
+}
+
+body.view-ai-active :is(.panel-card, .detail-card, .fold-card, .lazydev-home-panel, .studio-control-section, .studio-control-card, .runtime-overlay-panel),
+body:is(.view-tools-active, .view-blender-addons-active, .view-assets-active) :is(.tools-catalog-card, .tools-workspace-card, .resource-hub-main, .resource-manager-panel, .resource-hub-card) {
+  animation: studio-border-glow 6.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.view-ai-active :is(.panel-card, .detail-card, .fold-card, .lazydev-home-panel, .studio-control-section, .studio-control-card, .runtime-overlay-panel),
+  body:is(.view-tools-active, .view-blender-addons-active, .view-assets-active) :is(.tools-catalog-card, .tools-workspace-card, .resource-hub-main, .resource-manager-panel, .resource-hub-card) {
+    animation: none !important;
+  }
+}
+
+body.view-ai-active .rail-app-button,
+body.view-ai-active .rail-home {
+  border-radius: 14px;
+  border-color: var(--studio-panel-border);
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft) 28%, transparent) 0%, transparent 52%),
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 100%),
+    color-mix(in srgb, var(--studio-panel-bg-soft) 88%, black 12%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+body.view-ai-active .rail-app-button:hover:not(.active),
+body.view-ai-active .rail-app-button.active,
+body.view-ai-active .rail-home:hover:not(.active),
+body.view-ai-active .rail-home.active {
+  border-radius: 14px;
+  border-color: color-mix(in srgb, var(--studio-accent-1) 58%, white 12%);
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.16) 0%, transparent 44%),
+    linear-gradient(180deg, color-mix(in srgb, var(--studio-button-start) 88%, transparent) 0%, color-mix(in srgb, var(--studio-button-end) 78%, rgba(255,255,255,0.02)) 100%),
+    color-mix(in srgb, var(--studio-panel-bg) 88%, black 12%);
+  box-shadow: 0 12px 24px var(--studio-button-shadow);
+}
+
+body.view-ai-active .rail-tools-button {
+  border-radius: 14px;
+  border-color: var(--studio-panel-border);
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft) 28%, transparent) 0%, transparent 52%),
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 100%),
+    color-mix(in srgb, var(--studio-panel-bg-soft) 88%, black 12%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+body.view-ai-active .rail-tools-button:hover,
+body.view-ai-active .rail-tools-button.active {
+  border-color: color-mix(in srgb, var(--studio-accent-1) 58%, white 12%);
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft) 48%, transparent) 0%, transparent 52%),
+    linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.015) 100%),
+    color-mix(in srgb, var(--studio-panel-bg) 88%, black 12%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--studio-accent-2) 18%, transparent);
+}
+
+body.view-ai-active .rail-profile-button {
+  border-radius: 14px;
+  border-color: var(--studio-panel-border);
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft) 28%, transparent) 0%, transparent 52%),
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 100%),
+    color-mix(in srgb, var(--studio-panel-bg-soft) 88%, black 12%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+body.view-ai-active .app-shell {
+  border-color: var(--studio-panel-border);
+}
+
+body.view-ai-active .server-rail,
+body.view-ai-active .side-nav {
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--studio-accent-soft) 54%, transparent) 0%, transparent 38%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--studio-rail-bg, #1a0d0c) 86%, white 4%) 0%,
+      color-mix(in srgb, var(--studio-rail-bg, #1a0d0c) 94%, black 6%) 100%
+    );
+  border-right-color: var(--studio-panel-border);
+}
+
+body.view-ai-active .content-shell {
+  background:
+    radial-gradient(circle at top, var(--studio-shell-radial) 0%, transparent 34%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--studio-surface-bg, #10090a) 88%, white 4%) 0%,
+      color-mix(in srgb, var(--studio-surface-bg, #10090a) 94%, black 6%) 100%
+    );
+}
+
+body.view-ai-active .panel-card,
+body.view-ai-active .detail-card,
+body.view-ai-active .status-card,
+body.view-ai-active .thread-sidebar,
+body.view-ai-active .thread-stage {
+  border-color: var(--studio-panel-border);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+    var(--studio-panel-bg);
+  box-shadow: 0 16px 32px rgba(3, 9, 18, 0.34);
+}
+
+body.view-ai-active .fold-card,
+body.view-ai-active .fold-card summary,
+body.view-ai-active .output,
+body.view-ai-active .chat-header-card,
+body.view-ai-active .chat-feed-card,
+body.view-ai-active .chat-composer-card,
+body.view-ai-active .chat-status-card,
+body.view-ai-active .studio-bounded-section,
+body.view-ai-active .model3d-viewer-shell,
+body.view-ai-active .model3d-viewer-overlay {
+  border-color: var(--studio-panel-border);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.028) 0%, rgba(255,255,255,0.008) 100%),
+    var(--studio-panel-bg-soft);
+}
+
+body.view-ai-active .chat-bubble,
+body.view-ai-active .chat-bubble.user-bubble,
+body.view-ai-active .chat-bubble.assistant-bubble {
+  border-color: var(--studio-panel-border);
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--studio-accent-soft) 42%, transparent) 0%, transparent 46%),
+    linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%),
+    var(--studio-panel-bg);
+  box-shadow: 0 10px 24px rgba(48, 16, 14, 0.28);
+}
+
+body.view-ai-active .studio-view-hero-card {
+  background:
+    radial-gradient(circle at 92% 12%, var(--studio-accent-soft) 0%, transparent 40%),
+    radial-gradient(circle at 30% 90%, color-mix(in srgb, var(--studio-accent-2) 38%, transparent) 0%, transparent 42%),
+    linear-gradient(135deg, var(--studio-panel-bg) 0%, var(--studio-panel-bg-soft) 100%);
+}
+
+body.view-ai-active .studio-hero-title-accent {
+  background: linear-gradient(95deg, var(--studio-accent-1) 0%, var(--studio-accent-2) 52%, var(--studio-accent-3) 100%);
+  background-size: 180% 180%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter:
+    drop-shadow(0 0 14px color-mix(in srgb, var(--studio-accent-2) 42%, transparent))
+    drop-shadow(0 0 28px color-mix(in srgb, var(--studio-accent-3) 26%, transparent));
+}
+
+body.view-ai-active .studio-hero-logo {
+  border-color: var(--studio-panel-border);
+  background:
+    url('/assets/dashboard-logo.png') center/60% no-repeat,
+    radial-gradient(circle at 35% 20%, color-mix(in srgb, var(--studio-accent-1) 48%, transparent) 0%, transparent 44%),
+    linear-gradient(160deg, color-mix(in srgb, var(--studio-accent-2) 36%, transparent) 0%, color-mix(in srgb, var(--studio-accent-3) 36%, transparent) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 14px 34px var(--studio-button-shadow);
+}
+
+body.view-ai-active .studio-workflow-quick-tile,
+body.view-ai-active .messenger-connection-tile {
+  border-color: var(--studio-panel-border);
+  background: linear-gradient(165deg, var(--studio-panel-bg) 0%, var(--studio-panel-bg-soft) 100%);
+}
+
+body.view-ai-active .studio-workflow-quick-tile-icon {
+  color: var(--studio-accent-1);
+  --studio-icon-glow: color-mix(in srgb, var(--studio-accent-2) 72%, white 8%);
+}
+
+body.view-ai-active .rail-studio-workflow-button {
+  border: 1px solid var(--studio-panel-border);
+  background: color-mix(in srgb, var(--studio-panel-bg-soft) 88%, black 12%);
+  color: var(--rail-workflow-color, color-mix(in srgb, var(--ink) 86%, var(--muted) 14%));
+  box-shadow: none;
+}
+
+body.view-ai-active .rail-studio-workflow-button:hover,
+body.view-ai-active .rail-studio-workflow-button.active-focus {
+  border-color: color-mix(in srgb, var(--studio-accent-1) 58%, white 12%);
+  background: color-mix(in srgb, var(--studio-panel-bg) 88%, black 12%);
+  box-shadow: inset 3px 0 0 var(--rail-workflow-color, var(--studio-accent-1));
+}
+
+body.view-ai-active button:not(.studio-hero-logo):not(.rail-app-button):not(.rail-home):not(.rail-tools-button):not(.rail-profile-button):not(.rail-studio-workflow-button):not(.rail-theme-button):not(.rail-settings-button):not(.image-pool-preview-button),
+body.view-ai-active .panel-card button:not(.studio-hero-logo):not(.rail-app-button):not(.rail-home):not(.rail-tools-button):not(.rail-profile-button):not(.rail-studio-workflow-button):not(.rail-theme-button):not(.rail-settings-button):not(.image-pool-preview-button),
+body.view-ai-active .detail-card button:not(.studio-hero-logo):not(.rail-app-button):not(.rail-home):not(.rail-tools-button):not(.rail-profile-button):not(.rail-studio-workflow-button):not(.rail-theme-button):not(.rail-settings-button):not(.image-pool-preview-button) {
+  background: color-mix(in srgb, var(--studio-panel-bg-soft) 76%, var(--studio-accent-2) 24%);
+  box-shadow: none;
+  color: #fff8f1;
+}
+
+body.view-ai-active button.secondary,
+body.view-ai-active .panel-card button.secondary,
+body.view-ai-active .detail-card button.secondary,
+body.view-ai-active .ghost {
+  border: 1px solid var(--studio-panel-border);
+  background: var(--studio-panel-bg-soft);
+  color: color-mix(in srgb, var(--ink) 90%, white 10%);
+  box-shadow: none;
+}
+
+body.view-ai-active .ai-home-card-button.active-focus,
+body.view-ai-active .ai-section-target.ai-target-active {
+  border-color: color-mix(in srgb, var(--studio-accent-1) 55%, white 8%);
+  box-shadow: 0 0 0 1px var(--studio-accent-soft), 0 16px 30px rgba(4, 10, 18, 0.32);
+}
+
+body.view-ai-active .ai-dropzone {
+  height: auto;
+  min-height: 112px;
+  align-content: start;
+  border-color: color-mix(in srgb, var(--studio-accent-2) 68%, white 8%);
+  background: linear-gradient(180deg, var(--studio-accent-soft) 0%, color-mix(in srgb, var(--panel) 76%, black 24%) 100%);
+}
+
+body.view-ai-active .studio-status,
+body.view-ai-active .studio-status-history,
+body.view-ai-active .studio-status-progress {
+  border-color: var(--studio-panel-border);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.01) 100%),
+    var(--studio-panel-bg-soft);
+}
+
+body.view-ai-active .rail-settings-button,
+body.view-tools-active .rail-settings-button,
+body.view-profile-active .rail-settings-button,
+body.view-blender-addons-active .rail-settings-button,
+body.view-assets-active .rail-settings-button,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-settings-button {
+  border-color: color-mix(in srgb, var(--studio-panel-border, var(--line)) 82%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 100%),
+    color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 88%, black 12%);
+  color: color-mix(in srgb, var(--ink) 84%, var(--studio-accent-1, var(--accent)) 16%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+body.view-ai-active .rail-settings-button:hover,
+body.view-tools-active .rail-settings-button:hover,
+body.view-profile-active .rail-settings-button:hover,
+body.view-blender-addons-active .rail-settings-button:hover,
+body.view-assets-active .rail-settings-button:hover,
+body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active):not(.view-blender-addons-active):not(.view-assets-active) .rail-settings-button:hover {
+  border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 58%, white 12%);
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 48%, transparent) 0%, transparent 52%),
+    linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.015) 100%),
+    color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 88%, black 12%);
+}
+
+body.view-profile-active .runtime-overlay-panel {
+  border-color: var(--line);
+  background:
+    radial-gradient(circle at top, var(--accent-soft) 0%, transparent 40%),
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 100%),
+    var(--panel);
+  color: var(--ink);
+  box-shadow: 0 34px 56px rgba(0,0,0,0.34);
+}
+
+body.view-profile-active .settings-overlay-card,
+body.view-profile-active .about-overlay-panel .dashboard-tabs {
+  border-color: var(--line);
+  background: var(--panel-alt);
+}
+
+body.view-profile-active .about-overlay-panel .dashboard-tabs .ghost.active {
+  border-color: color-mix(in srgb, var(--accent) 62%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 62%, var(--panel) 38%);
+}

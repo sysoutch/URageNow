@@ -1,0 +1,13 @@
+[package]
+name = "asset-validator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+serde_json.workspace = true
+model-inspector = { path = "../model-inspector" }
+worker-contracts = { path = "../worker-contracts" }

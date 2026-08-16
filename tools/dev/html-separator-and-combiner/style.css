@@ -1,0 +1,95 @@
+:root {
+    --bg: #120d0d;
+    --panel: rgba(24, 14, 14, 0.92);
+    --panel-strong: rgba(18, 11, 11, 0.98);
+    --border: rgba(255, 180, 128, 0.18);
+    --accent: #ff8a4d;
+    --text: #f6f1ee;
+    --text-dim: #c8b6ae;
+}
+
+body[data-dashboard-theme="water"] { --bg: #0d1522; --panel: rgba(12, 21, 37, 0.94); --panel-strong: rgba(10, 17, 29, 0.98); --border: rgba(114, 190, 255, 0.18); --accent: #59b6ff; --text: #eef5ff; --text-dim: #a9bfd8; }
+body[data-dashboard-theme="nature"] { --bg: #11170f; --panel: rgba(18, 24, 16, 0.94); --panel-strong: rgba(13, 19, 11, 0.98); --border: rgba(146, 213, 120, 0.18); --accent: #82cd5f; --text: #f2f8ee; --text-dim: #bccfaf; }
+body[data-dashboard-theme="rock"] { --bg: #151515; --panel: rgba(24, 24, 24, 0.95); --panel-strong: rgba(16, 16, 16, 0.98); --border: rgba(196, 190, 176, 0.18); --accent: #c4ae8a; --text: #f2efea; --text-dim: #b7aea2; }
+
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 38%), linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%), var(--bg); color: var(--text); margin: 0; line-height: 1.5; }
+.app-wrapper { padding: 20px; }
+.container { max-width: 1400px; margin: auto; }
+
+header { text-align: center; margin-bottom: 30px; }
+h1 { color: var(--accent); margin-bottom: 20px; font-weight: 800; text-transform: uppercase; }
+
+.tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+.tab-btn { 
+    background: var(--panel); border: 1px solid var(--border); color: var(--text-dim);
+    padding: 12px 28px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s;
+}
+.tab-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+
+.mode-section { display: none; }
+.mode-section.active { display: block; }
+
+.card { background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
+
+textarea { 
+    width: 100%; min-height: 200px; padding: 15px; border: 1px solid var(--border); 
+    border-radius: 8px; font-family: 'Fira Code', monospace; box-sizing: border-box; 
+    background: var(--panel-strong); color: color-mix(in srgb, var(--accent) 72%, white 28%); font-size: 13px; outline: none;
+}
+
+.drop-area { border: 2px dashed var(--accent); padding: 20px; text-align: center; margin-bottom: 15px; border-radius: 8px; color: var(--accent); cursor: pointer; }
+.drop-area:hover {
+    background-color: rgba(56, 189, 248, 0.1);
+    border-color: #38bdf8;
+}
+
+.drop-area.dragover {
+    background-color: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+    border-style: solid;
+}
+.combiner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+
+.output-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+.code-box { background: var(--panel); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; }
+.code-header { background: var(--panel); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+.code-header span { font-size: 0.75rem; text-transform: uppercase; font-weight: bold; color: var(--text-dim); }
+
+pre[class*="language-"] { margin: 0 !important; height: 450px; background: var(--panel-strong) !important; }
+
+.btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.8rem; }
+.btn-action { background: var(--accent); color: #0f172a; width: 100%; font-size: 1.1rem; padding: 16px; margin-top: 10px; }
+.btn-copy { background: #475569; color: white; min-width: 80px; }
+.btn-download { background: #10b981; color: white; }
+
+@media (max-width: 720px) {
+    body[data-dashboard-theme] .app-wrapper {
+        padding: 14px;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    body[data-dashboard-theme] .combiner-grid,
+    body[data-dashboard-theme] .output-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body[data-dashboard-theme] .code-box,
+    body[data-dashboard-theme] pre[class*="language-"] {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    body[data-dashboard-theme] .code-header {
+        gap: 10px;
+    }
+
+    body[data-dashboard-theme] .header-btns {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 6px;
+        min-width: 0;
+    }
+}

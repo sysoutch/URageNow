@@ -1,0 +1,139 @@
+.network-settings-accordion {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: max(8px, var(--dashboard-control-radius, 10px));
+  background: color-mix(in srgb, var(--panel-alt) 84%, transparent);
+  overflow: clip;
+
+  > summary {
+    padding: 13px 15px;
+    color: var(--ink);
+    font-weight: 850;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  &[open] > summary {
+    border-bottom: 1px solid var(--line);
+  }
+
+  > :not(summary) {
+    margin-inline: 14px;
+  }
+
+  > :last-child {
+    margin-bottom: 14px;
+  }
+}
+
+.network-permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-block: 14px;
+
+  > label {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    min-width: 0;
+    padding: 11px;
+    border: 1px solid var(--line);
+    border-radius: max(7px, var(--dashboard-control-radius, 9px));
+    background: var(--panel);
+    cursor: pointer;
+  }
+
+  input {
+    margin-top: 3px;
+  }
+
+  span,
+  small {
+    display: block;
+    min-width: 0;
+  }
+
+  small {
+    margin-top: 3px;
+    color: var(--muted);
+  }
+}
+
+.companion-device-policy {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: max(8px, var(--dashboard-control-radius, 10px));
+  background: var(--panel);
+
+  .network-permission-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-block: 0;
+  }
+}
+
+.companion-pairing-qr,
+.network-token-qr {
+  display: grid;
+  grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  margin-block: 14px;
+
+  &[hidden] {
+    display: none;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    padding: 8px;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  span,
+  small {
+    display: block;
+  }
+
+  small {
+    margin-top: 6px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+}
+
+.companion-audit-entry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+
+  span,
+  small {
+    display: block;
+  }
+
+  small {
+    color: var(--muted);
+  }
+}
+
+@media (max-width: 760px) {
+  .network-permission-grid,
+  .companion-device-policy .network-permission-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .companion-pairing-qr,
+  .network-token-qr {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

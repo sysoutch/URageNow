@@ -1,0 +1,50 @@
+.app-shell {
+  .chip,
+  .toggle,
+  .detail-line,
+  .item,
+  .message-bubble,
+  .selected-user-card,
+  .info-card {
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0.008) 100%),
+      color-mix(in srgb, var(--panel) 84%, black 16%);
+  }
+
+  .selected-user-card {
+    display: grid;
+    gap: 6px;
+    padding: max(12px, var(--dashboard-cards-padding, 0px));
+    margin: var(--dashboard-cards-margin, 0px);
+    border-radius: var(--dashboard-cards-radius, var(--dashboard-card-radius, 0px));
+  }
+
+  .info-card {
+    display: grid;
+    gap: 6px;
+    padding: max(12px, var(--dashboard-cards-padding, 0px));
+    margin: var(--dashboard-cards-margin, 0px);
+    border-radius: var(--dashboard-cards-radius, var(--dashboard-card-radius, 0px));
+  }
+
+  .info-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #f2f3f5;
+  }
+
+  .info-card-copy {
+    color: #d0d5dc;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .info-card-meta {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+}

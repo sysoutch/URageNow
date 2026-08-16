@@ -1,0 +1,70 @@
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+!tools/game/ultimate-texas-holdem/dist/
+!tools/game/ultimate-texas-holdem/dist/**
+target/
+**/target/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.log
+
+# Environment files and local secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# IDE
+/.idea/
+/.settings/
+.classpath
+.project
+
+# Local Maven cache directories accidentally living in the repo root
+/backport-util-concurrent/
+/classworlds/
+/club/
+/com/
+/commons-cli/
+/commons-io/
+/commons-lang/
+/commons-logging/
+/io/
+/joda-time/
+/junit/
+/net/
+/org/
+/sax/
+
+# Crash dumps and generated files
+/hs_err_pid*.log
+/replay_pid*.log
+/previewGif.gif
+/dependency-reduced-pom.xml
+
+# Node migration workspace
+/bots/discord-bot/node_modules/
+/bots/discord-bot/dist/
+/bots/discord-bot/*.tsbuildinfo
+
+# Local runtime state and generated artifacts
+/artifacts/
+/output/
+/data/**
+!/data/.gitkeep
+
+# Standalone repositories maintained independently from this workspace
+/apps/*
+
+#tmp
+/tmp/*
+/integrations/
+/tools/dev/map-generator/images/*.png
+/tools/dev/map-generator/images/*.jpg
+src-tauri/binaries/
+src-tauri/runtime-bundle/

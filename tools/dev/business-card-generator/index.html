@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-dashboard-theme="fire">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Business Card Designer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/fabric.min.js"></script>
+  <script src="vendor/qrcode.min.js"></script>
+</head>
+<body data-dashboard-theme="fire">
+  <main class="business-card-app">
+    <header class="toolbar" aria-label="Business card actions">
+      <div class="toolbar-group" role="group" aria-label="Card side">
+        <button id="show-front-button" type="button">Front Side</button>
+        <button id="show-back-button" type="button">Back Side</button>
+      </div>
+      <div class="toolbar-group" role="group" aria-label="Card content">
+        <button id="add-text-button" type="button">Add Text</button>
+        <button id="add-logo-button" type="button">Add Logo</button>
+        <input id="upload" type="file" accept="image/*" hidden>
+        <button id="add-qr-button" type="button">Add QR</button>
+        <button id="delete-object-button" type="button">Delete</button>
+        <button id="clear-card-button" type="button">Clear</button>
+      </div>
+      <button id="export-png-button" class="primary-action" type="button">Export PNG</button>
+    </header>
+
+    <div class="workspace">
+      <section class="card-area" aria-label="Business card canvas">
+        <canvas id="card"></canvas>
+      </section>
+
+      <aside class="panel" data-dashboard-tool-sidebar>
+        <h2 id="sideTitle">Front Side</h2>
+        <div class="field">
+          <label for="bgType">Background</label>
+          <select id="bgType">
+            <option value="solid">Solid Color</option>
+            <option value="linear">Linear Gradient</option>
+            <option value="radial">Radial Gradient</option>
+          </select>
+        </div>
+        <div class="color-grid">
+          <label class="field" for="bgColor1">
+            <span>Color 1</span>
+            <input type="color" id="bgColor1" value="#ffffff">
+          </label>
+          <label class="field" for="bgColor2">
+            <span>Color 2</span>
+            <input type="color" id="bgColor2" value="#0066ff">
+          </label>
+        </div>
+        <button id="apply-background-button" type="button">Apply Background</button>
+        <p class="card-size">Standard card canvas: 85 mm × 55 mm</p>
+      </aside>
+    </div>
+  </main>
+
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+  <script src="../../shared/dashboard-tool-bridge.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

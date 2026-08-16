@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Transparency Tool</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../../shared/dashboard-tool-bridge.js"></script>
+</head>
+<body data-dashboard-theme="fire">
+    <main class="container">
+        <section class="hero">
+            <p class="eyebrow">PNG alpha editor</p>
+            <h1>Image Transparency Tool</h1>
+            <p class="subtitle">Adjust opacity, clean semi-transparent pixels, and export a polished PNG.</p>
+        </section>
+
+        <div id="transparency-upload-wrapper">
+            <label class="upload-card" for="upload">
+                <span class="upload-card-icon arrow-icon">&#8595;</span>
+                <strong>Choose an image</strong>
+                <span>or drag & drop it here.</span>
+                <input type="file" id="upload" accept="image/*" hidden>
+            </label>
+        </div>
+
+        <section class="panel controls-panel" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Transparency Controls">
+            <div class="control-row">
+                <div>
+                    <label for="opacityRange">Opacity</label>
+                    <p>Normalize the strongest alpha pixel to this value.</p>
+                </div>
+                <div class="range-wrap">
+                    <input type="range" id="opacityRange" min="0" max="100" value="100">
+                    <span id="opacityValue">100%</span>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <div>
+                    <label for="alphaThreshold">Non-opaque pixel cleanup</label>
+                    <p>Pixels with alpha below this threshold can be removed or replaced.</p>
+                </div>
+                <div class="range-wrap">
+                    <input type="range" id="alphaThreshold" min="1" max="254" value="254">
+                    <span id="alphaThresholdValue">&lt; 254</span>
+                </div>
+            </div>
+
+            <div class="control-grid">
+                <label class="field">
+                    <span>Cleanup action</span>
+                    <select id="cleanupMode">
+                        <option value="none">Keep pixels</option>
+                        <option value="transparent">Make fully transparent</option>
+                        <option value="color">Replace with color</option>
+                    </select>
+                </label>
+
+                <label class="field color-field" id="replacementColorField">
+                    <span>Replacement color</span>
+                    <input type="color" id="replacementColor" value="#000000">
+                </label>
+            </div>
+        </section>
+
+        <section class="preview-card">
+            <div class="preview-header">
+                <span>Preview</span>
+                <small id="imageInfo">No image loaded</small>
+            </div>
+            <div class="tool-status" id="toolStatus" data-status-tone="idle">Ready. Load an image to begin.</div>
+            <canvas id="canvas"></canvas>
+        </section>
+
+        <button id="download">Download PNG</button>
+    </main>
+    <script type="module" src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

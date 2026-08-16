@@ -1,0 +1,37 @@
+{
+  "26": {
+    "inputs": {
+      "audioUI": "",
+      "audio": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "PreviewAudio",
+    "_meta": {
+      "title": "Preview Audio"
+    }
+  },
+  "38": {
+    "inputs": {
+      "text": "There are some things that, when the country needs them, must be shouldered by someone.\n\nOur generation paved the way with our own mud; your task is to make that road lead to the stars and the sea.",
+      "instruct": "Character Name: Lin Huaiyue\nVoice Information: A loud, deep, and powerful middle-aged male voice.\n\nBackground: Chief consultant of a key national scientific research project, a senior strategic scientist nearing seventy. He has participated in major national scientific and technological projects, witnessing decades of trials and tribulations, and the arduous journey from lagging behind to independent innovation. Currently a lifetime honorary member of the National Science and Technology Advisory Committee, he continues to dedicate himself to cultivating young talent and providing advice for national strategic development.\n\nPhysical Characteristics: Tall and upright, with graying temples and a resolute expression etched in his brow. He often wears a dark Zhongshan suit or a simple formal suit, his eyes calm yet sharp, exuding authority and composure in every gesture.\n\nPersonality Traits: With an iron will and unwavering faith, never backing down from challenges; deeply patriotic and concerned for the future of the nation, closely linking personal destiny with the rise and fall of the country; rigorous and self-disciplined, always keeping one's word, speaking with a strong sense of responsibility and historical commitment; outwardly reserved but inwardly warm-hearted, seemingly serious but actually placing high hopes on the younger generation, willingly serving as a stepping stone for them.\n\nLife Motto: \"Our generation is not here to stand in the light, but to pave the way into the light.\"",
+      "model_choice": "1.7B",
+      "device": "auto",
+      "precision": "bf16",
+      "language": "Chinese",
+      "seed": 296999395434033,
+      "max_new_tokens": 2048,
+      "top_p": 0.8,
+      "top_k": 20,
+      "temperature": 1,
+      "repetition_penalty": 1.05,
+      "attention": "sdpa",
+      "unload_model_after_generate": false
+    },
+    "class_type": "FB_Qwen3TTSVoiceDesign",
+    "_meta": {
+      "title": "🎨 Qwen3-TTS VoiceDesign"
+    }
+  }
+}

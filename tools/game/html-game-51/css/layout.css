@@ -1,0 +1,328 @@
+/* Main game area - centered layout */
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Game wrapper - positions table and players around it */
+.game-wrapper {
+    position: relative;
+    width: 720px;
+    height: 680px;
+    margin: 0 auto;
+    overflow: visible; /* Allow player cards to extend beyond wrapper bounds */
+}
+
+/* Player cards container - top of table (CPU opponents) */
+#players {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    align-items: center;
+}
+
+/* Bottom player area - hidden, using absolute positioning on game-wrapper instead */
+#playersBottom {
+    display: none !important;
+}
+
+/* Player positions around the table - poker-style circular layout */
+/* These are positioned absolutely on .game-wrapper directly */
+
+/* Position for 1 CPU (right side only) */
+.game-wrapper .position-right {
+    position: absolute !important;
+    z-index: 10 !important;
+    right: -25px;
+    top: calc(50% - 35px);
+}
+
+/* Position for 2 CPUs (left and right) */
+.game-wrapper .position-left {
+    position: absolute !important;
+    z-index: 10 !important;
+    left: -25px;
+    top: calc(50% - 35px);
+}
+
+/* Position for 3 CPUs (left-top, right-top, bottom) */
+.game-wrapper .position-left-top {
+    position: absolute !important;
+    z-index: 10 !important;
+    left: -25px;
+    top: calc(50% - 70px);
+}
+
+.game-wrapper .position-right-top {
+    position: absolute !important;
+    z-index: 10 !important;
+    right: -25px;
+    top: calc(50% - 70px);
+}
+
+/* Position for 4+ CPUs (left-top, left-bottom, right-top, right-bottom) */
+.game-wrapper .position-left-bottom {
+    position: absolute !important;
+    z-index: 10 !important;
+    left: -25px;
+    top: calc(50% + 10px);
+}
+
+.game-wrapper .position-right-bottom {
+    position: absolute !important;
+    z-index: 10 !important;
+    right: -25px;
+    top: calc(50% + 10px);
+}
+
+/* Position for bottom-center (when more CPUs need placement) */
+.game-wrapper .position-bottom {
+    position: absolute !important;
+    z-index: 10 !important;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -20px;
+}
+
+/* Ensure player cards have proper sizing for all positions */
+.game-wrapper .position-right,
+.game-wrapper .position-left,
+.game-wrapper .position-left-top,
+.game-wrapper .position-right-top,
+.game-wrapper .position-left-bottom,
+.game-wrapper .position-right-bottom,
+.game-wrapper .position-bottom {
+    width: 170px !important;
+}
+
+/* Buttons should be above player cards */
+.buttons {
+    z-index: 20 !important;
+}
+
+
+/* Side panel - fixed right */
+aside {
+    position: fixed;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+/* Dice table - oval green felt */
+#table {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 720px;
+    height: 480px;
+    background: radial-gradient(ellipse at center, var(--table-green-light) 0%, var(--table-green) 50%, var(--table-green-dark) 100%);
+    border-radius: 260px;
+    border: 22px solid #78350f;
+    box-shadow:
+        0 0 0 8px #451a03,
+        0 0 0 28px rgba(120, 53, 15, 0.4),
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        inset 0 0 80px rgba(0, 0, 0, 0.3);
+    overflow: visible; /* Changed to visible so inner elements can show */
+}
+
+/* Table felt texture */
+#table::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* Remove the old overflow fix that was conflicting */
+#table {
+    overflow: visible !important;
+}
+
+/* Dice container - vertical column of sections, each section horizontal */
+#dice {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Each dice section (roll-dice, kept-dice) stacks vertically */
+.dice-section {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+/* Kept dice section styling */
+.dice-section.kept-dice {
+    padding: 10px 20px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+.dice-section.roll-dice {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+}
+
+/* Section labels */
+.section-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    width: auto;
+    text-align: center;
+}
+
+/* Points display - bottom center of table, above buttons area */
+#points {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 30px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 18px;
+    z-index: 5;
+}
+
+.current-turn {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#turnScore {
+    font-size: 48px;
+    font-weight: 700;
+    color: #fbbf24;
+    text-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+}
+
+#turnScore.busted {
+    color: #ef4444;
+    text-decoration: line-through;
+}
+
+/* Buttons container - positioned below the table in game-wrapper */
+.buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+}
+
+/* Inheritance buttons container */
+#inheritanceButtons {
+    display: none;
+    gap: 10px;
+}
+
+/* Inheritance info - between points and buttons */
+#inheritanceInfo {
+    position: absolute;
+    bottom: 75px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 6px 16px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+#inheritanceInfo p {
+    margin: 2px 0;
+}
+
+/* Ensure table clips its inner content properly */
+#table {
+    overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .game-wrapper {
+        width: 600px;
+        height: 580px;
+    }
+
+    #table {
+        width: 600px;
+        height: 400px;
+        border-radius: 200px;
+        border-width: 18px;
+    }
+
+    .die {
+        width: 52px;
+        height: 52px;
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 { font-size: 22px; }
+
+    .game-wrapper {
+        width: 450px;
+        height: 520px;
+    }
+
+    #table {
+        width: 450px;
+        height: 320px;
+        border-radius: 150px;
+        border-width: 14px;
+    }
+
+    .die {
+        width: 50px;
+        height: 50px;
+        font-size: 28px;
+    }
+
+    button { padding: 10px 20px; font-size: 13px; }
+}

@@ -1,0 +1,99 @@
+/**
+ * Shared Upload Card Component
+ * Universal styled upload area with dashed border, arrow icon, and dark theme
+ * Uses the global dashboard tool theme variables from /tools/shared/css/tool-theme.css.
+ * 
+ * Usage: Add <link rel="stylesheet" href="/tools/shared/css/upload-card.css"> to your HTML head
+ *        Then replace file input labels with the upload-card class structure
+ */
+
+/* =========================================================
+   UPLOAD CARD COMPONENT
+   ========================================================= */
+
+.upload-card {
+    min-height: 160px;
+    display: grid;
+    gap: 12px;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+    border-radius: 14px;
+    border: 2px dashed var(--tool-line-strong, rgba(255, 180, 128, 0.34));
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+        rgba(8, 8, 10, 0.28);
+    color: var(--tool-text, #f6f1ee);
+    cursor: pointer;
+    padding: 24px;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.upload-card:hover {
+    border-color: var(--tool-accent, #ff8a4d);
+    background:
+        radial-gradient(circle at center, color-mix(in srgb, var(--tool-accent, #ff8a4d) 10%, transparent) 0%, transparent 50%),
+        linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%),
+        rgba(8, 8, 10, 0.32);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tool-accent, #ff8a4d) 20%, transparent);
+}
+
+.upload-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--tool-accent, #ff8a4d) 12%, transparent);
+    color: var(--tool-accent, #ff8a4d);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Arrow download icon variant */
+.upload-card-icon.arrow-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--tool-accent, #ff8a4d) 12%, transparent);
+    color: var(--tool-accent, #ff8a4d);
+    font-size: 32px;
+}
+
+.upload-card strong {
+    color: var(--tool-text, #f6f1ee);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.upload-card span {
+    color: var(--tool-muted, #c8b6ae);
+    font-size: 0.82rem;
+}
+
+/* Fallback styling for tools without dashboard theme */
+.upload-card:not([data-dashboard-theme]) {
+    border-color: var(--tool-line-strong, rgba(255, 180, 128, 0.34));
+    background: rgba(18, 13, 13, 0.92);
+    color: var(--tool-text, #f6f1ee);
+}
+
+.upload-card:hover:not([data-dashboard-theme]) {
+    border-color: var(--tool-accent, #ff8a4d);
+}
+
+.upload-card-icon:not([data-dashboard-theme]),
+.upload-card-icon.arrow-icon:not([data-dashboard-theme]) {
+    background: color-mix(in srgb, var(--tool-accent, #ff8a4d) 12%, transparent);
+    color: var(--tool-accent, #ff8a4d);
+}
+
+.upload-card strong:not([data-dashboard-theme]) {
+    color: var(--tool-text, #f6f1ee);
+}
+
+.upload-card span:not([data-dashboard-theme]) {
+    color: var(--tool-muted, #c8b6ae);
+}

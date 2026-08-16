@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.dashboard.json",
+  "include": [
+    "workers/remote-worker/src/**/*.ts"
+  ]
+}

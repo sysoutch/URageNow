@@ -1,0 +1,23 @@
+{
+  "variables": {
+    "--bg": "#101914",
+    "--bg-2": "#16241c",
+    "--rail": "#102016",
+    "--sidebar": "#1a2f23",
+    "--surface": "#1e3628",
+    "--panel": "#1f3428",
+    "--panel-alt": "#192b21",
+    "--line": "rgba(116,255,181,0.18)",
+    "--line-strong": "rgba(116,255,181,0.32)",
+    "--ink": "#ebfdf2",
+    "--muted": "#add9bf",
+    "--accent": "#25d366",
+    "--accent-2": "#1aad56",
+    "--accent-3": "#66ebb2",
+    "--accent-soft": "rgba(37,211,102,0.24)",
+    "--card-glow": "rgba(8,46,27,0.24)",
+    "--shell-radius": "12px",
+    "--panel-radius": "12px",
+    "--font-family-base": "\"Segoe UI\", \"Noto Sans\", sans-serif"
+  }
+}

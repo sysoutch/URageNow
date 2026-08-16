@@ -1,0 +1,27 @@
+.app-shell {
+  .nav-tabs,
+  .nav-pills {
+    --bs-nav-link-color: var(--muted);
+    --bs-nav-link-hover-color: var(--ink);
+    --bs-nav-tabs-border-color: var(--line);
+    --bs-nav-tabs-link-hover-border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent-3)) 36%, transparent);
+    --bs-nav-tabs-link-active-color: var(--ink);
+    --bs-nav-tabs-link-active-bg: var(--studio-accent-soft, var(--accent-soft));
+    --bs-nav-tabs-link-active-border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent-3)) 56%, transparent);
+    gap: var(--dashboard-tab-gap, 6px);
+    padding: var(--dashboard-tab-padding, 0px);
+    margin: var(--dashboard-tabs-margin, 0px);
+    border-radius: var(--dashboard-tab-radius, var(--bs-border-radius-sm));
+  }
+
+  .nav-pills {
+    --bs-nav-pills-link-active-color: var(--button-primary-fg, var(--ink));
+    --bs-nav-pills-link-active-bg: var(--studio-accent-2, var(--accent));
+  }
+
+  .nav-link {
+    border-radius: var(--dashboard-tab-button-radius, var(--bs-border-radius-sm));
+    padding-inline: max(12px, var(--dashboard-tabs-padding, 0px));
+    font-weight: 800;
+  }
+}

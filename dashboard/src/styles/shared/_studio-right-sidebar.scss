@@ -1,0 +1,409 @@
+body.view-ai-active.studio-right-sidebar-active :is(.details-pane, .side-panel.side-panel-right, .studio-right-sidebar, .studio-right-sidebar-stack, [data-studio-right-sidebar-host]) {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: auto !important;
+}
+
+body.view-ai-active.studio-right-sidebar-active .studio-right-sidebar-stack {
+  align-content: stretch !important;
+  grid-auto-rows: minmax(0, 1fr) !important;
+}
+
+/* Studio inspectors are relocated into the shell details pane. The AI shell
+   normally removes that fourth grid column, so restore it only while a focused
+   workflow actually has inspector content. */
+@media (min-width: 981px) {
+  body.view-ai-active.studio-workflow-focused.studio-right-sidebar-active .app-shell {
+    grid-template-columns:
+      var(--server-rail-width, 84px)
+      var(--studio-workflow-sidebar-width, 0px)
+      minmax(0, 1fr)
+      var(--shell-details-width, 340px) !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused.studio-right-sidebar-active :is(.details-pane, .side-panel.side-panel-right) {
+    display: grid !important;
+    grid-column: 4 !important;
+    grid-row: 1 !important;
+    align-self: stretch !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+}
+
+body.view-ai-active.studio-right-sidebar-active #ask-rod-sidebar-panel[data-studio-sidebar-relocated="true"] {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  align-content: initial !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  padding: 0 4px 12px 0 !important;
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+  scroll-padding-block: 8px 20px;
+}
+
+body.view-ai-active.studio-right-sidebar-active #ask-rod-sidebar-panel[data-studio-sidebar-relocated="true"] > .studio-side-foldout {
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body.view-ai-active.studio-right-sidebar-active #ask-rod-sidebar-panel[data-studio-sidebar-relocated="true"] > .studio-side-foldout > summary {
+  flex: 0 0 auto !important;
+  align-self: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: var(--studio-foldout-summary-height) !important;
+  height: auto !important;
+  line-height: 1.2 !important;
+}
+
+body.view-ai-active.studio-right-sidebar-active #ask-rod-sidebar-panel[data-studio-sidebar-relocated="true"] > .studio-side-foldout > summary > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+body.view-ai-active.studio-right-sidebar-active #ask-rod-sidebar-panel[data-studio-sidebar-relocated="true"] > .studio-side-foldout > summary > small {
+  flex: 0 1 46%;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+body.view-ai-active.studio-right-sidebar-active #ask-rod-sidebar-panel[data-studio-sidebar-relocated="true"] > .studio-side-foldout > summary::after {
+  flex: 0 0 auto;
+}
+
+body.view-ai-active.studio-right-sidebar-active #ask-rod-sidebar-panel[data-studio-sidebar-relocated="true"] .ask-personality-body {
+  min-width: 0;
+  max-height: none;
+  overflow: visible;
+  scrollbar-gutter: auto;
+}
+
+body.view-ai-active.studio-right-sidebar-active :is(#image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel)[data-studio-sidebar-relocated="true"] {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  align-content: stretch !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+}
+
+body.view-ai-active.studio-right-sidebar-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel)[data-studio-sidebar-relocated="true"] {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+}
+
+body.view-ai-active.studio-right-sidebar-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel)[data-studio-sidebar-relocated="true"] > .studio-sidebar-split-shell {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+body.view-ai-active.studio-right-sidebar-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel)[data-studio-sidebar-relocated="true"]:has(> .studio-sidebar-split-shell) {
+  overflow: hidden !important;
+}
+
+body.view-ai-active.studio-right-sidebar-active .studio-sidebar-split-main {
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 88%, transparent) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 90%, black 10%) !important;
+  box-shadow: none;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout+.studio-side-foldout {
+  margin-top: -1px;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout:first-of-type {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout:last-of-type {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout>summary {
+  min-height: var(--studio-foldout-summary-height) !important;
+  padding: 8px 11px !important;
+  color: color-mix(in srgb, var(--ink) 92%, white 8%) !important;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout[open]>summary {
+  border-bottom-color: color-mix(in srgb, var(--studio-control-border) 88%, transparent) !important;
+  background: color-mix(in srgb, var(--studio-control-accent) 9%, transparent) !important;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout-content {
+  padding: 10px !important;
+  overflow: visible !important;
+  scrollbar-gutter: auto !important;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout-content :is(.resources-foldout-body, .ask-personality-body, .compact-media-section, .studio-bounded-section, .compact-list, .list, .latest-media-grid) {
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  overscroll-behavior: auto !important;
+  scrollbar-gutter: auto !important;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-side-foldout-content> :is(.field, .studio-step-card, .studio-status, .studio-bounded-section, .model3d-side-card, .model3d-inspector-section, .image-side-card, .audio-side-card, .music-side-card, .video-side-card, .studio-sidebar-info-panel, .video-info-panel) {
+  padding: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  align-content: start !important;
+  flex: 0 0 auto !important;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel .chat-sidebar-foldout > .studio-side-foldout-content {
+  gap: 10px !important;
+  padding: 12px !important;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel .chat-sidebar-foldout > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--studio-foldout-summary-height) !important;
+  min-height: var(--studio-foldout-summary-height) !important;
+  overflow: hidden;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel .chat-sidebar-foldout > summary > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel .chat-sidebar-foldout > summary > small {
+  flex: 0 1 42%;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel .chat-sidebar-foldout :is(input, select, textarea, button) {
+  max-width: 100%;
+}
+
+body.view-ai-active #ask-rod-sidebar-panel .chat-sidebar-foldout :is(input, select, textarea) {
+  width: 100%;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-sidebar-form {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-sidebar-form > .field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-sidebar-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-sidebar-actions > :is(button, a) {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding-inline: 9px;
+  white-space: normal;
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) .studio-sidebar-status-note {
+  min-width: 0;
+  min-height: 18px;
+  padding: 8px 9px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 72%, transparent);
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 84%, transparent);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+body.view-ai-active #image-sidebar-panel .studio-side-foldout-content:has(#image-pool-library-list) {
+  display: grid !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active #image-sidebar-panel .studio-side-foldout-content:has(#image-pool-library-list) .studio-bounded-section {
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  max-height: clamp(300px, 48vh, 620px) !important;
+  overflow: hidden !important;
+  border-radius: 0 !important;
+}
+
+body.view-ai-active #image-sidebar-panel #image-pool-library-list {
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+  padding-right: 4px !important;
+}
+
+body.view-ai-active #image-sidebar-panel #image-pool-library-list .image-pool-library-item {
+  gap: 8px !important;
+  padding: 8px !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 82%, black 18%) !important;
+  box-shadow: none !important;
+}
+
+body.view-ai-active #image-sidebar-panel #image-pool-library-list .image-pool-preview-button,
+body.view-ai-active #image-sidebar-panel #image-pool-library-list .image-pool-preview-button img,
+body.view-ai-active #image-sidebar-panel #image-pool-library-list .image-pool-library-actions button {
+  border-radius: 0 !important;
+}

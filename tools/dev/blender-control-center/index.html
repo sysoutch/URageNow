@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Blender Browser Stream</title>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #111;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+#screen {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    display: block;
+    cursor: none;
+    user-select: none;
+}
+
+#stream-status {
+    position: fixed;
+    inset: 0;
+    display: none;
+    place-items: center;
+    padding: 28px;
+    color: #f6f1ee;
+    font: 600 16px/1.5 system-ui, sans-serif;
+    text-align: center;
+    background: radial-gradient(circle at top, rgba(255, 138, 77, 0.2), transparent 44%), #111;
+}
+
+#stream-status p { max-width: 34rem; margin: 0; }
+</style>
+</head>
+
+<body data-dashboard-theme="dark">
+<img id="screen" draggable="false">
+<div id="stream-status"><p>Blender Browser Stream is not connected. Start the local Blender stream service to control its desktop session; this dashboard page cannot create that service.</p></div>
+
+<script>
+const img = document.getElementById("screen");
+const status = document.getElementById("stream-status");
+const canUseLocalStream = !window.location.pathname.startsWith("/tools/");
+let ws = null;
+
+if (canUseLocalStream) {
+    ws = new WebSocket("ws://127.0.0.1:8765");
+} else {
+    status.style.display = "grid";
+}
+
+if (ws) ws.binaryType = "arraybuffer";
+
+let lastUrl = null;
+
+if (ws) ws.onmessage = (event) => {
+    const blob = new Blob([event.data], { type: "image/jpeg" });
+    const url = URL.createObjectURL(blob);
+
+    img.src = url;
+
+    if (lastUrl) {
+        URL.revokeObjectURL(lastUrl);
+    }
+
+    lastUrl = url;
+};
+
+function send(data) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(data));
+    }
+}
+
+function getScreenCoords(e) {
+    const rect = img.getBoundingClientRect();
+
+    const x = Math.round((e.clientX - rect.left) * window.devicePixelRatio);
+    const y = Math.round((e.clientY - rect.top) * window.devicePixelRatio);
+
+    return { x, y };
+}
+
+document.addEventListener("mousemove", (e) => {
+    const p = getScreenCoords(e);
+
+    send({
+        type: "mouse_move",
+        x: p.x,
+        y: p.y
+    });
+});
+
+document.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+
+    send({
+        type: "mouse_down",
+        button: mapButton(e.button)
+    });
+});
+
+document.addEventListener("mouseup", (e) => {
+    e.preventDefault();
+
+    send({
+        type: "mouse_up",
+        button: mapButton(e.button)
+    });
+});
+
+document.addEventListener("wheel", (e) => {
+    e.preventDefault();
+
+    send({
+        type: "scroll",
+        dy: e.deltaY < 0 ? 5 : -5
+    });
+}, { passive: false });
+
+document.addEventListener("keydown", (e) => {
+    e.preventDefault();
+
+    send({
+        type: "key_down",
+        key: e.key
+    });
+});
+
+document.addEventListener("keyup", (e) => {
+    e.preventDefault();
+
+    send({
+        type: "key_up",
+        key: e.key
+    });
+});
+
+function mapButton(button) {
+    if (button === 0) return "left";
+    if (button === 1) return "middle";
+    if (button === 2) return "right";
+    return "left";
+}
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+</script>
+<script src="../../shared/dashboard-theme.js"></script>
+<script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+</body>
+</html>

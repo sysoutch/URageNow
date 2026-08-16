@@ -1,0 +1,107 @@
+/**
+ * Shared Upload Button Styles
+ * 
+ * Reusable styled file upload buttons for all tools.
+ * Include this CSS file in any tool that has <input type="file"> elements.
+ * 
+ * Usage:
+ *   1. Add link tag: <link rel="stylesheet" href="/tools/shared/css/upload-btn.css">
+ *   2. Wrap your file input with: <label class="upload-btn" for="yourFileInput">
+ *   3. Use classes: .upload-btn-icon, .upload-btn-text inside the label
+ * 
+ * Theme tokens come from /tools/shared/css/tool-theme.css.
+ */
+
+/* ===== Upload Button Base ===== */
+.upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px dashed var(--border, rgba(255, 137, 78, 0.2));
+    background:
+        radial-gradient(circle at top, color-mix(in srgb, var(--accent, #ff7b42) 10%, transparent) 0%, transparent 50%),
+        rgba(8, 8, 10, 0.24);
+    color: var(--text, #f8f2ee);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.upload-btn:hover {
+    border-color: var(--accent, #ff7b42);
+    background:
+        radial-gradient(circle at top, color-mix(in srgb, var(--accent, #ff7b42) 16%, transparent) 0%, transparent 50%),
+        rgba(8, 8, 10, 0.32);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #ff7b42) 24%, transparent);
+}
+
+.upload-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent, #ff7b42) 18%, transparent);
+    color: var(--accent, #ff7b42);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.upload-btn-text {
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+/* ===== Upload Card (larger variant for drop zones) ===== */
+.upload-card {
+    display: grid;
+    gap: 6px;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+    min-height: 128px;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px dashed var(--border, rgba(255, 137, 78, 0.2));
+    background:
+        radial-gradient(circle at top, color-mix(in srgb, var(--accent, #ff7b42) 14%, transparent) 0%, transparent 52%),
+        rgba(8, 8, 10, 0.24);
+    color: var(--text, #f8f2ee);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.upload-card:hover {
+    border-color: var(--accent, #ff7b42);
+    background:
+        radial-gradient(circle at top, color-mix(in srgb, var(--accent, #ff7b42) 20%, transparent) 0%, transparent 52%),
+        rgba(8, 8, 10, 0.32);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #ff7b42) 30%, transparent);
+}
+
+.upload-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.upload-card strong {
+    color: var(--text, #f8f2ee);
+    font-size: 0.9rem;
+}
+
+.upload-card span {
+    color: var(--text-dim, #c3b1a8);
+    font-size: 0.78rem;
+}

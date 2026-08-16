@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tilemap Creator</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+  <div class="app-shell">
+    <aside class="side-panel" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Tilemap Controls">
+      <header class="tool-header">
+        <div>
+          <p class="eyebrow">Dev Tool</p>
+          <h1>Tilemap Creator</h1>
+          <p class="tool-subtitle">Paint layered 2D maps from a spritesheet and export JSON.</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h2>Spritesheet</h2>
+        <label class="field">
+          <span>Image</span>
+          <input id="uploadInput" type="file" accept="image/*" multiple>
+        </label>
+        <label class="field">
+          <span>Upload Mode</span>
+          <select id="uploadModeSelect">
+            <option value="separate">Each image as its own tileset</option>
+            <option value="combined">Combine uploaded images into one tileset</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Tile Size</span>
+          <input id="tileSizeInput" type="number" min="4" max="256" value="32">
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Map Shape</h2>
+        <label class="field">
+          <span>Project Name</span>
+          <input id="projectNameInput" type="text" value="tilemap" spellcheck="false">
+        </label>
+        <div class="field-grid">
+          <label class="field">
+            <span>Width</span>
+            <input id="gridWidthInput" type="number" min="1" max="512" value="30">
+          </label>
+          <label class="field">
+            <span>Height</span>
+            <input id="gridHeightInput" type="number" min="1" max="512" value="20">
+          </label>
+        </div>
+        <label class="field">
+          <span>Grid Projection</span>
+          <select id="gridModeSelect">
+            <option value="orthogonal">Current / Orthogonal</option>
+            <option value="isometric">Isometric Diamond</option>
+          </select>
+        </label>
+        <button id="createGridButton" class="primary" type="button">Resize / Create Grid</button>
+      </section>
+
+      <section class="panel">
+        <h2>Brush</h2>
+        <div class="tool-group">
+          <p class="mini-label">Action</p>
+          <div class="mode-tabs brush-action-tabs" aria-label="Brush action">
+            <button class="mode-tab brush-icon-button active" data-brush-mode="paint" type="button" aria-label="Paint" title="Paint (P)"><span aria-hidden="true">✎</span><kbd>P</kbd></button>
+            <button class="mode-tab brush-icon-button" data-brush-mode="erase" type="button" aria-label="Erase" title="Erase (E)"><span aria-hidden="true">⌫</span><kbd>E</kbd></button>
+            <button class="mode-tab brush-icon-button" data-brush-mode="fill" type="button" aria-label="Fill" title="Fill (F)"><span aria-hidden="true">▧</span><kbd>F</kbd></button>
+            <button class="mode-tab brush-icon-button" data-brush-mode="pick" type="button" aria-label="Pick tile" title="Pick tile (I)"><span aria-hidden="true">◉</span><kbd>I</kbd></button>
+            <button class="mode-tab brush-icon-button" data-brush-mode="move" type="button" aria-label="Move" title="Move (M)"><span aria-hidden="true">✥</span><kbd>M</kbd></button>
+          </div>
+        </div>
+        <div class="tool-group paint-options-card">
+          <p class="mini-label">Paint Options</p>
+          <div class="paint-source-tabs" aria-label="Paint source mode">
+            <button class="paint-source-tab brush-icon-button active" data-paint-source-mode="stamp" type="button" aria-label="Stamp" title="Stamp"><span aria-hidden="true">▣</span></button>
+            <button class="paint-source-tab brush-icon-button" data-paint-source-mode="random" type="button" aria-label="Random" title="Random"><span aria-hidden="true">⤨</span></button>
+            <button class="paint-source-tab brush-icon-button" data-paint-source-mode="forward" type="button" aria-label="Forward order" title="Forward order"><span aria-hidden="true">→</span></button>
+            <button class="paint-source-tab brush-icon-button" data-paint-source-mode="reverse" type="button" aria-label="Reverse order" title="Reverse order"><span aria-hidden="true">←</span></button>
+            <button class="paint-source-tab brush-icon-button" data-paint-source-mode="pingpong" type="button" aria-label="Ping-pong order" title="Ping-pong order"><span aria-hidden="true">↔</span></button>
+            <button class="paint-source-tab brush-icon-button" data-paint-source-mode="noise" type="button" aria-label="Cell noise" title="Cell noise"><span aria-hidden="true">✦</span></button>
+          </div>
+        </div>
+        <div class="tool-group">
+          <p class="mini-label">Shape</p>
+          <div class="mode-tabs brush-shape-tabs" aria-label="Brush shape">
+            <button class="mode-tab brush-icon-button active" data-map-shape-mode="single" type="button" aria-label="Single cell" title="Single cell (1)"><span aria-hidden="true">▪</span><kbd>1</kbd></button>
+            <button class="mode-tab brush-icon-button" data-map-shape-mode="rect" type="button" aria-label="Rectangle" title="Rectangle (2)"><span aria-hidden="true">■</span><kbd>2</kbd></button>
+            <button class="mode-tab brush-icon-button" data-map-shape-mode="rectOutline" type="button" aria-label="Rectangle outline" title="Rectangle outline (4)"><span aria-hidden="true">□</span><kbd>4</kbd></button>
+            <button class="mode-tab brush-icon-button" data-map-shape-mode="circle" type="button" aria-label="Circle" title="Circle (3)"><span aria-hidden="true">●</span><kbd>3</kbd></button>
+          </div>
+        </div>
+        <div class="layer-sidebar-card">
+          <label class="field layer-sidebar-field">
+            <span>Layer</span>
+            <select id="layerSelect"></select>
+          </label>
+          <div class="layer-sidebar-stack">
+            <button id="addLayerButton" class="layer-sidebar-primary" type="button">Add Layer</button>
+            <button id="duplicateLayerButton" type="button">Duplicate Layer</button>
+          </div>
+          <div class="field-grid layer-sidebar-danger">
+            <button id="clearLayerButton" type="button">Erase Layer</button>
+            <button id="clearAllButton" type="button">Erase All</button>
+          </div>
+        </div>
+        <div class="tool-group">
+          <p class="mini-label">Transform</p>
+          <div class="toggle-grid">
+            <label class="toggle-pill" aria-label="Mirror map horizontally" title="Mirror map horizontally (X)"><input id="mirrorXInput" type="checkbox"><span class="toggle-pill-icon" aria-hidden="true">↔</span><kbd>X</kbd></label>
+            <label class="toggle-pill" aria-label="Mirror map vertically" title="Mirror map vertically (Y)"><input id="mirrorYInput" type="checkbox"><span class="toggle-pill-icon" aria-hidden="true">↕</span><kbd>Y</kbd></label>
+            <label class="toggle-pill" aria-label="Mirror brush horizontally" title="Mirror brush horizontally"><input id="brushMirrorXInput" type="checkbox"><span class="toggle-pill-icon" aria-hidden="true">⇄</span></label>
+            <label class="toggle-pill" aria-label="Mirror brush vertically" title="Mirror brush vertically"><input id="brushMirrorYInput" type="checkbox"><span class="toggle-pill-icon" aria-hidden="true">⇅</span></label>
+            <label class="toggle-pill toggle-pill-wide" aria-label="Show grid" title="Show grid (G)"><input id="showGridInput" type="checkbox" checked><span class="toggle-pill-icon" aria-hidden="true">#</span><kbd>G</kbd></label>
+          </div>
+          <div class="field-grid">
+            <button id="flipBrushXButton" class="brush-icon-button" type="button" aria-label="Flip brush horizontally" title="Flip brush horizontally"><span aria-hidden="true">⇄</span></button>
+            <button id="flipBrushYButton" class="brush-icon-button" type="button" aria-label="Flip brush vertically" title="Flip brush vertically"><span aria-hidden="true">⇅</span></button>
+          </div>
+        </div>
+        <div class="tool-group">
+          <p class="mini-label">Selection</p>
+          <div class="field-grid selection-actions">
+            <button id="selectAllMapButton" class="brush-icon-button" type="button" aria-label="Select all" title="Select all (Ctrl+A)"><span aria-hidden="true">▣</span><kbd>Ctrl+A</kbd></button>
+            <button id="flipSelectionXButton" class="brush-icon-button" type="button" aria-label="Flip selection horizontally" title="Flip selection horizontally"><span aria-hidden="true">⇄</span></button>
+            <button id="flipSelectionYButton" class="brush-icon-button" type="button" aria-label="Flip selection vertically" title="Flip selection vertically"><span aria-hidden="true">⇅</span></button>
+          </div>
+        </div>
+        <p class="hint">Choose an action and combine it with Single, Rect, Rect Outline, or Circle. Hold Ctrl to draw a perfect straight line. Ctrl+A selects the map, or the whole tileset while hovering it.</p>
+      </section>
+
+      <section class="panel action-panel">
+        <button id="resetViewButton" type="button">Reset View</button>
+        <button id="fitViewButton" type="button">Fit Map</button>
+        <button id="openMediaTrayButton" type="button">Media Tray</button>
+        <button id="importJsonButton" type="button">Import JSON</button>
+        <button id="exportJsonButton" type="button">Export JSON</button>
+        <button id="exportTiledButton" type="button">Export Tiled</button>
+        <button id="exportPngButton" type="button">Export PNG</button>
+        <input id="importJsonInput" class="hidden" type="file" accept="application/json,.json">
+      </section>
+    </aside>
+
+    <main class="preview-panel">
+      <div class="preview-toolbar">
+        <div>
+          <p class="eyebrow">Preview</p>
+          <h2 id="previewTitle">Layered Tilemap</h2>
+        </div>
+        <output id="statusOutput">No spritesheet loaded.</output>
+      </div>
+
+      <div class="canvas-stage" id="canvasStage">
+        <canvas id="mapCanvas" width="1280" height="820"></canvas>
+
+        <section class="overlay-panel tileset-panel" aria-label="Tileset helper">
+          <div class="overlay-head">
+            <div>
+              <p class="eyebrow">Tileset</p>
+              <strong id="tilesetStats">No image</strong>
+            </div>
+            <button id="toggleTilesetPanelButton" class="icon-button" type="button" title="Collapse tileset">-</button>
+          </div>
+          <div id="tilesetPanelBody" class="overlay-body">
+            <div class="tileset-tools">
+              <button class="mode-tab active" data-tileset-select-mode="single" type="button">Single</button>
+              <button class="mode-tab" data-tileset-select-mode="rect" type="button">Rect</button>
+              <button class="mode-tab" data-tileset-select-mode="rectOutline" type="button">Rect (Outline)</button>
+              <button class="mode-tab" data-tileset-select-mode="circle" type="button">Circle</button>
+            </div>
+            <div id="tilesetTabs" class="tileset-tabs"></div>
+            <div class="tileset-config-row">
+              <label class="field tileset-size-field">
+                <span>Active Tileset Tile Size</span>
+                <input id="activeTilesetTileSizeInput" type="number" min="1" max="4096" value="32">
+              </label>
+              <button id="duplicateTilesetButton" type="button">Duplicate Tileset</button>
+            </div>
+            <canvas id="tilesetCanvas"></canvas>
+            <div id="tilesetTabPreview" class="tileset-tab-preview hidden"><img alt=""><strong></strong><span></span></div>
+            <p class="hint">Drag in the tileset to select a rect, rect-outline, or circle brush.</p>
+          </div>
+        </section>
+
+        <section class="overlay-panel layers-panel" aria-label="Layers helper">
+          <div class="overlay-head">
+            <div>
+              <p class="eyebrow">Layers</p>
+              <strong id="layerStats">0 layers</strong>
+            </div>
+            <button id="toggleLayersPanelButton" class="icon-button" type="button" title="Collapse layers">-</button>
+          </div>
+          <div id="layersPanelBody" class="overlay-body">
+            <div id="layerList" class="layer-list"></div>
+          </div>
+        </section>
+
+        <section class="overlay-panel smart-wall-panel" aria-label="Smart wall brush assignment">
+          <div class="overlay-head">
+            <div>
+              <p class="eyebrow">Smart Wall</p>
+              <strong>Brush Assignment</strong>
+            </div>
+            <button id="toggleSmartWallPanelButton" class="icon-button" type="button" title="Collapse smart wall">-</button>
+          </div>
+          <div id="smartWallPanelBody" class="overlay-body smart-wall-body">
+            <div class="smart-profile-controls" aria-label="Smart brush profiles">
+              <div id="smartBrushProfileTabs" class="smart-profile-tabs"></div>
+              <div class="smart-profile-actions">
+                <button id="addSmartBrushProfileButton" type="button">Add</button>
+                <button id="duplicateSmartBrushProfileButton" type="button">Duplicate</button>
+                <button id="renameSmartBrushProfileButton" type="button">Rename</button>
+                <button id="deleteSmartBrushProfileButton" type="button">Delete</button>
+              </div>
+            </div>
+            <label class="toggle-field smart-enable"><input id="smartBrushEnabledInput" type="checkbox"> Enable auto wall <kbd>W</kbd></label>
+            <div class="smart-orientation-toggles" aria-label="Smart wall inner corner source mirroring">
+              <label class="toggle-field smart-orientation-toggle"><input id="smartBrushMirrorXInput" type="checkbox"> Mirror inner corners X</label>
+              <label class="toggle-field smart-orientation-toggle"><input id="smartBrushMirrorYInput" type="checkbox"> Mirror inner corners Y</label>
+            </div>
+            <div class="smart-actions">
+              <button id="smartBrushFromSelectionButton" type="button">Auto-map Replace</button>
+              <button id="smartBrushAddVariantsFromSelectionButton" type="button">Auto-map Add Variants</button>
+              <button id="smartBrushClearButton" type="button">Clear roles</button>
+            </div>
+            <div id="smartBrushRoleGrid" class="smart-role-grid"></div>
+            <p class="hint">Use Replace Tile for one sprite, Add Tile for one extra sprite, Replace Brush/Add Brush for a selected strip or block, or Auto-map Add Variants to add extra edge/corner sprites from a larger selection.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <section class="floating-media-tray media-tray-overlay hidden" id="floatingMediaTray" aria-label="Dashboard media tray">
+    <div class="tray-head">
+      <div>
+        <p class="eyebrow">Dashboard Media Tray</p>
+        <h2>Use Media As Tiles</h2>
+      </div>
+      <div class="tray-head-actions">
+        <button id="refreshDashboardMediaButton" type="button">Refresh</button>
+        <button id="closeMediaTrayButton" class="icon-button" type="button" title="Close media tray">&times;</button>
+      </div>
+    </div>
+    <div class="mode-tabs media-tray-tabs" role="tablist" aria-label="Media tray sources">
+      <button class="mode-tab active" data-media-tray-tab="pools" type="button">Image Pools</button>
+      <button class="mode-tab" data-media-tray-tab="recent" type="button">Recent Media</button>
+    </div>
+    <div class="tray-pane active" data-media-tray-panel="pools">
+      <label class="field">
+        <span>Image Pool</span>
+        <select id="imagePoolSelect">
+          <option value="">No image pools loaded</option>
+        </select>
+      </label>
+      <div id="imagePoolList" class="media-list"></div>
+    </div>
+    <div class="tray-pane" data-media-tray-panel="recent">
+      <div id="recentMediaList" class="media-list"></div>
+    </div>
+  </section>
+
+  <script type="module" src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

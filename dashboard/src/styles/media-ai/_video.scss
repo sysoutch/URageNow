@@ -1,0 +1,347 @@
+// Video Studio Modern Styling - Exact match to reference screenshot
+// Dark blue gradient background, blue buttons, orange accents
+
+.video-prompt-ai-tools {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1.1fr) auto;
+  align-items: center;
+  margin-top: 8px;
+}
+
+@media (max-width: 820px) {
+  .video-prompt-ai-tools {
+    grid-template-columns: 1fr;
+  }
+}
+
+.video-prompt-field-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(60, 130, 220, 0.15);
+  background: linear-gradient(180deg, #0d1a30 0%, #0a1428 100%);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.video-prompt-field-card > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+// Prompt Header with character counter
+.video-prompt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.video-prompt-header > label {
+  margin: 0 !important;
+  font-size: 13px;
+  font-weight: 700;
+  color: #c8d4f0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.video-prompt-counter {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7a8ab8;
+  white-space: nowrap;
+}
+
+// Prompt textarea wrapper with AI sparkle button
+.video-prompt-textarea-wrapper {
+  position: relative;
+  display: grid;
+}
+
+.video-prompt-textarea-wrapper textarea {
+  width: 100% !important;
+  min-height: 84px !important;
+  resize: vertical;
+  border-radius: 8px !important;
+  border: 1px solid rgba(60, 130, 220, 0.2) !important;
+  background: #0b1525 !important;
+  color: #dce4f8 !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 12px 52px 12px 14px !important;
+  box-sizing: border-box !important;
+}
+
+.video-prompt-textarea-wrapper textarea::placeholder {
+  color: #5a6a90 !important;
+}
+
+.video-ai-sparkle-btn {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px !important;
+  border: 1px solid rgba(60, 130, 220, 0.25) !important;
+  background: linear-gradient(180deg, #1a2d54 0%, #12203e 100%) !important;
+}
+
+// Section labels
+.video-section-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #6a7aa8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+// Motion Controls Grid
+.video-motion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.video-motion-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--studio-control-border, var(--line));
+  background: var(--studio-control-bg-soft, var(--panel-soft));
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.video-motion-item:hover {
+  border-color: var(--studio-control-accent, var(--accent));
+  background: color-mix(in srgb, var(--studio-control-accent, var(--accent)) 12%, var(--studio-control-bg-soft, var(--panel-soft)));
+}
+
+// Video Preset Cards
+.video-preset-cards {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.video-preset-card {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--studio-control-border, var(--line));
+  background: var(--studio-control-bg-soft, var(--panel-soft));
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.video-preset-card:hover {
+  border-color: var(--studio-control-accent, var(--accent));
+  background: color-mix(in srgb, var(--studio-control-accent, var(--accent)) 12%, var(--studio-control-bg-soft, var(--panel-soft)));
+}
+
+.video-preset-card.active {
+  border-color: var(--studio-control-accent, var(--accent)) !important;
+  background: color-mix(in srgb, var(--studio-control-accent, var(--accent)) 18%, var(--studio-control-bg-soft, var(--panel-soft))) !important;
+  color: var(--ink) !important;
+  box-shadow: inset 3px 0 0 var(--studio-control-accent, var(--accent));
+}
+
+// Prompt Preset Strips (compact) - wrapped in card-like container
+.video-preset-strips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(60, 130, 220, 0.15);
+  background: rgba(10, 18, 34, 0.5);
+}
+
+.video-preset-strips .studio-prompt-preset-button {
+  flex: 0 1 auto;
+  border-radius: 8px !important;
+  border: 1px solid rgba(60, 130, 220, 0.2) !important;
+  background: linear-gradient(180deg, #1a2d54 0%, #12203e 100%) !important;
+  color: #b0c0e8 !important;
+  font-size: 12px !important;
+  white-space: nowrap;
+}
+
+.video-preset-strips .studio-prompt-preset-button:hover {
+  border-color: rgba(80, 150, 240, 0.4) !important;
+  background: linear-gradient(180deg, #1e3460 0%, #162848 100%) !important;
+}
+
+// AI Prompt Toggle area
+.video-ai-prompt-toggle {
+  display: grid;
+  gap: 10px;
+}
+
+.video-ai-prompt-toggle input[type="text"] {
+  width: 100%;
+  border-radius: 8px !important;
+  border: 1px solid rgba(60, 130, 220, 0.2) !important;
+  background: #0b1525 !important;
+  color: #dce4f8 !important;
+  padding: 10px 14px !important;
+  box-sizing: border-box !important;
+}
+
+// Collapsible Advanced Settings
+.video-advanced-settings {
+  border-radius: 8px;
+  border: 1px solid rgba(60, 130, 220, 0.15);
+  background: rgba(10, 18, 34, 0.4);
+  overflow: hidden;
+}
+
+.video-advanced-settings[open] {
+  border-color: rgba(60, 130, 220, 0.25);
+}
+
+.video-advanced-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: #b0c0e8;
+  user-select: none;
+}
+
+.video-advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.video-advanced-summary:hover {
+  background: rgba(60, 130, 220, 0.05);
+}
+
+.video-advanced-content {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+// Setting rows inside advanced settings
+.video-setting-row {
+  display: grid;
+  gap: 6px;
+}
+
+.video-setting-row > label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a9ac0;
+  margin: 0 !important;
+}
+
+.video-setting-row input[type="number"],
+.video-setting-row select {
+  width: 100%;
+  border-radius: 6px !important;
+  border: 1px solid rgba(60, 130, 220, 0.15) !important;
+  background: #0b1525 !important;
+  color: #dce4f8 !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box !important;
+}
+
+// Custom dimensions grid inside advanced settings
+.video-dimensions-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+}
+
+// Match every Studio's primary generation action.
+#generate-video-button {
+  width: 100% !important;
+  padding: 14px 20px !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.01em;
+  background: var(--studio-control-accent, var(--accent)) !important;
+  color: var(--studio-control-accent-ink, #fff) !important;
+  border: 1px solid color-mix(in srgb, var(--studio-control-accent, var(--accent)) 76%, white 24%) !important;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--studio-control-accent, var(--accent)) 28%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  cursor: pointer;
+  transition: all 160ms ease !important;
+}
+
+#generate-video-button:hover {
+  background: color-mix(in srgb, var(--studio-control-accent, var(--accent)) 84%, white 16%) !important;
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--studio-control-accent, var(--accent)) 36%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+#generate-video-button:active {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--studio-control-accent, var(--accent)) 28%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+// Negative prompt field card
+.video-negative-field-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(60, 130, 220, 0.15);
+  background: rgba(10, 18, 34, 0.4);
+}
+
+.video-negative-field-card > label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8a9ac0;
+  margin: 0 !important;
+}
+
+.video-negative-field-card textarea {
+  width: 100% !important;
+  min-height: 72px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(60, 130, 220, 0.15) !important;
+  background: #0b1525 !important;
+  color: #dce4f8 !important;
+  padding: 10px 12px !important;
+  box-sizing: border-box !important;
+}
+
+// Responsive adjustments for smaller screens
+@media (max-width: 768px) {
+  .video-prompt-field-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .video-motion-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .video-preset-cards {
+    flex-wrap: wrap;
+  }
+
+  .video-dimensions-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

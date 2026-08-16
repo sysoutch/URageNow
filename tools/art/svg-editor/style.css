@@ -1,0 +1,19 @@
+:root { --bg: #120d0d; --panel: rgba(24, 14, 14, 0.92); --panel-strong: rgba(18, 11, 11, 0.98); --accent: #ff8a4d; --text: #f6f1ee; --muted: #c8b6ae; --line: rgba(255, 180, 128, 0.18); }
+body[data-dashboard-theme="water"] { --bg: #0d1522; --panel: rgba(12, 21, 37, 0.94); --panel-strong: rgba(10, 17, 29, 0.98); --accent: #59b6ff; --text: #eef5ff; --muted: #a9bfd8; --line: rgba(114, 190, 255, 0.18); }
+body[data-dashboard-theme="nature"] { --bg: #11170f; --panel: rgba(18, 24, 16, 0.94); --panel-strong: rgba(13, 19, 11, 0.98); --accent: #82cd5f; --text: #f2f8ee; --muted: #bccfaf; --line: rgba(146, 213, 120, 0.18); }
+body[data-dashboard-theme="rock"] { --bg: #151515; --panel: rgba(24, 24, 24, 0.95); --panel-strong: rgba(16, 16, 16, 0.98); --accent: #c4ae8a; --text: #f2efea; --muted: #b7aea2; --line: rgba(196, 190, 176, 0.18); }
+body { margin: 0; font-family: sans-serif; display: flex; height: 100vh; background: radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 38%), linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%), var(--bg); color: var(--text); overflow: hidden; }
+#toolbar { width: 60px; background: var(--panel-strong); border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 10px; z-index: 100; }
+.tool-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.06); border: 1px solid var(--line); color: white; cursor: pointer; border-radius: 8px; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+.tool-btn.active { background: var(--accent); border-color: #fff; }
+#code-side { width: 300px; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+#canvas-side { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.24); overflow: auto; outline: none; }
+#canvas-side.drag-over { background: rgba(255,255,255,0.08); box-shadow: inset 0 0 50px var(--accent); }
+#svg-render { background: white; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 10px 10px; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+#svg-render svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.selected { outline: 2px dashed #ff9800 !important; outline-offset: 2px; }
+.draggable { cursor: move; }
+.handle { width: 10px; height: 10px; background: #ff9800; position: absolute; border: 1px solid white; border-radius: 2px; z-index: 1000; }
+#inspector-side { width: 240px; background: var(--panel); border-left: 1px solid var(--line); padding: 15px; }
+textarea { flex: 1; background: var(--panel-strong); color: color-mix(in srgb, var(--accent) 78%, white 22%); border: none; padding: 10px; font-family: monospace; outline: none; resize: none; font-size: 11px; }
+button.action-btn { width: 100%; padding: 8px; margin-bottom: 5px; cursor: pointer; background: rgba(255,255,255,0.06); color: white; border: 1px solid var(--line); border-radius: 8px; }

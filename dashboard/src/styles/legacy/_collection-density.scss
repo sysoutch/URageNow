@@ -1,0 +1,63 @@
+// Shared collection density control used by Tools, 3D Suites, and Game Engines.
+// It lives outside the legacy tools stylesheet so its behavior can stay focused.
+
+.dashboard-density-control {
+  display: inline-grid;
+  grid-template-columns: auto minmax(72px, 110px) auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-density-control input {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--studio-accent-1, var(--accent));
+}
+
+.dashboard-density-control output {
+  min-width: 34px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+[data-dashboard-layout-panel] {
+  --dashboard-collection-scale: 1;
+}
+
+[data-dashboard-layout-panel][data-dashboard-layout="cards"] :is(.resource-hub-grid, .resource-hub-home-grid, .desktop-tool-card-grid, .game-engine-project-list) {
+  gap: calc(12px * var(--dashboard-collection-scale));
+}
+
+[data-dashboard-layout-panel][data-dashboard-layout="cards"] .resource-hub-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(320px * var(--dashboard-collection-scale))), 1fr));
+}
+
+[data-dashboard-layout-panel][data-dashboard-layout="cards"] .resource-hub-home-grid {
+  grid-template-columns: repeat(auto-fit, minmax(calc(180px * var(--dashboard-collection-scale)), 1fr));
+}
+
+[data-dashboard-layout-panel][data-dashboard-layout="cards"] .desktop-tool-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(calc(260px * var(--dashboard-collection-scale)), 1fr));
+}
+
+[data-dashboard-layout-panel] :is(.tools-catalog-button, .desktop-tool-card, .resource-hub-card, .resource-hub-home-tile, .game-engine-project-card) {
+  padding: calc(12px * var(--dashboard-collection-scale));
+}
+
+[data-dashboard-layout-panel][data-dashboard-layout="cards"] :is(.tools-catalog-button-icon, .desktop-tool-card-icon, .resource-hub-card-icon, .resource-hub-home-tile-icon, .game-engine-project-icon) {
+  transform: scale(var(--dashboard-collection-scale));
+  transform-origin: center;
+}
+
+@media (max-width: 760px) {
+  .dashboard-density-control {
+    grid-template-columns: auto minmax(52px, 1fr) auto;
+    flex: 1 1 150px;
+  }
+}

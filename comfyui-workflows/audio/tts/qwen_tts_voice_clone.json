@@ -1,0 +1,53 @@
+{
+  "21": {
+    "inputs": {
+      "filename_prefix": "audio/ComfyUI",
+      "audioUI": "",
+      "audio": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "SaveAudio",
+    "_meta": {
+      "title": "Save Audio (FLAC)"
+    }
+  },
+  "24": {
+    "inputs": {
+      "audio": "Jan 27, 9.22 PM_.m4a",
+      "audioUI": ""
+    },
+    "class_type": "LoadAudio",
+    "_meta": {
+      "title": "Load Audio"
+    }
+  },
+  "40": {
+    "inputs": {
+      "target_text": "Do you know URage? URage is nice, very nice. Actually URage is the most awesome thing in human history. You don't believe me but it's true. If you hear URage is bad it's fake news, FAKE NEWS! Make URage great again!",
+      "model_choice": "1.7B",
+      "device": "auto",
+      "precision": "bf16",
+      "language": "Auto",
+      "ref_text": "",
+      "seed": 201535168944766,
+      "max_new_tokens": 2048,
+      "top_p": 0.8,
+      "top_k": 20,
+      "temperature": 1,
+      "repetition_penalty": 1.05,
+      "x_vector_only": true,
+      "attention": "sage_attn",
+      "unload_model_after_generate": false,
+      "ref_audio": [
+        "24",
+        0
+      ]
+    },
+    "class_type": "FB_Qwen3TTSVoiceClone",
+    "_meta": {
+      "title": "🎭 Qwen3-TTS VoiceClone"
+    }
+  }
+}

@@ -1,0 +1,126 @@
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 420px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+body[data-dashboard-sidebar-externalized="true"] .app {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body[data-dashboard-sidebar-externalized="true"] .sidebar {
+  display: none;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.04),
+      rgba(255,255,255,.02)
+    ),
+    var(--panel);
+  backdrop-filter: blur(16px);
+  scrollbar-gutter: stable;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.content {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 24px;
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.03),
+      rgba(255,255,255,.015)
+    ),
+    rgba(0,0,0,.08);
+  backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   PANEL OVERRIDES
+========================================================= */
+
+.panel,
+.hero {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.panel {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   GENERIC LAYOUTS
+========================================================= */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.button-row,
+.mini-row,
+.badge-row,
+.lane-tools {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* =========================================================
+   TITLES
+========================================================= */
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.section-title span,
+.footer-note,
+.dim {
+  color: var(--muted);
+  font-size: 13px;
+}

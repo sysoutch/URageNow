@@ -1,0 +1,321 @@
+:root { 
+    --bg-dark: #120d0d; 
+    --panel-bg: rgba(24, 14, 14, 0.92);
+    --panel-strong: rgba(18, 11, 11, 0.98);
+    --accent: #ff8a4d; 
+    --border: rgba(255, 180, 128, 0.18); 
+    --text-main: #f6f1ee;
+    --text-dim: #c8b6ae;
+    --success: #22c55e;
+    --danger: #ef4444;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body[data-dashboard-theme="water"] { --bg-dark: #0d1522; --panel-bg: rgba(12, 21, 37, 0.94); --panel-strong: rgba(10, 17, 29, 0.98); --accent: #59b6ff; --border: rgba(114, 190, 255, 0.18); --text-main: #eef5ff; --text-dim: #a9bfd8; }
+body[data-dashboard-theme="nature"] { --bg-dark: #11170f; --panel-bg: rgba(18, 24, 16, 0.94); --panel-strong: rgba(13, 19, 11, 0.98); --accent: #82cd5f; --border: rgba(146, 213, 120, 0.18); --text-main: #f2f8ee; --text-dim: #bccfaf; }
+body[data-dashboard-theme="rock"] { --bg-dark: #151515; --panel-bg: rgba(24, 24, 24, 0.95); --panel-strong: rgba(16, 16, 16, 0.98); --accent: #c4ae8a; --border: rgba(196, 190, 176, 0.18); --text-main: #f2efea; --text-dim: #b7aea2; }
+
+body, html { 
+    height: 100%; 
+    margin: 0; 
+    overflow: hidden; 
+    background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 38%),
+        linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+        var(--bg-dark); 
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; 
+    color: var(--text-main); 
+}
+
+/* --- 2. MAIN LAYOUT GRID --- */
+.app-container {
+    display: grid;
+    grid-template-areas: 
+        "header header header" 
+        "sidebar-left canvas sidebar-right";
+    grid-template-columns: 260px 1fr 280px;
+    grid-template-rows: 60px 1fr;
+    height: 100vh;
+    transition: grid-template-columns 0.3s ease; /* For smooth Preview transition */
+}
+
+/* --- 3. HEADER & LOGO --- */
+.app-header {
+    grid-area: header; 
+    background: var(--panel-bg); 
+    border-bottom: 1px solid var(--border);
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0 20px; 
+    z-index: 100;
+}
+
+.logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+.logo span { color: var(--accent); }
+
+#device-switcher { 
+    position: inherit;
+    background: rgba(0,0,0,0.3); 
+    padding: 4px; 
+    border-radius: 10px; 
+    display: flex; 
+    gap: 2px; 
+}
+
+/* --- 4. SIDEBAR PANELS --- */
+.sidebar-left { 
+    grid-area: sidebar-left; 
+    border-right: 1px solid var(--border); 
+    background: var(--panel-bg); 
+    overflow-y: auto; 
+}
+
+.sidebar-right { 
+    grid-area: sidebar-right; 
+    border-left: 1px solid var(--border); 
+    background: var(--panel-bg); 
+    overflow-y: auto; 
+}
+
+.panel-label { 
+    padding: 15px 16px 8px; 
+    font-size: 10px; 
+    font-weight: 800; 
+    color: var(--text-dim); 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    border-bottom: 1px solid var(--border); 
+    margin-bottom: 10px; 
+}
+
+/* --- 5. GRAPESJS UI OVERRIDES --- */
+.gjs-one-bg { background-color: transparent !important; }
+.gjs-two-color { color: var(--text-dim) !important; }
+.gjs-three-bg { background-color: var(--accent) !important; }
+.gjs-four-color, .gjs-four-color-h:hover { color: var(--accent) !important; }
+.gjs-cv-canvas { grid-area: canvas; background: color-mix(in srgb, var(--bg-dark) 88%, black 12%); }
+
+/* --- 6. BUTTON STYLES --- */
+.btn-group { display: flex; gap: 8px; }
+.btn { 
+    padding: 8px 14px; 
+    border-radius: 8px; 
+    font-size: 13px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    border: 1px solid var(--border); 
+    color: white; 
+    transition: 0.2s; 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+}
+.btn-blue { background: var(--accent); border: none; }
+.btn-green { background: var(--success); border: none; }
+.btn-secondary { background: rgba(255,255,255,0.05); }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+/* --- 7. MODALS & FORMS --- */
+.modal-body { padding: 20px; color: #fff; }
+.modal-body label { 
+    display: block; 
+    margin-top: 15px; 
+    font-size: 11px; 
+    font-weight: bold; 
+    color: var(--text-dim); 
+    text-transform: uppercase; 
+}
+.modal-body input, .modal-body textarea, .modal-body select { 
+    width: 100%; 
+    margin-top: 8px; 
+    padding: 12px; 
+    background: var(--panel-strong); 
+    border: 1px solid var(--border); 
+    color: #fff; 
+    border-radius: 6px; 
+    outline: none; 
+}
+.modal-body input:focus { border-color: var(--accent); }
+
+/* --- 8. TEMPLATE LIBRARY UI --- */
+.tpl-container { display: flex; flex-direction: column; height: 65vh; max-height: 600px; }
+.tpl-tabs { 
+    display: flex; 
+    gap: 20px; 
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 15px; 
+    margin-bottom: 20px; 
+}
+.tpl-tab { 
+    cursor: pointer; 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: var(--text-dim); 
+    transition: 0.2s; 
+    position: relative;
+}
+.tpl-tab.active { color: var(--accent); }
+.tpl-tab.active::after {
+    content: ''; position: absolute; bottom: -16px; left: 0; 
+    width: 100%; height: 2px; background: var(--accent);
+}
+
+.tpl-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+    gap: 20px; 
+    overflow-y: auto; 
+    padding: 10px 5px;
+}
+.tpl-card { 
+    background: var(--panel-bg); 
+    border: 1px solid var(--border); 
+    border-radius: 12px; 
+    overflow: hidden; 
+    position: relative;
+    transition: all 0.3s ease;
+}
+.tpl-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+.tpl-preview-area { 
+    height: 160px; 
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+.tpl-preview-area i { font-size: 40px; color: rgba(255,255,255,0.05); }
+
+.tpl-actions {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; opacity: 0; transition: 0.3s; backdrop-filter: blur(4px);
+}
+.tpl-card:hover .tpl-actions { opacity: 1; }
+
+.btn-tpl-apply { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 80%; }
+.btn-tpl-preview { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 6px; cursor: pointer; width: 80%; font-size: 11px; }
+
+.tpl-info { padding: 15px; border-top: 1px solid var(--border); }
+.tpl-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: white; }
+.tpl-tag { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+/* --- 9. PREVIEW OVERLAY --- */
+#tpl-full-preview {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95); z-index: 10000;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+}
+.preview-window {
+    width: 90%; height: 80%; background: white; border-radius: 12px; overflow: hidden;
+    position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+.preview-header { width: 90%; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; color: white; }
+
+#back-to-editor { 
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+    z-index: 9999; display: none; background: var(--accent); color: white; 
+    padding: 12px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+}
+
+@media (max-width: 720px) {
+    body[data-dashboard-theme],
+    html[data-dashboard-theme] {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    body[data-dashboard-theme] .app-container {
+        grid-template-areas:
+            "header"
+            "sidebar-left"
+            "canvas"
+            "sidebar-right";
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(420px, 1fr) auto;
+        min-width: 0;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    body[data-dashboard-theme] .app-header {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        min-height: 60px;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    body[data-dashboard-theme] .btn-group {
+        width: 100%;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+        gap: 8px;
+    }
+
+    body[data-dashboard-theme] .btn-group .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    body[data-dashboard-theme] .sidebar-left,
+    body[data-dashboard-theme] .sidebar-right {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        border-inline: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    body[data-dashboard-theme] .gjs-cv-canvas {
+        min-height: 420px;
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* --- 10. IMPORT HTML DIV --- */
+.import-html-div {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    width: 400px;
+    z-index: 1000;
+    display: none;
+}
+.import-html-div .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.import-html-div .panel-body {
+    padding: 10px 0;
+}
+.import-html-div .import-html-content {
+    text-align: center;
+}
+.import-html-div .import-html-content p {
+    margin: 10px 0;
+}
+.import-html-div .import-html-content input {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    background: #0f172a;
+    border: 1px solid var(--border);
+    color: #fff;
+    border-radius: 6px;
+}

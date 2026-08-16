@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Split and Combine Tool</title>
+  <link rel="stylesheet" href="/tools/shared/css/upload-btn.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+  <div class="tool-shell">
+    <aside class="tool-sidebar" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Split + Combine Controls">
+      <div class="tool-header">
+        <div>
+          <div class="tool-kicker">Art</div>
+          <h1>Image Split + Combine</h1>
+          <p>Split sprite sheets cleanly or rebuild atlases from multiple source images.</p>
+        </div>
+      </div>
+      <div class="tool-tabs" role="tablist" aria-label="Split or combine mode">
+        <button class="tool-tab active" id="tab-split" data-mode-tab="split" type="button" aria-selected="true">Split</button>
+        <button class="tool-tab" id="tab-combine" data-mode-tab="combine" type="button" aria-selected="false">Combine</button>
+      </div>
+      <section class="sidebar-section" data-mode-panel="split">
+        <label class="section-label" for="texture-upload">Source image</label>
+        <label class="upload-card" id="split-upload-card" for="texture-upload">
+          <input type="file" id="texture-upload" accept="image/*" hidden>
+          <span class="upload-card-icon">+</span>
+          <strong>Upload sheet or pasted image</strong>
+          <span>PNG, JPG, WebP</span>
+        </label>
+        <div class="hint-text">Paste also works while this tab is active.</div>
+        <div class="field-stack">
+          <label class="section-label" for="split-x">Grid</label>
+          <div class="grid-two">
+            <div class="field">
+              <span>Columns</span>
+              <input type="number" id="split-x" min="1" max="64" value="4">
+            </div>
+            <div class="field">
+              <span>Rows</span>
+              <input type="number" id="split-y" min="1" max="64" value="4">
+            </div>
+          </div>
+        </div>
+        <div class="field-stack">
+          <label class="section-label">Offsets and padding</label>
+          <div class="grid-two">
+            <div class="field">
+              <span>Offset X</span>
+              <input type="number" id="split-offset-x" min="0" max="5000" value="0">
+            </div>
+            <div class="field">
+              <span>Offset Y</span>
+              <input type="number" id="split-offset-y" min="0" max="5000" value="0">
+            </div>
+            <div class="field">
+              <span>Padding</span>
+              <input type="number" id="split-padding" min="0" max="128" value="0">
+            </div>
+            <label class="check-field">
+              <input type="checkbox" id="padding-edge-only">
+              <span>Padding only at edges</span>
+            </label>
+          </div>
+        </div>
+        <div class="field-stack">
+          <label class="section-label" for="split-output">Export</label>
+          <select id="split-output">
+            <option value="png">PNG</option>
+            <option value="jpeg">JPEG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <div class="button-stack">
+          <button class="primary-button" id="split-btn" type="button">Split Image</button>
+          <button class="secondary-button" id="download-splits-btn" type="button">Download Split Images</button>
+          <button class="secondary-button" id="preview-split-gif-btn" type="button">Preview Split GIF</button>
+          <button class="secondary-button" id="download-split-gif-btn" type="button">Download Split GIF</button>
+          <button class="secondary-button" id="download-split-frames-btn" type="button">Export Split Frames</button>
+        </div>
+        <div class="field-stack">
+          <label class="section-label" for="split-frame-delay">Animation delay</label>
+          <div class="field">
+            <span>Frame delay (ms)</span>
+            <input type="number" id="split-frame-delay" min="20" max="2000" step="10" value="140">
+          </div>
+        </div>
+      </section>
+      <section class="sidebar-section hidden" data-mode-panel="combine">
+        <label class="section-label" for="combine-upload">Source images</label>
+        <label class="upload-card" id="combine-upload-card" for="combine-upload">
+          <input type="file" id="combine-upload" accept="image/*" multiple hidden>
+          <span class="upload-card-icon">+</span>
+          <strong>Add images to combine</strong>
+          <span>Use multiple files or paste image files</span>
+        </label>
+        <div class="hint-text">Images are filled row by row into the combined atlas.</div>
+        <div class="field-stack">
+          <label class="section-label">Layout</label>
+          <div class="grid-two">
+            <div class="field">
+              <span>Columns</span>
+              <input type="number" id="combine-cols" min="1" max="64" value="3">
+            </div>
+            <div class="field">
+              <span>Rows</span>
+              <input type="number" id="combine-rows" min="1" max="64" value="3">
+            </div>
+            <div class="field">
+              <span>Padding</span>
+              <input type="number" id="combine-padding" min="0" max="128" value="0">
+            </div>
+            <div class="field">
+              <span>Cell size</span>
+              <select id="combine-cell-mode">
+                <option value="largest">Use largest source image</option>
+                <option value="first">Use first source image</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="field-stack">
+          <label class="section-label" for="combine-output">Export</label>
+          <select id="combine-output">
+            <option value="png">PNG</option>
+            <option value="jpeg">JPEG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <div class="button-stack">
+          <button class="primary-button" id="combine-btn" type="button">Combine Images</button>
+          <button class="secondary-button" id="download-combined-btn" type="button">Download Combined Image</button>
+          <button class="secondary-button" id="preview-combine-gif-btn" type="button">Preview Queue GIF</button>
+          <button class="secondary-button" id="download-combine-gif-btn" type="button">Download Queue GIF</button>
+          <button class="secondary-button" id="download-combine-frames-btn" type="button">Export Queue Frames</button>
+          <button class="ghost-button" id="clear-combine-btn" type="button">Clear Image Queue</button>
+        </div>
+        <div class="field-stack">
+          <label class="section-label" for="combine-frame-delay">Animation delay</label>
+          <div class="field">
+            <span>Frame delay (ms)</span>
+            <input type="number" id="combine-frame-delay" min="20" max="2000" step="10" value="140">
+          </div>
+        </div>
+        <div class="queue-block">
+          <div class="section-label">Queued images</div>
+          <div class="combine-queue" id="combine-queue-empty">No images queued yet.</div>
+          <div class="combine-queue-list hidden" id="combine-queue-list"></div>
+        </div>
+      </section>
+    </aside>
+    <main class="tool-main">
+      <section class="workspace-card" data-mode-panel="split">
+        <div class="workspace-head">
+          <div>
+            <div class="tool-kicker">Preview</div>
+            <h2>Split Workflow</h2>
+          </div>
+          <div class="hint-text" id="split-status">Waiting for source image.</div>
+        </div>
+        <div class="preview-grid preview-grid-split">
+          <div class="preview-panel">
+            <div class="preview-label">Source image</div>
+            <canvas id="texture-preview" width="300" height="300"></canvas>
+          </div>
+          <div class="preview-panel">
+            <div class="preview-label">Original canvas</div>
+            <canvas id="original-canvas" width="300" height="300"></canvas>
+          </div>
+          <div class="preview-panel preview-panel-wide preview-panel-fit">
+            <div class="preview-label">Split preview</div>
+            <canvas id="split-canvas" class="canvas-fit" width="300" height="300"></canvas>
+          </div>
+        </div>
+        <div class="preview-panel preview-panel-wide gif-preview-panel hidden" id="split-gif-preview-panel">
+          <div class="preview-label">GIF preview</div>
+          <img id="split-gif-preview" class="gif-preview-image" alt="Split GIF preview">
+        </div>
+      </section>
+      <section class="workspace-card hidden" data-mode-panel="combine">
+        <div class="workspace-head">
+          <div>
+            <div class="tool-kicker">Preview</div>
+            <h2>Combine Workflow</h2>
+          </div>
+          <div class="hint-text" id="combine-status">Add source images to build an atlas.</div>
+        </div>
+        <div class="preview-grid preview-grid-combine">
+          <div class="preview-panel">
+            <div class="preview-label">Queued image strip</div>
+            <canvas id="input-canvas" width="300" height="300"></canvas>
+          </div>
+          <div class="preview-panel preview-panel-wide">
+            <div class="preview-label">Combined result</div>
+            <canvas id="combined-canvas" width="300" height="300"></canvas>
+          </div>
+        </div>
+        <div class="preview-panel preview-panel-wide gif-preview-panel hidden" id="combine-gif-preview-panel">
+          <div class="preview-label">GIF preview</div>
+          <img id="combine-gif-preview" class="gif-preview-image" alt="Combine GIF preview">
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/tools/shared/dashboard-theme.js"></script>
+  <script src="/tools/art/spritesheet-utility/vendor/gif.js"></script>
+  <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

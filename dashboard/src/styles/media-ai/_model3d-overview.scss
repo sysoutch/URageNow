@@ -1,0 +1,55 @@
+.model3d-card {
+  gap: 12px;
+}
+
+.model3d-card-header {
+  align-items: center;
+}
+
+.model3d-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.model3d-beta-pill {
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 68%, transparent) 0%, color-mix(in srgb, var(--panel-alt) 82%, black 18%) 100%);
+  color: color-mix(in srgb, var(--ink) 92%, white 8%);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.model3d-top-card-label {
+  margin-bottom: -2px;
+}
+
+.model3d-source-input-stack {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-width: 0;
+}
+
+.model3d-generate-overview {
+  align-items: stretch;
+}
+
+.model3d-inline-folds {
+  display: grid;
+  gap: 10px;
+}
+
+.model3d-preview-summary,
+.model3d-preview-summary-controls {
+  display: none;
+}

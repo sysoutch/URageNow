@@ -1,0 +1,5 @@
+// Runtime state must win after every layout and theme override.
+.hidden,
+[hidden] {
+  display: none !important;
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Seamless Texture Maker - Create Professional Textures | URage</title>
+    <meta name="description" content="Generate perfectly tiling seamless textures for your 3D models and web designs instantly using our professional online engine.">
+    <link rel="canonical" href="https://tools.urage.net/art/seamless-texture-maker">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tools.urage.net/art/seamless-texture-maker">
+    <meta property="og:title" content="Seamless Texture Maker - Create Professional Textures">
+    <meta property="og:description" content="Generate perfectly tiling seamless textures for your 3D models and web designs instantly.">
+    <meta property="og:image" content="https://tools.urage.net/art/seamless-texture-maker/thumbnail.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Seamless Texture Maker">
+    <meta name="twitter:description" content="Generate perfectly tiling seamless textures instantly.">
+    <meta name="twitter:image" content="https://tools.urage.net/art/seamless-texture-maker/thumbnail.png">
+    <script src="../../shared/dashboard-tool-bridge.js"></script>
+
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="/tools/shared/css/sidebar-scrollview.css">
+    <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+    <aside class="sidebar" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Texture Controls">
+        <h2 style="margin:0; color:var(--p); font-size: 18px;">SEAMLESS PRO v8</h2>
+        
+        <div class="control-group">
+            <label>1. Source Texture</label>
+            <div id="seamless-upload-wrapper">
+                <label class="upload-card" for="img-upload">
+                    <span class="upload-card-icon arrow-icon">&#8595;</span>
+                    <strong>Choose a texture</strong>
+                    <span>or drag it here.</span>
+                    <input type="file" id="img-upload" accept="image/*" hidden>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>2. Edge Mask Type</label>
+            <select id="mask-type">
+                <option value="linear">Linear (Soft/Blurry)</option>
+                <option value="noise">Noise (Organic/Grainy)</option>
+                <option value="mirror">Pure Mirror (Kaleidoscope)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <div class="row"><label>3. Suture Depth</label><span class="val" id="soft-val">100px</span></div>
+            <input type="range" id="softness" min="0" max="400" value="100">
+        </div>
+
+        <div class="control-group">
+            <div class="row"><label>4. Color Jitter</label><span class="val" id="jit-val">0%</span></div>
+            <input type="range" id="jitter" min="0" max="100" value="0">
+        </div>
+
+        <div class="control-group">
+            <div class="row"><label>5. 3D Tiling Scale</label><span class="val" id="tile-val">2x2</span></div>
+            <input type="range" id="tile-scale" min="1" max="10" value="2">
+        </div>
+
+        <div class="control-group">
+            <label>6. Viewport Shape</label>
+            <div class="shape-btns">
+                <button class="shape-btn" onclick="setShape('sphere')">Sphere</button>
+                <button class="shape-btn" onclick="setShape('box')">Box</button>
+                <button class="shape-btn active" onclick="setShape('plane')">Plane</button>
+            </div>
+        </div>
+
+        <button class="btn-exp" onclick="download()">DOWNLOAD SEAMLESS MAP</button>
+    </aside>
+
+    <main class="viewport">
+        <div class="canvas-container">
+            <div class="panel-label">2D MAP EDITOR</div>
+            <canvas id="main-canvas"></canvas>
+        </div>
+        <div class="canvas-container" id="three-container">
+            <div class="panel-label">3D PREVIEW (REAL-TIME)</div>
+        </div>
+    </main>
+
+<script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

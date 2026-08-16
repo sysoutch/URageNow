@@ -1,0 +1,109 @@
+// Studio rail state mixins — consolidates duplicated view-* active selectors
+// Usage: @include studio-rail-view-states; or @include studio-rail-expanded-states;
+
+/// Consolidated selector for all non-collapsed view states
+@mixin studio-rail-view-states {
+  body.view-ai-active,
+  body.view-tools-active,
+  body.view-profile-active,
+  body:not(.view-ai-active):not(.view-tools-active):not(.view-profile-active) {
+    @content;
+  }
+}
+
+/// Consolidated selector for expanded rail states
+@mixin studio-rail-expanded-states {
+  body.view-ai-active.studio-rail-expanded,
+  body.view-tools-active.studio-rail-expanded,
+  body.view-profile-active.studio-rail-expanded {
+    @content;
+  }
+}
+
+/// Rail button base styles for all view states (non-gradient home)
+@mixin studio-rail-view-buttons {
+  .rail-home,
+  .rail-tools-button,
+  .rail-profile-button {
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,0.16) 0%, transparent 42%),
+      linear-gradient(180deg, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 36%, transparent) 0%, color-mix(in srgb, var(--studio-accent-3, var(--accent-3)) 18%, transparent) 100%),
+      color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 82%, black 18%);
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--studio-accent-3, var(--accent-3)) 18%, transparent);
+  }
+}
+
+/// Rail button compact sizes for all view states
+@mixin studio-rail-view-buttons-compact {
+  .rail-home,
+  .rail-tools-button,
+  .rail-profile-button {
+    width: 50px;
+    min-height: 50px;
+    padding: 7px 5px;
+    border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 84%, transparent);
+    border-radius: 14px;
+  }
+
+  .rail-home-mark,
+  .rail-tools-mark,
+  .rail-profile-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+  }
+}
+
+/// Rail label hiding for all view states
+@mixin studio-rail-hide-labels {
+  .rail-home-label,
+  .rail-tools-label,
+  .rail-profile-label {
+    display: none;
+  }
+}
+
+/// Rail home-wrap collapsed state
+@mixin studio-rail-home-wrap-collapsed {
+  .rail-home-wrap {
+    min-height: 0;
+    align-content: start;
+    overflow: hidden;
+  }
+}
+
+/// Settings button styles for all view states
+@mixin studio-rail-settings-button {
+  border-color: color-mix(in srgb, var(--studio-panel-border, var(--line)) 82%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 100%),
+    color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 88%, black 12%);
+  color: color-mix(in srgb, var(--ink) 84%, var(--studio-accent-1, var(--accent)) 16%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 58%, white 12%);
+    background:
+      radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 48%, transparent) 0%, transparent 52%),
+      linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.015) 100%),
+      color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 88%, black 12%);
+  }
+}
+
+/// Rail bottom grid row assignment
+@mixin studio-rail-bottom-row {
+  grid-row: 4;
+  padding-top: 8px;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  justify-items: center;
+  align-content: end;
+  overflow: visible;
+}
+
+/// Rail theme switcher grid row assignment
+@mixin studio-rail-theme-switcher-row {
+  grid-row: 3;
+  width: 100%;
+  justify-items: center;
+}

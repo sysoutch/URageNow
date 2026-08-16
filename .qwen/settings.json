@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Agent(Explore)",
+      "Bash(npm run *)",
+      "Bash(findstr *)",
+      "Bash(node *)",
+      "Bash(scripts\\run-dashboard.cmd *)",
+      "Bash(taskkill *)",
+      "Bash(timeout *)",
+      "Bash(tsconfig.json)"
+    ]
+  },
+  "$version": 4
+}

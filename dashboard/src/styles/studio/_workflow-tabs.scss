@@ -1,0 +1,35 @@
+body.view-ai-active .workspace-tabs-new.studio-primary-tabs {
+  display: inline-flex !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  gap: 0 !important;
+  padding: 4px !important;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 72%, transparent) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 82%, black 18%) !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active .workspace-tabs-new.studio-primary-tabs > .dashboard-tab {
+  min-width: 96px !important;
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  border: 0 !important;
+  border-right: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 72%, transparent) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 88%, black 12%) !important;
+  box-shadow: none !important;
+}
+
+body.view-ai-active .workspace-tabs-new.studio-primary-tabs > .dashboard-tab:last-child {
+  border-right: 0 !important;
+}
+
+body.view-ai-active .workspace-tabs-new.studio-primary-tabs > .dashboard-tab.active {
+  background: color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 48%, var(--studio-panel-bg, var(--panel)) 52%) !important;
+}
+.studio-workflow-tabs {
+  margin-bottom: 14px;
+}

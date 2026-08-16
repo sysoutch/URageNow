@@ -1,0 +1,3298 @@
+@mixin studio-control-shell {
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 92%, transparent) !important;
+  background: color-mix(in srgb, var(--studio-control-bg) 88%, black 12%) !important;
+  color: color-mix(in srgb, var(--ink) 88%, var(--muted) 12%) !important;
+  box-shadow: none !important;
+}
+
+@mixin studio-control-active {
+  border-color: color-mix(in srgb, var(--studio-control-accent) 58%, white 8%) !important;
+  background: color-mix(in srgb, var(--studio-control-accent) 22%, var(--studio-control-bg) 78%) !important;
+  color: var(--button-primary-fg, var(--ink)) !important;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--studio-control-accent) 82%, white 8%) !important;
+}
+
+@mixin studio-tab-list {
+  display: inline-flex !important;
+  align-items: stretch !important;
+  gap: var(--studio-tab-gap) !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  padding: var(--studio-tab-padding) !important;
+  border-radius: var(--studio-tab-radius) !important;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 84%, transparent) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%),
+    color-mix(in srgb, var(--studio-control-bg) 88%, black 12%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  overflow: auto hidden !important;
+  scrollbar-width: none;
+}
+
+body.view-ai-active {
+  --studio-control-bg: color-mix(in srgb, var(--studio-panel-bg, var(--panel)) 86%, black 14%);
+  --studio-control-bg-soft: color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 82%, black 18%);
+  --studio-control-border: color-mix(in srgb, var(--studio-panel-border, var(--line)) 82%, transparent);
+  --studio-control-accent: var(--studio-accent-1, var(--accent));
+  --studio-control-accent-strong: var(--studio-accent-2, var(--accent-2));
+  --studio-control-radius: var(--dashboard-buttons-radius, var(--dashboard-control-radius, 0px));
+  --studio-foldout-radius: var(--dashboard-cards-radius, var(--dashboard-card-radius, 0px));
+  --studio-foldout-summary-height: 38px;
+  --studio-tab-radius: var(--dashboard-tabs-radius, var(--dashboard-card-radius, 0px));
+  --studio-tab-button-radius: var(--dashboard-tabs-radius, var(--dashboard-control-radius, 0px));
+  --studio-tab-gap: 4px;
+  --studio-tab-padding: max(4px, var(--dashboard-tabs-padding, 0px));
+}
+
+body.view-ai-active :is(#ask-rod-card, [data-sidebar-split-shell="chat"]) {
+  --studio-control-accent: var(--rail-icon-chat);
+  --studio-control-accent-strong: color-mix(in srgb, var(--rail-icon-chat) 84%, white 8%);
+}
+
+body.view-ai-active :is(#image-studio-card, #image-sidebar-panel, [data-sidebar-split-shell="image"]) {
+  --studio-control-accent: var(--rail-icon-image);
+  --studio-control-accent-strong: color-mix(in srgb, var(--rail-icon-image) 84%, white 8%);
+}
+
+body.view-ai-active :is(#model3d-studio-card, #model3d-sidebar-panel, [data-sidebar-split-shell="model3d"]) {
+  --studio-control-accent: var(--rail-icon-model3d);
+  --studio-control-accent-strong: color-mix(in srgb, var(--rail-icon-model3d) 84%, white 8%);
+}
+
+body.view-ai-active :is(#audio-studio-card, #audio-sidebar-panel, [data-sidebar-split-shell="audio"]) {
+  --studio-control-accent: var(--rail-icon-audio);
+  --studio-control-accent-strong: color-mix(in srgb, var(--rail-icon-audio) 84%, white 8%);
+}
+
+body.view-ai-active :is(#music-studio-card, #music-sidebar-panel, [data-sidebar-split-shell="music"]) {
+  --studio-control-accent: var(--rail-icon-music);
+  --studio-control-accent-strong: color-mix(in srgb, var(--rail-icon-music) 84%, white 8%);
+}
+
+body.view-ai-active :is(#video-studio-card, #video-sidebar-panel, [data-sidebar-split-shell="video"]) {
+  --studio-control-accent: var(--rail-icon-video);
+  --studio-control-accent-strong: color-mix(in srgb, var(--rail-icon-video) 84%, white 8%);
+}
+
+body.view-ai-active :is(.studio-tabs,
+  .studio-tab-list,
+  .studio-workflow-tabs,
+  .studio-subtabs,
+  .studio-inspector-tabs) {
+  @include studio-tab-list;
+}
+
+body.view-ai-active :is(.studio-tabs,
+  .studio-tab-list,
+  .studio-workflow-tabs,
+  .studio-subtabs,
+  .studio-inspector-tabs)::-webkit-scrollbar {
+  display: none;
+}
+
+body.view-ai-active :is(.studio-tabs,
+  .studio-tab-list,
+  .studio-workflow-tabs,
+  .studio-subtabs,
+  .studio-inspector-tabs) :is(button, .ghost) {
+  min-height: 32px !important;
+  min-width: 92px !important;
+  padding: 0 max(12px, var(--dashboard-tabs-padding, 0px)) !important;
+  border-radius: var(--studio-tab-button-radius) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: color-mix(in srgb, var(--muted) 78%, white 22%) !important;
+  box-shadow: none !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+}
+
+body.view-ai-active :is(.studio-tabs,
+  .studio-tab-list,
+  .studio-workflow-tabs,
+  .studio-subtabs,
+  .studio-inspector-tabs) :is(button, .ghost):is(:hover, .active, .is-active, [aria-selected="true"]) {
+  @include studio-control-active;
+}
+
+body.view-ai-active :is(#ask-rod-card,
+  #model3d-studio-card,
+  #image-studio-card,
+  #audio-studio-card,
+  #music-studio-card,
+  #video-studio-card,
+  .workflow-settings-overlay,
+  .game-engine-send-overlay) :is(button.secondary, a.secondary, .ghost, .mini-button, .workflow-sidebar-toggle-button, .studio-prompt-preset-button, .studio-tool-picker-select) {
+  min-height: 36px;
+  border-radius: var(--dashboard-buttons-radius, var(--studio-control-radius)) !important;
+  padding: max(0px, var(--dashboard-buttons-padding, 0px)) max(13px, var(--dashboard-buttons-padding, 0px));
+  margin: var(--dashboard-buttons-margin, 0px);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  @include studio-control-shell;
+}
+
+body.view-ai-active :is(#ask-rod-card,
+  #model3d-studio-card,
+  #image-studio-card,
+  #audio-studio-card,
+  #music-studio-card,
+  #video-studio-card,
+  .workflow-settings-overlay,
+  .game-engine-send-overlay) :is(button.secondary, a.secondary, .ghost, .mini-button, .workflow-sidebar-toggle-button, .studio-prompt-preset-button, .studio-tool-picker-select):is(:hover, .active, .is-active, [aria-pressed="true"]) {
+  @include studio-control-active;
+}
+
+body.view-ai-active :is(.studio-segmented-control,
+  .studio-chip-grid,
+  .studio-choice-grid,
+  .studio-field-preset-strip) {
+  display: grid !important;
+  gap: 6px !important;
+  padding: max(4px, var(--dashboard-selections-padding, 0px)) !important;
+  margin: var(--dashboard-selections-margin, 0px) !important;
+  border-radius: var(--dashboard-selections-radius, var(--studio-control-radius)) !important;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 86%, transparent) !important;
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 88%, black 12%) !important;
+}
+
+body.view-ai-active :is(.studio-segmented-control,
+  .studio-chip-grid,
+  .studio-choice-grid,
+  .studio-field-preset-strip) :is(button, .mini-button) {
+  min-height: 32px !important;
+  min-width: 0 !important;
+  border-radius: var(--dashboard-selections-radius, var(--studio-control-radius)) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  @include studio-control-shell;
+}
+
+body.view-ai-active :is(.studio-segmented-control,
+  .studio-chip-grid,
+  .studio-choice-grid,
+  .studio-field-preset-strip) :is(button, .mini-button):is(:hover, .active, .is-active, [aria-pressed="true"]) {
+  @include studio-control-active;
+}
+
+body.view-ai-active :is(#ask-rod-card,
+  #model3d-studio-card,
+  #image-studio-card,
+  #audio-studio-card,
+  #music-studio-card,
+  #video-studio-card) :is(input, textarea, select):not(#ask-prompt) {
+  border-radius: var(--dashboard-selections-radius, var(--studio-control-radius)) !important;
+  margin: var(--dashboard-selections-margin, 0px) !important;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 92%, transparent) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
+    color-mix(in srgb, var(--studio-control-bg-soft) 84%, black 16%) !important;
+  color: var(--ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+body.view-ai-active :is(#ask-rod-card,
+  #model3d-studio-card,
+  #image-studio-card,
+  #audio-studio-card,
+  #music-studio-card,
+  #video-studio-card) select {
+  min-height: 38px;
+  padding-right: 34px !important;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, color-mix(in srgb, var(--muted) 88%, white 12%) 50%),
+    linear-gradient(135deg, color-mix(in srgb, var(--muted) 88%, white 12%) 50%, transparent 50%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)) !important;
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%,
+    0 0 !important;
+  background-repeat: no-repeat !important;
+  background-size:
+    6px 6px,
+    6px 6px,
+    100% 100% !important;
+}
+
+body.view-ai-active :is(#ask-rod-card,
+  #model3d-studio-card,
+  #image-studio-card,
+  #audio-studio-card,
+  #music-studio-card,
+  #video-studio-card) :is(input, textarea, select):not(#ask-prompt):focus {
+  border-color: color-mix(in srgb, var(--studio-control-accent) 68%, white 8%) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--studio-control-accent) 18%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+body.view-ai-active :is(.studio-toggle-card,
+  .studio-selection-card,
+  .toggle,
+  .compact-toggle,
+  .model3d-viewer-toggle,
+  .model3d-autorig-symmetry-toggle,
+  .variant-route-chip,
+  .command-toggle-item,
+  .image-edit-source-selection-item,
+  .image-variant-select,
+  .model3d-variant-select,
+  .studio-tool-picker-card) {
+  border-radius: var(--dashboard-checkboxes-radius, var(--studio-control-radius)) !important;
+  margin: var(--dashboard-checkboxes-margin, 0px) !important;
+  @include studio-control-shell;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle) {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  justify-self: stretch !important;
+  gap: 10px !important;
+  padding: max(8px, var(--dashboard-checkboxes-padding, 0px)) max(10px, var(--dashboard-checkboxes-padding, 0px)) !important;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle)>span {
+  min-width: 0 !important;
+  line-height: 1.22 !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle):has(> input[type="checkbox"])::before {
+  content: "" !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+  justify-self: end !important;
+  width: 38px !important;
+  height: 22px !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 88%, transparent) !important;
+  background: linear-gradient(180deg, rgba(31, 39, 54, 0.92) 0%, rgba(12, 18, 29, 0.96) 100%) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.32), 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  pointer-events: none !important;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease !important;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle):has(> input[type="checkbox"])::after {
+  content: "" !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+  justify-self: end !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin-right: 20px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #bfc9de 100%) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.34) !important;
+  pointer-events: none !important;
+  transition: transform 160ms ease, background 160ms ease !important;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle)>input[type="checkbox"] {
+  appearance: none !important;
+  position: relative !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  flex: 0 0 auto !important;
+  width: 38px !important;
+  height: 22px !important;
+  min-width: 38px !important;
+  min-height: 22px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 88%, transparent) !important;
+  background: linear-gradient(180deg, rgba(31, 39, 54, 0.92) 0%, rgba(12, 18, 29, 0.96) 100%) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.32), 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  cursor: pointer !important;
+  justify-self: end !important;
+  opacity: 0 !important;
+  z-index: 2 !important;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease !important;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle):has(> input[type="checkbox"]:checked)::before {
+  border-color: color-mix(in srgb, var(--studio-control-accent) 68%, white 10%) !important;
+  background: linear-gradient(180deg, var(--studio-button-start, rgba(255, 151, 85, 0.72)) 0%, var(--studio-button-end, rgba(255, 90, 48, 0.58)) 100%) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--studio-control-accent) 18%, transparent), 0 8px 18px color-mix(in srgb, var(--theme-preview-end, #ff5a30) 18%, transparent) !important;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle):has(> input[type="checkbox"]:checked)::after {
+  transform: translateX(16px);
+  background: linear-gradient(180deg, #fff7ec 0%, #ffe0bd 100%) !important;
+}
+
+body.view-ai-active :is(.toggle, .compact-toggle):has(> input[type="checkbox"]:focus-visible)::before {
+  outline: 2px solid color-mix(in srgb, var(--studio-control-accent) 76%, white 10%) !important;
+  outline-offset: 2px !important;
+}
+
+body.view-ai-active .compact-row> :is(.toggle, .compact-toggle) {
+  grid-column: 1 / -1 !important;
+}
+
+body.view-ai-active :is(.toggle,
+  .compact-toggle,
+  .model3d-viewer-toggle,
+  .model3d-autorig-symmetry-toggle,
+  .variant-route-chip,
+  .command-toggle-item,
+  .image-edit-source-selection-item,
+  .image-variant-select,
+  .model3d-variant-select,
+  .studio-tool-picker-card):is(:hover, .active, .selected, .is-active, [aria-pressed="true"]) {
+  @include studio-control-active;
+}
+
+body.view-ai-active :is(.studio-toggle-grid,
+  .studio-selection-grid,
+  .chat-toggle-grid,
+  .image-quick-action-toggles,
+  .model3d-gif-export-toggles,
+  .video-ai-prompt-toggle) {
+  display: grid;
+  gap: 8px;
+}
+
+body.view-ai-active :is(.studio-toggle-grid,
+  .studio-selection-grid,
+  .chat-toggle-grid,
+  .image-quick-action-toggles,
+  .model3d-gif-export-toggles,
+  .video-ai-prompt-toggle)> :is(.toggle, .compact-toggle, .studio-toggle-card, .studio-selection-card) {
+  min-width: 0;
+}
+
+body.view-ai-active .image-side-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 88%, transparent);
+  background:
+    radial-gradient(circle at 14% 8%, color-mix(in srgb, var(--studio-control-accent) 12%, transparent), transparent 34%),
+    color-mix(in srgb, var(--studio-control-bg-soft) 88%, black 12%);
+}
+
+body.view-ai-active :is(.image-variant-gallery, .model3d-variant-gallery) {
+  display: grid;
+  gap: 10px;
+}
+
+body.view-ai-active :is(.image-variant-card, .model3d-variant-card) {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: minmax(92px, 1fr) auto auto;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 88%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+    color-mix(in srgb, var(--studio-control-bg) 90%, black 10%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+body.view-ai-active :is(.image-variant-card, .model3d-variant-card).active {
+  border-color: color-mix(in srgb, var(--studio-control-accent) 62%, white 8%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 14px 28px color-mix(in srgb, var(--studio-control-accent) 18%, transparent);
+}
+
+body.view-ai-active :is(.image-variant-preview, .model3d-variant-preview) {
+  position: relative;
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 80%, transparent);
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25% 50%, rgba(255, 255, 255, 0.035) 50% 75%, transparent 75%),
+    color-mix(in srgb, var(--studio-control-bg-soft) 88%, black 12%);
+  background-size: 18px 18px;
+}
+
+body.view-ai-active :is(.image-variant-preview, .model3d-variant-preview):disabled {
+  opacity: 0.64;
+  cursor: default;
+}
+
+body.view-ai-active :is(.image-variant-preview, .model3d-variant-preview) img {
+  width: 100%;
+  height: 100%;
+  min-height: 92px;
+  object-fit: cover;
+}
+
+body.view-ai-active .model3d-variant-preview-fallback {
+  width: 100%;
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  color: color-mix(in srgb, var(--ink) 88%, var(--muted) 12%);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body.view-ai-active :is(.image-variant-badge, .model3d-variant-badge) {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 1;
+  padding: 4px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 82%, transparent);
+  background: color-mix(in srgb, var(--studio-control-bg) 76%, black 24%);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+body.view-ai-active :is(.image-variant-body, .model3d-variant-body) {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+body.view-ai-active :is(.image-variant-body, .model3d-variant-body) :is(strong, small) {
+  overflow-wrap: anywhere;
+}
+
+body.view-ai-active :is(.image-variant-body, .model3d-variant-body) strong {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+body.view-ai-active :is(.image-variant-body, .model3d-variant-body) small {
+  color: color-mix(in srgb, var(--muted) 82%, white 18%);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+body.view-ai-active :is(.image-variant-actions, .model3d-variant-actions) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+body.view-ai-active .image-variant-select,
+body.view-ai-active .image-variant-download,
+body.view-ai-active .image-variant-delete,
+body.view-ai-active .model3d-variant-select,
+body.view-ai-active .model3d-variant-download,
+body.view-ai-active .model3d-variant-delete {
+  min-height: 30px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 9px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+body.view-ai-active :is(.image-variant-download, .model3d-variant-download) {
+  @include studio-control-shell;
+}
+
+body.view-ai-active :is(.image-variant-download, .model3d-variant-download):hover {
+  @include studio-control-active;
+}
+
+body.view-ai-active :is(.image-variant-delete, .model3d-variant-delete) {
+  border-color: color-mix(in srgb, var(--danger) 64%, var(--studio-control-border));
+  background: color-mix(in srgb, var(--danger) 12%, var(--studio-control-bg));
+  color: color-mix(in srgb, var(--danger) 72%, white 28%);
+}
+
+body.view-ai-active :is(.image-variant-empty, .model3d-variant-empty) {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--studio-control-border) 88%, transparent);
+  color: color-mix(in srgb, var(--muted) 82%, white 18%);
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 80%, transparent);
+}
+
+body.view-ai-active :is(#ask-rod-sidebar-panel,
+  #image-sidebar-panel,
+  #audio-sidebar-panel,
+  #music-sidebar-panel,
+  #video-sidebar-panel,
+  #model3d-sidebar-panel) {
+  overflow: hidden;
+}
+
+body.view-ai-active .studio-sidebar-split-shell {
+  --studio-sidebar-bottom-height: 220px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 8px minmax(132px, min(var(--studio-sidebar-bottom-height), 68%));
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body.view-ai-active .studio-sidebar-split-main {
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: 4px;
+}
+
+body.view-ai-active .studio-sidebar-split-main .studio-side-foldout[open],
+body.view-ai-active .studio-sidebar-split-main .studio-side-foldout.is-last-expanded[open] {
+  flex: 0 0 auto !important;
+  min-height: max-content !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+body.view-ai-active .studio-sidebar-split-main > .studio-side-foldout {
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: fit-content !important;
+  align-self: stretch !important;
+}
+
+body.view-ai-active .studio-sidebar-split-main .studio-side-foldout.is-bottom-stack-start {
+  margin-top: -1px !important;
+}
+
+body.view-ai-active .studio-sidebar-split-main .studio-side-foldout-content {
+  flex: 0 0 auto !important;
+  min-height: max-content !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body.view-ai-active .studio-sidebar-split-resizer {
+  min-height: 8px;
+  cursor: row-resize;
+  border-top: 1px solid color-mix(in srgb, var(--studio-control-border) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--studio-control-border) 70%, transparent);
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--studio-control-accent) 38%, transparent), transparent),
+    color-mix(in srgb, var(--studio-control-bg-soft) 82%, transparent);
+}
+
+body.view-ai-active .studio-sidebar-split-resizer:is(:hover, .is-dragging) {
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--studio-control-accent) 74%, transparent), transparent),
+    color-mix(in srgb, var(--studio-control-bg-soft) 70%, var(--studio-control-accent) 12%);
+}
+
+body.view-ai-active.studio-sidebar-split-resizing,
+body.view-ai-active.studio-sidebar-split-resizing * {
+  cursor: row-resize !important;
+  user-select: none !important;
+}
+
+body.view-ai-active .studio-sidebar-split-bottom {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  max-height: min(var(--studio-sidebar-bottom-height), 68vh);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 88%, transparent);
+  border-radius: var(--studio-foldout-radius);
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 92%, black 8%);
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--studio-control-accent) 42%, transparent);
+}
+
+body.view-ai-active .studio-sidebar-bottom-tabs {
+  border: 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--studio-control-border) 80%, transparent) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+body.view-ai-active .studio-sidebar-bottom-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px;
+}
+
+body.view-ai-active .studio-sidebar-bottom-panel.hidden {
+  display: none !important;
+}
+
+body.view-ai-active .studio-sidebar-preview-panel {
+  display: grid;
+  grid-auto-rows: minmax(0, 1fr);
+  align-content: stretch;
+  justify-items: stretch;
+  height: 100%;
+}
+
+body.view-ai-active .studio-sidebar-preview-source-card {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.view-ai-active .studio-sidebar-preview-source-card > label {
+  display: none !important;
+}
+
+body.view-ai-active .studio-sidebar-preview-source-card .model3d-side-preview-shell {
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+body.view-ai-active .studio-sidebar-preview-source-card #model3d-preview-media {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+body.view-ai-active .studio-sidebar-preview-media {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 92%, black 8%);
+}
+
+body.view-ai-active .studio-sidebar-preview-panel > :is(img, video).studio-sidebar-preview-media {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+body.view-ai-active .studio-sidebar-preview-empty {
+  align-self: center;
+  padding: 18px 10px;
+  color: var(--studio-control-muted);
+  text-align: center;
+}
+
+body.view-ai-active .studio-sidebar-meta-output {
+  min-height: 100%;
+}
+
+body.view-ai-active .studio-sidebar-meta-grid {
+  display: grid;
+  gap: 8px;
+}
+
+body.view-ai-active .studio-sidebar-meta-row {
+  display: grid;
+  grid-template-columns: minmax(96px, 124px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 76%, transparent);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--studio-control-accent) 16%, transparent), transparent 26%),
+    color-mix(in srgb, var(--studio-control-bg-soft) 90%, black 10%);
+}
+
+body.view-ai-active .studio-sidebar-meta-row.is-full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.view-ai-active .studio-sidebar-meta-key {
+  color: color-mix(in srgb, var(--studio-control-accent) 72%, white 28%);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body.view-ai-active .studio-sidebar-meta-value {
+  color: color-mix(in srgb, white 88%, var(--studio-control-muted) 12%);
+  word-break: break-word;
+}
+
+body.view-ai-active .studio-sidebar-meta-note {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 72%, transparent);
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 88%, black 12%);
+  color: color-mix(in srgb, white 84%, var(--studio-control-muted) 16%);
+  white-space: pre-wrap;
+}
+
+body.view-ai-active .studio-sidebar-preview-source-hidden {
+  display: none !important;
+}
+
+body.view-ai-active .model3d-recent-image-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body.view-ai-active .model3d-recent-image-button {
+  display: grid;
+  grid-template-rows: 82px auto;
+  min-width: 0;
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid var(--studio-control-border);
+  border-radius: 0;
+  background: var(--studio-control-bg);
+  color: var(--studio-control-text);
+}
+
+body.view-ai-active .model3d-recent-image-button:is(:hover, .active) {
+  border-color: var(--studio-control-accent);
+  box-shadow: inset 3px 0 0 var(--studio-control-accent);
+}
+
+body.view-ai-active .model3d-recent-image-button img {
+  width: 100%;
+  height: 82px;
+  object-fit: cover;
+}
+
+body.view-ai-active .model3d-recent-image-button span {
+  min-width: 0;
+  padding: 5px 2px 2px;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.view-ai-active .studio-sidebar-bottom-panel> :is(.model3d-dock-panel, .image-dock-panel, .audio-dock-panel, .music-dock-panel, .video-dock-panel) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+body.view-ai-active .studio-sidebar-bottom-panel> :is(.output, .video-info-panel) {
+  min-height: 100%;
+  margin: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+body.view-ai-active .studio-sidebar-info-panel,
+body.view-ai-active .video-info-panel {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px;
+}
+
+body.view-ai-active .studio-sidebar-info-panel>strong,
+body.view-ai-active .video-info-panel>strong {
+  color: color-mix(in srgb, var(--studio-control-accent) 76%, white 24%);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+body.view-ai-active .studio-sidebar-info-panel>span,
+body.view-ai-active .video-info-panel>span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 76%, transparent);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--studio-control-accent) 16%, transparent), transparent 26%),
+    color-mix(in srgb, var(--studio-control-bg-soft) 90%, black 10%);
+  color: color-mix(in srgb, var(--studio-control-accent) 58%, white 18%);
+  font-size: 11px;
+}
+
+body.view-ai-active .studio-sidebar-info-panel b,
+body.view-ai-active .video-info-panel b {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+body {
+  --rail-sidebar-bg: color-mix(in srgb, var(--studio-rail-bg, var(--rail)) 92%, black 8%);
+  --rail-sidebar-panel: color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 86%, black 14%);
+  --rail-sidebar-border: color-mix(in srgb, var(--studio-panel-border, var(--line)) 86%, transparent);
+  --rail-sidebar-accent: var(--studio-accent-1, var(--accent));
+  --rail-sidebar-accent-strong: var(--studio-accent-2, var(--accent-2));
+  --rail-sidebar-button-radius: var(--dashboard-rails-radius, var(--dashboard-control-radius, 0px));
+  --rail-icon-studio: var(--studio-accent-1, var(--accent));
+  --rail-icon-lazydev: #d98cff;
+  --rail-icon-tools: #f0a45f;
+  --rail-icon-bots: #9fb1ff;
+  --rail-icon-chat: #b58aff;
+  --rail-icon-image: #65e19f;
+  --rail-icon-model3d: #67d0ff;
+  --rail-icon-audio: #ffbd6a;
+  --rail-icon-music: #ff80c4;
+  --rail-icon-video: #bc9cff;
+  --rail-icon-art: #ff72bf;
+  --rail-icon-dev: #46d6ff;
+  --rail-icon-game: #8cff9c;
+  --rail-icon-plan: #c69cff;
+  --rail-icon-shared: #9fb1c9;
+  --rail-icon-blender: #ff7a38;
+  --rail-icon-assets: #61f2aa;
+  --rail-icon-addon-home: var(--rail-icon-blender);
+  --rail-icon-addon-online: #ff8f42;
+  --rail-icon-addon-recommended: #ffb45c;
+  --rail-icon-addon-local-sources: #5fd7ff;
+  --rail-icon-addon-installed: #ff78bc;
+  --rail-icon-asset-home: var(--rail-icon-assets);
+  --rail-icon-asset-unity: #7fd2ff;
+  --rail-icon-asset-godot: #6be2ff;
+  --rail-icon-asset-unreal: #ff8a4c;
+}
+
+body.view-dashboard-active {
+  --rail-sidebar-button-radius: var(--dashboard-rails-radius, var(--dashboard-control-radius, 0px));
+}
+
+body.view-dashboard-active :is(.server-rail, .side-nav) {
+  padding: 0 !important;
+  gap: 0 !important;
+  align-content: stretch !important;
+}
+
+body.view-dashboard-active .app-shell {
+  grid-template-columns: var(--server-rail-width, 84px) minmax(240px, 280px) minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
+body.view-dashboard-active .workspace-sidebar,
+body.view-dashboard-active .side-panel.side-panel-left {
+  display: grid !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.view-dashboard-active .content-shell {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+body.view-dashboard-active .view[data-view-panel="dashboard"].active {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+
+body.view-dashboard-active .messenger-dashboard-shell {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) :is(.rail-home-wrap, .rail-guilds, .rail-studio-workflows, .rail-tools-categories, .rail-bot-sections, .rail-bottom) {
+  gap: 0 !important;
+  padding: 0 !important;
+  border-radius: var(--studio-foldout-radius) !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-settings-button, .rail-resource-section-button) {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 56px !important;
+  border-width: 0 0 1px !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) :is(.rail-home-mark, .rail-tools-mark, .rail-blender-addons-mark, .rail-assets-mark, .rail-profile-mark, .rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) {
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) :is(.rail-home-mark, .rail-tools-mark, .rail-blender-addons-mark, .rail-assets-mark, .rail-profile-mark, .rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) :is(svg, .bi) {
+  color: var(--rail-icon-color, currentColor) !important;
+  stroke: var(--rail-icon-color, currentColor) !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-app-button {
+  --rail-nav-color: var(--rail-sidebar-accent);
+  --rail-icon-color: var(--rail-icon-studio);
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-home {
+  --rail-nav-color: var(--rail-icon-lazydev);
+  --rail-icon-color: var(--rail-icon-lazydev);
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-tools-button {
+  --rail-nav-color: var(--rail-icon-tools);
+  --rail-icon-color: var(--rail-icon-tools);
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-profile-button {
+  --rail-nav-color: var(--rail-icon-bots);
+  --rail-icon-color: var(--rail-icon-bots);
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-blender-addons-button {
+  --rail-nav-color: var(--rail-icon-blender);
+  --rail-icon-color: var(--rail-icon-blender);
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-assets-button {
+  --rail-nav-color: var(--rail-icon-assets);
+  --rail-icon-color: var(--rail-icon-assets);
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-theme-switcher {
+  width: 100% !important;
+  border-width: 0 0 1px !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-settings-button {
+  width: 100% !important;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  gap: 9px;
+  padding: 0 10px;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-bottom {
+  justify-content: center;
+  justify-items: stretch;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active) .rail-bottom-label {
+  display: none;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded {
+  --server-rail-width: 164px;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded :is(.server-rail, .side-nav) {
+  justify-items: stretch;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button, .rail-settings-button) {
+  min-height: 58px !important;
+  padding: 8px 10px !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-app-button {
+  min-height: 76px !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded :is(.rail-home-label, .rail-tools-label, .rail-profile-label, .rail-blender-addons-label, .rail-assets-label, .rail-studio-workflow-label, .rail-tools-category-label, .rail-bottom-label) {
+  display: inline;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-home-label,
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-tools-label,
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-profile-label,
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-blender-addons-label,
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-assets-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-theme-switcher {
+  justify-items: stretch;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-theme-button {
+  width: 100%;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-bottom {
+  justify-content: center;
+  justify-items: stretch;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-settings-button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  gap: 9px;
+  padding: 0 10px;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active).studio-rail-expanded .rail-home-wrap {
+  min-height: 0;
+  align-content: start;
+  overflow: hidden;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active):not(.studio-rail-expanded) .rail-bottom-label,
+body.view-profile-active:not(.studio-rail-expanded) .rail-bottom-label {
+  display: none !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active):not(.studio-rail-expanded) .rail-bottom {
+  justify-items: stretch !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active):not(.studio-rail-expanded) .rail-settings-button {
+  grid-template-columns: 1fr !important;
+  place-items: center !important;
+  justify-items: center !important;
+  padding: 0 !important;
+}
+
+body:is(.view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active):not(.studio-rail-expanded) .rail-settings-button > span:first-child {
+  justify-self: center !important;
+  align-self: center !important;
+}
+
+body :is(.server-rail, .side-nav) {
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--rail-sidebar-accent) 16%, transparent) 0%, transparent 42%),
+    linear-gradient(180deg, color-mix(in srgb, var(--rail-sidebar-bg) 94%, white 3%), color-mix(in srgb, var(--rail-sidebar-bg) 94%, black 6%)) !important;
+  border-right: 1px solid var(--rail-sidebar-border) !important;
+}
+
+body :is(.rail-nav-button, .rail-settings-button, .rail-theme-button) {
+  border: 1px solid var(--rail-sidebar-border) !important;
+  border-radius: var(--rail-sidebar-button-radius) !important;
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 18%, transparent) 0%, transparent 54%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.014) 100%),
+    var(--rail-sidebar-panel) !important;
+  color: var(--rail-nav-color, color-mix(in srgb, var(--ink) 88%, var(--muted) 12%)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+}
+
+body :is(.rail-nav-button, .rail-settings-button, .rail-theme-button):is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+  border-color: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 58%, white 10%) !important;
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 34%, transparent) 0%, transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 22%, transparent) 0%, color-mix(in srgb, var(--rail-sidebar-accent-strong) 12%, transparent) 100%),
+    var(--rail-sidebar-panel) !important;
+  color: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 86%, var(--button-primary-fg, var(--ink)) 14%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 24px color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 20%, transparent) !important;
+}
+
+body :is(.rail-home-mark, .rail-tools-category-icon, .rail-studio-workflow-icon) {
+  background: color-mix(in srgb, var(--rail-icon-color, currentColor) 16%, var(--rail-sidebar-panel)) !important;
+  border: 1px solid color-mix(in srgb, var(--rail-icon-color, currentColor) 32%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+}
+
+body :is(.rail-home-mark, .rail-tools-category-icon, .rail-studio-workflow-icon) :is(svg, .bi) {
+  color: var(--rail-icon-color, currentColor) !important;
+  stroke: var(--rail-icon-color, currentColor) !important;
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--rail-icon-color, currentColor) 48%, transparent)) !important;
+}
+
+body .rail-app-button {
+  --rail-nav-color: var(--rail-sidebar-accent);
+  --rail-icon-color: var(--rail-icon-studio);
+}
+
+body .rail-home {
+  --rail-nav-color: var(--rail-icon-lazydev);
+  --rail-icon-color: var(--rail-icon-lazydev);
+}
+
+body .rail-tools-button {
+  --rail-nav-color: var(--rail-icon-tools);
+  --rail-icon-color: var(--rail-icon-tools);
+}
+
+body .rail-profile-button {
+  --rail-nav-color: var(--rail-icon-bots);
+  --rail-icon-color: var(--rail-icon-bots);
+}
+
+body .rail-studio-workflow-button {
+  --rail-nav-color: color-mix(in srgb, var(--ink) 86%, var(--muted) 14%);
+  --rail-icon-color: var(--rail-workflow-color, color-mix(in srgb, var(--ink) 82%, var(--muted) 18%));
+  --rail-workflow-glow: color-mix(in srgb, var(--rail-icon-color) 58%, transparent);
+}
+
+body .rail-studio-workflow-button.is-chat {
+  --rail-workflow-color: var(--rail-icon-chat);
+}
+
+body .rail-studio-workflow-button.is-image {
+  --rail-workflow-color: var(--rail-icon-image);
+}
+
+body .rail-studio-workflow-button.is-model3d {
+  --rail-workflow-color: var(--rail-icon-model3d);
+}
+
+body .rail-studio-workflow-button.is-audio {
+  --rail-workflow-color: var(--rail-icon-audio);
+}
+
+body .rail-studio-workflow-button.is-music {
+  --rail-workflow-color: var(--rail-icon-music);
+}
+
+body .rail-studio-workflow-button.is-video {
+  --rail-workflow-color: var(--rail-icon-video);
+}
+
+body .rail-tools-category-button {
+  --rail-nav-color: color-mix(in srgb, var(--ink) 86%, var(--muted) 14%);
+}
+
+body .rail-tools-category-button[data-tools-filter="art"] {
+  --rail-icon-color: var(--rail-icon-art);
+}
+
+body .rail-tools-category-button[data-tools-filter="image"] {
+  --rail-icon-color: var(--rail-icon-image);
+}
+
+body .rail-tools-category-button[data-tools-filter="model3d"] {
+  --rail-icon-color: var(--rail-icon-model3d);
+}
+
+body .rail-tools-category-button[data-tools-filter="audio"] {
+  --rail-icon-color: var(--rail-icon-audio);
+}
+
+body .rail-tools-category-button[data-tools-filter="music"] {
+  --rail-icon-color: var(--rail-icon-music);
+}
+
+body .rail-tools-category-button[data-tools-filter="dev"] {
+  --rail-icon-color: var(--rail-icon-dev);
+}
+
+body .rail-tools-category-button[data-tools-filter="game"] {
+  --rail-icon-color: var(--rail-icon-game);
+}
+
+body .rail-tools-category-button[data-tools-filter="plan"] {
+  --rail-icon-color: var(--rail-icon-plan);
+}
+
+body .rail-tools-category-button[data-tools-filter="video"] {
+  --rail-icon-color: var(--rail-icon-video);
+}
+
+body .rail-tools-category-button[data-tools-filter="shared"] {
+  --rail-icon-color: var(--rail-icon-shared);
+}
+
+body .rail-blender-addons-button {
+  --rail-nav-color: var(--rail-icon-blender);
+  --rail-icon-color: var(--rail-icon-blender);
+}
+
+body .rail-assets-button {
+  --rail-nav-color: var(--rail-icon-assets);
+  --rail-icon-color: var(--rail-icon-assets);
+}
+
+body .rail-resource-section-button[data-blender-nav="home"] {
+  --rail-icon-color: var(--rail-icon-addon-home);
+}
+
+body .rail-resource-section-button[data-blender-nav="online"] {
+  --rail-icon-color: var(--rail-icon-addon-online);
+}
+
+body .rail-resource-section-button[data-blender-nav="recommended"] {
+  --rail-icon-color: var(--rail-icon-addon-recommended);
+}
+
+body .rail-resource-section-button[data-blender-nav="local-sources"] {
+  --rail-icon-color: var(--rail-icon-addon-local-sources);
+}
+
+body .rail-resource-section-button[data-blender-nav="local"] {
+  --rail-icon-color: var(--rail-icon-addon-installed);
+}
+
+body .rail-resource-section-button[data-asset-platform="home"] {
+  --rail-icon-color: var(--rail-icon-asset-home);
+}
+
+body .rail-resource-section-button[data-asset-platform="unity"] {
+  --rail-icon-color: var(--rail-icon-asset-unity);
+}
+
+body .rail-resource-section-button[data-asset-platform="godot"] {
+  --rail-icon-color: var(--rail-icon-asset-godot);
+}
+
+body .rail-resource-section-button[data-asset-platform="unreal"] {
+  --rail-icon-color: var(--rail-icon-asset-unreal);
+}
+
+body.view-ai-active.studio-home-active:not(.studio-rail-hover-active) .rail-studio-workflows,
+body.view-ai-active.studio-home-active.studio-rail-hover-active:not([data-studio-rail-hover-group="workflow"]):not([data-studio-rail-hover-leaving-group="workflow"]) .rail-studio-workflows {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  transform: translateY(-8px) scaleY(0.96) !important;
+  overflow: hidden !important;
+  padding-block: 0 !important;
+  pointer-events: none !important;
+}
+
+body.view-ai-active.studio-workflow-home-active .rail-studio-workflows,
+body.view-ai-active.studio-workflow-focused .rail-studio-workflows {
+  max-height: var(--rail-section-open-max) !important;
+  opacity: 1 !important;
+  transform: translateY(0) scaleY(1) !important;
+  overflow-y: auto !important;
+  padding: 4px 0 2px !important;
+  pointer-events: auto !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button) {
+  width: 100% !important;
+  min-height: 48px !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  grid-auto-flow: column !important;
+  justify-content: start !important;
+  justify-items: start !important;
+  align-items: center !important;
+  align-content: center !important;
+  gap: 10px !important;
+  padding: 7px 10px !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button) .rail-home-label {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0.08em !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-app-button .rail-home-label {
+  font-size: 9px !important;
+}
+
+body .rail-theme-switcher {
+  grid-template-columns: repeat(3, 18px) !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 6px !important;
+  border: 1px solid var(--rail-sidebar-border) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012)),
+    color-mix(in srgb, var(--rail-sidebar-panel) 90%, black 10%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-theme-switcher {
+  grid-template-columns: repeat(5, 18px) !important;
+}
+
+body .rail-theme-button {
+  width: 18px !important;
+  min-width: 0 !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  padding: 0 !important;
+  border-color: color-mix(in srgb, var(--theme-swatch-start, #ffffff) 36%, transparent) !important;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.86) 0%, transparent 28%),
+    linear-gradient(145deg, var(--theme-swatch-start, #777), var(--theme-swatch-end, #222)) !important;
+  color: transparent !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 11px color-mix(in srgb, var(--theme-swatch-glow, var(--theme-swatch-start, #777)) 34%, transparent) !important;
+  --rail-nav-color: var(--theme-swatch-start, #777);
+}
+
+body .rail-theme-button:is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+  border-color: color-mix(in srgb, var(--theme-swatch-start) 72%, white 14%) !important;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.9) 0%, transparent 30%),
+    linear-gradient(145deg, var(--theme-swatch-start), var(--theme-swatch-end)) !important;
+  color: transparent !important;
+  transform: translateY(-1px) scale(1.04) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--theme-swatch-start) 22%, transparent),
+    0 0 16px color-mix(in srgb, var(--theme-swatch-glow) 52%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26) !important;
+}
+
+body .rail-theme-button span {
+  display: none !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.server-rail, .side-nav) {
+  padding: 0 !important;
+  gap: 0 !important;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--rail-sidebar-accent) 14%, transparent) 0%, transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--rail-sidebar-bg) 96%, white 2%), color-mix(in srgb, var(--rail-sidebar-bg) 92%, black 8%)) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-home-wrap, .rail-studio-workflows, .rail-tools-categories, .rail-resource-sections, .rail-bottom) {
+  width: 100% !important;
+  gap: 0 !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) .rail-home-wrap {
+  padding-bottom: 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 74%, transparent) !important;
+}
+
+body .settings-overlay-tab-panel {
+  display: none;
+}
+
+body .settings-overlay-tab-panel.active {
+  display: block;
+}
+
+body .overlay-manager-grid {
+  grid-template-columns: minmax(240px, 0.48fr) minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  height: 100%;
+}
+
+body .overlay-manager-sidebar-card,
+body .overlay-manager-main-card,
+body .theme-manager-sidebar-card,
+body .theme-manager-grid-card {
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+body .overlay-manager-sidebar-card,
+body .theme-manager-sidebar-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+body .overlay-manager-main-card,
+body .theme-manager-grid-card {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+}
+
+body .overlay-manager-section-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 64%, transparent);
+}
+
+body .overlay-manager-section-heading span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body .overlay-manager-section-heading small {
+  min-width: 0;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--muted) 84%, var(--ink) 16%);
+  font-size: 10px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body .overlay-manager-card-body {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  align-content: start;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+body .theme-manager-grid-card > .theme-manager-grid {
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto !important;
+  align-content: start !important;
+}
+
+body .theme-manager-sidebar-card .field,
+body .theme-manager-grid-card .field,
+body .overlay-manager-sidebar-card .field,
+body .overlay-manager-main-card .field {
+  min-width: 0;
+  width: 100%;
+}
+
+body .theme-manager-group-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 42px !important;
+  height: auto !important;
+  padding: 3px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+body .theme-manager-group-tabs > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding-inline: 6px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .theme-manager-meta-list {
+  display: grid;
+  gap: 10px;
+}
+
+body .theme-manager-meta-list > div {
+  display: grid;
+  grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+body .theme-manager-meta-list :is(strong, span, code) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body .theme-manager-meta-list code {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+body .theme-appearance-controls {
+  display: grid;
+  gap: 10px;
+  flex: 0 0 auto;
+  align-content: start;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 64%, transparent);
+  overflow: visible;
+}
+
+body .theme-appearance-controls h4 {
+  margin: 0;
+}
+
+body .theme-radius-field {
+  gap: 7px;
+}
+
+body .theme-radius-field input[type="range"] {
+  width: 100%;
+}
+
+body .theme-appearance-value {
+  justify-self: start;
+  padding: 3px 7px;
+  border: 1px solid color-mix(in srgb, var(--line) 64%, transparent);
+  border-radius: var(--dashboard-control-radius, 0);
+  color: color-mix(in srgb, var(--ink) 86%, var(--muted) 14%);
+  background: color-mix(in srgb, var(--panel-alt) 88%, black 12%);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+body .theme-appearance-global-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+body .theme-appearance-range-field {
+  min-width: 0;
+}
+
+body .theme-appearance-component-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding-top: 4px;
+  color: var(--ink);
+}
+
+body .theme-appearance-component-heading span {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .theme-appearance-component-heading small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+body .theme-appearance-component-list {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+body .theme-appearance-component-foldout {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--line) 62%, transparent);
+  border-radius: var(--dashboard-foldouts-radius, var(--dashboard-card-radius, 0));
+  background: color-mix(in srgb, var(--panel-alt) 72%, transparent);
+  overflow: hidden;
+}
+
+body .theme-appearance-component-foldout > summary {
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 12px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+body .theme-appearance-component-foldout > summary::-webkit-details-marker {
+  display: none;
+}
+
+body .theme-appearance-component-foldout > summary::after {
+  content: "+";
+  color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 86%, white 8%);
+  font-weight: 950;
+  text-align: center;
+}
+
+body .theme-appearance-component-foldout[open] > summary {
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 54%, transparent);
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 9%, transparent);
+}
+
+body .theme-appearance-component-foldout[open] > summary::after {
+  content: "-";
+}
+
+body .theme-appearance-component-foldout summary span {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body .theme-appearance-component-foldout summary small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+body .theme-appearance-component-controls {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--panel-alt) 84%, black 8%);
+}
+
+body .theme-component-slider-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 58px minmax(76px, 1fr) minmax(44px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+body .theme-component-slider-row > span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body .theme-component-slider-row output {
+  min-width: 44px;
+  padding: 3px 5px;
+  border: 1px solid color-mix(in srgb, var(--line) 56%, transparent);
+  border-radius: var(--dashboard-control-radius, 0);
+  background: color-mix(in srgb, var(--panel-alt) 84%, black 16%);
+  color: color-mix(in srgb, var(--ink) 86%, var(--muted) 14%);
+  font-size: 10px;
+  font-weight: 850;
+  text-align: center;
+}
+
+body .image-object-prompt-editor {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body .image-identify-max-amount {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid var(--studio-control-border);
+  background: var(--studio-control-bg);
+}
+
+body .image-identify-max-amount > span {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+body .image-identify-max-amount > input {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+body .image-object-prompt-editor-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+body .image-object-prompt-editor-head strong {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+body .image-object-prompt-editor-head small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+body .image-object-prompt-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+body .image-prompt-processing-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 6px;
+  min-width: 0;
+}
+
+body .image-prompt-processing-controls > label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+body .image-prompt-processing-controls > label > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+body .image-prompt-processing-controls :is(select, input) {
+  width: 100%;
+  min-width: 0;
+}
+
+body .image-prompt-processing-controls:has(#image-prompt-processing-batch-field.hidden) > label:first-child {
+  grid-column: 1 / -1;
+}
+
+body.view-ai-active #image-studio-card .image-object-prompt-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active #image-studio-card .image-object-prompt-tab-item {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: stretch;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 82%, transparent);
+  background: var(--studio-control-bg);
+}
+
+body.view-ai-active #image-studio-card .image-object-prompt-tab-item > input {
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+}
+
+body.view-ai-active #image-studio-card .image-object-prompt-tab-item > button {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.view-ai-active #image-studio-card .image-object-prompt-tab-item:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+body .theme-manager-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0px, 1fr));
+  gap: 4px;
+  align-content: start;
+  overflow: auto;
+}
+
+body .theme-manager-card {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+}
+
+body .theme-manager-card.hidden {
+  display: none !important;
+}
+
+body .theme-manager-card-button {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.86) 0%, transparent 22%),
+    linear-gradient(145deg, var(--theme-swatch-start, #777), var(--theme-swatch-end, #222));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 18px color-mix(in srgb, var(--theme-swatch-glow, #777) 18%, transparent);
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+body .theme-manager-card-button:hover {
+  transform: scale(1.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 28px color-mix(in srgb, var(--theme-swatch-glow, #777) 30%, transparent);
+}
+
+body .theme-manager-card-button:active {
+  transform: scale(0.98);
+}
+
+body .theme-manager-card-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body .theme-manager-card-button.active {
+  border-color: color-mix(in srgb, var(--theme-swatch-start, var(--accent)) 62%, white 12%) !important;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--theme-swatch-start, var(--accent)) 70%, white 10%), 0 0 24px color-mix(in srgb, var(--theme-swatch-glow, #777) 36%, transparent) !important;
+}
+
+body .theme-manager-card-button.active {
+  border-color: color-mix(in srgb, var(--theme-swatch-start, var(--accent)) 62%, white 12%) !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-swatch-start, var(--accent)) 36%, transparent), color-mix(in srgb, var(--theme-swatch-end, var(--accent-2)) 28%, transparent)),
+    color-mix(in srgb, var(--panel-alt) 82%, black 18%) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-swatch-glow, var(--accent)) 20%, transparent) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) .rail-bottom {
+  padding-top: 0 !important;
+  border-top: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 74%, transparent) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-nav-button, .rail-settings-button) {
+  position: relative !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-nav-button, .rail-settings-button)::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 8px auto 8px -1px !important;
+  width: 3px !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 82%, white 8%) !important;
+  opacity: 0 !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 46%, transparent) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-nav-button, .rail-settings-button):is(.active, .active-focus, [aria-pressed="true"])::before {
+  opacity: 1 !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button) {
+  border-width: 0 0 1px !important;
+  border-radius: var(--rail-sidebar-button-radius) !important;
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 18%, transparent) 0%, transparent 56%),
+    linear-gradient(90deg, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 7%, transparent), transparent 46%),
+    color-mix(in srgb, var(--rail-sidebar-panel) 93%, black 7%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button):is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+  background:
+    radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 26%, transparent) 0%, transparent 58%),
+    linear-gradient(90deg, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 15%, transparent), transparent 58%),
+    color-mix(in srgb, var(--rail-sidebar-panel) 96%, white 2%) !important;
+  box-shadow: inset 4px 0 0 color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 82%, white 6%), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-home-mark, .rail-tools-mark, .rail-blender-addons-mark, .rail-assets-mark, .rail-profile-mark, .rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 4px !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) .rail-app-button .rail-home-mark {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded {
+  --server-rail-width: 224px !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded :is(.server-rail, .side-nav) {
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-app-button {
+  min-height: 72px !important;
+  grid-template-columns: 54px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  padding: 10px 14px !important;
+  justify-items: start !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-app-button .rail-home-mark {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 6px !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-app-button .rail-home-label {
+  display: block !important;
+  color: color-mix(in srgb, var(--rail-icon-studio) 82%, var(--ink) 18%) !important;
+  font-size: 17px !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0.04em !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button, .rail-settings-button) {
+  min-height: 54px !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto !important;
+  justify-content: start !important;
+  justify-items: start !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 9px 14px !important;
+}
+
+body.view-ai-active.studio-rail-expanded .rail-studio-workflows,
+body.view-tools-active.studio-rail-expanded .rail-tools-categories {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded :is(.rail-studio-workflow-label, .rail-tools-category-label, .rail-resource-section-label, .rail-home-label, .rail-tools-label, .rail-profile-label, .rail-bottom-label) {
+  display: inline !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: color-mix(in srgb, var(--ink) 88%, var(--muted) 12%) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-home .rail-home-label,
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-tools-button .rail-home-label,
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-profile-button .rail-home-label {
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 82%, var(--ink) 18%) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-theme-switcher {
+  justify-self: stretch !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active).studio-rail-expanded .rail-theme-button {
+  width: 100% !important;
+  min-height: 24px !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-guilds, .rail-studio-workflows, .rail-tools-categories, .rail-resource-sections, .rail-bottom) {
+  gap: 0 !important;
+}
+
+body:is(.view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active) :is(.rail-nav-button, .rail-settings-button, .rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button) {
+  border-radius: var(--rail-sidebar-button-radius) !important;
+}
+
+body.view-ai-active {
+  --studio-control-section-gap: 11px;
+  --studio-control-section-padding: 16px 14px 14px;
+  --studio-control-section-radius: 0px;
+  --studio-control-section-badge-size: 24px;
+  --studio-control-section-badge-offset: 14px;
+  --studio-control-section-title-size: 15px;
+}
+
+body.view-ai-active .studio-control-section {
+  position: relative !important;
+  gap: var(--studio-control-section-gap) !important;
+  padding: 14px !important;
+  border-radius: var(--studio-control-radius) !important;
+  border-color: color-mix(in srgb, var(--studio-control-accent) 18%, var(--studio-control-border)) !important;
+  background: color-mix(in srgb, var(--studio-control-bg-soft) 90%, black 10%) !important;
+}
+
+body.view-ai-active .studio-control-section::before {
+  content: none !important;
+  display: none !important;
+}
+
+body.view-ai-active .studio-control-section> :is(label, .studio-sidebar-section-title, .image-sidebar-section-title),
+body.view-ai-active .studio-control-section .image-prompt-interpret-head>div:first-child>strong {
+  min-height: 0 !important;
+  padding-left: 0 !important;
+  align-items: center !important;
+  font-size: var(--studio-control-section-title-size) !important;
+  line-height: 1.18 !important;
+}
+
+body.view-ai-active .studio-control-card {
+  padding: 13px !important;
+}
+
+body.view-ai-active .studio-control-card::before {
+  --studio-control-section-badge-size: 22px;
+  --studio-control-section-badge-offset: 13px;
+}
+
+body.view-ai-active .studio-control-card>label {
+  min-height: 0 !important;
+  padding-left: 0 !important;
+  align-items: flex-start !important;
+  overflow-wrap: anywhere !important;
+}
+
+body.view-ai-active :is(.studio-control-section, .studio-control-card) :is(input, select, textarea) {
+  min-height: 40px !important;
+}
+
+body.view-ai-active :is(.studio-control-section, .studio-control-card) :is(.studio-chip-grid, .studio-segmented-control) {
+  gap: 7px !important;
+  padding: 4px !important;
+  border-radius: var(--studio-control-radius) !important;
+}
+
+body.view-ai-active :is(.studio-control-section, .studio-control-card) :is(.studio-chip-grid, .studio-segmented-control) button {
+  min-height: 38px !important;
+  border-radius: var(--studio-control-radius) !important;
+  padding-inline: 8px !important;
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+body.view-ai-active .studio-control-section .studio-chip-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 96px), 1fr)) !important;
+}
+
+body.view-ai-active .studio-control-section .studio-segmented-control {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 58px), 1fr)) !important;
+}
+
+body.view-ai-active .lazydev-home-card {
+  gap: 14px !important;
+  padding: 18px !important;
+  background:
+    radial-gradient(circle at 86% 8%, color-mix(in srgb, var(--studio-control-accent) 12%, transparent) 0%, transparent 34%),
+    color-mix(in srgb, var(--studio-surface-bg, var(--bg)) 86%, black 14%) !important;
+}
+
+body.view-ai-active .lazydev-home-hero {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px) !important;
+  padding: 0 0 4px !important;
+}
+
+body.view-ai-active .lazydev-home-create-panel {
+  grid-template-columns: minmax(250px, 0.38fr) minmax(0, 1fr) !important;
+  gap: 14px !important;
+  padding: 14px !important;
+}
+
+body.view-ai-active .lazydev-home-chat-card {
+  grid-template-columns: 58px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding-right: 14px !important;
+}
+
+body.view-ai-active .lazydev-home-chat-icon {
+  width: 58px !important;
+  height: 58px !important;
+}
+
+body.view-ai-active .lazydev-home-workflow-grid {
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body.view-ai-active .lazydev-home-workflow-button {
+  min-height: 84px !important;
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  justify-items: start !important;
+  align-content: center !important;
+  align-items: center !important;
+  gap: 11px !important;
+  padding: 12px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
+    color-mix(in srgb, var(--studio-control-bg) 90%, black 10%) !important;
+  color: var(--ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045) !important;
+}
+
+body.view-ai-active .lazydev-home-workflow-icon {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+body.view-ai-active .lazydev-home-workflow-icon svg {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+body.view-ai-active .lazydev-home-workflow-button.is-chat .lazydev-home-workflow-icon {
+  color: var(--studio-accent-1, var(--accent));
+}
+
+body.view-ai-active .lazydev-home-workflow-button.is-image .lazydev-home-workflow-icon {
+  color: var(--green);
+}
+
+body.view-ai-active .lazydev-home-workflow-button.is-model3d .lazydev-home-workflow-icon {
+  color: var(--studio-accent-3, var(--accent-3));
+}
+
+body.view-ai-active .lazydev-home-workflow-button.is-audio .lazydev-home-workflow-icon {
+  color: var(--warm);
+}
+
+body.view-ai-active .lazydev-home-workflow-button.is-music .lazydev-home-workflow-icon {
+  color: var(--danger);
+}
+
+body.view-ai-active .lazydev-home-workflow-button.is-video .lazydev-home-workflow-icon {
+  color: var(--studio-accent-2, var(--accent-2));
+}
+
+body.view-ai-active .lazydev-home-panel {
+  padding: 14px !important;
+}
+
+body.view-ai-active .studio-home-project-card,
+body.view-ai-active .lazydev-home-activity-list button,
+body.view-ai-active .lazydev-home-list button {
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 72%, transparent) !important;
+  border-radius: 10px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+    color-mix(in srgb, var(--studio-control-bg) 88%, black 12%) !important;
+  color: var(--ink) !important;
+  box-shadow: none !important;
+}
+
+body.view-ai-active .studio-home-project-thumb.is-image,
+body.view-ai-active .studio-home-activity-icon.is-image {
+  color: var(--green) !important;
+}
+
+body.view-ai-active .studio-home-project-thumb.is-model3d,
+body.view-ai-active .studio-home-activity-icon.is-model3d {
+  color: var(--studio-accent-3, var(--accent-3)) !important;
+}
+
+body.view-ai-active .studio-home-project-thumb.is-audio,
+body.view-ai-active .studio-home-activity-icon.is-audio {
+  color: var(--warm) !important;
+}
+
+body.view-ai-active .studio-home-project-thumb.is-music,
+body.view-ai-active .studio-home-activity-icon.is-music {
+  color: var(--danger) !important;
+}
+
+body.view-ai-active .studio-home-project-thumb.is-video,
+body.view-ai-active .studio-home-activity-icon.is-video {
+  color: var(--studio-accent-2, var(--accent-2)) !important;
+}
+
+body.view-ai-active .lazydev-home-dashboard-grid {
+  grid-template-columns: minmax(0, 1.36fr) minmax(340px, 0.72fr) !important;
+  align-items: start !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 14px !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-project-card {
+  position: relative !important;
+  min-height: 218px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto minmax(0, auto) !important;
+  align-content: start !important;
+  align-items: start !important;
+  gap: 12px !important;
+  padding: 12px !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-project-thumb {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 128px !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 10px !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-project-copy {
+  width: 100% !important;
+  align-self: start !important;
+  gap: 4px !important;
+  padding-right: 24px !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-project-copy strong,
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-project-copy span {
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-project-copy strong {
+  -webkit-line-clamp: 2 !important;
+  line-height: 1.18 !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-project-copy span {
+  -webkit-line-clamp: 1 !important;
+  font-size: 11px !important;
+}
+
+body.view-ai-active .studio-home-project-grid.is-compact .studio-home-more-button {
+  position: absolute !important;
+  right: 10px !important;
+  bottom: 12px !important;
+  width: 22px !important;
+  min-width: 22px !important;
+}
+
+body.view-ai-active .lazydev-home-activity-list button {
+  min-height: 72px !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(72px, 92px) !important;
+  gap: 12px !important;
+  padding: 10px !important;
+}
+
+body.view-ai-active .studio-home-activity-copy {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 3px !important;
+  line-height: 1.12 !important;
+}
+
+body.view-ai-active .studio-home-activity-copy>strong,
+body.view-ai-active .studio-home-activity-copy>small {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.view-ai-active .studio-home-activity-copy>strong {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  white-space: normal !important;
+}
+
+body.view-ai-active .studio-home-activity-copy>small {
+  display: block !important;
+  white-space: nowrap !important;
+}
+
+body.view-ai-active .studio-home-activity-time {
+  justify-self: end !important;
+  white-space: nowrap !important;
+  font-size: 10px !important;
+  opacity: 0.72 !important;
+}
+
+body.view-ai-active .studio-home-activity-preview {
+  width: 100% !important;
+  height: 52px !important;
+  display: grid !important;
+  place-items: center !important;
+  justify-self: end !important;
+  border-radius: 9px !important;
+  overflow: hidden !important;
+  color: color-mix(in srgb, var(--studio-control-accent) 78%, white 12%) !important;
+  background:
+    radial-gradient(circle at 38% 28%, color-mix(in srgb, currentColor 30%, transparent) 0%, transparent 48%),
+    color-mix(in srgb, var(--studio-control-bg) 80%, black 20%) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+
+body.view-ai-active .studio-home-activity-preview img,
+body.view-ai-active .studio-home-activity-preview video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button {
+  min-height: 54px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding: 8px 12px !important;
+  border-radius: 10px !important;
+  justify-items: start !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button .button-icon {
+  width: 38px !important;
+  height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 9px !important;
+  color: color-mix(in srgb, var(--studio-control-accent) 86%, white 10%) !important;
+  background: color-mix(in srgb, currentColor 12%, transparent) !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button>span:not(.button-icon) {
+  min-width: 0 !important;
+  width: 100% !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1180px) {
+  body.view-ai-active .lazydev-home-dashboard-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active .lazydev-home-activity-list button {
+    grid-template-columns: minmax(0, 1fr) minmax(70px, 88px) !important;
+  }
+
+  body.view-ai-active .studio-home-activity-time {
+    display: none !important;
+  }
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-panel {
+  grid-template-rows: minmax(0, 1fr) auto auto auto !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools:not(.image-tool-quick-actions) {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr)) !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 8px !important;
+  overflow: visible !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools+.image-studio-preview-tools:not(.image-tool-quick-actions) {
+  grid-row: 3 !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-tool-quick-actions.hidden,
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-tool-quick-actions:empty {
+  display: none !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-tool-quick-actions:not(.hidden):not(:empty) {
+  grid-row: 4 !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)) !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-top: 8px !important;
+  overflow: visible !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools :is(.mini-button, .tool-quick-action-button, .studio-tool-picker, .studio-tool-picker > button) {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools :is(.mini-button, .tool-quick-action-button, .studio-tool-picker > button) {
+  min-height: 36px !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools :is(.mini-button, .tool-quick-action-button, .studio-tool-picker > button) span:not(.button-icon) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+$studio-shell-primary-rail-views: ".view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active";
+$studio-shell-bot-rail-views: ".view-dashboard-active, .view-messaging-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-messenger-active, .view-activity-active";
+$studio-shell-all-rail-views: "#{$studio-shell-primary-rail-views}, #{$studio-shell-bot-rail-views}";
+
+body:is(#{$studio-shell-all-rail-views}) {
+  --rail-sidebar-button-radius: var(--dashboard-rails-radius, var(--dashboard-control-radius, 0px));
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.server-rail, .side-nav) {
+  padding: 0 !important;
+  gap: 0 !important;
+  align-content: stretch !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home-wrap, .rail-guilds, .rail-studio-workflows, .rail-tools-categories, .rail-resource-sections, .rail-bottom) {
+  gap: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-settings-button, .rail-resource-section-button) {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 56px !important;
+  border-width: 0 0 1px !important;
+  border-radius: var(--rail-sidebar-button-radius) !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home-mark, .rail-tools-mark, .rail-blender-addons-mark, .rail-assets-mark, .rail-profile-mark, .rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) {
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home-mark, .rail-tools-mark, .rail-blender-addons-mark, .rail-assets-mark, .rail-profile-mark, .rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) :is(svg, .bi) {
+  color: var(--rail-icon-color, currentColor) !important;
+  stroke: var(--rail-icon-color, currentColor) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-app-button svg {
+  color: var(--rail-icon-studio) !important;
+  stroke: var(--rail-icon-studio) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-home svg {
+  color: var(--rail-icon-lazydev) !important;
+  stroke: var(--rail-icon-lazydev) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-button svg {
+  color: var(--rail-icon-tools) !important;
+  stroke: var(--rail-icon-tools) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-profile-button svg {
+  color: var(--rail-icon-bots) !important;
+  stroke: var(--rail-icon-bots) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-studio-workflow-button.is-chat svg {
+  color: var(--rail-icon-chat) !important;
+  stroke: var(--rail-icon-chat) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-studio-workflow-button.is-image svg {
+  color: var(--rail-icon-image) !important;
+  stroke: var(--rail-icon-image) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-studio-workflow-button.is-model3d svg {
+  color: var(--rail-icon-model3d) !important;
+  stroke: var(--rail-icon-model3d) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-studio-workflow-button.is-audio svg {
+  color: var(--rail-icon-audio) !important;
+  stroke: var(--rail-icon-audio) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-studio-workflow-button.is-music svg {
+  color: var(--rail-icon-music) !important;
+  stroke: var(--rail-icon-music) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-studio-workflow-button.is-video svg {
+  color: var(--rail-icon-video) !important;
+  stroke: var(--rail-icon-video) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-blender-addons-button svg {
+  color: var(--rail-icon-blender) !important;
+  stroke: var(--rail-icon-blender) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-assets-button svg {
+  color: var(--rail-icon-assets) !important;
+  stroke: var(--rail-icon-assets) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-icon {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 22px !important;
+  height: 22px !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="image"] { --rail-icon-color: var(--rail-icon-image); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="model3d"] { --rail-icon-color: var(--rail-icon-model3d); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="audio"] { --rail-icon-color: var(--rail-icon-audio); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="music"] { --rail-icon-color: var(--rail-icon-music); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="video"] { --rail-icon-color: var(--rail-icon-video); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="art"] { --rail-icon-color: var(--rail-icon-art); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="dev"] { --rail-icon-color: var(--rail-icon-dev); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="game"] { --rail-icon-color: var(--rail-icon-game); }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="plan"] { --rail-icon-color: var(--rail-icon-plan); }
+
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-icon {
+  color: var(--rail-icon-color, currentColor) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="home"] { --rail-icon-color: var(--rail-icon-addon-home); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="online"] { --rail-icon-color: var(--rail-icon-addon-online); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="recommended"] { --rail-icon-color: var(--rail-icon-addon-recommended); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="local-sources"] { --rail-icon-color: var(--rail-icon-addon-local-sources); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="local"] { --rail-icon-color: var(--rail-icon-addon-installed); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="home"] { --rail-icon-color: var(--rail-icon-asset-home); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="unity"] { --rail-icon-color: var(--rail-icon-asset-unity); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="godot"] { --rail-icon-color: var(--rail-icon-asset-godot); }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="unreal"] { --rail-icon-color: var(--rail-icon-asset-unreal); }
+
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-icon {
+  color: var(--rail-icon-color, currentColor) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-sub {
+  display: none !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-theme-switcher {
+  width: 100% !important;
+  border-width: 0 0 1px !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded {
+  --server-rail-width: 164px;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded :is(.server-rail, .side-nav) {
+  justify-items: stretch !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-settings-button, .rail-resource-section-button) {
+  min-height: 58px !important;
+  padding: 9px 16px !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded .rail-app-button {
+  min-height: 76px !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.server-rail, .side-nav) {
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-home-wrap {
+  min-height: 0 !important;
+  align-content: start !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-home-wrap::-webkit-scrollbar {
+  width: 6px;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-home-wrap::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--rail-sidebar-accent) 38%, transparent);
+}
+
+body.view-tools-active .rail-tools-categories,
+body.view-ai-active:not(.studio-home-active) .rail-studio-workflows,
+body.view-blender-addons-active .rail-resource-sections[data-resource-rail-group="blender-addons"],
+body.view-assets-active .rail-resource-sections[data-resource-rail-group="assets"],
+body.view-dashboard-active .rail-resource-sections[data-resource-rail-group="bots"] {
+  height: max-content !important;
+  min-height: max-content !important;
+  max-height: var(--rail-section-open-max) !important;
+  overflow: auto !important;
+  transform: translateY(0) scaleY(1) !important;
+}
+
+body.view-ai-active.studio-home-active:not(.studio-rail-hover-active) .rail-studio-workflows,
+body.view-ai-active.studio-home-active.studio-rail-hover-active:not([data-studio-rail-hover-group="workflow"]):not([data-studio-rail-hover-leaving-group="workflow"]) .rail-studio-workflows {
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  padding: 0 !important;
+  border-block-width: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 980px) {
+  body:is(#{$studio-shell-all-rail-views}) .app-shell {
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body:is(#{$studio-shell-all-rail-views}) :is(.server-rail, .side-nav) {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    grid-auto-flow: row !important;
+    grid-auto-columns: initial !important;
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto !important;
+    align-items: stretch !important;
+    justify-items: center !important;
+    width: 58px !important;
+    height: 100% !important;
+    max-height: none !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-right: 1px solid var(--studio-panel-border) !important;
+    border-bottom: 0 !important;
+  }
+
+  body:is(#{$studio-shell-all-rail-views}) .content-shell {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  body:is(#{$studio-shell-all-rail-views}) .rail-home-wrap {
+    display: grid !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body:is(#{$studio-shell-all-rail-views}) .app-shell {
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+  }
+
+  body:is(#{$studio-shell-all-rail-views}) :is(.server-rail, .side-nav) {
+    width: 52px !important;
+  }
+}
+
+body:is(.view-blender-addons-active, .view-assets-active, .view-dashboard-active) {
+  --font-family-base: "Sora", "Exo 2", "Trebuchet MS", sans-serif;
+  --bg: var(--studio-shell-bg-start, #120909);
+  --bg-2: var(--studio-shell-bg-end, #0e0707);
+  --rail: var(--studio-rail-bg, #1a0d0c);
+  --sidebar: var(--studio-panel-bg-soft, rgba(12, 7, 8, 0.84));
+  --surface: var(--studio-surface-bg, #10090a);
+  --panel: var(--studio-panel-bg, rgba(18, 10, 10, 0.9));
+  --panel-alt: var(--studio-panel-bg-soft, rgba(12, 7, 8, 0.84));
+  --line: var(--studio-panel-border, rgba(255, 128, 74, 0.26));
+  --line-strong: color-mix(in srgb, var(--studio-panel-border, rgba(255, 128, 74, 0.26)) 150%, white 6%);
+  --accent: var(--studio-accent-2, #ff6a35);
+  --accent-2: var(--studio-accent-3, #ff3d1f);
+  --accent-3: var(--studio-accent-1, #ffb266);
+  --accent-soft: var(--studio-accent-soft, rgba(255, 126, 68, 0.26));
+  --rail-sidebar-bg: color-mix(in srgb, var(--studio-rail-bg, #1a0d0c) 92%, black 8%);
+  --rail-sidebar-panel: color-mix(in srgb, var(--studio-panel-bg-soft, rgba(12, 7, 8, 0.84)) 86%, black 14%);
+  --rail-sidebar-border: color-mix(in srgb, var(--studio-panel-border, rgba(255, 128, 74, 0.26)) 86%, transparent);
+  --rail-sidebar-accent: var(--studio-accent-1, #ffb266);
+  --rail-sidebar-accent-strong: var(--studio-accent-2, #ff6a35);
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded :is(.rail-app-button, .rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button, .rail-settings-button:not(#rail-workflow-expand-button)) {
+  display: grid !important;
+  grid-auto-flow: column !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto !important;
+  align-content: center !important;
+  align-items: center !important;
+  justify-content: start !important;
+  justify-items: start !important;
+  gap: 12px !important;
+  text-align: left !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded .rail-app-button {
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  min-height: 66px !important;
+  width: 100% !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded :is(.rail-home-mark, .rail-tools-mark, .rail-blender-addons-mark, .rail-assets-mark, .rail-profile-mark, .rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon, .rail-settings-button:not(#rail-workflow-expand-button)>span:first-child) {
+  grid-column: 1 !important;
+  justify-self: center !important;
+  align-self: center !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded .rail-app-button .rail-home-mark {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded :is(.rail-home-label, .rail-tools-label, .rail-profile-label, .rail-blender-addons-label, .rail-assets-label, .rail-studio-workflow-label, .rail-tools-category-label, .rail-resource-section-label, .rail-bottom-label) {
+  grid-column: 2 !important;
+  justify-self: start !important;
+  align-self: center !important;
+  display: block !important;
+  max-width: 100% !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) #rail-workflow-expand-button {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  place-items: center !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  text-align: center !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded #rail-workflow-expand-button {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  place-items: center !important;
+  text-align: center !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded #rail-workflow-expand-button span {
+  transform: rotate(90deg);
+}
+
+body.view-dashboard-active:not(.studio-rail-expanded) :is(.rail-home-mark, .rail-tools-mark, .rail-blender-addons-mark, .rail-assets-mark, .rail-profile-mark, .rail-studio-workflow-icon, .rail-tools-category-icon, .rail-resource-section-icon) {
+  width: 34px !important;
+  height: 34px !important;
+  justify-self: center !important;
+}
+
+body.view-dashboard-active:not(.studio-rail-expanded) .rail-app-button {
+  min-height: 74px !important;
+  height: 74px !important;
+}
+
+body.view-dashboard-active:not(.studio-rail-expanded) .rail-app-button .rail-home-mark {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.view-dashboard-active :is(.studio-workflow-sidebar, .details-pane, .side-panel.side-panel-right, .content-header, .shell-edge-toggle, .mobile-bottom-nav) {
+  display: none !important;
+}
+
+body.view-dashboard-active .rail-guilds {
+  display: none !important;
+}
+
+body.view-dashboard-active:not(.studio-rail-hover-active) .rail-tools-categories,
+body.view-dashboard-active.studio-rail-hover-active:not([data-studio-rail-hover-group="tools"]):not([data-studio-rail-hover-leaving-group="tools"]) .rail-tools-categories {
+  display: none !important;
+}
+
+// Messenger shortcuts belong to the Bots view only. Showing them in every
+// workspace creates a competing nested scroller and shifts the primary rail.
+body.view-dashboard-active .rail-bot-sections {
+  display: grid !important;
+}
+
+body:not(.view-dashboard-active) .rail-bot-sections {
+  display: none !important;
+}
+
+body.view-dashboard-active .workspace-sidebar .sidebar-mode-panel,
+body.view-dashboard-active .side-panel.side-panel-left .sidebar-mode-panel {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) {
+  --rail-main-button-min: 56px;
+  --rail-section-open-max: calc(var(--rail-main-button-min) * 3 + 6px);
+  --rail-main-button-gap: 12px;
+  --rail-main-button-padding: 9px 16px;
+  --rail-active-bar-width: 4px;
+  --rail-section-collapsed-offset: -6px;
+  --rail-expanded-icon-column: 38px;
+  --rail-transition-slow: 220ms;
+  --rail-transition-base: 180ms;
+  --rail-transition-fast: 160ms;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-resource-section-button, .rail-tools-category-button) {
+  min-height: var(--rail-main-button-min) !important;
+  padding: max(9px, var(--dashboard-rails-padding, 0px)) max(16px, var(--dashboard-rails-padding, 0px)) !important;
+  margin: var(--dashboard-rails-margin, 0px) !important;
+  border-width: 0 0 1px !important;
+  border-radius: var(--rail-sidebar-button-radius) !important;
+  border-color: var(--rail-sidebar-border) !important;
+  background:
+    radial-gradient(circle at 24% 18%, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 18%, transparent) 0%, transparent 58%),
+    linear-gradient(90deg, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 10%, transparent), transparent 58%),
+    color-mix(in srgb, var(--rail-sidebar-panel) 94%, transparent) !important;
+  color: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 84%, var(--ink) 16%) !important;
+  box-shadow: none !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-resource-section-button, .rail-tools-category-button):is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+  border-color: color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 58%, var(--ink) 8%) !important;
+  background:
+    radial-gradient(circle at 24% 18%, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 28%, transparent) 0%, transparent 62%),
+    linear-gradient(90deg, color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 22%, transparent), transparent 64%),
+    color-mix(in srgb, var(--rail-sidebar-panel) 96%, var(--rail-sidebar-accent) 4%) !important;
+  box-shadow: inset var(--rail-active-bar-width) 0 0 color-mix(in srgb, var(--rail-nav-color, var(--rail-sidebar-accent)) 86%, var(--ink) 6%) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-sections {
+  display: grid !important;
+  max-height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  transform: translateY(var(--rail-section-collapsed-offset)) scaleY(0.98) !important;
+  transform-origin: top !important;
+  pointer-events: none !important;
+  transition:
+    max-height var(--rail-transition-slow) ease,
+    opacity var(--rail-transition-fast) ease,
+    transform var(--rail-transition-base) ease !important;
+}
+
+body.view-blender-addons-active .rail-resource-sections[data-resource-rail-group="blender-addons"],
+body.view-assets-active .rail-resource-sections[data-resource-rail-group="assets"],
+body.view-dashboard-active .rail-resource-sections[data-resource-rail-group="bots"] {
+  max-height: var(--rail-section-open-max) !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+  opacity: 1 !important;
+  transform: translateY(0) scaleY(1) !important;
+  pointer-events: auto !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}).studio-rail-expanded :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-resource-section-button, .rail-tools-category-button) {
+  display: grid !important;
+  grid-auto-flow: column !important;
+  grid-template-columns: var(--rail-expanded-icon-column) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  justify-items: start !important;
+  gap: var(--rail-main-button-gap) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-studio-workflow-button, .rail-tools-category-button, .rail-resource-section-button) {
+  --rail-nav-color: var(--rail-sidebar-accent) !important;
+  --rail-icon-color: var(--rail-sidebar-accent-strong) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-home:not(.rail-blender-addons-button):not(.rail-assets-button) {
+  --rail-nav-color: var(--rail-icon-lazydev) !important;
+  --rail-icon-color: var(--rail-icon-lazydev) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-button {
+  --rail-nav-color: var(--rail-icon-tools) !important;
+  --rail-icon-color: var(--rail-icon-tools) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-blender-addons-button {
+  --rail-nav-color: var(--rail-icon-blender) !important;
+  --rail-icon-color: var(--rail-icon-blender) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-assets-button {
+  --rail-nav-color: var(--rail-icon-assets) !important;
+  --rail-icon-color: var(--rail-icon-assets) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-profile-button {
+  --rail-nav-color: var(--rail-icon-bots) !important;
+  --rail-icon-color: var(--rail-icon-bots) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="image"] { --rail-nav-color: var(--rail-icon-image) !important; --rail-icon-color: var(--rail-icon-image) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="model3d"] { --rail-nav-color: var(--rail-icon-model3d) !important; --rail-icon-color: var(--rail-icon-model3d) !important; }
+
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="audio"] { --rail-nav-color: var(--rail-icon-audio) !important; --rail-icon-color: var(--rail-icon-audio) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="music"] { --rail-nav-color: var(--rail-icon-music) !important; --rail-icon-color: var(--rail-icon-music) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="video"] { --rail-nav-color: var(--rail-icon-video) !important; --rail-icon-color: var(--rail-icon-video) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="art"] { --rail-nav-color: var(--rail-icon-art) !important; --rail-icon-color: var(--rail-icon-art) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="dev"] { --rail-nav-color: var(--rail-icon-dev) !important; --rail-icon-color: var(--rail-icon-dev) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="game"] { --rail-nav-color: var(--rail-icon-game) !important; --rail-icon-color: var(--rail-icon-game) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-tools-category-button[data-tools-filter="plan"] { --rail-nav-color: var(--rail-icon-plan) !important; --rail-icon-color: var(--rail-icon-plan) !important; }
+
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="home"] { --rail-nav-color: var(--rail-icon-addon-home) !important; --rail-icon-color: var(--rail-icon-addon-home) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="online"] { --rail-nav-color: var(--rail-icon-addon-online) !important; --rail-icon-color: var(--rail-icon-addon-online) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="recommended"] { --rail-nav-color: var(--rail-icon-addon-recommended) !important; --rail-icon-color: var(--rail-icon-addon-recommended) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="local-sources"] { --rail-nav-color: var(--rail-icon-addon-local-sources) !important; --rail-icon-color: var(--rail-icon-addon-local-sources) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-blender-nav="local"] { --rail-nav-color: var(--rail-icon-addon-installed) !important; --rail-icon-color: var(--rail-icon-addon-installed) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="home"] { --rail-nav-color: var(--rail-icon-asset-home) !important; --rail-icon-color: var(--rail-icon-asset-home) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="unity"] { --rail-nav-color: var(--rail-icon-asset-unity) !important; --rail-icon-color: var(--rail-icon-asset-unity) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="godot"] { --rail-nav-color: var(--rail-icon-asset-godot) !important; --rail-icon-color: var(--rail-icon-asset-godot) !important; }
+body:is(#{$studio-shell-all-rail-views}) .rail-resource-section-button[data-asset-platform="unreal"] { --rail-nav-color: var(--rail-icon-asset-unreal) !important; --rail-icon-color: var(--rail-icon-asset-unreal) !important; }
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-tools-category-button, .rail-resource-section-button) :is(svg, .bi) {
+  color: var(--rail-icon-color, currentColor) !important;
+  stroke: var(--rail-icon-color, currentColor) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-tools-category-button, .rail-resource-section-button) svg :is(path, circle, rect, line, polyline, polygon) {
+  stroke: var(--rail-icon-color, currentColor) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.rail-home, .rail-tools-button, .rail-blender-addons-button, .rail-assets-button, .rail-profile-button, .rail-tools-category-button, .rail-resource-section-button) svg [fill]:not([fill="none"]) {
+  fill: var(--rail-icon-color, currentColor) !important;
+}
+
+body:is(#{$studio-shell-all-rail-views}) :is(.server-rail, .side-nav) {
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--rail-sidebar-accent) 14%, transparent) 0%, transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--rail-sidebar-bg) 96%, white 2%), color-mix(in srgb, var(--rail-sidebar-bg) 92%, black 8%)) !important;
+}
+
+@media (min-width: 981px) {
+  // Settings can preserve already-open rail accordion groups while another
+  // group is previewed or activated.
+  body.studio-rail-hover-active[data-studio-rail-hover-mode="collapse-expand-keep-others"] .rail-studio-workflows,
+  body.studio-rail-hover-active[data-studio-rail-hover-mode="collapse-expand-keep-others"] .rail-tools-categories,
+  body.studio-rail-hover-active[data-studio-rail-hover-mode="collapse-expand-keep-others"] .rail-resource-sections[data-resource-rail-group] {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+  body:is(#{$studio-shell-all-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="workflow"], [data-studio-rail-hover-leaving-group="workflow"]) .rail-studio-workflows,
+  body:is(#{$studio-shell-all-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="tools"], [data-studio-rail-hover-leaving-group="tools"]) .rail-tools-categories,
+  body:is(#{$studio-shell-all-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="blender-addons"], [data-studio-rail-hover-leaving-group="blender-addons"]) .rail-resource-sections[data-resource-rail-group="blender-addons"],
+  body:is(#{$studio-shell-all-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="assets"], [data-studio-rail-hover-leaving-group="assets"]) .rail-resource-sections[data-resource-rail-group="assets"],
+  body:is(#{$studio-shell-all-rail-views}).studio-rail-hover-active:is([data-studio-rail-hover-group="bots"], [data-studio-rail-hover-leaving-group="bots"]) .rail-resource-sections[data-resource-rail-group="bots"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: var(--rail-section-open-max) !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    opacity: 1 !important;
+    transform: translateY(0) scaleY(1) !important;
+    pointer-events: auto !important;
+  }
+
+}
+
+body.view-dashboard-active .workspace-sidebar .sidebar-messenger-list,
+body.view-dashboard-active .side-panel.side-panel-left .sidebar-messenger-list {
+  align-content: start !important;
+}
+
+body.view-dashboard-active #messenger-launch-tablist {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+  body.view-dashboard-active .app-shell {
+    grid-template-columns: 58px minmax(180px, 220px) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.view-dashboard-active .app-shell {
+    grid-template-columns: 52px minmax(180px, 220px) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.view-dashboard-active :is(.server-rail, .side-nav) {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+}
+
+body.view-ai-active .lazydev-home-dashboard-grid {
+  grid-template-columns: minmax(0, 1.22fr) minmax(360px, 0.78fr) !important;
+  gap: 14px !important;
+}
+
+body.view-ai-active .lazydev-home-activity-list button {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(78px, 16%, 112px) !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 76px !important;
+}
+
+body.view-ai-active .studio-home-activity-copy {
+  overflow: hidden !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 3px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.view-ai-active .studio-home-activity-copy> :is(strong, small) {
+  min-width: 0 !important;
+  width: 100% !important;
+  grid-column: 1 !important;
+}
+
+body.view-ai-active .studio-home-activity-copy>strong {
+  font-size: 13px !important;
+  line-height: 1.18 !important;
+}
+
+body.view-ai-active .studio-home-activity-copy>small {
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+}
+
+body.view-ai-active .studio-home-activity-time {
+  display: none !important;
+}
+
+body.view-ai-active .studio-home-activity-preview {
+  min-width: 78px !important;
+  max-width: 112px !important;
+  height: 58px !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  align-items: center !important;
+  min-height: 58px !important;
+  padding: 8px 12px !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button .button-icon {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 6px !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button>span:not(.button-icon) {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 980px) {
+  body.view-ai-active .lazydev-home-create-panel {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active .lazydev-home-activity-list button {
+    grid-template-columns: minmax(0, 1fr) 84px !important;
+  }
+
+  body.view-ai-active .studio-home-project-grid.is-compact {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  }
+}
+
+body.view-ai-active .lazydev-home-activity-list button {
+  grid-template-columns: 82px minmax(0, 1fr) !important;
+  min-height: 76px !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  padding: 10px 12px !important;
+}
+
+body.view-ai-active .lazydev-home-activity-list .studio-home-activity-preview {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: start !important;
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  height: 58px !important;
+  border-radius: 8px !important;
+  background: color-mix(in srgb, var(--studio-control-bg) 82%, black 18%) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active .lazydev-home-activity-list .studio-home-activity-preview:has(img),
+body.view-ai-active .lazydev-home-activity-list .studio-home-activity-preview:has(video) {
+  background: transparent !important;
+}
+
+body.view-ai-active .lazydev-home-activity-list .studio-home-activity-preview img,
+body.view-ai-active .lazydev-home-activity-list .studio-home-activity-preview video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+body.view-ai-active .lazydev-home-activity-list .studio-home-activity-copy {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button {
+  align-items: center !important;
+  justify-items: start !important;
+  align-content: center !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button .button-icon {
+  align-self: center !important;
+  justify-self: center !important;
+}
+
+body.view-ai-active .lazydev-home-list .lazydev-home-action-button>span:not(.button-icon) {
+  align-self: center !important;
+  line-height: 1.2 !important;
+}
+
+
+body.view-ai-active.studio-workflow-focused :is(.details-pane, .side-panel.side-panel-right, .studio-right-sidebar, [data-studio-right-sidebar-host], [data-studio-sidebar-relocated="true"]) {
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable !important;
+}
+
+body.view-ai-active.studio-workflow-focused :is(.studio-right-sidebar, [data-studio-right-sidebar-host], [data-studio-sidebar-relocated="true"]) {
+  height: 100% !important;
+}
+
+body.view-ai-active.studio-workflow-focused .studio-sidebar-split-shell {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) 8px minmax(132px, min(var(--studio-sidebar-bottom-height), 68%)) !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active.studio-workflow-focused .studio-sidebar-split-main {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+}
+
+body.view-ai-active.studio-workflow-focused .studio-sidebar-split-main .studio-side-foldout[open],
+body.view-ai-active.studio-workflow-focused .studio-sidebar-split-main .studio-side-foldout.is-last-expanded[open] {
+  flex: 0 0 auto !important;
+  min-height: max-content !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+body.view-ai-active.studio-workflow-focused .studio-sidebar-split-main .studio-side-foldout-content {
+  flex: 0 0 auto !important;
+  min-height: max-content !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body.view-ai-active.studio-workflow-focused .studio-sidebar-split-bottom {
+  min-height: 120px !important;
+  max-height: min(var(--studio-sidebar-bottom-height), 68vh) !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active.studio-workflow-focused .studio-sidebar-split-resizer {
+  display: block !important;
+}
+
+@media (max-width: 980px) {
+  body.view-ai-active .lazydev-home-activity-list button {
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active .lazydev-home-activity-list .studio-home-activity-preview {
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+    height: 54px !important;
+  }
+
+  body.view-ai-active .lazydev-home-usage-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Button Generator</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+    <div class="container">
+        <h1>HTML Button Generator</h1>
+        <p>Generate beautiful animated buttons with customizable styles</p>
+        
+        <div class="generator-controls" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Button Controls">
+            <div class="control-group">
+                <label for="buttonText">Button Text:</label>
+                <input type="text" id="buttonText" value="Click Me">
+            </div>
+            
+            <div class="control-group">
+                <label for="colorType">Color Type:</label>
+                <select id="colorType">
+                    <option value="solid">Solid</option>
+                    <option value="gradient">Gradient</option>
+                </select>
+            </div>
+            
+            <div class="control-group" id="colorPickerGroup">
+                <label for="buttonColor">Button Color:</label>
+                <input type="color" id="buttonColor" value="#3498db">
+            </div>
+            
+            <div class="control-group" id="gradientColorGroup" style="display: none;">
+                <label for="colorAmount">Number of Colors:</label>
+                <input type="range" id="colorAmount" min="2" max="6" value="2">
+                <span id="colorAmountValue">2</span>
+            </div>
+
+            <div class="control-group" id="gradientDirGroup" style="display: none;">
+                <label for="gradientDir">Gradient Direction:</label>
+                <select id="gradientDir">
+                    <option value="45deg">Diagonal (45deg)</option>
+                    <option value="90deg">Horizontal (90deg)</option>
+                    <option value="180deg">Vertical (180deg)</option>
+                    <option value="circle">Radial (Circle)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="glassMode">Glassmorphism:</label>
+                <input type="checkbox" id="glassMode">
+            </div>
+
+            <div class="control-group">
+                <label for="textShadow">Text Shadow:</label>
+                <input type="checkbox" id="textShadow">
+            </div>
+            
+            <div class="control-group" id="customColorGroup" style="display: none;">
+                <div id="colorPickerContainer"></div>
+            </div>
+            
+            <div class="control-group">
+                <label for="buttonSize">Button Size:</label>
+                <select id="buttonSize">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="buttonAnimation">Animation:</label>
+                <select id="buttonAnimation">
+                    <option value="none">None</option>
+                    <option value="pulse">Pulse</option>
+                    <option value="bounce">Bounce</option>
+                    <option value="shake">Shake</option>
+                    <option value="glow">Glow</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="buttonShape">Shape:</label>
+                <select id="buttonShape">
+                    <option value="rounded">Rounded</option>
+                    <option value="square">Square</option>
+                    <option value="pill">Pill</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="borderStyle">Border Style:</label>
+                <select id="borderStyle">
+                    <option value="none">None</option>
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="dotted">Dotted</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="borderWidth">Border Width:</label>
+                <input type="range" id="borderWidth" min="0" max="10" value="0">
+                <span id="borderWidthValue">0px</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="borderColor">Border Color:</label>
+                <input type="color" id="borderColor" value="#3498db">
+            </div>
+            
+            <div class="control-group">
+                <label for="shadow">Shadow:</label>
+                <select id="shadow">
+                    <option value="none">None</option>
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
+                        <button id="generateBtn">Generate Button</button>
+            <button id="randomizeBtn">Randomize Settings</button>
+        </div>
+        
+        <div class="result-container">
+            <h2>Preview</h2>
+            <div class="split-preview">
+                <div class="preview-column light">
+                    <span>Light Background</span>
+                    <div id="buttonPreviewLight" class="preview-slot"></div>
+                </div>
+                <div class="preview-column dark">
+                    <span>Dark Background</span>
+                    <div id="buttonPreviewDark" class="preview-slot"></div>
+                </div>
+            </div>
+            
+            <div class="code-container">
+                <h3>Code</h3>
+                <pre id="generatedCode"></pre>
+                <button id="copyBtn">Copy Code</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

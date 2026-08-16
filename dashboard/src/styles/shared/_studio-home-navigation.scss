@@ -1,0 +1,42 @@
+// The overview workflow tiles are navigation controls, not cards containing a
+// second tiny action. The entire visible surface is the accessible button.
+body.view-ai-active .studio-home-overview-only button.studio-workflow-quick-tile {
+  width: 100%;
+  color: inherit !important;
+  font: inherit;
+  cursor: pointer;
+  appearance: none;
+  border: 1px solid var(--studio-panel-border) !important;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--studio-icon-glow) 18%, transparent) 0%, transparent 42%),
+    linear-gradient(165deg, var(--studio-panel-bg) 0%, var(--studio-panel-bg-soft) 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 10px 22px color-mix(in srgb, var(--studio-icon-glow) 9%, transparent) !important;
+}
+
+body.view-ai-active .studio-home-overview-only button.studio-workflow-quick-tile:hover {
+  border-color: color-mix(in srgb, var(--studio-icon-glow) 52%, var(--studio-panel-border)) !important;
+}
+
+body.view-ai-active .studio-home-overview-only button.studio-workflow-quick-tile:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--studio-icon-glow) 78%, white 12%);
+  outline-offset: 3px;
+}
+
+body.view-ai-active .studio-home-overview-only button.studio-workflow-quick-tile > * {
+  pointer-events: none;
+}
+
+// Reuse the exact category icon language from the rail instead of generic
+// settings/star placeholders on the URage NOW overview.
+body.view-ai-active .studio-home-feature-art.is-tools { color: var(--rail-icon-tools); }
+body.view-ai-active .studio-home-feature-art.is-addons { color: var(--rail-icon-blender); }
+body.view-ai-active .studio-home-feature-art.is-assets { color: var(--rail-icon-assets); }
+body.view-ai-active .studio-home-feature-art.is-bots { color: var(--rail-icon-bots); }
+
+body.view-ai-active .studio-home-feature-art > .bi {
+  font-size: 84px;
+  line-height: 1;
+  filter: drop-shadow(0 0 22px color-mix(in srgb, currentColor 62%, transparent));
+}

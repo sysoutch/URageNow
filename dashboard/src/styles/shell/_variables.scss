@@ -1,0 +1,83 @@
+// Shell CSS custom properties — single source of truth for all theme variables
+// Body-class variants apply per-messenger / per-view overrides
+
+:root {
+  --bg: #0d1118;
+  --bg-2: #151b26;
+  --rail: #0f141d;
+  --sidebar: #171f2d;
+  --surface: #1a2231;
+  --panel: #243041;
+  --panel-alt: #1c2533;
+  --line: rgba(255,178,102,0.14);
+  --line-strong: rgba(255,178,102,0.24);
+  --ink: #f5f7fb;
+  --muted: #9eabc2;
+  --accent: #b65b32;
+  --accent-2: #8f341b;
+  --accent-3: #ffb266;
+  --accent-soft: rgba(182,91,50,0.18);
+  --card-glow: rgba(4,8,16,0.38);
+  --green: #42ba7f;
+  --warm: #ffbf59;
+  --danger: #ff667d;
+  --shell-radius: 30px;
+  --panel-radius: 24px;
+  --font-family-base: "Trebuchet MS", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+
+  // Studio theme variables (overridden by body.view-ai-active etc.)
+  --studio-accent-1: var(--accent);
+  --studio-accent-2: var(--accent-2);
+  --studio-accent-3: var(--accent-3);
+  --studio-accent-soft: var(--accent-soft);
+  --studio-panel-bg: var(--panel);
+  --studio-panel-bg-soft: var(--panel-alt);
+  --studio-panel-border: var(--line);
+  --studio-button-start: rgba(255, 151, 85, 0.56);
+  --studio-button-end: rgba(255, 90, 48, 0.38);
+  --studio-button-shadow: rgba(49, 84, 204, 0.34);
+  --server-rail-width: 84px;
+  --shell-workspace-width: 320px;
+  --shell-details-width: 360px;
+  --shell-page-padding: 14px;
+  --dashboard-focus-ring-width: 2px;
+  --dashboard-touch-target: 44px;
+  --dashboard-mobile-nav-clearance: 88px;
+}
+
+// Studio theme overrides — brown/gold palette (includes blender-addons and assets views)
+body.view-ai-active,
+body.view-tools-active,
+body.view-profile-active,
+body.view-blender-addons-active,
+body.view-assets-active {
+  --font-family-base: "Sora", "Exo 2", "Trebuchet MS", sans-serif;
+  --bg: #050813;
+  --bg-2: #100e0b;
+  --rail: #0d0b09;
+  --sidebar: #14110d;
+  --surface: #18140f;
+  --panel: #201a13;
+  --panel-alt: #17130f;
+  --line: rgba(205, 174, 122, 0.18);
+  --line-strong: rgba(215, 184, 132, 0.38);
+  --ink: #f4efe7;
+  --muted: #b9ad9b;
+  --accent: #d3aa72;
+  --accent-2: #b8874f;
+  --accent-3: #f0c98a;
+  --accent-soft: rgba(211, 170, 114, 0.22);
+  --card-glow: rgba(80, 49, 22, 0.36);
+  --shell-radius: 26px;
+  --panel-radius: 18px;
+
+  --studio-accent-1: var(--accent);
+  --studio-accent-2: var(--accent-2);
+  --studio-accent-3: var(--accent-3);
+  --studio-accent-soft: var(--accent-soft);
+  --studio-panel-bg: var(--panel);
+  --studio-panel-bg-soft: var(--panel-alt);
+  --studio-panel-border: var(--line);
+}
+
+// Messenger views inherit the shared dashboard theme tokens.

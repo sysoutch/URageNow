@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Is Using AI Legit? Matrix</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <style>
+    :root {
+      --bg: var(--tool-bg, #0f172a);
+      --panel: var(--tool-surface, #111827);
+      --panel-2: var(--tool-surface-alt, #1f2937);
+      --text: var(--tool-text, #e5e7eb);
+      --muted: var(--tool-muted, #9ca3af);
+      --line: var(--tool-line, #374151);
+      --ok: var(--tool-success, #22c55e);
+      --bad: var(--tool-danger, #ef4444);
+      --maybe: #f59e0b;
+      --accent: var(--tool-accent, #60a5fa);
+      --shadow: var(--tool-shadow, 0 20px 60px rgba(0,0,0,.35));
+      --radius: var(--urage-tool-radius, 0px);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 20%, transparent), transparent 32rem),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--maybe) 12%, transparent), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+      padding: 28px;
+    }
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 4rem);
+      letter-spacing: -.06em;
+      line-height: .95;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 850px;
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    button, select, input, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .1s ease, border-color .15s ease, background .15s ease;
+    }
+
+    button:hover { border-color: var(--accent); }
+    button:active { transform: translateY(1px); }
+
+    .primary {
+      background: linear-gradient(180deg, var(--accent), var(--tool-accent-strong, var(--accent)));
+      border-color: var(--accent);
+    }
+
+    .danger:hover { border-color: var(--bad); }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      vertical-align: top;
+      padding: 12px;
+    }
+
+    th:last-child, td:last-child { border-right: none; }
+    tr:last-child td { border-bottom: none; }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--panel);
+      color: var(--text);
+      text-align: left;
+      font-size: .88rem;
+      letter-spacing: .02em;
+    }
+
+    tbody tr:hover td { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+
+    .small { width: 100px; text-align: center; }
+    .medium { width: 155px; }
+    .wide { width: 270px; }
+
+    .editable {
+      min-height: 42px;
+      outline: none;
+      border-radius: 10px;
+      padding: 6px;
+      line-height: 1.35;
+    }
+
+    .editable:focus {
+      box-shadow: inset 0 0 0 2px var(--accent);
+      background: color-mix(in srgb, var(--accent) 9%, transparent);
+    }
+
+    .mark {
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      user-select: none;
+      border: 1px solid var(--line);
+      cursor: pointer;
+      margin: 0 auto;
+      background: var(--tool-surface-strong, var(--panel));
+    }
+
+    .mark.ok { color: var(--ok); border-color: rgba(34,197,94,.55); background: rgba(34,197,94,.1); }
+    .mark.bad { color: var(--bad); border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.1); }
+    .mark.maybe { color: var(--maybe); border-color: rgba(245,158,11,.55); background: rgba(245,158,11,.1); }
+    .mark.empty { color: var(--muted); }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: .9rem;
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .verdict.ok { color: var(--ok); background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.4); }
+    .verdict.bad { color: var(--bad); background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.4); }
+    .verdict.maybe { color: var(--maybe); background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.4); }
+
+    .row-actions {
+      display: flex;
+      justify-content: center;
+    }
+
+    .delete-row {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 999px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel-2) 80%, transparent);
+      font-size: .92rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: color-mix(in srgb, var(--text) 4%, transparent);
+    }
+
+    .panel {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .panel textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      color: var(--text);
+      background: var(--tool-surface-strong, var(--panel));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      line-height: 1.45;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 16px; }
+      .toolbar button { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body data-dashboard-theme="fire" data-dashboard-scroll-document>
+  <main class="app">
+    <header>
+      <h1>Is Using AI Legit?</h1>
+      <p class="subtitle">
+        A practical matrix for judging AI use cases. Click the circles to cycle between blank, ✓, ✕, and ?. Edit any cell directly. The tool gives a rough verdict based on ownership, rights, transformation, and disclosure. Because apparently ethics needs a UI now.
+      </p>
+    </header>
+
+    <div class="toolbar" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Matrix Controls">
+      <button class="primary" id="addRow">+ Add row</button>
+      <button id="resetRows">Reset examples</button>
+      <button id="exportJson">Export JSON</button>
+      <button id="copyMarkdown">Copy Markdown</button>
+      <button class="danger" id="clearRows">Clear all</button>
+    </div>
+
+    <section class="card">
+      <div class="table-wrap">
+        <table id="matrix">
+          <thead>
+            <tr>
+              <th class="wide">AI action</th>
+              <th class="wide">Input / source</th>
+              <th class="small">You made it?</th>
+              <th class="small">Licensed / permission?</th>
+              <th class="small">Copies protected expression?</th>
+              <th class="small">Transformative?</th>
+              <th class="small">Disclosed?</th>
+              <th class="medium">Verdict</th>
+              <th class="wide">Notes</th>
+              <th class="small">Remove</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span class="pill"><strong style="color:var(--ok)">✓</strong> usually helps legitimacy</span>
+        <span class="pill"><strong style="color:var(--bad)">✕</strong> usually hurts legitimacy</span>
+        <span class="pill"><strong style="color:var(--maybe)">?</strong> depends on context</span>
+        <span class="pill">Verdicts are guidance, not legal advice. Civilization remains complicated.</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Quick read</h2>
+      <div class="note">
+        Generally safer: using your own material, public-domain/openly licensed material, or AI for description, accessibility, summarization, or analysis without copying protected expression. Riskier: generating close substitutes for copyrighted/licensed characters, extracting text from images you do not own, rebuilding models/assets from someone else’s image, or using outputs commercially without checking rights.
+      </div>
+      <textarea id="jsonOut" placeholder="Exported JSON or copied Markdown status appears here. The machines need somewhere to whisper."></textarea>
+    </section>
+  </main>
+
+  <script>
+    const states = ["empty", "ok", "bad", "maybe"];
+    const symbols = { empty: "", ok: "✓", bad: "✕", maybe: "?" };
+
+    const starterRows = [
+      {
+        action: "Generate text from image",
+        source: "Described text itself, like OCR or alt text",
+        made: "maybe", licensed: "maybe", copies: "bad", transformative: "ok", disclosed: "maybe",
+        notes: "Usually OK when used for description, accessibility, search, notes, or personal reference.",
+      },
+      {
+        action: "Generate text from image",
+        source: "Described text itself, but it includes licensed things",
+        made: "bad", licensed: "bad", copies: "maybe", transformative: "maybe", disclosed: "maybe",
+        notes: "Probably problematic if it reproduces or markets around licensed characters, brands, artwork, or protected creative expression.",
+      },
+      {
+        action: "Generate text from image",
+        source: "Text from an image you made",
+        made: "ok", licensed: "ok", copies: "bad", transformative: "ok", disclosed: "maybe",
+        notes: "Usually OK. You control the source, assuming it does not contain someone else’s protected material.",
+      },
+      {
+        action: "Generate text from image",
+        source: "Text from an image you did not make",
+        made: "bad", licensed: "maybe", copies: "maybe", transformative: "maybe", disclosed: "maybe",
+        notes: "Maybe problematic. Safer for personal notes or accessibility; riskier for publication, commercial use, or copying protected text.",
+      },
+      {
+        action: "Generate 3D/model/asset from image",
+        source: "Image you made or own",
+        made: "ok", licensed: "ok", copies: "bad", transformative: "ok", disclosed: "maybe",
+        notes: "Often OK when you own the image and the output is not copying someone else’s protected design.",
+      },
+      {
+        action: "Generate 3D/model/asset from image",
+        source: "Image made by someone else",
+        made: "bad", licensed: "bad", copies: "maybe", transformative: "maybe", disclosed: "bad",
+        notes: "Higher risk. This can become derivative work or asset cloning, especially for art, products, characters, logos, or paid content.",
+      },
+      {
+        action: "Train or fine-tune model",
+        source: "Dataset you created or have rights to use",
+        made: "ok", licensed: "ok", copies: "bad", transformative: "ok", disclosed: "ok",
+        notes: "Usually the cleanest route, provided privacy, consent, data protection, and contract terms are handled.",
+      },
+      {
+        action: "Train or fine-tune model",
+        source: "Scraped copyrighted or licensed material",
+        made: "bad", licensed: "bad", copies: "maybe", transformative: "maybe", disclosed: "bad",
+        notes: "Legally and ethically messy. Also a fine way to collect lawsuits like trading cards.",
+      }
+    ];
+
+    const tbody = document.querySelector("tbody");
+    const jsonOut = document.getElementById("jsonOut");
+
+    function cycleState(el) {
+      const current = el.dataset.state || "empty";
+      const next = states[(states.indexOf(current) + 1) % states.length];
+      setMark(el, next);
+      updateVerdicts();
+      save();
+    }
+
+    function setMark(el, state) {
+      el.dataset.state = state;
+      el.className = "mark " + state;
+      el.textContent = symbols[state];
+      el.setAttribute("aria-label", state === "empty" ? "blank" : state);
+    }
+
+    function makeMark(state) {
+      const el = document.createElement("span");
+      el.tabIndex = 0;
+      el.role = "button";
+      setMark(el, state || "empty");
+      el.addEventListener("click", () => cycleState(el));
+      el.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          cycleState(el);
+        }
+      });
+      return el;
+    }
+
+    function editable(text = "") {
+      const div = document.createElement("div");
+      div.className = "editable";
+      div.contentEditable = "true";
+      div.textContent = text;
+      div.addEventListener("input", () => { updateVerdicts(); save(); });
+      return div;
+    }
+
+    function verdictFor(row) {
+      const marks = [...row.querySelectorAll(".mark")].map(m => m.dataset.state);
+      const [made, licensed, copies, transformative, disclosed] = marks;
+      let score = 0;
+      if (made === "ok") score += 2;
+      if (licensed === "ok") score += 2;
+      if (copies === "bad") score += 2;
+      if (transformative === "ok") score += 1;
+      if (disclosed === "ok") score += 1;
+      if (made === "bad") score -= 2;
+      if (licensed === "bad") score -= 3;
+      if (copies === "ok" || copies === "maybe") score -= 2;
+      if (transformative === "bad") score -= 1;
+      if (disclosed === "bad") score -= 1;
+      if (marks.includes("maybe")) score -= 0.5;
+
+      if (score >= 3) return { label: "Usually OK", cls: "ok" };
+      if (score <= -2) return { label: "Risky / probably not", cls: "bad" };
+      return { label: "Depends", cls: "maybe" };
+    }
+
+    function updateVerdicts() {
+      [...tbody.rows].forEach(row => {
+        const cell = row.querySelector(".verdict-cell");
+        const v = verdictFor(row);
+        cell.innerHTML = `<span class="verdict ${v.cls}">${v.label}</span>`;
+      });
+    }
+
+    function addRow(data = {}) {
+      const tr = document.createElement("tr");
+      const cells = [
+        editable(data.action || ""),
+        editable(data.source || ""),
+        makeMark(data.made),
+        makeMark(data.licensed),
+        makeMark(data.copies),
+        makeMark(data.transformative),
+        makeMark(data.disclosed),
+        null,
+        editable(data.notes || ""),
+        null
+      ];
+
+      cells.forEach((child, i) => {
+        const td = document.createElement("td");
+        if ([2,3,4,5,6,9].includes(i)) td.className = "small";
+        if (i === 7) {
+          td.className = "verdict-cell medium";
+        } else if (i === 9) {
+          const wrap = document.createElement("div");
+          wrap.className = "row-actions";
+          const btn = document.createElement("button");
+          btn.className = "delete-row danger";
+          btn.textContent = "×";
+          btn.title = "Remove row";
+          btn.addEventListener("click", () => { tr.remove(); updateVerdicts(); save(); });
+          wrap.appendChild(btn);
+          td.appendChild(wrap);
+        } else {
+          td.appendChild(child);
+        }
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+      updateVerdicts();
+      save();
+    }
+
+    function getRows() {
+      return [...tbody.rows].map(row => {
+        const editableCells = row.querySelectorAll(".editable");
+        const marks = row.querySelectorAll(".mark");
+        return {
+          action: editableCells[0].textContent.trim(),
+          source: editableCells[1].textContent.trim(),
+          made: marks[0].dataset.state,
+          licensed: marks[1].dataset.state,
+          copies: marks[2].dataset.state,
+          transformative: marks[3].dataset.state,
+          disclosed: marks[4].dataset.state,
+          verdict: row.querySelector(".verdict").textContent.trim(),
+          notes: editableCells[2].textContent.trim()
+        };
+      });
+    }
+
+    function save() {
+      localStorage.setItem("aiLegitMatrixRows", JSON.stringify(getRows()));
+    }
+
+    function load() {
+      tbody.innerHTML = "";
+      const saved = localStorage.getItem("aiLegitMatrixRows");
+      const rows = saved ? JSON.parse(saved) : starterRows;
+      rows.forEach(addRow);
+      updateVerdicts();
+    }
+
+    function reset() {
+      localStorage.removeItem("aiLegitMatrixRows");
+      tbody.innerHTML = "";
+      starterRows.forEach(addRow);
+      updateVerdicts();
+      save();
+    }
+
+    function toMarkdown(rows) {
+      const header = "| AI action | Input / source | You made it? | Licensed? | Copies protected expression? | Transformative? | Disclosed? | Verdict | Notes |";
+      const sep = "|---|---|---|---|---|---|---|---|---|";
+      const mark = s => symbols[s] || "";
+      const clean = s => String(s).replaceAll("|", "\\|").replace(/\n/g, " ");
+      const body = rows.map(r => `| ${clean(r.action)} | ${clean(r.source)} | ${mark(r.made)} | ${mark(r.licensed)} | ${mark(r.copies)} | ${mark(r.transformative)} | ${mark(r.disclosed)} | ${clean(r.verdict)} | ${clean(r.notes)} |`).join("\n");
+      return [header, sep, body].join("\n");
+    }
+
+    function describeCurrentAssets() {
+      const rows = getRows();
+      return [
+        {
+          kind: "text",
+          title: "AI legitimacy matrix",
+          fileName: "ai-legitimacy-matrix.json",
+          mimeType: "application/json",
+          textContent: JSON.stringify(rows, null, 2),
+          metadata: { sourceTool: "ai-legit-matrix", resourceFormat: "matrix-json" }
+        },
+        {
+          kind: "text",
+          title: "AI legitimacy matrix Markdown",
+          fileName: "ai-legitimacy-matrix.md",
+          mimeType: "text/markdown",
+          textContent: toMarkdown(rows),
+          metadata: { sourceTool: "ai-legit-matrix", resourceFormat: "matrix-markdown" }
+        }
+      ];
+    }
+
+    window.describeCurrentAssets = describeCurrentAssets;
+    window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+    window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+
+    document.getElementById("addRow").addEventListener("click", () => addRow({
+      action: "New AI use case",
+      source: "Describe the input/source here",
+      made: "empty", licensed: "empty", copies: "empty", transformative: "empty", disclosed: "empty",
+      notes: "Add reasoning here. Annoying, but useful."
+    }));
+
+    document.getElementById("resetRows").addEventListener("click", reset);
+
+    document.getElementById("clearRows").addEventListener("click", () => {
+      tbody.innerHTML = "";
+      save();
+      jsonOut.value = "Cleared.";
+    });
+
+    document.getElementById("exportJson").addEventListener("click", async () => {
+      const text = JSON.stringify(getRows(), null, 2);
+      jsonOut.value = text;
+      try { await navigator.clipboard.writeText(text); jsonOut.value += "\n\nCopied JSON to clipboard."; } catch {}
+    });
+
+    document.getElementById("copyMarkdown").addEventListener("click", async () => {
+      const text = toMarkdown(getRows());
+      jsonOut.value = text;
+      try { await navigator.clipboard.writeText(text); jsonOut.value += "\n\nCopied Markdown to clipboard."; } catch {}
+    });
+
+    load();
+  </script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+</body>
+</html>

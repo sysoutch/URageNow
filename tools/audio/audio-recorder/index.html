@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audio Recorder</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+  <main class="recorder-shell">
+    <section class="hero-card">
+      <p class="eyebrow">Audio Tool</p>
+      <h1>Audio Recorder</h1>
+      <p class="subtitle">Record microphone input, PC/system audio from a shared screen/tab, or mix both into one exportable file.</p>
+    </section>
+
+    <section class="control-card" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Recorder Controls">
+      <div class="field-grid">
+        <label>
+          <span>Source</span>
+          <select id="audio-source-select">
+            <option value="mic">Microphone</option>
+            <option value="system">PC Sound / Tab Audio</option>
+            <option value="mixed">Mic + PC Sound</option>
+          </select>
+        </label>
+        <label>
+          <span>Microphone</span>
+          <select id="audio-device-select"></select>
+        </label>
+      </div>
+      <div class="button-row">
+        <button id="refresh-devices-button" type="button">Refresh Devices</button>
+        <button id="start-recording-button" type="button">Start Recording</button>
+        <button id="stop-recording-button" class="danger hidden" type="button">Stop</button>
+      </div>
+      <p id="status-output" class="status-line">Ready.</p>
+    </section>
+
+    <section class="output-card">
+      <div>
+        <p class="eyebrow">Current Output</p>
+        <h2 id="recording-title">No recording yet</h2>
+      </div>
+      <audio id="recording-preview" controls></audio>
+      <a id="download-link" class="download-link hidden" download="audio-recording.webm">Download Recording</a>
+    </section>
+  </main>
+  <script src="script.js"></script>
+  <script src="/tools/shared/dashboard-current-output-autodescribe.js"></script>
+</body>
+</html>

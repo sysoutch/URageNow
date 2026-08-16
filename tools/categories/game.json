@@ -1,0 +1,6 @@
+{
+  "id": "game",
+  "label": "Games",
+  "icon": "controller",
+  "description": "Playable experiments and game-development tools."
+}

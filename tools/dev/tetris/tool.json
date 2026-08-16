@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "dev__tetris",
+  "title": "tetris",
+  "description": "Tetris Clone",
+  "integration": {
+    "theme": true,
+    "currentOutput": true,
+    "toolBridge": true,
+    "dashboardSidebar": true,
+    "acceptsFiles": true,
+    "outputKind": "image",
+    "persistState": false
+  }
+}

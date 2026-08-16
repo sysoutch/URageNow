@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" data-dashboard-theme="urage">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dice 5 - Pig Game</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+</head>
+
+<body>
+  <div id="app">
+    <header>
+      <h1>🎲 Dice 5</h1>
+    </header>
+
+    <main>
+      <!-- Game wrapper - positions table and players around it -->
+      <div class="game-wrapper">
+
+        <!-- Top player cards (CPU opponents) -->
+        <section id="players"></section>
+
+        <!-- Table with game elements -->
+        <section id="table">
+          <div id="dice"></div>
+
+          <div id="points">
+            <div class="current-turn">
+              Current Turn: <span id="turnScore">0</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Buttons below the table -->
+        <div class="buttons">
+            <button id="roll">Roll</button>
+            <button id="bank">Bank</button>
+            <button id="knock">Knock!</button>
+
+            <!-- Inheritance decision buttons -->
+            <div id="inheritanceButtons">
+              <button id="acceptInheritance">Accept</button>
+              <button id="declineInheritance">Decline</button>
+            </div>
+        </div>
+
+        <!-- Inheritance info below buttons -->
+        <div id="inheritanceInfo">
+            <p>Inheritance Available:</p>
+            <p id="inheritanceDetails"></p>
+        </div>
+
+        <!-- Bottom player cards (human players) -->
+        <section id="playersBottom"></section>
+
+      </div>
+
+      <!-- Side panel - fixed right (modals removed from here) -->
+      <aside>
+        <div class="cpu-turn-indicator" id="cpuIndicator">CPU: OFF</div>
+        <button id="settingsButton">⚙️ Settings</button>
+        <button id="darkModeToggle">🌙 Dark Mode</button>
+        <div class="message-container" id="messageContainer"></div>
+      </aside>
+
+      <!-- Settings modal - full screen overlay outside aside -->
+      <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+          <h2>⚙️ Game Settings</h2>
+
+          <div class="form-group">
+            <label for="playerName1">Player 1 Name:</label>
+            <input type="text" id="playerName1" placeholder="Enter player name" value="Player 1">
+          </div>
+
+          <div class="form-group">
+            <label for="playerName2">Player 2 Name:</label>
+            <input type="text" id="playerName2" placeholder="Enter player name" value="CPU">
+          </div>
+
+          <div class="form-group">
+            <label for="targetScore">Winning Score:</label>
+            <input type="number" id="targetScore" min="1000" max="50000" step="100" value="10000">
+          </div>
+
+          <div class="form-group">
+            <label for="numDice">Number of Dice:</label>
+            <input type="number" id="numDice" min="3" max="6" step="1" value="6">
+          </div>
+
+          <div class="form-group">
+            <label for="cpuEnabled">CPU Mode:</label>
+            <select id="cpuEnabled">
+              <option value="true">Yes (vs CPU)</option>
+              <option value="false">No (Hotseat)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="cpuCountGroup">
+            <label for="cpuCount">Number of CPUs:</label>
+            <input type="number" id="cpuCount" min="1" max="5" step="1" value="1">
+          </div>
+
+          <div class="form-group">
+            <label for="aiDifficulty">AI Difficulty:</label>
+            <select id="aiDifficulty">
+              <option value="safe">Safe</option>
+              <option value="gambler">Gambler</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="enableInheritance">Enable Inheritance:</label>
+            <select id="enableInheritance">
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="enableHotDice">Enable Hot Dice:</label>
+            <select id="enableHotDice">
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="enableEndgameChase">Enable Endgame Chase:</label>
+            <select id="enableEndgameChase">
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
+          <h3>🎲 Scoring Options</h3>
+
+          <div class="form-group">
+            <label for="straightValue">Straight Value:</label>
+            <input type="number" id="straightValue" min="500" max="5000" step="100" value="1000">
+          </div>
+
+          <div class="form-group">
+            <label for="kindMode">Four/Five/Six of a Kind:</label>
+            <select id="kindMode">
+              <option value="add">Add (Option A)</option>
+              <option value="double">Double (Option B)</option>
+            </select>
+          </div>
+
+          <h3>🤖 CPU Thinking Delays</h3>
+
+          <div class="form-group">
+            <label for="cpuMinDelay">CPU Min Delay (ms):</label>
+            <input type="number" id="cpuMinDelay" min="500" max="10000" step="500" value="2000">
+          </div>
+
+          <div class="form-group">
+            <label for="cpuMaxDelay">CPU Max Delay (ms):</label>
+            <input type="number" id="cpuMaxDelay" min="1000" max="30000" step="500" value="8000">
+          </div>
+
+          <div class="form-group">
+            <label for="cpuKnockMinDelay">CPU Knock Min Delay (ms):</label>
+            <input type="number" id="cpuKnockMinDelay" min="2000" max="30000" step="500" value="4000">
+          </div>
+
+          <div class="form-group">
+            <label for="cpuKnockMaxDelay">CPU Knock Max Delay (ms):</label>
+            <input type="number" id="cpuKnockMaxDelay" min="3000" max="60000" step="500" value="15000">
+          </div>
+
+          <div class="modal-buttons">
+            <button id="saveSettings">Save Settings</button>
+            <button id="resetGame">Reset Game</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game over modal - full screen overlay outside aside -->
+      <div class="modal-overlay" id="gameOverModal">
+        <div class="modal game-over-modal">
+          <h2>🎉 Game Over!</h2>
+
+          <div class="winner-display" id="winnerDisplay"></div>
+
+          <div class="final-scores">
+            <div class="score-card" id="finalScore1"></div>
+            <div class="score-card" id="finalScore2"></div>
+          </div>
+
+          <p id="winnerMessage"></p>
+
+          <div class="modal-buttons">
+            <button id="playAgain">Play Again</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Load scripts -->
+  <script src="js/rules.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+</body>
+</html>

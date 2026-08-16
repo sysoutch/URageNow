@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "URage NOW",
+  "version": "0.1.0",
+  "identifier": "com.uragestudio.dashboard",
+  "build": {
+    "beforeDevCommand": "npm run dev:dashboard:local",
+    "beforeBuildCommand": "npm run build:dashboard && npm run desktop:runtime",
+    "devUrl": "http://127.0.0.1:4782",
+    "frontendDist": "http://127.0.0.1:4782"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "URage NOW",
+        "width": 1440,
+        "height": 920,
+        "minWidth": 960,
+        "minHeight": 640,
+        "resizable": true,
+        "decorations": false
+      }
+    ],
+    "withGlobalTauri": true,
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "externalBin": [
+      "binaries/urage-dashboard-runtime",
+      "binaries/urage-native-application-broker"
+    ],
+    "resources": {
+      "runtime-bundle/": "runtime-bundle/"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      }
+    }
+  }
+}

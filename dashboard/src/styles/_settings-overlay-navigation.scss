@@ -1,0 +1,88 @@
+.settings-overlay-panel .settings-overlay-tab-panel[data-settings-panel="network"].active {
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--overlay-gap, 14px);
+}
+
+#settings-overlay .network-settings-subtabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-self: stretch;
+  align-self: stretch;
+  width: auto !important;
+  max-width: none !important;
+
+  .ghost {
+    flex: 1 1 0;
+    min-width: 0 !important;
+  }
+}
+
+.network-settings-subpanel {
+  display: none;
+  min-height: 0;
+  overflow: hidden;
+
+  &.active {
+    display: grid;
+  }
+
+  > .settings-overlay-card {
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    > :is(button, a.secondary, .chip) {
+      flex: 0 1 auto;
+      width: auto !important;
+    }
+  }
+
+  a.secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: max(10px, var(--dashboard-buttons-padding, 0px)) max(12px, var(--dashboard-buttons-padding, 0px));
+    border: 1px solid var(--line);
+    border-radius: var(--dashboard-buttons-radius, var(--dashboard-control-radius, 0px));
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+      color-mix(in srgb, var(--panel-alt) 84%, black 16%);
+    color: var(--ink);
+    font-weight: 800;
+    text-decoration: none;
+  }
+}
+
+#settings-overlay .settings-overlay-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+
+  button {
+    flex: 0 0 auto;
+    width: auto !important;
+    min-width: 128px;
+  }
+}
+
+@media (max-width: 680px) {
+  #settings-overlay .network-settings-subtabs {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #settings-overlay .settings-overlay-footer button {
+    flex: 1 1 140px;
+  }
+}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map Generator - 3D</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <!-- Shared libs -->
+  <link rel="stylesheet" href="../../../shared/libs/fontawesome/css/fontawesome.css">
+  <link rel="stylesheet" href="../../../shared/libs/fontawesome/css/brands.css">
+  <link rel="stylesheet" href="../../../shared/libs/fontawesome/css/solid.css">
+
+  <!-- 3D Game Map Generator styles -->
+   <link rel="stylesheet" href="./css/styles.css">
+
+  <!-- ES module import map for Three.js -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body data-dashboard-theme="fire">
+  <div class="app-shell">
+    <aside class="side-panel" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="3D Map Controls">
+      <header class="tool-header">
+        <div>
+          <p class="eyebrow">Dev Tool</p>
+          <h1>3D Map Generator</h1>
+        </div>
+        <button id="randomizeSeedButton" type="button" title="Randomize seed">Seed</button>
+      </header>
+
+      <section class="panel">
+        <div class="mode-tabs" aria-label="Map type">
+          <button class="mode-tab active" data-mode="topdown-flat" type="button">Topdown</button>
+          <button class="mode-tab" data-mode="isometric" type="button">Isometric</button>
+          <button class="mode-tab" data-mode="sidescroller" type="button">Side Scroller</button>
+        </div>
+        <div class="mode-tabs" aria-label="Projection">
+          <button class="mode-tab active" data-projection="orthographic" type="button">Orthographic</button>
+          <button class="mode-tab" data-projection="perspective" type="button">Perspective</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Map Shape</h2>
+        <label class="field">
+          <span>Seed</span>
+          <input id="seedInput" type="number" min="1" max="999999" value="1337">
+        </label>
+        <div class="field-grid">
+          <label class="field">
+            <span>Width</span>
+            <input id="widthInput" type="number" min="6" max="80" value="24">
+          </label>
+          <label class="field">
+            <span>Depth / Height</span>
+            <input id="depthInput" type="number" min="6" max="60" value="18">
+          </label>
+        </div>
+        <div class="field-grid">
+          <label class="field">
+            <span>Density</span>
+            <input id="densityInput" type="range" min="0" max="100" value="42">
+          </label>
+          <label class="field">
+            <span>Height</span>
+            <input id="heightInput" type="range" min="1" max="8" value="4">
+          </label>
+        </div>
+        <div class="field-grid">
+          <label class="field">
+            <span>Path Width</span>
+            <input id="pathWidthInput" type="number" min="1" max="8" value="3">
+          </label>
+          <label class="field">
+            <span>Platform Gap</span>
+            <input id="gapInput" type="number" min="1" max="10" value="3">
+          </label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Mirror</h2>
+        <label class="field">
+          <span>Pattern</span>
+          <select id="mirrorPatternInput">
+            <option value="none">None</option>
+            <option value="x">Horizontal</option>
+            <option value="y">Vertical</option>
+            <option value="xy">Both Axes</option>
+          </select>
+        </label>
+        <div class="field-grid">
+          <label class="field">
+            <span>Repeat X</span>
+            <input id="mirrorRepeatXInput" type="number" min="0" max="6" value="0">
+          </label>
+          <label class="field">
+            <span>Repeat Y</span>
+            <input id="mirrorRepeatYInput" type="number" min="0" max="6" value="0">
+          </label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Camera</h2>
+        <div class="field-grid">
+          <label class="field">
+            <span>Yaw</span>
+            <input id="yawInput" type="range" min="-70" max="70" value="38">
+          </label>
+          <label class="field">
+            <span>Pitch</span>
+            <input id="pitchInput" type="range" min="18" max="68" value="42">
+          </label>
+        </div>
+        <label class="field">
+          <span>Zoom</span>
+          <input id="zoomInput" type="range" min="45" max="130" value="82">
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Models</h2>
+        <label class="field">
+          <span>Import OBJ / GLB / FBX</span>
+          <input id="modelFileInput" type="file" accept=".obj,.glb,.gltf,.fbx,model/obj,model/gltf-binary,model/gltf+json" multiple>
+        </label>
+        <div class="field-grid">
+          <label class="field">
+            <span>Use As</span>
+            <select id="modelRoleInput">
+              <option value="tile">Replace Blocks</option>
+              <option value="prop">Add Objects</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Scale</span>
+            <input id="modelScaleInput" type="number" min="0.1" max="8" step="0.1" value="1">
+          </label>
+        </div>
+        <label class="field">
+          <span>Object Density</span>
+          <input id="propDensityInput" type="range" min="0" max="100" value="18">
+        </label>
+        <div id="modelAssetList" class="asset-list">No imported models.</div>
+      </section>
+
+      <section class="panel">
+        <h2>Theme</h2>
+        <div class="swatch-grid" aria-label="Palette">
+          <button class="swatch active" data-palette="ruins" style="--swatch-a:#c7b98b;--swatch-b:#56513e" type="button">Ruins</button>
+          <button class="swatch" data-palette="forest" style="--swatch-a:#67e8a5;--swatch-b:#276749" type="button">Forest</button>
+          <button class="swatch" data-palette="lava" style="--swatch-a:#ffb86b;--swatch-b:#e23b3b" type="button">Lava</button>
+        </div>
+      </section>
+
+      <section class="panel action-panel">
+        <button id="generateButton" class="primary" type="button">Generate Map</button>
+        <button id="exportZipButton" type="button"><i class="fas fa-file-archive"></i> Export ZIP</button>
+        <div class="action-separator"></div>
+        <button id="exportPngButton" type="button">Export PNG</button>
+        <button id="exportJsonButton" type="button">Export JSON</button>
+      </section>
+    </aside>
+
+    <main class="preview-panel">
+      <div class="preview-toolbar">
+        <div>
+          <p class="eyebrow">Preview</p>
+          <h2 id="previewTitle">Topdown Orthographic Blockout</h2>
+        </div>
+        <output id="mapStats">0 tiles</output>
+      </div>
+      <canvas id="mapCanvas" width="1280" height="820"></canvas>
+    </main>
+  </div>
+
+  <!-- Shared dashboard theme -->
+  <script src="../../../shared/dashboard-theme.js"></script>
+
+  <!-- Shared auto-describe bridge -->
+  <script src="../../../shared/dashboard-current-output-autodescribe.js"></script>
+
+  <!-- Shared dashboard output bridge -->
+  <script src="../../../shared/dashboard-tool-bridge.js"></script>
+
+  <!-- ES module entry point for 3D map generator -->
+   <script type="module" src="./js/app.js"></script>
+
+</body>
+</html>

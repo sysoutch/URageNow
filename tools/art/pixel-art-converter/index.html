@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Converter</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+<div class="tool-layout">
+    <div class="sidebar" data-dashboard-tool-sidebar-ignore>
+        <details class="control-group sidebar-panel source-panel" id="sourceDetails" open>
+            <summary>
+                <span class="summary-title">Source</span>
+                <span class="summary-meta">Image or batch</span>
+            </summary>
+            <!-- Styled upload button -->
+            <label class="upload-btn" for="fileInput">
+                <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                <span class="upload-btn-icon">+</span>
+                <span class="upload-btn-text">Choose images</span>
+            </label>
+            <div id="batchQueueHint" style="font-size:0.72rem; color:var(--text-dim); line-height:1.3;">
+                Select one or more images. Additional picks append to the queue so you can process a batch.
+            </div>
+            <div id="batchQueue" class="batch-queue" aria-live="polite"></div>
+            <div class="btn-row">
+                <button class="btn btn-outline" id="clearBatchBtn" style="display:none; padding:8px 10px; font-size:0.8rem;">Clear queue</button>
+            </div>
+
+            <!-- Dashboard Image Pool sub-foldout -->
+            <details class="pool-sub-foldout" id="poolDetails">
+                <summary>
+                    <span class="summary-title">Dashboard Image Pool</span>
+                    <span class="summary-meta">Pull from library</span>
+                </summary>
+                <div style="margin-top:8px;">
+                    <label for="imagePoolSelect">Image Pool</label>
+                    <select id="imagePoolSelect">
+                        <option value="">No dashboard pools loaded</option>
+                    </select>
+                </div>
+                <div style="margin-top:10px;">
+                    <label for="imagePoolImageSelect">Pool Image</label>
+                    <select id="imagePoolImageSelect">
+                        <option value="">Select a pool first</option>
+                    </select>
+                </div>
+                <div class="btn-row" style="margin-top:10px;">
+                    <button class="btn btn-outline" id="refreshImagePoolsBtn" style="padding:8px 10px; font-size:0.8rem;">Refresh pools</button>
+                    <button class="btn btn-outline" id="loadPoolImageBtn" style="padding:8px 10px; font-size:0.8rem;">Load selected</button>
+                </div>
+                <div id="imagePoolHint" style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                    When opened inside URage NOW, this can pull from dashboard image pools.
+                </div>
+            </details>
+        </details>
+
+        <details class="control-group sidebar-panel preset-panel" id="presetDetails" open>
+            <summary>
+                <span class="summary-title">Conversion Profile</span>
+                <span class="summary-meta">Fast starting point</span>
+            </summary>
+            <select id="quickPresetSelect">
+                <option value="none" selected>None</option>
+                <option value="true_pixel">AI to Real Pixels</option>
+                <option value="ai_mild">AI Fix (Mild)</option>
+                <option value="ai_strong">AI Fix (Strong)</option>
+                <option value="palette_only">Palette Snap Only</option>
+                <option value="sprite_clean">Sprite Clean (No Dither)</option>
+            </select>
+            <div class="btn-row">
+                <button class="btn btn-outline" id="applyPresetBtn" style="padding:8px 10px; font-size:0.8rem;">Apply preset</button>
+                <button class="btn btn-outline" id="resetPresetBtn" style="padding:8px 10px; font-size:0.8rem;">Reset</button>
+            </div>
+            <div id="quickPresetHint" style="font-size:0.72rem; color:var(--text-dim); line-height:1.3;">
+                One-click starting points for common AI pixel-art issues.
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="gridDetails" open>
+            <summary>
+                <span class="summary-title">Pixel Grid</span>
+                <span class="summary-meta">Density, auto size, conversion</span>
+            </summary>
+            <label>Pixel Density: <span id="pixelSizeValue" style="color:var(--accent)">8</span>px</label>
+            <input type="range" id="pixelSizeSlider" min="1" max="32" value="8">
+            <div style="display:flex; align-items:center; gap:8px; margin-top:5px;">
+                <input type="checkbox" id="autoScaleCheckbox" checked>
+                <label style="text-transform:none; font-weight:400;">Auto pixel size</label>
+            </div>
+            <div style="margin-top:6px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Auto pixel basis</div>
+                <select id="autoPixelSizeBasisSelect">
+                    <option value="larger-side">Larger side</option>
+                    <option value="smaller-side" selected>Smaller side (recommended)</option>
+                    <option value="average-side">Average side</option>
+                </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:5px;">
+                <input type="checkbox" id="autoConvertCheckbox" checked>
+                <label style="text-transform:none; font-weight:400;">Auto-convert</label>
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel control-group-emphasis" id="ditherDetails">
+            <summary>
+                <span class="summary-title">Dither Texture</span>
+                <span class="summary-meta">Optional retro patterning</span>
+            </summary>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="applyDitherCheckbox">
+                <label style="text-transform:none; font-weight:400;">Apply dithering</label>
+            </div>
+            <div style="margin-top:6px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Dither mode</div>
+                <select id="applyDitherModeSelect">
+                    <option value="ordered" selected>Ordered Bayer</option>
+                    <option value="floyd-steinberg">Floyd-Steinberg</option>
+                </select>
+            </div>
+            <div style="margin-top:6px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Dither amount</span>
+                    <span><span id="applyDitherValue" style="color:var(--accent)">0</span></span>
+                </div>
+                <input type="range" id="applyDitherSlider" min="0" max="100" value="0">
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3;">
+                Ordered Bayer keeps a more regular retro texture. Floyd-Steinberg pushes a more organic diffused pattern.
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="samplingDetails" open>
+            <summary>
+                <span class="summary-title">Block Sampling</span>
+                <span class="summary-meta">Dominant color controls</span>
+            </summary>
+            <label>Block Size: <span id="blockSizeValue" style="color:var(--accent)">8</span>px</label>
+            <input type="range" id="blockSizeSlider" min="1" max="64" value="8">
+            <div style="font-size:0.75rem; color:var(--text-dim); line-height:1.3;">
+                Larger blocks merge details by replacing each block with the most common color inside it.
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+                <input type="checkbox" id="advancedSamplingCheckbox" checked>
+                <label style="text-transform:none; font-weight:400;">Advanced sampling</label>
+            </div>
+            <div id="advancedSamplingPanel" style="margin-top:6px;">
+                <div style="margin-top:10px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Color tolerance</span>
+                        <span><span id="colorToleranceValue" style="color:var(--accent)">8</span></span>
+                    </div>
+                    <input type="range" id="colorToleranceSlider" min="0" max="32" value="8">
+                </div>
+                <div style="margin-top:10px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Block inset</span>
+                        <span><span id="blockInsetValue" style="color:var(--accent)">0</span>px</span>
+                    </div>
+                    <input type="range" id="blockInsetSlider" min="0" max="16" value="0">
+                </div>
+                <div style="margin-top:10px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Alpha cutoff</span>
+                        <span><span id="alphaCutoffValue" style="color:var(--accent)">1</span></span>
+                    </div>
+                    <input type="range" id="alphaCutoffSlider" min="0" max="255" value="2">
+                </div>
+                <div style="margin-top:10px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Sample step</span>
+                        <span><span id="sampleStepValue" style="color:var(--accent)">4</span></span>
+                    </div>
+                    <input type="range" id="sampleStepSlider" min="1" max="32" value="6">
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                    Tolerance groups similar colors before counting. Inset ignores a small border around each block. Sample step trades accuracy for speed.
+                </div>
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="alignmentDetails">
+            <summary>
+                <span class="summary-title">Grid Alignment</span>
+                <span class="summary-meta">Offsets and drift repair</span>
+            </summary>
+            <div style="display:flex; gap:12px;">
+                <div style="flex:1;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Offset X</span>
+                        <span><span id="offsetXValue" style="color:var(--accent)">0</span>px</span>
+                    </div>
+                    <input type="range" id="offsetXSlider" min="0" max="63" value="0">
+                </div>
+                <div style="flex:1;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Offset Y</span>
+                        <span><span id="offsetYValue" style="color:var(--accent)">0</span>px</span>
+                    </div>
+                    <input type="range" id="offsetYSlider" min="0" max="63" value="0">
+                </div>
+            </div>
+            <button class="btn btn-outline" id="detectGridBtn" style="padding:8px 10px; font-size:0.8rem;">Auto-detect grid</button>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="lockGridCheckbox">
+                <label style="text-transform:none; font-weight:400;">Lock grid</label>
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3;">
+                Offset shifts where blocks start. Auto-detect tries to align to the most consistent pixel grid (good for AI pixel art).
+            </div>
+            <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="preResizeCheckbox">
+                    <label style="text-transform:none; font-weight:400;">Pre-resize image (fix grid drift)</label>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                    <input type="checkbox" id="preResizeLinkCheckbox" checked>
+                    <label style="text-transform:none; font-weight:400;">Link X/Y</label>
+                </div>
+                <div class="two-col" style="margin-top:10px;">
+                    <div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                            <span>Scale X</span>
+                            <span><span id="preResizeXValue" style="color:var(--accent)">100</span>%</span>
+                        </div>
+                        <input type="range" id="preResizeXSlider" min="80" max="120" value="100" step="1">
+                    </div>
+                    <div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                            <span>Scale Y</span>
+                            <span><span id="preResizeYValue" style="color:var(--accent)">100</span>%</span>
+                        </div>
+                        <input type="range" id="preResizeYSlider" min="80" max="120" value="100" step="1">
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <div style="font-size:0.75rem; color:var(--text-dim);">Resample</div>
+                    <select id="preResizeMethodSelect">
+                        <option value="smooth" selected>Smooth (recommended)</option>
+                        <option value="nearest">Nearest</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="btn btn-outline" id="snapToBlocksBtn" style="padding:8px 10px; font-size:0.8rem;">Snap size to blocks</button>
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                Useful when AI pixel art is slightly scaled and the pixel grid "drifts". Try small changes like 99% or 101%, then re-detect the grid.
+                </div>
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="paletteDetails" open>
+            <summary>
+                <span class="summary-title">Palette</span>
+                <span class="summary-meta">Snap colors cleanly</span>
+            </summary>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <input type="checkbox" id="paletteEnableCheckbox">
+                <label style="text-transform:none; font-weight:400;">Enable palette snapping</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Preset</div>
+                <select id="palettePresetSelect">
+                    <option value="auto" selected>Auto from image</option>
+                    <option value="pico8">PICO-8 (16)</option>
+                    <option value="gb">Game Boy (4)</option>
+                    <option value="db16">DawnBringer 16</option>
+                    <option value="c64">C64 (16)</option>
+                </select>
+                <div id="palettePresetHint" style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                    Presets force a fixed palette (useful for perfecting AI pixel art).
+                </div>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Palette size</span>
+                    <span><span id="paletteSizeValue" style="color:var(--accent)">16</span></span>
+                </div>
+                <input type="range" id="paletteSizeSlider" min="2" max="256" value="16">
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Quantizer</div>
+                <select id="paletteMethodSelect">
+                    <option value="kmeans" selected>K-Means (better)</option>
+                    <option value="median">Median Cut (fast)</option>
+                </select>
+            </div>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="lockPaletteCheckbox">
+                <label style="text-transform:none; font-weight:400;">Lock palette</label>
+            </div>
+            <div id="paletteSwatches" class="palette-swatches" style="margin-top:10px;"></div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn btn-outline" id="exportPaletteBtn" style="padding:8px 10px; font-size:0.8rem;">Export palette</button>
+                <button class="btn btn-outline" id="exportIndexedBtn" style="padding:8px 10px; font-size:0.8rem;">Export indexed PNG</button>
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                Palette snapping is the biggest win for AI pixel art: it kills near-duplicate colors and stabilizes clusters.
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="cleanupDetails" open>
+            <summary>
+                <span class="summary-title">AI Cleanup</span>
+                <span class="summary-meta">Remove blur, mush, and fake AA</span>
+            </summary>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <input type="checkbox" id="gradientCrushCheckbox">
+                <label style="text-transform:none; font-weight:400;">Gradient crush</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Value steps</span>
+                    <span><span id="valueStepsValue" style="color:var(--accent)">0</span></span>
+                </div>
+                <input type="range" id="valueStepsSlider" min="0" max="16" value="0">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+                <input type="checkbox" id="mergeSimilarCheckbox">
+                <label style="text-transform:none; font-weight:400;">Merge similar regions</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Merge threshold</span>
+                    <span><span id="mergeThresholdValue" style="color:var(--accent)">12</span></span>
+                </div>
+                <input type="range" id="mergeThresholdSlider" min="0" max="80" value="12">
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Min region size</span>
+                    <span><span id="mergeMinSizeValue" style="color:var(--accent)">8</span>px</span>
+                </div>
+                <input type="range" id="mergeMinSizeSlider" min="1" max="256" value="8">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+                <input type="checkbox" id="despeckleCheckbox">
+                <label style="text-transform:none; font-weight:400;">Despeckle</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Despeckle strength</span>
+                    <span><span id="despeckleValue" style="color:var(--accent)">50</span></span>
+                </div>
+                <input type="range" id="despeckleSlider" min="0" max="100" value="50">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+                <input type="checkbox" id="islandsCheckbox">
+                <label style="text-transform:none; font-weight:400;">Remove tiny islands</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Min island size</span>
+                    <span><span id="islandsValue" style="color:var(--accent)">8</span></span>
+                </div>
+                <input type="range" id="islandsSlider" min="0" max="64" value="8">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+                <input type="checkbox" id="aaRemoveCheckbox">
+                <label style="text-transform:none; font-weight:400;">Anti-alias remover</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>AA strength</span>
+                    <span><span id="aaStrengthValue" style="color:var(--accent)">50</span></span>
+                </div>
+                <input type="range" id="aaStrengthSlider" min="0" max="100" value="50">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+                <input type="checkbox" id="ditherCleanupCheckbox">
+                <label style="text-transform:none; font-weight:400;">Dither cleanup</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Dither strength</span>
+                    <span><span id="ditherStrengthValue" style="color:var(--accent)">50</span></span>
+                </div>
+                <input type="range" id="ditherStrengthSlider" min="0" max="100" value="50">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+                <input type="checkbox" id="outlineCheckbox">
+                <label style="text-transform:none; font-weight:400;">Outline</label>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+                <input type="color" id="outlineColorPicker" value="#000000">
+                <select id="outlineModeSelect">
+                    <option value="inside" selected>Inside</option>
+                    <option value="outside">Outside</option>
+                </select>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Outline thickness</span>
+                    <span><span id="outlineThicknessValue" style="color:var(--accent)">1</span>px</span>
+                </div>
+                <input type="range" id="outlineThicknessSlider" min="1" max="8" value="1">
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Silhouette detection</div>
+                <select id="outlineDetectionSelect">
+                    <option value="auto" selected>Auto detect</option>
+                    <option value="alpha">Transparent alpha</option>
+                    <option value="corners">Corner background</option>
+                    <option value="edges">Edge background</option>
+                    <option value="contrast">Color contrast</option>
+                </select>
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                These cleanups target common AI artifacts: noisy dithering, gradient mush, fake anti-aliasing, and missing sprite silhouettes.
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="spriteSheetDetails">
+            <summary>
+                <span class="summary-title">Sprite Sheet</span>
+                <span class="summary-meta">Process cells separately</span>
+            </summary>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <input type="checkbox" id="spriteSheetCheckbox">
+                <label style="text-transform:none; font-weight:400;">Process as sprite sheet</label>
+            </div>
+            <div class="two-col" style="margin-top:10px;">
+                <div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Cell W</span><span><span id="cellWValue" style="color:var(--accent)">32</span>px</span>
+                    </div>
+                    <input type="range" id="cellWSlider" min="8" max="512" value="32" step="1">
+                </div>
+                <div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Cell H</span><span><span id="cellHValue" style="color:var(--accent)">32</span>px</span>
+                    </div>
+                    <input type="range" id="cellHSlider" min="8" max="512" value="32" step="1">
+                </div>
+            </div>
+            <div class="two-col" style="margin-top:10px;">
+                <div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Gap X</span><span><span id="gapXValue" style="color:var(--accent)">0</span>px</span>
+                    </div>
+                    <input type="range" id="gapXSlider" min="0" max="64" value="0" step="1">
+                </div>
+                <div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                        <span>Gap Y</span><span><span id="gapYValue" style="color:var(--accent)">0</span>px</span>
+                    </div>
+                    <input type="range" id="gapYSlider" min="0" max="64" value="0" step="1">
+                </div>
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                Applies the same cleanup per cell so colors and grids don't bleed between sprites.
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="transparencyDetails">
+            <summary>
+                <span class="summary-title">Transparency</span>
+                <span class="summary-meta">Background and edges</span>
+            </summary>
+            <div class="color-well">
+                <input type="color" id="bgColorPicker" value="#ffffff">
+                <button class="btn btn-outline" id="pickColorBtn" style="padding:4px 8px; font-size:0.7rem;">Sample Eye-dropper</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:5px;">
+                <input type="checkbox" id="forceOpaqueBlocksCheckbox" checked>
+                <label style="text-transform:none; font-weight:400;">Force opaque pixel blocks</label>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:5px;">
+                <input type="checkbox" id="removeBgCheckbox">
+                <label style="text-transform:none; font-weight:400;">Remove selected color</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>BG match</span>
+                    <span><span id="bgMatchValue" style="color:var(--accent)">30</span></span>
+                </div>
+                <input type="range" id="bgMatchSlider" min="0" max="100" value="30">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+                <input type="checkbox" id="preserveTransparencyCheckbox" checked>
+                <label style="text-transform:none; font-weight:400;">Preserve transparency (avoid bleed)</label>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Min opaque coverage</span>
+                    <span><span id="minOpaqueValue" style="color:var(--accent)">15</span>%</span>
+                </div>
+                <input type="range" id="minOpaqueSlider" min="0" max="100" value="15">
+            </div>
+        </details>
+
+        <details class="control-group sidebar-panel" id="exportDetails">
+            <summary>
+                <span class="summary-title">Preview &amp; Export</span>
+                <span class="summary-meta">Resolution, overlays, quality</span>
+            </summary>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="fastPreviewCheckbox" checked>
+                <label style="text-transform:none; font-weight:400;">Fast preview (scale down)</label>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <input type="checkbox" id="targetResCheckbox">
+                <label style="text-transform:none; font-weight:400;">Normalize to sprite resolution</label>
+            </div>
+            <div style="margin-top:6px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Target max side</span>
+                    <span><span id="targetMaxValue" style="color:var(--accent)">128</span>px</span>
+                </div>
+                <input type="range" id="targetMaxSlider" min="16" max="512" value="128" step="8">
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Downsample</div>
+                <select id="targetResampleSelect">
+                    <option value="smooth" selected>Smooth</option>
+                    <option value="nearest">Nearest</option>
+                </select>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Output resolution</div>
+                <select id="outputResolutionSelect">
+                    <option value="original" selected>Original size</option>
+                    <option value="target">Target size</option>
+                </select>
+            </div>
+            <div style="margin-top:6px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Preview max size</span>
+                    <span><span id="previewMaxValue" style="color:var(--accent)">1024</span>px</span>
+                </div>
+                <input type="range" id="previewMaxSlider" min="256" max="2048" step="64" value="1024">
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Export quality</div>
+                <select id="exportQualitySelect">
+                    <option value="original" selected>Original (slow, best)</option>
+                    <option value="preview">Preview (fast)</option>
+                </select>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:0.75rem; color:var(--text-dim);">Overlay</div>
+                <select id="overlayModeSelect">
+                    <option value="none" selected>None</option>
+                    <option value="diff">Changed pixels</option>
+                    <option value="snapped">Palette snapped</option>
+                    <option value="aa">AA removed</option>
+                    <option value="dither">Dither cleaned</option>
+                    <option value="islands">Islands removed</option>
+                    <option value="outline">Outline</option>
+                </select>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:0.75rem; color:var(--text-dim);">
+                    <span>Overlay opacity</span>
+                    <span><span id="overlayOpacityValue" style="color:var(--accent)">40</span>%</span>
+                </div>
+                <input type="range" id="overlayOpacitySlider" min="0" max="100" value="40">
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-dim); line-height:1.3; margin-top:6px;">
+                Preview is rendered at a scaled size for speed. Export can render from preview or re-render from the original image.
+            </div>
+        </details>
+
+        <button class="btn btn-primary" id="convertBtn">Process Pixels</button>
+
+        <div class="control-group sidebar-panel action-panel" style="margin-top:auto; gap:10px;">
+            <div class="panel-heading">
+                <label>Output</label>
+                <span class="panel-kicker">Nearest-neighbor exports</span>
+            </div>
+            <button class="btn btn-success" id="downloadBtn" style="display:none;">Save PNG</button>
+            <button class="btn btn-outline" id="downloadAllBtn" style="display:none;">Save All PNGs</button>
+            <button class="btn btn-outline" id="downloadScaledBtn" style="display:none;">Save 4K Scale</button>
+            <button class="btn btn-outline" id="downloadGifBtn" style="display:none;">Save GIF</button>
+            <button class="btn btn-outline" id="downloadFramesBtn" style="display:none;">Save Frames</button>
+        </div><!-- /.action-panel -->
+        </div><!-- /.sidebar -->
+
+        <div class="main-content">
+        <div class="preview-view-tabs" role="tablist" aria-label="Preview mode">
+            <button class="preview-view-tab active" id="previewModeTwoBtn" data-preview-mode="two" type="button" role="tab" aria-selected="true">2 Views</button>
+            <button class="preview-view-tab" id="previewModeRevealBtn" data-preview-mode="reveal" type="button" role="tab" aria-selected="false">Reveal Slider</button>
+        </div>
+        <div class="preview-grid">
+            <div class="preview-card" id="cardOriginal">
+                <h3>Source Image</h3>
+                <div class="canvas-wrap" id="originalWrap">
+                    <canvas id="originalCanvas" class="hidden"></canvas>
+                </div>
+            </div>
+        <div class="preview-card" id="cardPixel">
+            <h3>Pixel Preview</h3>
+            <div class="preview-meta" id="previewInfo"></div>
+                <div class="canvas-wrap" id="pixelWrap">
+                    <div class="canvas-stack">
+                        <canvas id="pixelCanvas" class="hidden"></canvas>
+                        <canvas id="overlayCanvas" class="hidden"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-card compare-card" id="cardCompare">
+                <div class="compare-header">
+                    <h3>Left/Right Reveal</h3>
+                    <div class="preview-meta"><span id="revealValue">50</span>% source / pixel split</div>
+                </div>
+                <div class="canvas-wrap compare-wrap" id="compareWrap">
+                    <canvas id="compareCanvas" class="hidden"></canvas>
+                </div>
+                <input type="range" id="revealSlider" min="0" max="100" value="50" hidden aria-hidden="true" tabindex="-1">
+            </div>
+            <div class="preview-card gif-frame-strip-card hidden" id="gifFrameStripCard">
+                <div class="compare-header">
+                    <h3>GIF Frames</h3>
+                    <div class="gif-frame-strip-header-actions">
+                        <button type="button" class="ghost-button mini-button" id="gifPlaybackToggleBtn">Pause</button>
+                        <div class="preview-meta" id="gifFrameStripMeta">Frame 1 / 1</div>
+                    </div>
+                </div>
+                <div class="gif-frame-strip" id="gifFrameStrip" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <strong>Pro Tip:</strong> Use "AI to Real Pixels" first for fake pixel-art renders, then tune Block Sampling and Palette. Export from target size when you need an actual low-resolution pixel image.
+        </div>
+        </div><!-- /.main-content -->
+    </div><!-- /.tool-layout -->
+
+    <script src="js/pas-core.js"></script>
+    <script src="js/pas-png-indexed.js"></script>
+    <script src="js/pas-palette.js"></script>
+    <script src="js/pas-cleanup.js"></script>
+    <script src="js/pas-grid.js"></script>
+    <script src="js/pas-render.js"></script>
+    <script src="js/pas-ui-presets.js"></script>
+    <script src="/tools/art/spritesheet-utility/vendor/gif.js"></script>
+    <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

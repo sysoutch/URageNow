@@ -1,0 +1,225 @@
+  body.view-ai-active,
+  body.view-tools-active {
+    --bg: var(--studio-shell-bg-start, #120909);
+    --bg-2: var(--studio-shell-bg-end, #0e0707);
+    --rail: var(--studio-rail-bg, #1a0d0c);
+    --sidebar: var(--studio-panel-bg-soft, rgba(12, 7, 8, 0.84));
+    --surface: var(--studio-surface-bg, #10090a);
+    --panel: var(--studio-panel-bg, rgba(18, 10, 10, 0.9));
+    --panel-alt: var(--studio-panel-bg-soft, rgba(12, 7, 8, 0.84));
+    --line: var(--studio-panel-border, rgba(255, 128, 74, 0.26));
+    --line-strong: color-mix(in srgb, var(--studio-panel-border, rgba(255, 128, 74, 0.26)) 150%, white 6%);
+    --accent: var(--studio-accent-2, #ff6a35);
+    --accent-2: var(--studio-accent-3, #ff3d1f);
+    --accent-3: var(--studio-accent-1, #ffb266);
+    --accent-soft: var(--studio-accent-soft, rgba(255, 126, 68, 0.26));
+    --dashboard-scroll-track: color-mix(in srgb, var(--studio-panel-bg-soft, rgba(12, 7, 8, 0.84)) 86%, black 14%);
+    --dashboard-scroll-track-strong: color-mix(in srgb, var(--studio-panel-bg-soft, rgba(12, 7, 8, 0.84)) 82%, black 18%);
+    --dashboard-scroll-thumb: color-mix(in srgb, var(--studio-accent-2, #ff6a35) 72%, #ffcf9c 28%);
+    --dashboard-scroll-thumb-2: color-mix(in srgb, var(--studio-accent-3, #ff3d1f) 76%, #ffd5a8 24%);
+    --dashboard-scroll-thumb-hover: color-mix(in srgb, var(--studio-accent-1, #ffb266) 70%, white 30%);
+    --dashboard-scroll-thumb-hover-2: color-mix(in srgb, var(--studio-accent-2, #ff6a35) 80%, #ffd29f 20%);
+    --studio-workflow-sidebar-width: 0px;
+    --studio-workflow-sidebar-pin-width: 280px;
+    background:
+      radial-gradient(circle at 16% 8%, color-mix(in srgb, var(--studio-accent-2, #ff6a35) 26%, transparent) 0%, transparent 36%),
+      radial-gradient(circle at 78% 4%, color-mix(in srgb, var(--studio-accent-1, #ffb266) 18%, transparent) 0%, transparent 38%),
+      radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--studio-accent-3, #ff3d1f) 16%, transparent) 0%, transparent 44%),
+      linear-gradient(170deg, var(--studio-shell-bg-start, #120909) 0%, var(--studio-shell-bg-mid, #1a0907) 46%, var(--studio-shell-bg-end, #0e0707) 100%);
+  }
+
+  body.view-tools-active .server-rail,
+  body.view-tools-active .side-nav {
+    border-right-color: var(--studio-panel-border);
+  }
+
+  body.view-tools-active .content-shell {
+    border-color: var(--studio-panel-border);
+  }
+
+  body.view-ai-active .app-shell {
+    grid-template-columns:
+      var(--server-rail-width, 84px)
+      var(--studio-workflow-sidebar-width, 0px)
+      minmax(0, 1fr) !important;
+    border: 0;
+    border-radius: 0;
+  }
+
+  body.view-ai-active .server-rail,
+  body.view-ai-active .side-nav {
+    grid-column: 1;
+  }
+
+  body.view-ai-active .studio-workflow-sidebar {
+    grid-column: 2;
+    border-radius: 0;
+    border-right: 1px solid var(--studio-panel-border);
+  }
+
+  body.view-ai-active .content-shell {
+    grid-column: 3;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  body.view-ai-active .details-pane,
+  body.view-ai-active .side-panel.side-panel-right {
+    display: none !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-open.studio-workflow-sidebar-sticky {
+    --studio-workflow-sidebar-width: var(--studio-workflow-sidebar-pin-width, 280px);
+  }
+
+  body.view-ai-active .workspace-sidebar:not(.studio-workflow-sidebar),
+  body.view-ai-active .content-header,
+  body.view-ai-active .content-header-messenger-row,
+  body.view-ai-active .content-header-view-row,
+  body.view-ai-active .content-header-side,
+  body.view-ai-active .shell-toggle[data-discord-only="true"],
+  body.view-ai-active .shell-toggle[data-non-discord-only="true"],
+  body.view-ai-active .rail-divider,
+  body.view-ai-active .rail-guilds,
+  body.view-ai-active .shell-edge-toggle {
+    display: none !important;
+  }
+
+  body.view-ai-active .studio-workflow-sidebar {
+    display: none !important;
+    position: relative;
+    z-index: 42;
+    transform: translateX(-18px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+
+  body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-floaty .studio-workflow-sidebar {
+    position: absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: calc(var(--server-rail-width, 84px) - 1px) !important;
+    width: var(--studio-workflow-sidebar-pin-width, 280px) !important;
+    z-index: 64 !important;
+    box-shadow: 24px 0 48px rgba(0, 0, 0, 0.28);
+  }
+
+  .studio-workflow-sidebar-resizer {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--server-rail-width, 84px) + var(--studio-workflow-sidebar-width, 0px) - 5px);
+    width: 10px;
+    z-index: 66;
+    cursor: col-resize;
+    touch-action: none;
+  }
+
+  .studio-workflow-sidebar-resizer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 4px;
+    width: 2px;
+    background: transparent;
+    transition: background 160ms ease, box-shadow 160ms ease;
+  }
+
+  body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-open.studio-workflow-sidebar-sticky .studio-workflow-sidebar-resizer {
+    display: block;
+  }
+
+  body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-open.studio-workflow-sidebar-sticky .studio-workflow-sidebar-resizer:hover::before,
+  body.studio-workflow-sidebar-resizing .studio-workflow-sidebar-resizer::before {
+    background: var(--studio-accent-2, #ff6a35);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--studio-accent-2, #ff6a35) 64%, transparent);
+  }
+
+  body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-open .studio-workflow-sidebar {
+    display: block !important;
+    min-width: 0;
+    overflow: hidden;
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  body.view-ai-active.studio-workflow-focused.studio-workflow-sidebar-floaty:not(.studio-workflow-sidebar-open) .studio-workflow-sidebar {
+    display: block !important;
+    transform: translateX(-102%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  body.view-ai-active .content-shell {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  body.view-ai-active .view[data-view-panel="ai"].active .ai-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.view-ai-active .ai-grid.ai-focused-mode,
+  body.view-ai-active .ai-grid.ai-focused-mode .ai-detail-card {
+    min-height: 0;
+    height: 100%;
+  }
+
+  body.view-ai-active .ai-grid.ai-focused-mode {
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+  }
+
+  body.view-ai-active.studio-workflow-focused .studio-workflow-sidebar {
+    padding: 0;
+  }
+
+  body.view-ai-active.studio-workflow-focused .studio-workflow-sidebar > .sidebar-mode-panel {
+    padding: 16px;
+    box-shadow: none;
+  }
+
+  body.view-ai-active.studio-workflow-focused .content-shell {
+    padding: 0;
+  }
+
+  body.view-ai-active.studio-workflow-focused .view[data-view-panel="ai"].active {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  body.view-ai-active.studio-workflow-focused .ai-grid.ai-focused-mode {
+    gap: 0;
+    overflow: hidden;
+  }
+
+  body.view-ai-active.studio-workflow-focused .ai-detail-card {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  // URage Now Home is a page-level overview, not a card inside a second
+  // framed shell. Its own cards provide the spacing and boundaries.
+  body.view-ai-active.studio-home-active :is(.content-shell, .view[data-view-panel="ai"].active) {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.view-ai-active.studio-home-active .studio-view-shell {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.view-ai-active .mobile-bottom-nav {
+    display: none !important;
+  }

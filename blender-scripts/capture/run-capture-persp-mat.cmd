@@ -1,0 +1,1 @@
+"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b "C:\files\test.blend" --python "C:\Files\URageStudio\blender-scripts\capture\capture.py" -- --output "C:\files\screenshot_persp_mat.png" --width 1080 --height 1080 --background transparent --rotate --axis Z --frames 60 --projection PERSP --shading MATERIAL --zoom 1.5 --gif-folder "C:\files\gif_frames_persp_mat"

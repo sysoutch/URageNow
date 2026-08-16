@@ -1,0 +1,8 @@
+// Catalog controls are not useful while an embedded tool owns the workspace.
+.tools-workspace-card.is-tool-active .tools-dashboard-toolbar {
+  display: none !important;
+}
+
+.tools-workspace-card.is-tool-active #tools-add-tool-button {
+  display: none !important;
+}

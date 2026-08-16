@@ -1,0 +1,304 @@
+// Bridges the older messenger pages onto the current Studio theme contract.
+// Messenger brands may still colour their own identity/status indicators, but
+// page surfaces, controls, and typography must come from one theme source.
+
+$messenger-views: ".view-dashboard-active, .view-messaging-active, .view-messenger-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-activity-active";
+$expanded-rail-content-views: ".view-ai-active, .view-tools-active, .view-profile-active, .view-blender-addons-active, .view-assets-active, .view-dashboard-active, .view-messaging-active, .view-messenger-active, .view-automation-active, .view-guild-active, .view-moderation-active, .view-activity-active";
+
+body[data-dashboard-theme]:is(#{$messenger-views}) {
+  --bg: var(--studio-shell-bg-end);
+  --bg-2: var(--studio-shell-bg-mid);
+  --rail: var(--studio-rail-bg);
+  --sidebar: var(--studio-rail-bg);
+  --surface: var(--studio-surface-bg);
+  --panel: var(--studio-panel-bg);
+  --panel-alt: var(--studio-panel-bg-soft);
+  --line: var(--studio-panel-border);
+  --line-strong: color-mix(in srgb, var(--studio-panel-border) 72%, var(--studio-accent-1) 28%);
+  --accent: var(--studio-accent-1);
+  --accent-2: var(--studio-accent-2);
+  --accent-3: var(--studio-accent-3);
+  --accent-soft: var(--studio-accent-soft);
+  --card-glow: color-mix(in srgb, var(--studio-accent-1) 14%, transparent);
+  background:
+    radial-gradient(circle at 75% 10%, color-mix(in srgb, var(--studio-accent-soft) 58%, transparent), transparent 34rem),
+    linear-gradient(145deg, var(--studio-shell-bg-start), var(--studio-shell-bg-end)) !important;
+}
+
+body[data-dashboard-theme]:is(#{$messenger-views}) {
+  .app-shell,
+  .content-shell,
+  .workspace-sidebar,
+  .side-panel,
+  .details-pane,
+  .chat-workspace,
+  .messenger-chat-workspace,
+  .chat-header-card,
+  .chat-feed-card,
+  .chat-sidebar-card,
+  .chat-composer-card {
+    background: color-mix(in srgb, var(--studio-surface-bg) 92%, transparent) !important;
+  }
+
+  :is(
+    .panel-card,
+    .feature-card,
+    .tool-card,
+    .detail-card,
+    .sidebar-card,
+    .channel-row,
+    .channel-browser,
+    .chat-bubble,
+    .output,
+    .chip,
+    .messenger-dashboard-header-card,
+    .messenger-dashboard-stat-card,
+    .messenger-dashboard-feed-card,
+    .messenger-dashboard-activity-card,
+    .messenger-dashboard-commands-card,
+    .messenger-dashboard-detail-card,
+    .messenger-dashboard-message-item,
+    .messenger-dashboard-fetch-controls,
+    .messenger-dashboard-detail-row,
+    .messenger-dashboard-command-meter
+  ) {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--studio-panel-bg) 96%, white 4%), var(--studio-panel-bg-soft)) !important;
+    border-color: var(--studio-panel-border) !important;
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--studio-accent-1) 9%, transparent) !important;
+  }
+
+  :is(input, textarea, select, .markdown-render-box) {
+    color: var(--ink) !important;
+    background: color-mix(in srgb, var(--studio-panel-bg-soft) 92%, black 8%) !important;
+    border-color: var(--studio-panel-border) !important;
+  }
+
+  :is(button, .secondary, .ghost, .dashboard-tab) {
+    color: var(--ink) !important;
+    border-color: var(--studio-panel-border) !important;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--studio-panel-bg) 88%, var(--studio-accent-soft)), var(--studio-panel-bg-soft)) !important;
+    box-shadow: none !important;
+  }
+
+  :is(button, .secondary, .ghost, .dashboard-tab):is(:hover, :focus-visible, .active) {
+    border-color: color-mix(in srgb, var(--studio-accent-1) 72%, var(--studio-panel-border)) !important;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--studio-accent-soft) 72%, var(--studio-panel-bg)), var(--studio-panel-bg-soft)) !important;
+  }
+
+  :is(
+    .panel-kicker,
+    .panel-subtitle,
+    .hint,
+    .chat-channel-subtitle,
+    .chat-role,
+    .messenger-dashboard-message-item.is-empty
+  ) {
+    color: var(--muted) !important;
+  }
+
+  :is(
+    .messenger-dashboard-copy h3,
+    .messenger-dashboard-stat-value,
+    .messenger-dashboard-message-top strong,
+    .messenger-dashboard-detail-row strong,
+    .messenger-dashboard-command-head,
+    .messenger-dashboard-command-head strong
+  ) {
+    color: var(--ink) !important;
+  }
+}
+
+// Messenger is a workspace, not the legacy chat/sidebar two-column layout.
+// Reusing that grid left an empty implicit sidebar column and let generic .row
+// rules turn Matrix permission choices into overlapping full-width controls.
+@media (min-width: 981px) {
+  body.view-messenger-active [data-view-panel="messenger"] {
+    min-height: 0;
+    height: 100%;
+  }
+
+  body.view-messenger-active .messenger-chat-workspace {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: none !important;
+    align-content: start;
+  }
+
+  body.view-messenger-active .messenger-chat-workspace > :is(.chat-header-card, .chat-feed-card, .chat-composer-card) {
+    grid-area: auto !important;
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+body.view-messenger-active #matrix-workflow-permission-actions {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+body.view-messenger-active #matrix-workflow-permission-actions > label,
+body.view-messenger-active .chat-composer-card > label:has(#matrix-workflow-allow-all-members) {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 38px;
+  margin: 0 !important;
+  padding: 8px 10px;
+  border: 1px solid var(--studio-panel-border);
+  background: color-mix(in srgb, var(--studio-panel-bg-soft) 88%, black 12%);
+  color: var(--ink);
+}
+
+body.view-messenger-active #matrix-workflow-permission-actions input,
+body.view-messenger-active #matrix-workflow-allow-all-members {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+
+@media (min-width: 981px) {
+  // In the base rail grid, the third row is the flexible one. Messenger
+  // content lives in .rail-home-wrap, which was left in an auto-height second
+  // row, leaving the flexible row as a large blank strip above the swatches.
+  // Make the room rail—not the decorative theme-switcher row—own that space.
+  body:is(
+    .view-ai-active,
+    .view-tools-active,
+    .view-profile-active,
+    .view-blender-addons-active,
+    .view-assets-active,
+    .view-dashboard-active,
+    .view-messaging-active,
+    .view-automation-active,
+    .view-guild-active,
+    .view-moderation-active,
+    .view-messenger-active,
+    .view-activity-active
+  ).studio-rail-expanded :is(.server-rail, .side-nav) {
+    grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+    gap: 8px !important;
+  }
+
+  body:is(
+    .view-ai-active,
+    .view-tools-active,
+    .view-profile-active,
+    .view-blender-addons-active,
+    .view-assets-active,
+    .view-dashboard-active,
+    .view-messaging-active,
+    .view-automation-active,
+    .view-guild-active,
+    .view-moderation-active,
+    .view-messenger-active,
+    .view-activity-active
+  ).studio-rail-expanded .rail-home-wrap {
+    grid-row: 2;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  body.view-messenger-active .rail-home-wrap .rail-guilds {
+    flex: 1 1 auto;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  // The inactive AI workflow list was invisible but still occupied six rows
+  // before the Messenger categories. Remove it from layout entirely.
+  body.view-messenger-active .rail-studio-workflows {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  // Matrix/Telegram room lists are the rail's flexible content region.
+  // Their old fixed 220px list left a false empty sidebar beneath rooms.
+  body.view-messenger-active .rail-direct-messages {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr);
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  body.view-messenger-active .rail-direct-message-list {
+    max-height: none !important;
+    min-height: 0;
+  }
+
+  body:is(
+    .view-ai-active,
+    .view-tools-active,
+    .view-profile-active,
+    .view-blender-addons-active,
+    .view-assets-active,
+    .view-dashboard-active,
+    .view-messaging-active,
+    .view-automation-active,
+    .view-guild-active,
+    .view-moderation-active,
+    .view-messenger-active,
+    .view-activity-active
+  ).studio-rail-expanded .rail-theme-switcher {
+    grid-row: 3;
+  }
+
+  body:is(
+    .view-ai-active,
+    .view-tools-active,
+    .view-profile-active,
+    .view-blender-addons-active,
+    .view-assets-active,
+    .view-dashboard-active,
+    .view-messaging-active,
+    .view-automation-active,
+    .view-guild-active,
+    .view-moderation-active,
+    .view-messenger-active,
+    .view-activity-active
+  ).studio-rail-expanded .rail-bottom {
+    grid-row: 4;
+  }
+
+  // A legacy five-row grid is still emitted by Studio chrome after the
+  // feature styles. Do not try to reassign its spacer tracks: make the rail a
+  // simple vertical layout and give its actual content container the free
+  // space. This is shared by Tools, Studios, and Messenger routes.
+  body:is(#{$expanded-rail-content-views}).studio-rail-expanded :is(.server-rail, .side-nav) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-items: initial !important;
+    gap: 0 !important;
+    min-height: 0 !important;
+  }
+
+  body:is(#{$expanded-rail-content-views}).studio-rail-expanded .rail-home-wrap {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  body:is(#{$expanded-rail-content-views}).studio-rail-expanded :is(.rail-divider, .rail-theme-switcher, .rail-bottom) {
+    flex: 0 0 auto !important;
+  }
+
+  body:is(#{$messenger-views}).studio-rail-expanded .rail-direct-messages {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+}

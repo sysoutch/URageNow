@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Texture Map Painter</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <style>
+    :root {
+      --bg: #101217;
+      --panel: #181c24;
+      --panel2: #202633;
+      --text: #eef2ff;
+      --muted: #9aa6bd;
+      --line: #30384a;
+      --accent: #79a7ff;
+      --danger: #ff7474;
+      --ok: #65d69e;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1d2432, var(--bg));
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    #app {
+      display: grid;
+      grid-template-columns: 350px 1fr 460px;
+      height: 100vh;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .panel {
+      background: rgba(24, 28, 36, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .panel h2 {
+      margin: 0;
+      padding: 14px 16px;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .section {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      margin: 9px 0;
+    }
+
+    input[type="range"] { width: 150px; }
+    input[type="color"] {
+      width: 42px;
+      height: 28px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    select, button, input[type="number"] {
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    button {
+      cursor: pointer;
+      transition: transform .1s ease, background .15s ease;
+    }
+    button:hover { background: #2a3345; }
+    button:active { transform: translateY(1px); }
+    button.primary { background: #2957ac; border-color: #3d74d9; }
+    button.danger { background: #5a2730; border-color: #7e3441; }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      align-items: center;
+    }
+
+    .tab {
+      border-radius: 999px;
+      padding: 8px 14px;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+    }
+    .tab.active { background: #315da8; border-color: #6297ff; }
+
+    #paintWrap {
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      padding: 14px;
+      position: relative;
+    }
+
+    #paintCanvas {
+      width: min(72vh, 100%);
+      height: min(72vh, 100%);
+      aspect-ratio: 1 / 1;
+      image-rendering: pixelated;
+      background: #808080;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.35);
+      cursor: crosshair;
+    }
+
+    #paintCanvas.hidden {
+      display: none;
+    }
+
+    #model3dView {
+      width: min(72vh, 100%);
+      height: min(72vh, 100%);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.35);
+      overflow: hidden;
+      display: none;
+    }
+
+    #model3dView.visible {
+      display: block;
+    }
+
+    #model3dView canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    #preview3d {
+      width: 100%;
+      height: 42vh;
+      display: block;
+      background: #080a0f;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #preview3d canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    .maps {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 12px;
+      height: calc(58vh - 22px);
+      overflow: auto;
+    }
+
+    .map-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .map-card canvas {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #000;
+      border-radius: 10px;
+      border: 1px solid #252c3a;
+      image-rendering: pixelated;
+    }
+
+    .map-card .title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .map-card button {
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+      #app { grid-template-columns: 1fr; height: auto; }
+      #preview3d { height: 360px; }
+      .maps { height: auto; }
+    }
+
+    /* Mode indicator */
+    #modeIndicator {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(41, 87, 172, 0.9);
+      color: white;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* UV overlay on preview — sits above the Three.js canvas for painting interaction */
+    #uvOverlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      cursor: crosshair;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .section-divider {
+      border-top: 1px solid var(--line);
+      margin: 8px 0;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body data-dashboard-theme="fire">
+  <div id="app">
+    <aside class="panel">
+      <h2>Brush & Map Controls</h2>
+      <div class="section">
+        <label>Paint Target
+          <select id="target">
+            <option value="albedo">Albedo (Diffuse)</option>
+            <option value="height">Height</option>
+            <option value="roughness">Roughness</option>
+            <option value="smoothness">Smoothness</option>
+          </select>
+        </label>
+        <label>Brush Size <input id="brushSize" type="range" min="2" max="100" value="34"></label>
+        <label>Brush Strength <input id="strength" type="range" min="1" max="100" value="55"></label>
+        <label>Paint Value <input id="paintValue" type="range" min="0" max="255" value="220"></label>
+        <label>Albedo Color <input id="albedoColor" type="color" value="#b8b8b8"></label>
+        <label>Falloff <input id="falloff" type="range" min="0" max="100" value="70"></label>
+        <div class="button-row">
+          <button id="invert">Invert Target</button>
+          <button id="blur">Blur Height</button>
+          <button id="clear" class="danger">Reset Maps</button>
+          <button id="fill" class="primary">Fill Target</button>
+          <button id="importAlbedo" title="Import albedo and rebuild the derived height, normal, roughness, and smoothness maps">Import Albedo + Maps</button>
+          <button id="clearAlbedo">Clear Albedo</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <label>Normal Strength <input id="normalStrength" type="range" min="1" max="120" value="45"></label>
+        <label>Height Scale <input id="heightScale" type="range" min="0" max="100" value="24"></label>
+        <label>Roughness Preview <input id="roughnessScale" type="range" min="0" max="100" value="55"></label>
+        <label>Light Rotation <input id="lightRot" type="range" min="0" max="628" value="90"></label>
+
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <label style="flex:1;margin:0;">Preview Shape
+            <select id="shape">
+              <option value="sphere">Sphere</option>
+              <option value="cube">Cube</option>
+              <option value="quad">Quad (Flat)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="section-divider">
+          <button id="importModel" class="primary" style="width:100%;">Import GLB / FBX Model</button>
+        </div>
+
+        <div class="section-divider">
+          <label style="display:flex;align-items:center;gap:6px;margin:4px 0;">
+            <input type="checkbox" id="uvPaintMode" checked>
+            UV Mode Paint (3D preview)
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;margin:4px 0;">
+            <input type="checkbox" id="generateFromImage">
+            Generate Maps From Image
+          </label>
+        </div>
+
+        <div>
+          <button id="importSourceImage" class="primary" style="width:100%;">Import Source Image</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="button-row">
+          <button data-noise="bumps">Add Bumps</button>
+          <button data-noise="scratches">Add Scratches</button>
+          <button data-noise="bricks">Brick Pattern</button>
+          <button data-noise="waves">Wave Pattern</button>
+        </div>
+      </div>
+
+      <div class="section hint">
+        Drag on the large 2D canvas to paint. In the <b>3D Model</b> tab, left-click drag paints directly on the model (UV-based). Hold <b>Alt + click</b> anywhere to toggle UV Mode Paint on/off. The preview panel is for orbit/pan/zoom only — never paints. Right-click drags pan in both viewports. Import GLB/FBX models — existing textures are auto-loaded.
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <div class="panel tabs">
+        <button class="tab active" data-view="albedo">Albedo</button>
+        <button class="tab" data-view="height">Height</button>
+        <button class="tab" data-view="normal">Normal</button>
+        <button class="tab" data-view="roughness">Roughness</button>
+        <button class="tab" data-view="smoothness">Smoothness</button>
+        <button class="tab" data-view="model3d">3D Model</button>
+      </div>
+      <div class="panel" id="paintWrap">
+        <canvas id="paintCanvas" width="512" height="512"></canvas>
+        <div id="model3dView"></div>
+      </div>
+    </main>
+
+    <aside class="panel">
+      <div id="preview3d">
+        <div id="modeIndicator">Preview Mode</div>
+        <canvas id="uvOverlay"></canvas>
+      </div>
+      <input id="albedoFile" type="file" accept="image/*" hidden>
+      <input id="sourceImageFile" type="file" accept="image/*" hidden>
+      <input id="modelFile" type="file" accept=".glb,.gltf,.fbx" hidden>
+      <div class="maps">
+        <div class="map-card"><div class="title">Albedo <button data-download="albedo">PNG</button></div><canvas id="albedoCanvas" width="256" height="256"></canvas></div>
+        <div class="map-card"><div class="title">Height <button data-download="height">PNG</button></div><canvas id="heightCanvas" width="256" height="256"></canvas></div>
+        <div class="map-card"><div class="title">Normal <button data-download="normal">PNG</button></div><canvas id="normalCanvas" width="256" height="256"></canvas></div>
+        <div class="map-card"><div class="title">Roughness <button data-download="roughness">PNG</button></div><canvas id="roughCanvas" width="256" height="256"></canvas></div>
+        <div class="map-card"><div class="title">Smoothness <button data-download="smoothness">PNG</button></div><canvas id="smoothCanvas" width="256" height="256"></canvas></div>
+      </div>
+    </aside>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+    import {
+      populateHeightFromAlbedo,
+      populateNormalFromHeight,
+      populateRoughnessFromAlbedo
+    } from './textureMapGeneration.js';
+
+    const SIZE = 512;
+    const albedoRGBA = new Uint8ClampedArray(SIZE * SIZE * 4);
+    const heightMap = new Uint8ClampedArray(SIZE * SIZE).fill(128);
+    const roughness = new Uint8ClampedArray(SIZE * SIZE).fill(155);
+    const smoothness = new Uint8ClampedArray(SIZE * SIZE).fill(100);
+    const normalRGBA = new Uint8ClampedArray(SIZE * SIZE * 4);
+
+    // Initialize albedo to gray
+    for (let i = 0; i < SIZE * SIZE; i++) {
+      const j = i * 4;
+      albedoRGBA[j] = 184; albedoRGBA[j+1] = 184; albedoRGBA[j+2] = 184; albedoRGBA[j+3] = 255;
+    }
+
+    const $ = id => document.getElementById(id);
+    const paintCanvas = $('paintCanvas');
+    const pctx = paintCanvas.getContext('2d', { willReadFrequently: true });
+    const mapCanvases = {
+      albedo: $('albedoCanvas'), height: $('heightCanvas'), normal: $('normalCanvas'), roughness: $('roughCanvas'), smoothness: $('smoothCanvas')
+    };
+    const mapCtx = Object.fromEntries(Object.entries(mapCanvases).map(([k,c]) => [k, c.getContext('2d')])) ;
+    const preview = $('preview3d');
+
+    // UV overlay canvas for 3D painting interaction
+    const uvOverlayCanvas = $('uvOverlay');
+    const uvCtx = uvOverlayCanvas.getContext('2d');
+
+    // Main Three.js renderer for the top preview panel
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setClearColor(0x808080, 1);
+
+    preview.appendChild(renderer.domElement);
+
+    // Second Three.js renderer for the 3D Model tab (main workspace)
+    const model3dView = $('model3dView');
+    const renderer3d = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false
+    });
+
+    renderer3d.outputColorSpace = THREE.SRGBColorSpace;
+    renderer3d.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer3d.toneMappingExposure = 1.6;
+
+    renderer3d.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer3d.setClearColor(0x808080, 1);
+
+    model3dView.appendChild(renderer3d.domElement);
+
+    // Both renderers share the SAME scene — different cameras/controls per viewport
+    const camera3d = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera3d.position.set(2.5, 2, 3.5);
+
+    // Separate controls for the 3D Model tab (targets renderer3d's DOM element).
+    const controls3d = new OrbitControls(camera3d, renderer3d.domElement);
+    controls3d.enablePan = true;
+
+    // Disable OrbitControls' keyboard handling so we can handle Ctrl ourselves without pan conflicts
+    controls3d.enableKeys = false;
+    controls3d.enableDamping = true;
+    controls3d.dampingFactor = 0.08;
+    controls3d.minDistance = 0.5;
+    controls3d.maxDistance = 15;
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(2, 1.8, 3);
+
+    // Disable OrbitControls' keyboard handling so Ctrl doesn't trigger pan in the preview panel either
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 0.5;
+    controls.maxDistance = 15;
+
+    // Bright lighting setup for clear model visibility
+    const ambientLight = new THREE.AmbientLight(0xffffff, 5);
+    scene.add(ambientLight);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 3.0));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 10.0);
+    keyLight.position.set(5, 8, 6);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xc8d8f0, 2.0);
+    fillLight.position.set(-5, 4, -3);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    rimLight.position.set(0, -2, -5);
+    scene.add(rimLight);
+
+    // Add a subtle environment for reflections
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const envScene = new THREE.Scene();
+    envScene.background = new THREE.Color(0x404860);
+    const envLight1 = new THREE.DirectionalLight(0xffffff, 3);
+    envLight1.position.set(5, 5, 5);
+    envScene.add(envLight1);
+    const envLight2 = new THREE.DirectionalLight(0x8ab4f8, 2);
+    envLight2.position.set(-5, 3, -5);
+    envScene.add(envLight2);
+    const envRT = pmremGenerator.fromScene(envScene);
+    scene.environment = envRT.texture;
+
+    // Texture references
+    let albedoTex, normalTex, roughTex;
+    function initTextures() {
+      const ac = document.createElement('canvas');
+      ac.width = ac.height = SIZE;
+
+      albedoTex = new THREE.CanvasTexture(ac);
+      albedoTex.colorSpace = THREE.SRGBColorSpace;
+      albedoTex.wrapS = THREE.RepeatWrapping;
+      albedoTex.wrapT = THREE.RepeatWrapping;
+      albedoTex.flipY = false;
+
+      const nc = document.createElement('canvas');
+      nc.width = nc.height = SIZE;
+
+      normalTex = new THREE.CanvasTexture(nc);
+      normalTex.colorSpace = THREE.NoColorSpace;
+      normalTex.wrapS = THREE.RepeatWrapping;
+      normalTex.wrapT = THREE.RepeatWrapping;
+      normalTex.flipY = false;
+
+      const rc = document.createElement('canvas');
+      rc.width = rc.height = SIZE;
+
+      roughTex = new THREE.CanvasTexture(rc);
+      roughTex.colorSpace = THREE.NoColorSpace;
+      roughTex.wrapS = THREE.RepeatWrapping;
+      roughTex.wrapT = THREE.RepeatWrapping;
+      roughTex.flipY = false;
+
+      // CRITICAL
+      albedoTex.needsUpdate = true;
+      normalTex.needsUpdate = true;
+      roughTex.needsUpdate = true;
+    }
+    initTextures();
+
+    // Shared material for primitives — applies our painted textures
+    const sharedMaterial = new THREE.MeshStandardMaterial({
+      map: albedoTex,
+      normalMap: normalTex,
+      roughnessMap: roughTex,
+      roughness: 0.6,
+      metalness: 0.05,
+      normalScale: new THREE.Vector2(0.5, 0.5),
+      emissive: new THREE.Color(0x111111),
+      emissiveIntensity: 0.3
+    });
+
+    // State for imported model vs primitive mode
+    let mesh = null;
+    let importedModel = false;
+
+    function setPreviewShape() {
+      if (mesh) {
+        scene.remove(mesh);
+        mesh.traverse(child => {
+          if (child.geometry) child.geometry.dispose();
+        });
+      }
+      importedModel = false;
+      $('uvPaintMode').checked = true;
+      const shapeVal = $('shape').value;
+
+      let geo;
+      if (shapeVal === 'cube') {
+        geo = new THREE.BoxGeometry(1.5, 1.5, 1.5, 8, 8, 8);
+      } else if (shapeVal === 'quad') {
+        geo = new THREE.PlaneGeometry(2, 2, 8, 8);
+      } else {
+        geo = new THREE.SphereGeometry(0.9, 64, 32);
+      }
+
+      mesh = new THREE.Mesh(geo, sharedMaterial);
+      scene.add(mesh);
+    }
+
+    function updateThreeTextures() {
+      const ac = albedoTex.image;
+      if (ac) {
+        ac.getContext('2d').putImageData(new ImageData(albedoRGBA, SIZE, SIZE), 0, 0);
+        albedoTex.needsUpdate = true;
+      }
+
+      const nc = normalTex.image;
+      if (nc) {
+        nc.getContext('2d').putImageData(new ImageData(normalRGBA, SIZE, SIZE), 0, 0);
+        normalTex.needsUpdate = true;
+      }
+
+      const rc = roughTex.image;
+      if (rc) {
+        rc.getContext('2d').putImageData(arrayToImageData(roughness), 0, 0);
+        roughTex.needsUpdate = true;
+      }
+
+      sharedMaterial.normalScale.set(+$('normalStrength').value / 45, +$('normalStrength').value / 45);
+      sharedMaterial.roughness = clamp(+$('roughnessScale').value / 100, 0.02, 1);
+      sharedMaterial.needsUpdate = true;
+
+      if (mesh) {
+        mesh.traverse(child => {
+          if (child.isMesh && child.material) {
+
+            if (child.material.map) {
+              child.material.map.needsUpdate = true;
+            }
+
+            if (child.material.normalMap) {
+              child.material.normalMap.needsUpdate = true;
+            }
+
+            if (child.material.roughnessMap) {
+              child.material.roughnessMap.needsUpdate = true;
+            }
+
+            child.material.needsUpdate = true;
+          }
+        });
+      }
+    }
+
+    // Extract a Three.js texture to our SIZE x SIZE RGBA array
+    function textureToRGBA(texture) {
+      if (!texture || !texture.image) return null;
+      const img = texture.image;
+      const c = document.createElement('canvas');
+      // Use the texture's actual dimensions, but cap at SIZE
+      const w = Math.min(img.width, SIZE);
+      const h = Math.min(img.height, SIZE);
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext('2d');
+
+      if (img instanceof HTMLVideoElement) {
+        ctx.drawImage(img, 0, 0, w, h);
+      } else {
+        ctx.drawImage(img, 0, 0, w, h);
+      }
+      return ctx.getImageData(0, 0, w, h);
+    }
+
+    // Extract texture from a material by common property names
+    function extractTextureFromMaterial(mat, propNames) {
+      for (const name of propNames) {
+        const tex = mat[name];
+        if (tex && tex.isTexture && tex.image) {
+          return tex;
+        }
+      }
+      return null;
+    }
+
+    // Load a Three.js texture into our internal arrays at SIZE x SIZE
+    function loadTextureToArray(texture, targetArray, isRGBA = true, sRGB = false) {
+      if (!texture) return false;
+      const img = texture.image;
+      if (!img) return false;
+
+      const c = document.createElement('canvas');
+      c.width = SIZE;
+      c.height = SIZE;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      const imageData = ctx.getImageData(0, 0, SIZE, SIZE);
+
+      if (isRGBA && targetArray === albedoRGBA) {
+        albedoRGBA.set(imageData.data);
+        return true;
+      } else if (targetArray === normalRGBA) {
+        // Convert normal map: texture values in [0,255] → normalized [-1,1] → our RGBA
+        const src = imageData.data;
+        for (let i = 0; i < SIZE * SIZE; i++) {
+          const j = i * 4;
+          const nx = (src[j] / 255) * 2 - 1;
+          const ny = (src[j+1] / 255) * 2 - 1;
+          const nz = (src[j+2] / 255) * 2 - 1;
+          normalRGBA[j] = Math.round((nx + 1) / 2 * 255);
+          normalRGBA[j+1] = Math.round((ny + 1) / 2 * 255);
+          normalRGBA[j+2] = Math.round((nz + 1) / 2 * 255);
+          normalRGBA[j+3] = 255;
+        }
+        return true;
+      } else if (targetArray === heightMap) {
+        const src = imageData.data;
+        for (let i = 0; i < SIZE * SIZE; i++) {
+          heightMap[i] = Math.round((src[i*4] + src[i*4+1] + src[i*4+2]) / 3);
+        }
+        return true;
+      } else if (targetArray === roughness) {
+        const src = imageData.data;
+        for (let i = 0; i < SIZE * SIZE; i++) {
+          // For roughness, use the red channel or luminance
+          roughness[i] = Math.round((src[i*4] + src[i*4+1] + src[i*4+2]) / 3);
+        }
+        return true;
+      }
+      return false;
+    }
+
+    // Process an imported model: extract textures and apply them to our paint system
+    let albedoFoundInModel = false;
+
+    function processImportedModel(model) {
+      let albedoFound = false;
+      let normalFound = false;
+      let roughnessFound = false;
+
+      // Traverse all meshes in the model to find textures
+      model.traverse(child => {
+        if (!child.isMesh || !child.material) return;
+
+        const mat = child.material;
+
+        // Try to extract albedo/diffuse texture
+        if (!albedoFound && (mat.map || mat.diffuseMap || mat.color)) {
+          const tex = mat.map || mat.diffuseMap;
+          if (tex && tex.isTexture && tex.image) {
+            if (loadTextureToArray(tex, albedoRGBA, true, true)) {
+              albedoFound = true;
+              albedoFoundInModel = true;
+            }
+          }
+        }
+
+        // Try to extract normal map texture
+        if (!normalFound && mat.normalMap) {
+          const tex = mat.normalMap;
+          if (tex && tex.isTexture && tex.image) {
+            loadTextureToArray(tex, normalRGBA, true, false);
+            normalFound = true;
+          }
+        }
+
+        // Try to extract roughness/metallic/ao textures
+        if (!roughnessFound) {
+          const tex = mat.roughnessMap || mat.metalnessMap || mat.aoMap;
+          if (tex && tex.isTexture && tex.image) {
+            loadTextureToArray(tex, roughness, false, false);
+            roughnessFound = true;
+          }
+        }
+      });
+
+      // If we found textures, update everything
+      if (albedoFound || normalFound || roughnessFound) {
+        dirty = true;
+      }
+
+      // If no albedo was found in the model, generate from a default gray
+      if (!albedoFound) {
+        for (let i = 0; i < SIZE * SIZE; i++) {
+          const j = i * 4;
+          albedoRGBA[j] = 184; albedoRGBA[j+1] = 184; albedoRGBA[j+2] = 184; albedoRGBA[j+3] = 255;
+        }
+      }
+
+      // Reset the flag after processing
+      const hadAlbedo = albedoFoundInModel;
+
+      // If no normal was found, generate from height (which may be generated from albedo)
+      if (!normalFound && !heightFoundFromModel) {
+        generateNormal();
+      }
+
+      // Restore flag for applyTexturesToModel
+      albedoFoundInModel = hadAlbedo;
+
+      // If no roughness was found, generate from albedo luminance
+      if (!roughnessFound) {
+        generateRoughnessFromAlbedo();
+      }
+
+      updateThreeTextures();
+    }
+
+    let heightFoundFromModel = false;
+
+    function applyTexturesToModel(object) {
+
+      object.traverse(child => {
+
+        if (!child.isMesh) return;
+
+        // FIX BROKEN NORMALS
+        if (child.geometry) {
+
+          child.geometry.computeVertexNormals();
+
+          child.geometry.normalizeNormals();
+
+          child.geometry.attributes.normal.needsUpdate = true;
+        }
+
+        child.material = new THREE.MeshNormalMaterial();
+
+        child.frustumCulled = false;
+      });
+
+    }
+
+    let view = 'albedo';
+    let drawing = false;
+    let last = null;
+    let dirty = true;
+
+    function idx(x, y) { return y * SIZE + x; }
+    function clamp(v, a=0, b=255) { return Math.max(a, Math.min(b, v)); }
+    function getTargetArray() {
+      const t = $('target').value;
+      if (t === 'height') return heightMap;
+      if (t === 'roughness') return roughness;
+      if (t === 'smoothness') return smoothness;
+      return albedoRGBA;
+    }
+
+    function hexToRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    function syncInverseMaps(changed) {
+      if (changed === 'roughness') for (let i = 0; i < roughness.length; i++) smoothness[i] = 255 - roughness[i];
+      if (changed === 'smoothness') for (let i = 0; i < smoothness.length; i++) roughness[i] = 255 - smoothness[i];
+    }
+
+    function paintAt(x, y) {
+      const radius = +$('brushSize').value;
+      const strength = +$('strength').value / 100;
+      const value = +$('paintValue').value;
+      const falloff = +$('falloff').value / 100;
+      const arr = getTargetArray();
+      const target = $('target').value;
+      const albedoColor = hexToRgb($('albedoColor').value);
+      const minX = Math.max(0, Math.floor(x - radius));
+      const maxX = Math.min(SIZE - 1, Math.ceil(x + radius));
+      const minY = Math.max(0, Math.floor(y - radius));
+      const maxY = Math.min(SIZE - 1, Math.ceil(y + radius));
+
+      for (let yy = minY; yy <= maxY; yy++) {
+        for (let xx = minX; xx <= maxX; xx++) {
+          const dx = xx - x, dy = yy - y;
+          const d = Math.sqrt(dx*dx + dy*dy) / radius;
+          if (d <= 1) {
+            const soft = falloff <= 0 ? 1 : Math.pow(1 - d, 0.35 + falloff * 2.2);
+            const a = strength * soft;
+            const i = idx(xx, yy);
+            if (target === 'albedo') {
+              const j = i * 4;
+              arr[j] = clamp(arr[j] + (albedoColor[0] - arr[j]) * a);
+              arr[j+1] = clamp(arr[j+1] + (albedoColor[1] - arr[j+1]) * a);
+              arr[j+2] = clamp(arr[j+2] + (albedoColor[2] - arr[j+2]) * a);
+              arr[j+3] = 255;
+            } else {
+              arr[i] = clamp(arr[i] + (value - arr[i]) * a);
+            }
+          }
+        }
+      }
+      syncInverseMaps(target);
+      dirty = true;
+    }
+
+    function drawLine(a, b) {
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const steps = Math.max(1, Math.ceil(Math.sqrt(dx*dx + dy*dy) / 3));
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        paintAt(a.x + dx * t, a.y + dy * t);
+      }
+    }
+
+    function pointerPos(e) {
+      const r = paintCanvas.getBoundingClientRect();
+      return {
+        x: clamp((e.clientX - r.left) / r.width * SIZE, 0, SIZE - 1),
+        y: clamp((e.clientY - r.top) / r.height * SIZE, 0, SIZE - 1)
+      };
+    }
+
+    paintCanvas.addEventListener('pointerdown', e => {
+      drawing = true;
+      paintCanvas.setPointerCapture(e.pointerId);
+      last = pointerPos(e);
+      paintAt(last.x, last.y);
+    });
+    paintCanvas.addEventListener('pointermove', e => {
+      if (!drawing) return;
+      const p = pointerPos(e);
+      drawLine(last, p);
+      last = p;
+    });
+    window.addEventListener('pointerup', () => drawing = false);
+
+    function resizeUVOverlay() {
+      const rect = preview.getBoundingClientRect();
+      uvOverlayCanvas.width = Math.max(320, Math.floor(rect.width));
+      uvOverlayCanvas.height = Math.max(220, Math.floor(rect.height));
+      uvOverlayCanvas.style.width = '100%';
+      uvOverlayCanvas.style.height = '100%';
+    }
+
+    // Raycaster for 3D painting on the preview mesh
+    const raycaster = new THREE.Raycaster();
+    const mouseVec = new THREE.Vector2();
+
+    function updateUVOverlayPointerEvents() {
+      const painting = $('uvPaintMode').checked && mesh;
+
+      // When UV paint mode is active, disable rotation ONLY on the 3D Model tab viewport.
+      // The preview panel always allows full orbit controls (rotate/pan/zoom).
+      controls3d.enableRotate = !painting;
+    }
+
+    // Generic UV painting from any Three.js viewport (only 3D Model tab, NOT preview)
+    function paintFromPointer(clientX, clientY, useCamera3d = false) {
+      if (!mesh || !$('uvPaintMode').checked) return null;
+
+      const cam = useCamera3d ? camera3d : camera;
+      let rect;
+
+      if (useCamera3d) {
+        rect = renderer3d.domElement.getBoundingClientRect();
+      } else {
+        // Use the Three.js renderer's canvas rect, not the overlay
+        rect = renderer.domElement.getBoundingClientRect();
+      }
+
+      mouseVec.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouseVec.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouseVec, cam);
+      const intersects = raycaster.intersectObject(mesh, true);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0];
+        const uv = hit.uv;
+        if (uv) {
+          return {
+            x: clamp(Math.floor(uv.x * SIZE), 0, SIZE - 1),
+            y: clamp(SIZE - Math.floor(uv.y * SIZE) - 1, 0, SIZE - 1)
+          };
+        }
+      }
+      return null;
+    }
+
+    let last3DPoint = null;
+
+    // Top preview panel — NEVER paints. Only OrbitControls (rotate/pan/zoom).
+    // No painting events attached to renderer.domElement at all.
+
+    // 3D Model tab painting on renderer3d's canvas — left-click only
+    let isPaintingInModelTab = false;
+
+    renderer3d.domElement.addEventListener('pointerdown', e => {
+      if (!$('uvPaintMode').checked || !mesh) return;
+      if (e.button !== 0) return; // Only left click
+      const pt = paintFromPointer(e.clientX, e.clientY, true);
+      if (pt) {
+        isPaintingInModelTab = true;
+        drawing = true;
+        last3DPoint = pt;
+        paintAt(pt.x, pt.y);
+      }
+    });
+
+    renderer3d.domElement.addEventListener('pointermove', e => {
+      if (!isPaintingInModelTab || !$('uvPaintMode').checked || !mesh) return;
+      const pt = paintFromPointer(e.clientX, e.clientY, true);
+      if (pt && last3DPoint) {
+        drawLine(last3DPoint, pt);
+        last3DPoint = pt;
+      } else if (pt) {
+        paintAt(pt.x, pt.y);
+        last3DPoint = pt;
+      }
+    });
+
+    renderer3d.domElement.addEventListener('pointerup', e => {
+      isPaintingInModelTab = false;
+      drawing = false;
+      last3DPoint = null;
+    });
+
+    renderer3d.domElement.addEventListener('pointerleave', () => {
+      isPaintingInModelTab = false;
+      drawing = false;
+      last3DPoint = null;
+    });
+
+    window.addEventListener('pointerup', () => {
+      drawing = false;
+      last3DPoint = null;
+      isPaintingInModelTab = false;
+    });
+
+    // Alt key toggles UV Mode Paint on press, toggles back on release.
+    let altWasDown = false;
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Alt' && !altWasDown) {
+        altWasDown = true;
+        $('uvPaintMode').checked = !$('uvPaintMode').checked;
+        updateUVOverlayPointerEvents();
+      }
+    });
+
+    window.addEventListener('keyup', e => {
+      if (e.key === 'Alt' && altWasDown) {
+        altWasDown = false;
+        $('uvPaintMode').checked = !$('uvPaintMode').checked;
+        updateUVOverlayPointerEvents();
+      }
+    });
+
+    // Toggle UV overlay pointer events when checkbox changes
+    $('uvPaintMode').addEventListener('change', updateUVOverlayPointerEvents);
+
+    function arrayToImageData(arr, size=SIZE) {
+      const data = new Uint8ClampedArray(arr.length * 4);
+      for (let i = 0, j = 0; i < arr.length; i++, j += 4) {
+        data[j] = data[j+1] = data[j+2] = arr[i];
+        data[j+3] = 255;
+      }
+      return new ImageData(data, size, size);
+    }
+
+    function generateNormal() {
+      populateNormalFromHeight(heightMap, normalRGBA, SIZE, +$('normalStrength').value / 14);
+    }
+
+    function renderPaintCanvas() {
+      if (view === 'albedo') pctx.putImageData(new ImageData(albedoRGBA, SIZE, SIZE), 0, 0);
+      else if (view === 'normal') pctx.putImageData(new ImageData(normalRGBA, SIZE, SIZE), 0, 0);
+      else if (view === 'height') pctx.putImageData(arrayToImageData(heightMap), 0, 0);
+      else if (view === 'roughness') pctx.putImageData(arrayToImageData(roughness), 0, 0);
+      else pctx.putImageData(arrayToImageData(smoothness), 0, 0);
+    }
+
+    function blitSmall(name, source) {
+      const tmp = document.createElement('canvas');
+      tmp.width = tmp.height = SIZE;
+      const t = tmp.getContext('2d');
+      if (source === normalRGBA) t.putImageData(new ImageData(normalRGBA, SIZE, SIZE), 0, 0);
+      else if (source === albedoRGBA) t.putImageData(new ImageData(albedoRGBA, SIZE, SIZE), 0, 0);
+      else t.putImageData(arrayToImageData(source), 0, 0);
+      const c = mapCanvases[name];
+      mapCtx[name].clearRect(0,0,c.width,c.height);
+      mapCtx[name].drawImage(tmp, 0, 0, c.width, c.height);
+    }
+
+    function resizePreview() {
+      const rect = preview.getBoundingClientRect();
+      const w = Math.max(320, Math.floor(rect.width));
+      const h = Math.max(220, Math.floor(rect.height));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      resizeUVOverlay();
+
+      // Resize the 3D Model tab viewport if visible
+      if ($('model3dView').classList.contains('visible')) {
+        const rect2 = model3dView.getBoundingClientRect();
+        const w2 = Math.max(320, Math.floor(rect2.width));
+        const h2 = Math.max(220, Math.floor(rect2.height));
+        renderer3d.setSize(w2, h2, false);
+        camera3d.aspect = w2 / h2;
+        camera3d.updateProjectionMatrix();
+      }
+
+       dirty = true;
+    }
+
+   function refresh() {
+      generateNormal();
+      renderPaintCanvas();
+      blitSmall('albedo', albedoRGBA);
+      blitSmall('height', heightMap);
+      blitSmall('normal', normalRGBA);
+      blitSmall('roughness', roughness);
+      blitSmall('smoothness', smoothness);
+      updateThreeTextures();
+      dirty = false;
+    }
+
+    function loop() {
+      if (dirty) refresh();
+      controls.update();
+      renderer.render(scene, camera);
+
+      // Also render the 3D Model tab view from the same scene with its own camera
+      if ($('model3dView').classList.contains('visible')) {
+        controls3d.update();
+        renderer3d.render(scene, camera3d);
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    function blurHeight() {
+      const copy = new Uint8ClampedArray(heightMap);
+      for (let y = 1; y < SIZE - 1; y++) {
+        for (let x = 1; x < SIZE - 1; x++) {
+          let sum = 0;
+          for (let yy = -1; yy <= 1; yy++) for (let xx = -1; xx <= 1; xx++) sum += copy[idx(x+xx,y+yy)];
+          heightMap[idx(x,y)] = sum / 9;
+        }
+      }
+      dirty = true;
+    }
+
+    function generateHeightFromAlbedo() {
+      populateHeightFromAlbedo(albedoRGBA, heightMap);
+    }
+
+    function generateRoughnessFromAlbedo() {
+      populateRoughnessFromAlbedo(albedoRGBA, roughness);
+    }
+
+    function generateDerivedMapsFromAlbedo() {
+      generateHeightFromAlbedo();
+      generateNormal();
+      generateRoughnessFromAlbedo();
+      syncInverseMaps('roughness');
+      dirty = true;
+    }
+
+    function generateAllFromSourceImage() {
+      if (!$('generateFromImage').checked) return;
+      generateDerivedMapsFromAlbedo();
+    }
+
+    function applyImportedAlbedoImageData(imageData, options = {}) {
+      albedoRGBA.set(imageData.data);
+      if (options.alwaysGenerateDerivedMaps === true || $('generateFromImage').checked) {
+        generateDerivedMapsFromAlbedo();
+        return;
+      }
+      dirty = true;
+    }
+
+    function addNoise(kind) {
+      if (kind === 'bumps') {
+        for (let n = 0; n < 130; n++) {
+          const x = Math.random() * SIZE, y = Math.random() * SIZE;
+          const old = $('paintValue').value;
+          $('paintValue').value = 170 + Math.random() * 85;
+          paintAt(x, y);
+          $('paintValue').value = old;
+        }
+      }
+      if (kind === 'scratches') {
+        for (let n = 0; n < 80; n++) {
+          let x = Math.random() * SIZE, y = Math.random() * SIZE;
+          const len = 20 + Math.random() * 120;
+          const angle = Math.random() * Math.PI * 2;
+          drawLine({x,y}, {x:x+Math.cos(angle)*len, y:y+Math.sin(angle)*len});
+        }
+      }
+      if (kind === 'bricks') {
+        heightMap.fill(155);
+        for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+          const row = Math.floor(y / 56);
+          const bx = (x + (row % 2) * 42) % 84;
+          const mortar = bx < 5 || y % 56 < 5;
+          heightMap[idx(x,y)] = mortar ? 70 : 170 + ((x+y) % 9);
+        }
+      }
+      if (kind === 'waves') {
+        for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+          heightMap[idx(x,y)] = clamp(128 + Math.sin(x/18 + y/38) * 50 + Math.sin(y/14) * 24);
+        }
+      }
+      dirty = true;
+    }
+
+    document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const tabView = btn.dataset.view;
+
+      if (tabView === 'model3d') {
+        // Show 3D model view, hide 2D canvas
+        paintCanvas.classList.add('hidden');
+        model3dView.classList.add('visible');
+
+        // Sync camera position from main preview to 3D model view
+        camera3d.position.copy(camera.position);
+        controls3d.target.copy(controls.target);
+        controls3d.update();
+
+        resizePreview(); // This will also resize the 3D model viewport
+      } else {
+        // Show 2D canvas, hide 3D model view
+        paintCanvas.classList.remove('hidden');
+        model3dView.classList.remove('visible');
+        view = tabView;
+        dirty = true;
+      }
+    }));
+
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', () => {
+        if (el.id === 'shape') setPreviewShape();
+        dirty = true;
+      });
+      // Also handle change for checkboxes
+      el.addEventListener('change', () => {
+        if (el.id === 'shape') setPreviewShape();
+        if (el.id === 'uvPaintMode') updateUVOverlayPointerEvents();
+        dirty = true;
+      });
+    });
+    document.querySelectorAll('[data-noise]').forEach(btn => btn.addEventListener('click', () => addNoise(btn.dataset.noise)));
+
+    $('invert').addEventListener('click', () => {
+      const arr = getTargetArray();
+      for (let i = 0; i < arr.length; i++) arr[i] = 255 - arr[i];
+      syncInverseMaps($('target').value);
+      dirty = true;
+    });
+    $('blur').addEventListener('click', blurHeight);
+    $('clear').addEventListener('click', () => {
+      heightMap.fill(128); roughness.fill(155); smoothness.fill(100);
+      for (let i = 0; i < SIZE * SIZE; i++) {
+        const j = i * 4;
+        albedoRGBA[j] = 184; albedoRGBA[j+1] = 184; albedoRGBA[j+2] = 184; albedoRGBA[j+3] = 255;
+      }
+      dirty = true;
+    });
+    $('fill').addEventListener('click', () => {
+      const arr = getTargetArray();
+      if ($('target').value === 'albedo') {
+        const c = hexToRgb($('albedoColor').value);
+        for (let i = 0; i < SIZE * SIZE; i++) {
+          const j = i * 4;
+          arr[j] = c[0]; arr[j+1] = c[1]; arr[j+2] = c[2]; arr[j+3] = 255;
+        }
+      } else {
+        arr.fill(+$('paintValue').value);
+      }
+      syncInverseMaps($('target').value);
+      dirty = true;
+    });
+
+    document.querySelectorAll('[data-download]').forEach(btn => btn.addEventListener('click', () => {
+      const key = btn.dataset.download;
+      const out = buildTextureMapCanvas(key);
+      const a = document.createElement('a');
+      a.href = out.toDataURL('image/png');
+      a.download = `${key}-map.png`;
+      a.click();
+    }));
+
+    function buildTextureMapCanvas(key) {
+      const out = document.createElement('canvas');
+      out.width = out.height = SIZE;
+      const ctx = out.getContext('2d');
+      if (key === 'normal') ctx.putImageData(new ImageData(normalRGBA, SIZE, SIZE), 0, 0);
+      else if (key === 'albedo') ctx.putImageData(new ImageData(albedoRGBA, SIZE, SIZE), 0, 0);
+      else ctx.putImageData(arrayToImageData(key === 'height' ? heightMap : key === 'roughness' ? roughness : smoothness), 0, 0);
+      return out;
+    }
+
+    function describeCurrentAssets() {
+      return ['albedo', 'height', 'normal', 'roughness', 'smoothness'].map(key => {
+        const canvas = buildTextureMapCanvas(key);
+        const dataUrl = canvas.toDataURL('image/png');
+        return {
+          kind: 'image',
+          title: `${key.charAt(0).toUpperCase()}${key.slice(1)} Map`,
+          fileName: `${key}-map.png`,
+          mimeType: 'image/png',
+          dataUrl,
+          width: SIZE,
+          height: SIZE,
+          previewKind: 'image',
+          previewUrl: dataUrl,
+          sourceDetail: 'Generated texture map from Texture Map Painter.',
+          metadata: { sourceTool: 'texture-map-painter', mapRole: key }
+        };
+      });
+    }
+
+    window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+    window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+
+    // Import albedo texture image
+    $('importAlbedo').addEventListener('click', () => $('albedoFile').click());
+    $('clearAlbedo').addEventListener('click', () => {
+      for (let i = 0; i < SIZE * SIZE; i++) {
+        const j = i * 4;
+        albedoRGBA[j] = 184; albedoRGBA[j+1] = 184; albedoRGBA[j+2] = 184; albedoRGBA[j+3] = 255;
+      }
+      dirty = true;
+    });
+    $('albedoFile').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = c.height = SIZE;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, SIZE, SIZE);
+        applyImportedAlbedoImageData(ctx.getImageData(0, 0, SIZE, SIZE), {
+          alwaysGenerateDerivedMaps: true
+        });
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(file);
+      e.target.value = '';
+    });
+
+    // ===== Generate Maps From Source Image =====
+    $('importSourceImage').addEventListener('click', () => $('sourceImageFile').click());
+
+    $('generateFromImage').addEventListener('change', () => {
+      if ($('generateFromImage').checked) generateAllFromSourceImage();
+      else dirty = true;
+    });
+
+    // Initial state for UV overlay pointer events
+    updateUVOverlayPointerEvents();
+
+    $('fill').addEventListener('click', () => {
+      setTimeout(() => { if ($('generateFromImage').checked) generateAllFromSourceImage(); }, 10);
+    });
+
+    // ===== GLB / FBX Import =====
+    const gltfLoader = new GLTFLoader();
+    const fbxLoader = new FBXLoader();
+
+    $('importModel').addEventListener('click', () => $('modelFile').click());
+
+    function loadModel(file) {
+
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      const url = URL.createObjectURL(file);
+
+      const onLoad = (result) => {
+
+        // REMOVE OLD MODEL
+        if (mesh) {
+
+          scene.remove(mesh);
+
+          mesh.traverse(child => {
+
+            if (child.geometry) {
+              child.geometry.dispose();
+            }
+
+          });
+
+        }
+
+        let model;
+
+        if (ext === 'fbx') {
+          model = result;
+        } else {
+          model = result.scene;
+        }
+
+        // FORCE SAFE MATERIALS + FIX NORMALS
+        model.traverse(child => {
+
+          if (!child.isMesh) return;
+
+          // FIX GEOMETRY NORMALS
+          if (child.geometry) {
+
+            child.geometry.computeVertexNormals();
+
+            child.geometry.normalizeNormals();
+
+            if (child.geometry.attributes.normal) {
+              child.geometry.attributes.normal.needsUpdate = true;
+            }
+
+          }
+
+          // SIMPLE DEBUG MATERIAL
+          child.material = new THREE.MeshStandardMaterial({
+
+            color: 0xcccccc,
+
+            roughness: 0.8,
+
+            metalness: 0.0,
+
+            side: THREE.DoubleSide
+
+          });
+
+          child.castShadow = false;
+
+          child.receiveShadow = false;
+
+          child.frustumCulled = false;
+
+        });
+
+        // SAFE BOUNDS
+        const box = new THREE.Box3().setFromObject(model);
+
+        const size = box.getSize(new THREE.Vector3());
+
+        const center = box.getCenter(new THREE.Vector3());
+
+        let maxDim = Math.max(size.x, size.y, size.z);
+
+        // SAFETY
+        if (!isFinite(maxDim) || maxDim <= 0.00001) {
+          maxDim = 1;
+        }
+
+        // SAFE SCALE
+        const scale = 2 / maxDim;
+
+        model.scale.set(scale, scale, scale);
+
+        // CENTER MODEL
+        model.position.set(
+          -center.x * scale,
+          -center.y * scale,
+          -center.z * scale
+        );
+
+        // ADD TO SCENE
+        mesh = model;
+
+        importedModel = true;
+
+        scene.add(model);
+
+        // CAMERA RESET
+        camera.position.set(0, 2, 12);
+
+        camera.lookAt(0, 0, 0);
+
+        controls.target.set(0, 0, 0);
+
+        controls.update();
+
+        camera3d.position.set(0, 2, 12);
+
+        camera3d.lookAt(0, 0, 0);
+
+        controls3d.target.set(0, 0, 0);
+
+        controls3d.update();
+
+        // FORCE RENDER
+        renderer.render(scene, camera);
+
+        renderer3d.render(scene, camera3d);
+
+        URL.revokeObjectURL(url);
+
+        dirty = true;
+
+      };
+
+      const onError = (err) => {
+
+        console.error('MODEL LOAD ERROR:', err);
+
+        URL.revokeObjectURL(url);
+
+      };
+
+      if (ext === 'fbx') {
+
+        fbxLoader.load(url, onLoad, undefined, onError);
+
+      } else if (ext === 'glb' || ext === 'gltf') {
+
+        gltfLoader.load(url, onLoad, undefined, onError);
+
+      } else {
+
+        console.error('Unsupported file format:', ext);
+
+      }
+
+    }
+
+    $('sourceImageFile').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = c.height = SIZE;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, SIZE, SIZE);
+        const imageData = ctx.getImageData(0, 0, SIZE, SIZE);
+
+        applyImportedAlbedoImageData(imageData);
+
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(file);
+      e.target.value = '';
+    });
+
+    // Drag and drop support on the preview area
+    let isModelDrop = false;
+    preview.addEventListener('dragover', e => {
+      const file = e.dataTransfer && e.dataTransfer.files[0];
+      if (file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'glb' || ext === 'gltf' || ext === 'fbx') {
+          isModelDrop = true;
+          e.preventDefault();
+          preview.style.outline = '2px dashed #79a7ff';
+        } else if (ext.match(/^(png|jpg|jpeg|gif|webp|bmp)$/)) {
+          isModelDrop = false;
+          e.preventDefault();
+          preview.style.outline = '2px dashed #65d69e';
+        }
+      }
+    });
+    preview.addEventListener('dragleave', () => {
+      preview.style.outline = '';
+      isModelDrop = false;
+    });
+
+    preview.addEventListener('drop', e => {
+      e.preventDefault();
+      preview.style.outline = '';
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!file) return;
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      if (ext === 'glb' || ext === 'gltf' || ext === 'fbx') {
+        loadModel(file);
+      } else if (ext.match(/^(png|jpg|jpeg|gif|webp|bmp)$/)) {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = c.height = SIZE;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0, SIZE, SIZE);
+          const imageData = ctx.getImageData(0, 0, SIZE, SIZE);
+          applyImportedAlbedoImageData(imageData);
+          URL.revokeObjectURL(img.src);
+        };
+        img.src = URL.createObjectURL(file);
+      }
+    });
+
+    $('modelFile').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      loadModel(file);
+      e.target.value = '';
+    });
+
+    // Sync camera when main controls change (only if 3D model view is visible)
+    const origControlsUpdate = controls.update.bind(controls);
+    controls.addEventListener('change', () => {
+      if ($('model3dView').classList.contains('visible')) {
+        camera3d.position.copy(camera.position);
+        controls3d.target.copy(controls.target);
+        dirty = true;
+      }
+    });
+
+    window.addEventListener('resize', resizePreview);
+    resizePreview();
+    setPreviewShape();
+    loop();
+  </script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

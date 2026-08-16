@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Studio Sequencer Offline</title>
+  <script src="../../shared/dashboard-theme.js"></script>
+  <link rel="stylesheet" href="/tools/shared/css/sidebar-scrollview.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body data-dashboard-theme="fire">
+  <div class="app">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Sequencer Controls">
+
+      <section class="grid-2">
+        <div class="panel">
+          <div class="section-title">
+            <h2>Transport</h2>
+            <span>Space = play/pause</span>
+          </div>
+
+          <div class="button-row">
+            <button class="icon-btn primary" id="playBtn">▶ Play</button>
+            <button class="icon-btn" id="stopBtn">■ Stop</button>
+            <button class="icon-btn" id="clearBtn">✦ Clear</button>
+            <button class="icon-btn" id="randomBtn">⟲ Random</button>
+            <button class="icon-btn" id="autoRandomBtn">⟳ Auto Random</button>
+            <button class="icon-btn" id="duplicateBtn">⧉ Duplicate A→B</button>
+            <button class="icon-btn" id="chainBtn">⇄ Chain A+B</button>
+          </div>
+
+          <div class="mini-row" style="margin-top:12px; align-items:center;">
+            <div class="transport-led" id="led"></div>
+            <span class="dim">Pattern: <strong id="patternLabel">A</strong></span>
+            <span class="dim">Step: <strong id="stepLabel">1</strong></span>
+            <span class="dim">Length: <strong id="lengthLabel">16</strong></span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>Groove</h2>
+            <span>Fine control</span>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat">
+              <label>Tempo</label>
+              <strong><span id="bpmValue">112</span> BPM</strong>
+              <input id="bpm" type="range" min="70" max="170" value="112" />
+            </div>
+
+            <div class="stat">
+              <label>Swing</label>
+              <strong><span id="swingValue">12</span>%</strong>
+              <input id="swing" type="range" min="0" max="45" value="12" />
+            </div>
+
+            <div class="stat">
+              <label>Master</label>
+              <strong><span id="volumeValue">80</span>%</strong>
+              <input id="volume" type="range" min="0" max="100" value="80" />
+            </div>
+
+            <div class="stat">
+              <label>Steps</label>
+              <strong><span id="stepsValue">16</span></strong>
+              <input id="steps" type="range" min="8" max="32" value="16" step="8" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AUTO RANDOM PANEL -->
+      <section class="panel" id="autoRandomPanel">
+        <div class="section-title">
+          <h2>⟳ Auto Random</h2>
+          <span id="autoRandomStatus">Disabled — enable to start auto-generating patterns</span>
+        </div>
+
+        <div class="stat-grid" id="autoRandomControls">
+
+          <!-- === SECTION: Core Scheduling === -->
+          <div style="grid-column: span 2; font-size:13px;font-weight:bold;color:var(--accent);margin-top:8px;">⏱ After X Loops Scheduling</div>
+
+          <!-- Loops Until Random (core interval) -->
+          <div class="stat">
+            <label>After X loops</label>
+            <strong><span id="arLoopsValue">4</span></strong>
+            <input id="arLoops" type="range" min="1" max="32" value="4" />
+          </div>
+
+          <!-- Auto Stop -->
+          <div class="stat">
+            <label>Auto stop after X loops</label>
+            <strong><span id="arStopValue">∞</span></strong>
+            <input id="arStop" type="range" min="0" max="64" value="0" />
+          </div>
+
+          <!-- Drum Fill every X loops -->
+          <div class="stat">
+            <label>🥁 Drum fill every</label>
+            <strong><span id="arFillEveryValue">8</span></strong>
+            <input id="arFillEvery" type="range" min="0" max="32" value="8" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">0 = disabled, adds fills on perc/fx lanes</small>
+          </div>
+
+          <!-- Breakdown every X loops -->
+          <div class="stat">
+            <label>🔇 Breakdown every</label>
+            <strong><span id="arBreakdownEveryValue">16</span></strong>
+            <input id="arBreakdownEvery" type="range" min="0" max="64" value="16" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">0 = disabled, strips elements gradually</small>
+          </div>
+
+          <!-- Buildup every X loops -->
+          <div class="stat">
+            <label>🔊 Buildup every</label>
+            <strong><span id="arBuildupEveryValue">32</span></strong>
+            <input id="arBuildupEvery" type="range" min="0" max="64" value="32" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">0 = disabled, layers elements gradually</small>
+          </div>
+
+          <!-- BPM Drift every X loops -->
+          <div class="stat">
+            <label>🎵 BPM drift every</label>
+            <strong><span id="arBpmDriftStepValue">4</span></strong>
+            <input id="arBpmDriftStep" type="range" min="1" max="16" value="4" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Change BPM every N loops</small>
+          </div>
+
+          <!-- === SECTION: Variety & Mode === -->
+          <div style="grid-column: span 2; font-size:13px;font-weight:bold;color:var(--accent);margin-top:8px;">🎲 Variety & Mode</div>
+
+          <!-- Variety Mode -->
+          <div class="stat">
+            <label>Variety mode</label>
+            <select id="arVarietyMode" style="width:100%;margin-top:8px;padding:6px;border-radius:8px;background:var(--panel-2);color:var(--text);border:1px solid var(--line);">
+              <option value="full">Full Random — complete re-roll each cycle</option>
+              <option value="evolution" selected>Evolution — mutate 30-60% of steps per cycle</option>
+              <option value="drift">Drift — gradually shift 1-2 steps per loop</option>
+            </select>
+          </div>
+
+          <!-- Intensity -->
+          <div class="stat">
+            <label>Intensity</label>
+            <strong><span id="arIntensityValue">50</span>%</strong>
+            <input id="arIntensity" type="range" min="10" max="90" value="50" />
+          </div>
+
+          <!-- Scope -->
+          <div class="stat">
+            <label>Scope</label>
+            <select id="arScope" style="width:100%;margin-top:8px;padding:6px;border-radius:8px;background:var(--panel-2);color:var(--text);border:1px solid var(--line);">
+              <option value="all">All lanes</option>
+              <option value="selected">Selected lanes only</option>
+              <option value="single">Single lane</option>
+            </select>
+          </div>
+
+          <!-- Probability mode -->
+          <div class="stat">
+            <label>Probability mode</label>
+            <select id="arProbMode" style="width:100%;margin-top:8px;padding:6px;border-radius:8px;background:var(--panel-2);color:var(--text);border:1px solid var(--line);">
+              <option value="uniform">Uniform — equal chance all steps</option>
+              <option value="beat" selected>Beat — higher on 1, 5, 9, 13…</option>
+              <option value="syncopate">Syncopate — emphasize off-beats</option>
+            </select>
+          </div>
+
+          <!-- Fill chance -->
+          <div class="stat">
+            <label>Fill intensity</label>
+            <strong><span id="arFillChanceValue">20</span>%</strong>
+            <input id="arFillChance" type="range" min="5" max="50" value="20" />
+          </div>
+
+          <!-- === SECTION: Breakdown & Buildup === -->
+          <div style="grid-column: span 2; font-size:13px;font-weight:bold;color:var(--accent);margin-top:8px;">📉📈 Breakdown & Buildup</div>
+
+          <!-- Breakdown mode toggle -->
+          <div class="stat">
+            <label>Breakdown mode</label>
+            <input id="arBreakdownMode" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Gradually strip elements, then rebuild</small>
+          </div>
+
+          <!-- Breakdown rate -->
+          <div class="stat">
+            <label>Breakdown speed</label>
+            <strong><span id="arBreakdownRateValue">2</span></strong>
+            <input id="arBreakdownRate" type="range" min="1" max="5" value="2" disabled />
+          </div>
+
+          <!-- Breakdown floor -->
+          <div class="stat">
+            <label>Breakdown floor</label>
+            <strong><span id="arBreakdownMinValue">10</span>%</strong>
+            <input id="arBreakdownMin" type="range" min="5" max="40" value="10" disabled />
+          </div>
+
+          <!-- Buildup mode toggle -->
+          <div class="stat">
+            <label>Buildup mode</label>
+            <input id="arBuildupMode" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Gradually layer in elements</small>
+          </div>
+
+          <!-- Buildup rate -->
+          <div class="stat">
+            <label>Buildup speed</label>
+            <strong><span id="arBuildupRateValue">2</span></strong>
+            <input id="arBuildupRate" type="range" min="1" max="5" value="2" disabled />
+          </div>
+
+          <!-- Buildup ceiling -->
+          <div class="stat">
+            <label>Buildup ceiling</label>
+            <strong><span id="arBuildupMaxValue">70</span>%</strong>
+            <input id="arBuildupMax" type="range" min="30" max="90" value="70" disabled />
+          </div>
+
+          <!-- === SECTION: Groove & Feel === -->
+          <div style="grid-column: span 2; font-size:13px;font-weight:bold;color:var(--accent);margin-top:8px;">🎶 Groove & Feel</div>
+
+          <!-- Humanize toggle -->
+          <div class="stat">
+            <label>Humanize</label>
+            <input id="arHumanize" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Add slight randomness for organic feel</small>
+          </div>
+
+          <!-- Humanize amount -->
+          <div class="stat">
+            <label>Humanize amount</label>
+            <strong><span id="arHumanizeValue">15</span>%</strong>
+            <input id="arHumanize" type="range" min="5" max="40" value="15" disabled style="margin-top:8px;" />
+          </div>
+
+          <!-- Swing variation toggle -->
+          <div class="stat">
+            <label>Swing variation</label>
+            <input id="arSwingVar" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Randomize swing ±N per cycle</small>
+            <div class="mini-row" style="margin-top:6px;">
+              <label style="font-size:11px;">Range:</label>
+              <input id="arSwingRange" type="range" min="1" max="10" value="3" disabled />
+              <span id="arSwingRangeValue" style="font-size:12px;min-width:20px;">3</span>
+            </div>
+          </div>
+
+          <!-- Step variation toggle -->
+          <div class="stat">
+            <label>Step variation</label>
+            <input id="arStepVar" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Slightly adjust step count each cycle</small>
+            <div class="mini-row" style="margin-top:6px;">
+              <label style="font-size:11px;">Vary amount:</label>
+              <input id="arStepVaryAmount" type="range" min="1" max="8" value="2" disabled />
+              <span id="arStepVaryAmountValue" style="font-size:12px;min-width:20px;">2</span>
+            </div>
+          </div>
+
+          <!-- Random BPM toggle -->
+          <div class="stat">
+            <label>Random BPM drift</label>
+            <input id="arRandomBPM" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Slowly vary tempo within a range</small>
+          </div>
+
+          <!-- BPM drift range -->
+          <div class="stat">
+            <label>BPM drift range</label>
+            <strong><span id="arBpmDriftRangeValue">5</span></strong>
+            <input id="arBpmDriftRange" type="range" min="1" max="20" value="5" disabled />
+          </div>
+
+          <!-- Bass pulse -->
+          <div class="stat">
+            <label>Bass pulse</label>
+            <input id="arBassPulse" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Sync bass to kick pattern for stronger groove</small>
+          </div>
+
+          <!-- Chord stabs -->
+          <div class="stat">
+            <label>Chord stabs</label>
+            <input id="arChordStab" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Add chord accents on beat boundaries (0, 8, 16, 24)</small>
+          </div>
+
+          <!-- Accent chance -->
+          <div class="stat">
+            <label>Accent chance</label>
+            <strong><span id="arAccentChanceValue">15</span>%</strong>
+            <input id="arAccentChance" type="range" min="0" max="60" value="15" />
+          </div>
+
+          <!-- === SECTION: Pattern & Transition === -->
+          <div style="grid-column: span 2; font-size:13px;font-weight:bold;color:var(--accent);margin-top:8px;">🔄 Pattern & Transition</div>
+
+          <!-- Pattern transition -->
+          <div class="stat">
+            <label>Pattern transition</label>
+            <input id="arPatternTransition" type="checkbox" style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Crossfade between A↔B during auto-random</small>
+            <div class="mini-row" style="margin-top:6px;">
+              <label style="font-size:11px;">Duration:</label>
+              <input id="arTransitionDuration" type="range" min="200" max="4000" step="100" value="800" disabled />
+              <span id="arTransitionDurationValue" style="font-size:12px;min-width:45px;">800ms</span>
+            </div>
+          </div>
+
+          <!-- Randomize on stop -->
+          <div class="stat">
+            <label>Randomize on stop</label>
+            <input id="arRandomizeOnStop" type="checkbox" checked style="margin-top:8px;" />
+            <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">Generate new pattern when stopping playback</small>
+          </div>
+
+          <!-- === SECTION: Per-lane & Status === -->
+          <div style="grid-column: span 2; font-size:13px;font-weight:bold;color:var(--accent);margin-top:8px;">🎛 Lane Controls & Status</div>
+
+          <!-- Per-lane intensity -->
+          <div class="stat" style="grid-column: span 2;">
+            <label>Lane density overrides</label>
+            <div id="laneIntensitySliders" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;"></div>
+          </div>
+
+          <!-- Loop counter display -->
+          <div class="stat">
+            <label>Cycle count</label>
+            <strong><span id="arLoopCount">0</span></strong>
+            <small style="color:var(--muted);font-size:11px;">Loops completed so far</small>
+          </div>
+
+          <!-- Last changed info -->
+          <div class="stat">
+            <label>Last changed</label>
+            <strong id="arLastChanged" style="font-size:14px;">—</strong>
+            <small style="color:var(--muted);font-size:11px;">When pattern last shifted</small>
+          </div>
+
+          <!-- Active mode indicator -->
+          <div class="stat">
+            <label>Active modes</label>
+            <strong id="arActiveModes" style="font-size:12px;word-break:normal;">None</strong>
+            <small style="color:var(--muted);font-size:11px;">Currently enabled features</small>
+          </div>
+
+        </div>
+
+        <!-- Lane lock/selection row -->
+        <div class="mini-row" id="arLaneSelector" style="margin-top:12px;flex-wrap:wrap;gap:4px;">
+          <span class="dim" style="width:100%;margin-bottom:4px;">Lane controls:</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Pattern memories</h2>
+          <span>Store four snapshots</span>
+        </div>
+
+        <div class="memory-grid" id="memoryGrid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Pattern I/O</h2>
+          <span>Move ideas between browsers</span>
+        </div>
+
+        <div class="button-row" style="margin-bottom:12px;">
+          <button class="icon-btn" id="exportBtn">⇩ Export JSON</button>
+          <button class="icon-btn" id="importBtn">⇧ Import JSON</button>
+          <button class="icon-btn" id="saveLocalBtn">💾 Save local</button>
+          <button class="icon-btn" id="loadLocalBtn">📂 Load local</button>
+        </div>
+
+        <textarea
+          class="export-box"
+          id="ioBox"
+          placeholder="Exported JSON appears here..."
+        ></textarea>
+      </section>
+
+    </aside>
+
+    <!-- RIGHT CONTENT -->
+    <main class="content">
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Preset bank</h2>
+          <span>Instant ideas</span>
+        </div>
+
+        <div class="preset-grid" id="presetGrid"></div>
+      </section>
+
+      <section class="panel sequencer">
+        <div class="section-title">
+          <h2>Sequencer</h2>
+          <span>Click steps to toggle notes and hits</span>
+        </div>
+
+        <div id="lanes"></div>
+
+        <p class="footer-note">
+          Added next logical features: more lanes, per-lane volume,
+          mute/solo, A/B patterns, chain playback, save slots,
+          JSON import/export, and keyboard shortcuts.
+        </p>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/audio-engine.js"></script>
+  <script src="js/sequencer.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

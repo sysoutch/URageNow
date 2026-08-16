@@ -1,0 +1,63 @@
+// Public product identity. Internal module and runtime names remain URageStudio
+// until a separately planned compatibility migration changes their contracts.
+
+.dashboard-wordmark {
+  align-items: baseline;
+  display: inline-flex;
+  font-weight: 850;
+  letter-spacing: .015em;
+  white-space: nowrap;
+}
+
+.dashboard-wordmark-u {
+  background: linear-gradient(145deg, #f0f2f6 0%, #8b96a8 48%, #e1e6ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-right: .01em;
+}
+
+.dashboard-wordmark-rage {
+  background: linear-gradient(104deg, var(--studio-accent-1, var(--accent)) 0%, var(--studio-accent-2, var(--accent-2)) 52%, var(--studio-accent-3, var(--accent-3)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.dashboard-wordmark-now {
+  color: color-mix(in srgb, var(--ink, #f5f7ff) 91%, var(--studio-panel-bg, #101522) 9%);
+  font-weight: 700;
+  margin-left: .12em;
+}
+
+.dashboard-wordmark-descriptor {
+  color: var(--muted, #abb4c7);
+  font-size: .68em;
+  font-weight: 700;
+  letter-spacing: .11em;
+  margin-left: .7em;
+  text-transform: uppercase;
+}
+
+// Category-card defaults deliberately use compact uppercase labels. The product
+// wordmark is the rail's primary visual anchor, so it receives its own scale.
+body.studio-rail-expanded .rail-app-button .rail-home-label.dashboard-wordmark {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  letter-spacing: .005em !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+}
+
+body.studio-rail-expanded .rail-app-button .dashboard-wordmark :is(.dashboard-wordmark-u, .dashboard-wordmark-rage, .dashboard-wordmark-now) {
+  text-transform: none !important;
+}
+
+.rail-home-label .dashboard-wordmark-descriptor {
+  display: none;
+}
+
+.desktop-window-title.dashboard-wordmark {
+  font-size: 12px;
+  letter-spacing: .02em;
+}

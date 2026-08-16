@@ -1,0 +1,144 @@
+// Cross-dashboard resilience and accessibility. Feature layout stays in its owning layer.
+html {
+  color-scheme: dark;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-width: 280px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+.app-shell {
+  min-width: 0;
+  min-height: 0;
+  isolation: isolate;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--dashboard-buttons-radius, 10px);
+  background: var(--panel);
+  color: var(--ink);
+  font-weight: 800;
+  transform: translateY(calc(-100% - 16px));
+  transition: transform 140ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--dashboard-focus-ring-width) solid color-mix(in srgb, var(--accent-3) 82%, white 18%);
+  outline-offset: 2px;
+}
+
+:where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+:where(.view, .content-shell, .panel-card, .detail-card, .status-card, .field, .row) {
+  min-inline-size: 0;
+}
+
+:where(img, svg, video, canvas, iframe) {
+  max-inline-size: 100%;
+}
+
+:where(p, dd, td, th, code, .muted, .helper-text) {
+  overflow-wrap: anywhere;
+}
+
+.runtime-overlay-panel,
+.settings-overlay-panel {
+  max-block-size: calc(100dvh - 24px);
+  overscroll-behavior: contain;
+}
+
+@media (pointer: coarse) {
+  :where(.mobile-nav-link, .dashboard-tab, .messenger-tab, .tab-link) {
+    min-block-size: var(--dashboard-touch-target);
+  }
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    margin: 0 !important;
+  }
+
+  body.workspace-collapsed .workspace-sidebar,
+  body.details-collapsed .details-pane {
+    display: none;
+  }
+
+  body:not(:is(.view-ai-active, .view-tools-active, .view-dashboard-active, .view-blender-addons-active, .view-assets-active)) .content-shell {
+    padding-bottom: calc(var(--dashboard-mobile-nav-clearance) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-bottom-nav {
+    left: max(10px, env(safe-area-inset-left, 0px));
+    right: max(10px, env(safe-area-inset-right, 0px));
+    bottom: max(10px, env(safe-area-inset-bottom, 0px));
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(58px, 1fr);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .mobile-bottom-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-nav-link {
+    min-height: 56px;
+    scroll-snap-align: center;
+  }
+}
+
+@media (max-width: 720px) {
+  body {
+    padding: 6px;
+  }
+
+  .app-shell {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  body.view-dashboard-active .app-shell {
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+  }
+
+  body.view-dashboard-active .content-shell {
+    grid-column: 2 !important;
+  }
+
+  .mobile-bottom-nav {
+    left: max(6px, env(safe-area-inset-left, 0px));
+    right: max(6px, env(safe-area-inset-right, 0px));
+    bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

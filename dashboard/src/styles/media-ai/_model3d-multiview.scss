@@ -1,0 +1,26 @@
+@layer components {
+  .model3d-source-item-actions:has(.model3d-multiview-slot-field) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 8px;
+  }
+
+  .model3d-multiview-slot-field {
+    display: grid;
+    gap: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .model3d-multiview-slot-field select {
+    min-height: 34px;
+    padding: 5px 8px;
+    border-color: color-mix(in srgb, var(--studio-accent-2, var(--accent)) 48%, var(--line));
+    background: color-mix(in srgb, var(--panel) 86%, black 14%);
+    color: var(--ink);
+  }
+}

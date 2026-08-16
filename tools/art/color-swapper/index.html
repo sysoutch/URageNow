@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Studio Pro - URage Tools</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <script src="../../shared/dashboard-tool-bridge.js"></script>
+    <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+    <div class="app-wrapper">
+        <aside class="color-panel" aria-label="Color tools" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Color Tools">
+            <header class="sidebar-header">
+                <h1>ARCADE <span>STUDIO</span> PRO</h1>
+                <p>Click the image to pick a color, or use hardware presets.</p>
+            </header>
+
+            <div class="tool-box">
+                <label for="presetSelect">Hardware Presets</label>
+                <select id="presetSelect">
+                    <option value="none">Current Palette</option>
+                    <option value="dmg_classic">GameBoy DMG (Original Green)</option>
+                    <option value="pocket_silver">GameBoy Pocket (Grayscale)</option>
+                    <option value="light_teal">GameBoy Light (Teal Glow)</option>
+                    <option value="pico8">PICO-8 (Retro 16)</option>
+                </select>
+
+                <label for="decimateSlider">Color Decimation</label>
+                <input type="range" id="decimateSlider" min="2" max="64" value="64">
+                <div class="range-meta">
+                    <span>Complexity</span>
+                    <span id="sliderVal">64 Colors</span>
+                </div>
+                <button class="btn btn-secondary" type="button" onclick="processImage()">Apply Hardware Filter</button>
+            </div>
+
+            <section class="palette-section" aria-label="Active palette">
+                <h3>Active Palette <span id="colorCount" class="badge">0</span></h3>
+                <div class="color-grid" id="paletteGrid"></div>
+            </section>
+
+            <div class="tool-box">
+                <label for="colorPicker">Precision Swapper</label>
+                <input type="color" id="colorPicker" value="#ff4500">
+                <button class="btn" type="button" id="applySwap">Swap Selected Color</button>
+                <button class="btn btn-secondary" type="button" onclick="download()">Download PNG</button>
+            </div>
+        </aside>
+
+         <main class="preview-area" aria-label="Image preview">
+              <div class="preview-toolbar">
+                  <div id="colorswap-upload-wrapper">
+                      <label class="upload-card" for="upload">
+                          <span class="upload-card-icon arrow-icon">&#8595;</span>
+                          <strong>Choose an image</strong>
+                          <span>or drag it here.</span>
+                          <input type="file" id="upload" accept="image/*" hidden>
+                      </label>
+                  </div>
+              </div>
+            <div class="canvas-container">
+                <canvas id="canvas"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

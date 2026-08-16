@@ -1,0 +1,3362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SpriteForge AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="vendor/gif.js"></script>
+<script src="../../shared/dashboard-tool-bridge.js"></script>
+<script src="../../shared/dashboard-theme.js"></script>
+<link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+
+<style>
+:root { --tool-bg: #120d0d; --tool-surface: rgba(24, 14, 14, 0.92); --tool-surface-alt: rgba(18, 11, 11, 0.98); --tool-line: rgba(255, 180, 128, 0.18); --tool-accent: #ff8a4d; --tool-text: #f6f1ee; --tool-muted: #c8b6ae; }
+body[data-dashboard-theme="water"] { --tool-bg: #0d1522; --tool-surface: rgba(12, 21, 37, 0.94); --tool-surface-alt: rgba(10, 17, 29, 0.98); --tool-line: rgba(114, 190, 255, 0.18); --tool-accent: #59b6ff; --tool-text: #eef5ff; --tool-muted: #a9bfd8; }
+body[data-dashboard-theme="nature"] { --tool-bg: #11170f; --tool-surface: rgba(18, 24, 16, 0.94); --tool-surface-alt: rgba(13, 19, 11, 0.98); --tool-line: rgba(146, 213, 120, 0.18); --tool-accent: #82cd5f; --tool-text: #f2f8ee; --tool-muted: #bccfaf; }
+body[data-dashboard-theme="rock"] { --tool-bg: #151515; --tool-surface: rgba(24, 24, 24, 0.95); --tool-surface-alt: rgba(16, 16, 16, 0.98); --tool-line: rgba(196, 190, 176, 0.18); --tool-accent: #c4ae8a; --tool-text: #f2efea; --tool-muted: #b7aea2; }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--tool-bg); color: var(--tool-text); font-family: sans-serif; }
+canvas { image-rendering: pixelated; }
+.flex { display: flex; }
+.grid { display: grid; }
+.hidden { display: none !important; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1 1 0; min-width: 0; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.h-screen { min-height: 100vh; }
+.h-14 { min-height: 3.5rem; }
+.h-36 { min-height: 9rem; }
+.h-\\[28rem\\] { min-height: 28rem; }
+.max-h-20 { max-height: 5rem; }
+.max-h-40 { max-height: 10rem; }
+.max-h-80 { max-height: 20rem; }
+.max-h-96 { max-height: 24rem; }
+.max-w-full { max-width: 100%; }
+.max-w-6xl { max-width: 72rem; }
+.min-h-48 { min-height: 12rem; }
+.w-80 { width: 20rem; max-width: 100%; }
+.w-full { width: 100%; }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gap-2 { gap: .5rem; }
+.gap-3 { gap: .75rem; }
+.p-1 { padding: .25rem; }
+.p-2 { padding: .5rem; }
+.p-3 { padding: .75rem; }
+.p-4 { padding: 1rem; }
+.px-2 { padding-left: .5rem; padding-right: .5rem; }
+.px-3 { padding-left: .75rem; padding-right: .75rem; }
+.py-1 { padding-top: .25rem; padding-bottom: .25rem; }
+.mb-1 { margin-bottom: .25rem; }
+.mb-2 { margin-bottom: .5rem; }
+.mb-3 { margin-bottom: .75rem; }
+.mt-2 { margin-top: .5rem; }
+.mt-6 { margin-top: 1.5rem; }
+.border { border: 1px solid var(--tool-line); }
+.border-b { border-bottom: 1px solid var(--tool-line); }
+.border-r { border-right: 1px solid var(--tool-line); }
+.border-t { border-top: 1px solid var(--tool-line); }
+.border-slate-800 { border-color: var(--tool-line); }
+.bg-black { background: var(--tool-surface-alt); }
+.bg-blue-600,
+.bg-crystal-600,
+.bg-slate-700,
+.bg-amber-600,
+.bg-emerald-600,
+.bg-emerald-700 { background: color-mix(in srgb, var(--tool-accent) 34%, var(--tool-surface) 66%); }
+.bg-slate-900,
+.bg-slate-900\\/60 { background: var(--tool-surface); }
+.bg-slate-950 { background: var(--tool-surface-alt); }
+.rounded { border-radius: 10px; }
+.text-\\[11px\\] { font-size: 11px; }
+.text-xs { font-size: 12px; }
+.text-sm { font-size: 14px; }
+.font-bold { font-weight: 800; }
+.text-gray-300,
+.text-gray-400,
+.text-gray-500 { color: var(--tool-muted); }
+.cursor-pointer { cursor: pointer; }
+.select-none { user-select: none; }
+.resize-y { resize: vertical; }
+.object-contain { object-fit: contain; }
+.overflow-auto { overflow: auto; }
+.overflow-hidden { overflow: hidden; }
+.overflow-y-auto { overflow-y: auto; }
+.whitespace-pre-wrap { white-space: pre-wrap; }
+.space-y-2 > * + * { margin-top: .5rem; }
+@media (min-width: 768px) { .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .xl\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 720px) {
+    body[data-dashboard-theme] > .flex.flex-1 { flex-direction: column; overflow: visible; }
+    body[data-dashboard-theme] .w-80 { width: 100%; border-right: 0; border-bottom: 1px solid var(--tool-line); }
+}
+.checkerboard {
+    background-color: var(--tool-surface-alt);
+    background-image:
+        linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.08) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.08) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.08) 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+</style>
+</head>
+
+<body class="flex flex-col h-screen" data-dashboard-theme="fire">
+
+<div class="h-14 flex items-center justify-between px-3 bg-slate-900 border-b border-slate-800">
+    <div class="font-bold">SpriteForge AI</div>
+    <button id="aiButton" onclick="aiDetect()" class="bg-crystal-600 px-3 py-1 rounded">AI Detect</button>
+</div>
+
+<div class="flex flex-1 overflow-hidden">
+
+<div class="w-80 p-3 bg-slate-950 border-r border-slate-800 overflow-y-auto">
+
+<div id="spritesheet-upload-wrapper" class="mb-3">
+<label class="upload-card" for="upload" style="min-height:100px;">
+<span class="upload-card-icon arrow-icon">&#8595;</span>
+<strong>Upload spritesheet</strong>
+<span>or drag it here.</span>
+<input type="file" id="upload" accept="image/png,image/jpeg" hidden>
+</label>
+</div>
+
+<div class="text-xs">Provider</div>
+<select id="providerSelect" class="w-full bg-black p-1 mb-3">
+    <option value="ollama">Ollama</option>
+    <option value="lmstudio">LM Studio</option>
+</select>
+
+<div class="text-xs">Provider Endpoint</div>
+<input id="endpointInput" type="text" class="w-full bg-black p-1 mb-2" placeholder="http://127.0.0.1:11434">
+<div class="flex gap-2 mb-3">
+    <button onclick="saveEndpointForProvider()" class="flex-1 text-xs bg-slate-700 py-1 rounded">Save Endpoint</button>
+    <button onclick="resetEndpointForProvider()" class="flex-1 text-xs bg-slate-700 py-1 rounded">Reset</button>
+</div>
+
+<div class="text-xs">Model</div>
+<select id="modelSelect" class="w-full bg-black p-1 mb-3"></select>
+
+<div class="text-xs">Grid</div>
+<input id="cols" type="number" min="1" value="3" class="w-full mb-2 bg-black p-1">
+<input id="rows" type="number" min="1" value="3" class="w-full mb-2 bg-black p-1">
+<label class="flex items-center gap-2 text-xs mb-2">
+    <input id="gridLineEditToggle" type="checkbox">
+    Edit grid lines (drag in preview)
+</label>
+<div class="text-[11px] text-gray-500 mb-2">Tip: Double-click a grid segment to insert a knot.</div>
+<button onclick="resetGridLinesFromInputs()" class="w-full text-xs bg-slate-700 py-1 rounded mb-2">Reset Grid Lines</button>
+
+<button onclick="sliceGrid()" class="w-full bg-blue-600 py-1 rounded mb-2">Slice Grid</button>
+<button onclick="sliceDiagonal()" class="w-full bg-emerald-600 py-1 rounded mb-3">Auto Split (Diagonal)</button>
+
+<label class="flex items-center gap-2 text-xs mb-2">
+    <input id="cropToSpriteToggle" type="checkbox">
+    Cut down to sprites only
+</label>
+<label class="flex items-center gap-2 text-xs mb-2">
+    <input id="keepCellPaddingToggle" type="checkbox" checked>
+    Keep source cell padding
+</label>
+
+<label class="flex items-center gap-2 text-xs mb-2">
+    <input id="transparencyToggle" type="checkbox" checked>
+    Keep transparency
+</label>
+
+<label class="flex items-center gap-2 text-xs mb-3">
+    <input id="debugOverlayToggle" type="checkbox" checked>
+    Debug overlay lines
+</label>
+
+<label class="flex items-center gap-2 text-xs mb-2">
+    <input id="splineEditToggle" type="checkbox">
+    Spline separator edit
+</label>
+<div class="grid grid-cols-2 gap-2 mb-3">
+    <button onclick="startNewSpline()" class="text-xs bg-slate-700 py-1 rounded">New Spline</button>
+    <button onclick="finishSpline()" class="text-xs bg-slate-700 py-1 rounded">Finish</button>
+    <button onclick="clearSplines()" class="text-xs bg-slate-700 py-1 rounded">Clear</button>
+    <button onclick="applySplineSplit()" class="text-xs bg-emerald-700 py-1 rounded">Apply Spline Split</button>
+</div>
+
+<details class="mb-3 border border-slate-800 rounded bg-slate-900/60">
+    <summary class="cursor-pointer text-xs px-2 py-1 select-none">AI Settings</summary>
+    <div class="p-2 border-t border-slate-800">
+        <div class="text-xs mb-1">Detection prompt</div>
+        <textarea id="promptInput" class="w-full bg-black p-2 text-xs rounded h-36 resize-y"></textarea>
+        <div class="flex gap-2 mt-2">
+            <button onclick="resetPromptEditor()" class="flex-1 text-xs bg-slate-700 py-1 rounded">Reset Prompt</button>
+            <button onclick="savePromptEditor()" class="flex-1 text-xs bg-slate-700 py-1 rounded">Save Prompt</button>
+        </div>
+    </div>
+</details>
+
+<div class="text-xs">GIF frame delay (ms)</div>
+<input id="gifDelay" type="number" min="30" max="2000" value="120" class="w-full mb-2 bg-black p-1">
+
+<button id="generateGifButton" onclick="generateGifPreview()" class="w-full bg-amber-600 py-1 rounded mb-2">Generate GIF Preview</button>
+<button id="downloadGifButton" onclick="downloadGif()" class="w-full bg-emerald-700 py-1 rounded mb-3" disabled>Download GIF</button>
+
+<pre id="log" class="text-xs text-gray-400 mt-2 whitespace-pre-wrap"></pre>
+
+</div>
+
+<div class="flex-1 overflow-auto p-4">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-xs text-gray-400 mb-2">Input Preview</div>
+        <div class="border border-slate-800 bg-slate-900 rounded p-3 min-h-48 flex items-center justify-center">
+            <canvas id="previewCanvas" class="hidden max-w-full max-h-96"></canvas>
+            <div id="inputPlaceholder" class="text-sm text-gray-500">Upload an image to preview it here.</div>
+        </div>
+
+        <div class="text-xs text-gray-400 mt-6 mb-2">Extracted Sprites</div>
+        <div class="border border-slate-800 bg-slate-900 rounded p-3 h-[28rem] overflow-y-auto">
+            <div id="spriteWrapper" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+        </div>
+
+        <div class="text-xs text-gray-400 mt-6 mb-2">GIF Preview</div>
+        <div class="border border-slate-800 bg-slate-900 rounded p-3 min-h-48 flex items-center justify-center">
+            <img id="gifPreview" class="hidden max-w-full max-h-80 object-contain" alt="Animated GIF preview">
+            <div id="gifPlaceholder" class="text-sm text-gray-500">Generate GIF preview from extracted sprites.</div>
+        </div>
+
+        <div class="text-xs text-gray-400 mt-6 mb-2">LLM Debug</div>
+        <div class="border border-slate-800 bg-slate-900 rounded p-3 space-y-2">
+            <div class="text-[11px] text-gray-400">Meta</div>
+            <pre id="llmMetaDebug" class="text-[11px] text-gray-300 whitespace-pre-wrap max-h-20 overflow-auto"></pre>
+
+            <div class="text-[11px] text-gray-400">Prompt Sent</div>
+            <pre id="llmPromptDebug" class="text-[11px] text-gray-300 whitespace-pre-wrap max-h-40 overflow-auto"></pre>
+
+            <div class="text-[11px] text-gray-400">LLM Text Output</div>
+            <pre id="llmReplyDebug" class="text-[11px] text-gray-300 whitespace-pre-wrap max-h-40 overflow-auto"></pre>
+
+            <div class="text-[11px] text-gray-400">Upstream Raw Body</div>
+            <pre id="llmRawBodyDebug" class="text-[11px] text-gray-300 whitespace-pre-wrap max-h-40 overflow-auto"></pre>
+
+            <div class="text-[11px] text-gray-400">Extracted JSON</div>
+            <pre id="llmParsedDebug" class="text-[11px] text-gray-300 whitespace-pre-wrap max-h-40 overflow-auto"></pre>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<canvas id="canvas" class="hidden"></canvas>
+
+<script>
+/* ================= STATE ================= */
+let img = new Image();
+let base64 = "";
+let sprites = [];
+let gifBlobUrl = "";
+let separatorCurves = [];
+let activeCurveIndex = -1;
+let gridGuides = { vertical: [], horizontal: [] };
+let activeGridDrag = null;
+let selectedGridKnot = null;
+window.registerDashboardThemeSync((theme, tokens) => {
+    if (typeof tailwind === 'undefined') return;
+    const isDark = true;
+    const config = {
+        theme: {
+            extend: {
+                colors: {
+                    slate: {
+                        900: tokens.surface,
+                        950: tokens.surfaceStrong || tokens.surface,
+                        800: tokens.line
+                    }
+                }
+            }
+        }
+    };
+    tailwind.config = config;
+});
+const PROMPT_STORAGE_KEY = "spriteforge.aiPrompt";
+const ENDPOINTS_STORAGE_KEY = "spriteforge.providerEndpoints";
+const DEFAULT_PROVIDER_ENDPOINTS = {
+    ollama: "http://127.0.0.1:11434",
+    lmstudio: "http://127.0.0.1:1234"
+};
+const hasSpriteForgeProxy = !window.location.pathname.startsWith("/tools/");
+const DEFAULT_AI_PROMPT = `Detect each full sprite character exactly once.
+Do not split a single sprite into parts.
+If diagonal or non-rectangular separation is needed, return polygon points.
+Return ONLY JSON in one of these formats:
+{
+  "regions":[{"points":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}]}]
+}
+or
+{
+  "sprites":[{"x":0,"y":0,"width":0,"height":0}]
+}`;
+let providerEndpoints = { ...DEFAULT_PROVIDER_ENDPOINTS };
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const previewCanvas = document.getElementById("previewCanvas");
+const previewCtx = previewCanvas.getContext("2d");
+
+const uploadInput = document.getElementById("upload");
+const providerSelect = document.getElementById("providerSelect");
+const endpointInput = document.getElementById("endpointInput");
+const modelSelect = document.getElementById("modelSelect");
+const colsInput = document.getElementById("cols");
+const rowsInput = document.getElementById("rows");
+const gridLineEditToggle = document.getElementById("gridLineEditToggle");
+const cropToSpriteToggle = document.getElementById("cropToSpriteToggle");
+const keepCellPaddingToggle = document.getElementById("keepCellPaddingToggle");
+const transparencyToggle = document.getElementById("transparencyToggle");
+const debugOverlayToggle = document.getElementById("debugOverlayToggle");
+const splineEditToggle = document.getElementById("splineEditToggle");
+const gifDelayInput = document.getElementById("gifDelay");
+const promptInput = document.getElementById("promptInput");
+
+const spriteWrapper = document.getElementById("spriteWrapper");
+const inputPlaceholder = document.getElementById("inputPlaceholder");
+const gifPreview = document.getElementById("gifPreview");
+const gifPlaceholder = document.getElementById("gifPlaceholder");
+const downloadGifButton = document.getElementById("downloadGifButton");
+const llmMetaDebug = document.getElementById("llmMetaDebug");
+const llmPromptDebug = document.getElementById("llmPromptDebug");
+const llmReplyDebug = document.getElementById("llmReplyDebug");
+const llmRawBodyDebug = document.getElementById("llmRawBodyDebug");
+const llmParsedDebug = document.getElementById("llmParsedDebug");
+
+function log(text) {
+    document.getElementById("log").textContent = text;
+}
+
+function loadImageSource(source, fileName) {
+    return new Promise((resolve, reject) => {
+        const normalizedSource = String(source || "").trim();
+        if (!normalizedSource) {
+            reject(new Error("No image source was provided."));
+            return;
+        }
+        img = new Image();
+        img.onload = () => {
+            drawSourceToCanvas();
+            base64 = canvas.toDataURL("image/png").split(",")[1];
+            separatorCurves = [];
+            activeCurveIndex = -1;
+            selectedGridKnot = null;
+            activeGridDrag = null;
+            initializeGridGuidesFromInputs(true);
+            clearSprites();
+            redrawPreview();
+            log(`Image loaded (${img.width}x${img.height})`);
+            resolve();
+        };
+        img.onerror = () => reject(new Error("Failed to load image."));
+        img.src = normalizedSource;
+    });
+}
+
+function loadPromptFromStorage() {
+    try {
+        const stored = localStorage.getItem(PROMPT_STORAGE_KEY);
+        if (stored && stored.trim()) {
+            return stored;
+        }
+    } catch {
+        // Ignore storage errors and fallback to default prompt.
+    }
+    return DEFAULT_AI_PROMPT;
+}
+
+function getCurrentPrompt() {
+    const raw = String(promptInput.value || "").trim();
+    return raw || DEFAULT_AI_PROMPT;
+}
+
+function savePromptEditor() {
+    const value = getCurrentPrompt();
+    promptInput.value = value;
+
+    try {
+        localStorage.setItem(PROMPT_STORAGE_KEY, value);
+        log("Prompt saved");
+    } catch {
+        log("Prompt save failed");
+    }
+}
+
+function resetPromptEditor() {
+    promptInput.value = DEFAULT_AI_PROMPT;
+    try {
+        localStorage.removeItem(PROMPT_STORAGE_KEY);
+    } catch {
+        // Ignore storage errors.
+    }
+    log("Prompt reset");
+}
+
+function setLlmDebug({
+    meta = "",
+    prompt = "",
+    reply = "",
+    rawBody = "",
+    parsed = ""
+} = {}) {
+    llmMetaDebug.textContent = meta;
+    llmPromptDebug.textContent = prompt;
+    llmReplyDebug.textContent = reply;
+    llmRawBodyDebug.textContent = rawBody;
+    llmParsedDebug.textContent = parsed;
+}
+
+function initializePromptEditor() {
+    promptInput.value = loadPromptFromStorage();
+    promptInput.addEventListener("change", savePromptEditor);
+}
+
+function sanitizeEndpoint(url) {
+    return String(url || "").trim().replace(/\/+$/, "");
+}
+
+function loadEndpointsFromStorage() {
+    try {
+        const raw = localStorage.getItem(ENDPOINTS_STORAGE_KEY);
+        if (!raw) {
+            return {};
+        }
+
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+            return parsed;
+        }
+    } catch {
+        // Ignore storage parsing failures and use defaults.
+    }
+
+    return {};
+}
+
+function saveEndpointsToStorage() {
+    try {
+        localStorage.setItem(ENDPOINTS_STORAGE_KEY, JSON.stringify(providerEndpoints));
+    } catch {
+        // Ignore storage failures.
+    }
+}
+
+async function loadProviderDefaultsFromServer() {
+    if (!hasSpriteForgeProxy) return;
+    try {
+        const res = await fetch("/api/providers");
+        const data = await res.json();
+        if (!res.ok || !Array.isArray(data?.providers)) {
+            return;
+        }
+
+        data.providers.forEach((provider) => {
+            if (provider?.id && provider?.baseUrl) {
+                providerEndpoints[provider.id] = sanitizeEndpoint(provider.baseUrl);
+            }
+        });
+    } catch {
+        // Ignore endpoint lookup errors and keep local defaults.
+    }
+}
+
+function syncEndpointInputFromProvider() {
+    const providerId = providerSelect.value;
+    endpointInput.value = providerEndpoints[providerId] || "";
+}
+
+function getCurrentEndpoint() {
+    const inputValue = sanitizeEndpoint(endpointInput.value);
+    if (inputValue) {
+        return inputValue;
+    }
+
+    const providerId = providerSelect.value;
+    return sanitizeEndpoint(providerEndpoints[providerId] || "");
+}
+
+function saveEndpointForProvider() {
+    const providerId = providerSelect.value;
+    const endpoint = getCurrentEndpoint();
+    providerEndpoints[providerId] = endpoint;
+    endpointInput.value = endpoint;
+    saveEndpointsToStorage();
+    log(`Saved ${providerId} endpoint`);
+    loadModels();
+}
+
+function resetEndpointForProvider() {
+    const providerId = providerSelect.value;
+    providerEndpoints[providerId] = sanitizeEndpoint(DEFAULT_PROVIDER_ENDPOINTS[providerId] || "");
+    endpointInput.value = providerEndpoints[providerId];
+    saveEndpointsToStorage();
+    log(`Reset ${providerId} endpoint`);
+    loadModels();
+}
+
+async function initializeProviderEndpoints() {
+    providerEndpoints = {
+        ...DEFAULT_PROVIDER_ENDPOINTS
+    };
+
+    await loadProviderDefaultsFromServer();
+    providerEndpoints = {
+        ...providerEndpoints,
+        ...loadEndpointsFromStorage()
+    };
+
+    providerEndpoints.ollama = sanitizeEndpoint(providerEndpoints.ollama || DEFAULT_PROVIDER_ENDPOINTS.ollama);
+    providerEndpoints.lmstudio = sanitizeEndpoint(providerEndpoints.lmstudio || DEFAULT_PROVIDER_ENDPOINTS.lmstudio);
+
+    syncEndpointInputFromProvider();
+}
+
+function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+}
+
+function roundPoint(point) {
+    return {
+        x: Math.round(Number(point?.x) || 0),
+        y: Math.round(Number(point?.y) || 0)
+    };
+}
+
+function createDefaultGuideKnots(axis, anchorValue, subdivisions) {
+    const count = Math.max(1, subdivisions);
+    const knots = [];
+
+    for (let i = 0; i <= count; i += 1) {
+        if (axis === "vertical") {
+            knots.push({
+                x: anchorValue,
+                y: Math.round(((img.height - 1) * i) / count)
+            });
+        } else {
+            knots.push({
+                x: Math.round(((img.width - 1) * i) / count),
+                y: anchorValue
+            });
+        }
+    }
+
+    return knots;
+}
+
+function normalizeGuideLine(axis, line, fallbackAnchor, subdivisions) {
+    const defaultKnots = createDefaultGuideKnots(axis, fallbackAnchor, subdivisions);
+    const knots = Array.isArray(line?.knots) && line.knots.length >= 2
+        ? line.knots.map((point) => roundPoint(point))
+        : defaultKnots;
+
+    if (axis === "vertical") {
+        knots.forEach((point) => {
+            point.x = clamp(point.x, 0, img.width - 1);
+            point.y = clamp(point.y, 0, img.height - 1);
+        });
+
+        knots.sort((a, b) => a.y - b.y);
+        for (let i = 0; i < knots.length; i += 1) {
+            const lower = i === 0 ? 0 : knots[i - 1].y + 1;
+            const upper = i === knots.length - 1 ? img.height - 1 : knots[i + 1].y - 1;
+            knots[i].y = clamp(knots[i].y, lower, upper);
+        }
+    } else {
+        knots.forEach((point) => {
+            point.x = clamp(point.x, 0, img.width - 1);
+            point.y = clamp(point.y, 0, img.height - 1);
+        });
+
+        knots.sort((a, b) => a.x - b.x);
+        for (let i = 0; i < knots.length; i += 1) {
+            const lower = i === 0 ? 0 : knots[i - 1].x + 1;
+            const upper = i === knots.length - 1 ? img.width - 1 : knots[i + 1].x - 1;
+            knots[i].x = clamp(knots[i].x, lower, upper);
+        }
+    }
+
+    return { knots };
+}
+
+function getLineCenterOnAxis(axis, line) {
+    if (!Array.isArray(line?.knots) || !line.knots.length) {
+        return 0;
+    }
+
+    if (axis === "vertical") {
+        return Math.round(line.knots.reduce((sum, point) => sum + point.x, 0) / line.knots.length);
+    }
+
+    return Math.round(line.knots.reduce((sum, point) => sum + point.y, 0) / line.knots.length);
+}
+
+function getLineAxisRange(axis, line) {
+    if (!Array.isArray(line?.knots) || !line.knots.length) {
+        return { min: 0, max: 0 };
+    }
+
+    if (axis === "vertical") {
+        const values = line.knots.map((point) => point.x);
+        return { min: Math.min(...values), max: Math.max(...values) };
+    }
+
+    const values = line.knots.map((point) => point.y);
+    return { min: Math.min(...values), max: Math.max(...values) };
+}
+
+function getNeighborAxisBounds(axis, lines, lineIndex, minGap = 6) {
+    const prev = lines[lineIndex - 1];
+    const next = lines[lineIndex + 1];
+    const edgeMax = axis === "vertical" ? img.width - 1 : img.height - 1;
+
+    const prevRange = prev ? getLineAxisRange(axis, prev) : null;
+    const nextRange = next ? getLineAxisRange(axis, next) : null;
+
+    const minValue = prevRange ? prevRange.max + minGap : minGap;
+    const maxValue = nextRange ? nextRange.min - minGap : edgeMax - minGap;
+
+    return {
+        min: clamp(minValue, 0, edgeMax),
+        max: clamp(maxValue, 0, edgeMax)
+    };
+}
+
+function constrainGuideLineAgainstNeighbors(axis, lines, lineIndex) {
+    const line = lines[lineIndex];
+    if (!line || !Array.isArray(line.knots) || line.knots.length < 2) {
+        return;
+    }
+
+    const bounds = getNeighborAxisBounds(axis, lines, lineIndex);
+    if (bounds.max < bounds.min) {
+        return;
+    }
+
+    if (axis === "vertical") {
+        line.knots.forEach((point) => {
+            point.x = clamp(point.x, bounds.min, bounds.max);
+        });
+    } else {
+        line.knots.forEach((point) => {
+            point.y = clamp(point.y, bounds.min, bounds.max);
+        });
+    }
+}
+
+function lineHasDiagonalOffset(axis, line) {
+    if (!Array.isArray(line?.knots) || line.knots.length < 2) {
+        return false;
+    }
+
+    if (axis === "vertical") {
+        const baseX = line.knots[0].x;
+        return line.knots.some((point) => Math.abs(point.x - baseX) > 0);
+    }
+
+    const baseY = line.knots[0].y;
+    return line.knots.some((point) => Math.abs(point.y - baseY) > 0);
+}
+
+function initializeGridGuidesFromInputs(force = false) {
+    if (!img.width || !img.height) {
+        return;
+    }
+
+    const cols = Math.max(1, parseInt(colsInput.value, 10) || 1);
+    const rows = Math.max(1, parseInt(rowsInput.value, 10) || 1);
+    const verticalCount = Math.max(0, cols - 1);
+    const horizontalCount = Math.max(0, rows - 1);
+
+    const needsRebuild =
+        force ||
+        !Array.isArray(gridGuides.vertical) ||
+        !Array.isArray(gridGuides.horizontal) ||
+        gridGuides.vertical.length !== verticalCount ||
+        gridGuides.horizontal.length !== horizontalCount;
+
+    if (needsRebuild) {
+        gridGuides.vertical = [];
+        for (let i = 1; i < cols; i += 1) {
+            const x = Math.round((img.width * i) / cols);
+            gridGuides.vertical.push({
+                knots: createDefaultGuideKnots("vertical", x, rows)
+            });
+        }
+
+        gridGuides.horizontal = [];
+        for (let i = 1; i < rows; i += 1) {
+            const y = Math.round((img.height * i) / rows);
+            gridGuides.horizontal.push({
+                knots: createDefaultGuideKnots("horizontal", y, cols)
+            });
+        }
+    }
+
+    gridGuides.vertical = gridGuides.vertical.map((line, index) => {
+        const fallbackX = Math.round((img.width * (index + 1)) / cols);
+        return normalizeGuideLine("vertical", line, fallbackX, rows);
+    });
+
+    gridGuides.horizontal = gridGuides.horizontal.map((line, index) => {
+        const fallbackY = Math.round((img.height * (index + 1)) / rows);
+        return normalizeGuideLine("horizontal", line, fallbackY, cols);
+    });
+
+    gridGuides.vertical.forEach((line, index) => {
+        constrainGuideLineAgainstNeighbors("vertical", gridGuides.vertical, index);
+        gridGuides.vertical[index] = normalizeGuideLine("vertical", line, getLineCenterOnAxis("vertical", line), rows);
+    });
+
+    gridGuides.horizontal.forEach((line, index) => {
+        constrainGuideLineAgainstNeighbors("horizontal", gridGuides.horizontal, index);
+        gridGuides.horizontal[index] = normalizeGuideLine("horizontal", line, getLineCenterOnAxis("horizontal", line), cols);
+    });
+}
+
+function resetGridLinesFromInputs() {
+    initializeGridGuidesFromInputs(true);
+    selectedGridKnot = null;
+    redrawPreview();
+    log("Grid guides reset");
+}
+
+function getGridBoundaryArrays() {
+    initializeGridGuidesFromInputs(false);
+
+    const xBoundaries = [
+        0,
+        ...gridGuides.vertical.map((line) => {
+            if (!Array.isArray(line?.knots) || line.knots.length < 2) {
+                return 0;
+            }
+            return getLineCenterOnAxis("vertical", line);
+        }).sort((a, b) => a - b),
+        img.width
+    ];
+
+    const yBoundaries = [
+        0,
+        ...gridGuides.horizontal.map((line) => {
+            if (!Array.isArray(line?.knots) || line.knots.length < 2) {
+                return 0;
+            }
+            return getLineCenterOnAxis("horizontal", line);
+        }).sort((a, b) => a - b),
+        img.height
+    ];
+
+    return { xBoundaries, yBoundaries };
+}
+
+function getGridCellRectForBounds(bounds) {
+    if (!bounds || !img.width || !img.height) {
+        return null;
+    }
+
+    const { xBoundaries, yBoundaries } = getGridBoundaryArrays();
+    if (xBoundaries.length < 2 || yBoundaries.length < 2) {
+        return null;
+    }
+
+    const centerX = bounds.x + bounds.width / 2;
+    const centerY = bounds.y + bounds.height / 2;
+
+    let colIndex = -1;
+    for (let i = 0; i < xBoundaries.length - 1; i += 1) {
+        if (centerX >= xBoundaries[i] && centerX < xBoundaries[i + 1]) {
+            colIndex = i;
+            break;
+        }
+    }
+
+    let rowIndex = -1;
+    for (let i = 0; i < yBoundaries.length - 1; i += 1) {
+        if (centerY >= yBoundaries[i] && centerY < yBoundaries[i + 1]) {
+            rowIndex = i;
+            break;
+        }
+    }
+
+    if (colIndex < 0) {
+        colIndex = Math.max(0, xBoundaries.length - 2);
+    }
+    if (rowIndex < 0) {
+        rowIndex = Math.max(0, yBoundaries.length - 2);
+    }
+
+    const x0 = xBoundaries[colIndex];
+    const x1 = xBoundaries[colIndex + 1];
+    const y0 = yBoundaries[rowIndex];
+    const y1 = yBoundaries[rowIndex + 1];
+
+    return {
+        x: x0,
+        y: y0,
+        width: Math.max(1, x1 - x0),
+        height: Math.max(1, y1 - y0)
+    };
+}
+
+function drawGridGuides() {
+    if (!img.width || !img.height) {
+        return;
+    }
+
+    initializeGridGuidesFromInputs(false);
+
+    const drawLineWithKnots = (line, axis, index) => {
+        if (!Array.isArray(line?.knots) || line.knots.length < 2) {
+            return;
+        }
+
+        const isActiveLine =
+            activeGridDrag &&
+            activeGridDrag.axis === axis &&
+            activeGridDrag.lineIndex === index;
+        const baseHue = axis === "vertical" ? (index * 45 + 80) % 360 : (index * 45 + 200) % 360;
+
+        previewCtx.lineWidth = isActiveLine ? 3 : (gridLineEditToggle.checked ? 2.2 : 1.2);
+        previewCtx.strokeStyle = isActiveLine
+            ? "rgba(250, 204, 21, 0.98)"
+            : (gridLineEditToggle.checked ? "rgba(34, 211, 238, 0.95)" : `hsla(${baseHue}, 95%, 60%, 0.92)`);
+        previewCtx.beginPath();
+        previewCtx.moveTo(line.knots[0].x, line.knots[0].y);
+        for (let i = 1; i < line.knots.length; i += 1) {
+            previewCtx.lineTo(line.knots[i].x, line.knots[i].y);
+        }
+        previewCtx.stroke();
+
+        if (gridLineEditToggle.checked) {
+            line.knots.forEach((point, knotIndex) => {
+                const isEndKnot = knotIndex === 0 || knotIndex === line.knots.length - 1;
+                const isActiveKnot =
+                    isActiveLine &&
+                    activeGridDrag?.kind === "knot" &&
+                    activeGridDrag?.knotIndex === knotIndex;
+                const isSelectedKnot =
+                    selectedGridKnot &&
+                    selectedGridKnot.axis === axis &&
+                    selectedGridKnot.lineIndex === index &&
+                    selectedGridKnot.knotIndex === knotIndex;
+                const outerRadius = isActiveKnot ? 8 : 6.5;
+                const innerRadius = isActiveKnot ? 5.2 : 4.2;
+
+                previewCtx.beginPath();
+                previewCtx.fillStyle = isSelectedKnot ? "rgba(217, 70, 239, 0.95)" : "rgba(2, 6, 23, 0.95)";
+                previewCtx.arc(point.x, point.y, outerRadius, 0, Math.PI * 2);
+                previewCtx.fill();
+
+                previewCtx.beginPath();
+                previewCtx.fillStyle = isActiveKnot
+                    ? "#facc15"
+                    : (isSelectedKnot ? "#e879f9" : (isEndKnot ? "#fef08a" : "#22d3ee"));
+                previewCtx.arc(point.x, point.y, innerRadius, 0, Math.PI * 2);
+                previewCtx.fill();
+
+                previewCtx.strokeStyle = "rgba(255,255,255,0.95)";
+                previewCtx.lineWidth = 1;
+                previewCtx.stroke();
+
+                previewCtx.beginPath();
+                previewCtx.fillStyle = "rgba(255,255,255,0.95)";
+                previewCtx.arc(point.x, point.y, 1.3, 0, Math.PI * 2);
+                previewCtx.fill();
+            });
+        }
+    };
+
+    gridGuides.vertical.forEach((line, index) => drawLineWithKnots(line, "vertical", index));
+    gridGuides.horizontal.forEach((line, index) => drawLineWithKnots(line, "horizontal", index));
+}
+
+function distancePointToSegment(point, a, b) {
+    const vx = b.x - a.x;
+    const vy = b.y - a.y;
+    const wx = point.x - a.x;
+    const wy = point.y - a.y;
+    const lenSq = vx * vx + vy * vy;
+    if (lenSq < 1e-6) {
+        return Math.hypot(point.x - a.x, point.y - a.y);
+    }
+    const t = clamp((wx * vx + wy * vy) / lenSq, 0, 1);
+    const px = a.x + t * vx;
+    const py = a.y + t * vy;
+    return Math.hypot(point.x - px, point.y - py);
+}
+
+function getGridDragTarget(point, rect) {
+    initializeGridGuidesFromInputs(false);
+
+    const thresholdX = Math.max(5, (10 * img.width) / Math.max(1, rect.width));
+    const thresholdY = Math.max(5, (10 * img.height) / Math.max(1, rect.height));
+    const knotThreshold = Math.max(thresholdX, thresholdY) * 1.9;
+
+    let best = null;
+    let bestDistance = Number.POSITIVE_INFINITY;
+
+    const scanAxis = (axis, lines) => {
+        lines.forEach((line, lineIndex) => {
+            if (!Array.isArray(line?.knots) || line.knots.length < 2) {
+                return;
+            }
+
+            line.knots.forEach((knot, knotIndex) => {
+                const d = Math.hypot(point.x - knot.x, point.y - knot.y);
+                if (d < knotThreshold && d < bestDistance) {
+                    bestDistance = d;
+                    best = { kind: "knot", axis, lineIndex, knotIndex };
+                }
+            });
+
+            if (best?.kind === "knot" && bestDistance <= knotThreshold) {
+                return;
+            }
+
+            for (let segmentIndex = 0; segmentIndex < line.knots.length - 1; segmentIndex += 1) {
+                const dLine = distancePointToSegment(point, line.knots[segmentIndex], line.knots[segmentIndex + 1]);
+                const lineThreshold = (axis === "vertical" ? thresholdX : thresholdY) * 0.8;
+                if (dLine < lineThreshold && dLine < bestDistance) {
+                    bestDistance = dLine;
+                    best = { kind: "line", axis, lineIndex, segmentIndex };
+                }
+            }
+        });
+    };
+
+    scanAxis("vertical", gridGuides.vertical);
+    scanAxis("horizontal", gridGuides.horizontal);
+
+    return best;
+}
+
+function applyGridDrag(target, point) {
+    const minGap = 6;
+
+    if (target.axis === "vertical") {
+        const lines = gridGuides.vertical;
+        const line = lines[target.lineIndex];
+        if (!line || !Array.isArray(line.knots) || line.knots.length < 2) {
+            return;
+        }
+
+        const bounds = getNeighborAxisBounds("vertical", lines, target.lineIndex, minGap);
+        const minX = bounds.min;
+        const maxX = bounds.max;
+        const lastIndex = line.knots.length - 1;
+
+        if (target.kind === "knot") {
+            const knot = line.knots[target.knotIndex];
+            knot.x = clamp(Math.round(point.x), minX, maxX);
+            const prevKnot = target.knotIndex > 0 ? line.knots[target.knotIndex - 1] : null;
+            const nextKnot = target.knotIndex < lastIndex ? line.knots[target.knotIndex + 1] : null;
+            const minYOnLine = prevKnot ? Math.max(0, prevKnot.y + 1) : 0;
+            const maxYOnLine = nextKnot ? Math.min(img.height - 1, nextKnot.y - 1) : img.height - 1;
+            knot.y = clamp(Math.round(point.y), minYOnLine, maxYOnLine);
+        } else {
+            const dx = point.x - target.startPoint.x;
+            const indices = Number.isFinite(target.segmentIndex)
+                ? [target.segmentIndex, target.segmentIndex + 1]
+                : line.knots.map((_, knotIndex) => knotIndex);
+            const minCurrent = Math.min(...indices.map((knotIndex) => target.initialKnots[knotIndex].x));
+            const maxCurrent = Math.max(...indices.map((knotIndex) => target.initialKnots[knotIndex].x));
+            const maxShiftLeft = minX - minCurrent;
+            const maxShiftRight = maxX - maxCurrent;
+            const shift = clamp(dx, maxShiftLeft, maxShiftRight);
+
+            indices.forEach((knotIndex) => {
+                line.knots[knotIndex].x = clamp(Math.round(target.initialKnots[knotIndex].x + shift), minX, maxX);
+            });
+        }
+
+        lines[target.lineIndex] = normalizeGuideLine("vertical", line, getLineCenterOnAxis("vertical", line), Math.max(1, parseInt(rowsInput.value, 10) || 1));
+    } else {
+        const lines = gridGuides.horizontal;
+        const line = lines[target.lineIndex];
+        if (!line || !Array.isArray(line.knots) || line.knots.length < 2) {
+            return;
+        }
+
+        const bounds = getNeighborAxisBounds("horizontal", lines, target.lineIndex, minGap);
+        const minY = bounds.min;
+        const maxY = bounds.max;
+        const lastIndex = line.knots.length - 1;
+
+        if (target.kind === "knot") {
+            const knot = line.knots[target.knotIndex];
+            knot.y = clamp(Math.round(point.y), minY, maxY);
+            const prevKnot = target.knotIndex > 0 ? line.knots[target.knotIndex - 1] : null;
+            const nextKnot = target.knotIndex < lastIndex ? line.knots[target.knotIndex + 1] : null;
+            const minXOnLine = prevKnot ? Math.max(0, prevKnot.x + 1) : 0;
+            const maxXOnLine = nextKnot ? Math.min(img.width - 1, nextKnot.x - 1) : img.width - 1;
+            knot.x = clamp(Math.round(point.x), minXOnLine, maxXOnLine);
+        } else {
+            const dy = point.y - target.startPoint.y;
+            const indices = Number.isFinite(target.segmentIndex)
+                ? [target.segmentIndex, target.segmentIndex + 1]
+                : line.knots.map((_, knotIndex) => knotIndex);
+            const minCurrent = Math.min(...indices.map((knotIndex) => target.initialKnots[knotIndex].y));
+            const maxCurrent = Math.max(...indices.map((knotIndex) => target.initialKnots[knotIndex].y));
+            const maxShiftUp = minY - minCurrent;
+            const maxShiftDown = maxY - maxCurrent;
+            const shift = clamp(dy, maxShiftUp, maxShiftDown);
+
+            indices.forEach((knotIndex) => {
+                line.knots[knotIndex].y = clamp(Math.round(target.initialKnots[knotIndex].y + shift), minY, maxY);
+            });
+        }
+
+        lines[target.lineIndex] = normalizeGuideLine("horizontal", line, getLineCenterOnAxis("horizontal", line), Math.max(1, parseInt(colsInput.value, 10) || 1));
+    }
+}
+
+function projectPointToSegment(point, a, b) {
+    const vx = b.x - a.x;
+    const vy = b.y - a.y;
+    const lenSq = vx * vx + vy * vy;
+
+    if (lenSq < 1e-6) {
+        return { x: a.x, y: a.y, t: 0 };
+    }
+
+    const wx = point.x - a.x;
+    const wy = point.y - a.y;
+    const t = clamp((wx * vx + wy * vy) / lenSq, 0, 1);
+
+    return {
+        x: a.x + t * vx,
+        y: a.y + t * vy,
+        t
+    };
+}
+
+function insertGridKnotAtPoint(point, rect) {
+    const target = getGridDragTarget(point, rect);
+    if (!target || target.kind !== "line" || !Number.isFinite(target.segmentIndex)) {
+        return false;
+    }
+
+    const axis = target.axis;
+    const lines = axis === "vertical" ? gridGuides.vertical : gridGuides.horizontal;
+    const line = lines[target.lineIndex];
+    if (!line || !Array.isArray(line.knots) || line.knots.length < 2) {
+        return false;
+    }
+
+    const start = line.knots[target.segmentIndex];
+    const end = line.knots[target.segmentIndex + 1];
+    if (!start || !end) {
+        return false;
+    }
+
+    const projected = projectPointToSegment(point, start, end);
+    if (projected.t <= 0.05 || projected.t >= 0.95) {
+        return false;
+    }
+
+    const knot = {
+        x: Math.round(projected.x),
+        y: Math.round(projected.y)
+    };
+
+    if (axis === "vertical") {
+        knot.y = clamp(knot.y, start.y + 1, end.y - 1);
+        knot.x = clamp(knot.x, 0, img.width - 1);
+    } else {
+        knot.x = clamp(knot.x, start.x + 1, end.x - 1);
+        knot.y = clamp(knot.y, 0, img.height - 1);
+    }
+
+    line.knots.splice(target.segmentIndex + 1, 0, knot);
+    lines[target.lineIndex] = normalizeGuideLine(
+        axis,
+        line,
+        getLineCenterOnAxis(axis, line),
+        axis === "vertical" ? Math.max(1, parseInt(rowsInput.value, 10) || 1) : Math.max(1, parseInt(colsInput.value, 10) || 1)
+    );
+    constrainGuideLineAgainstNeighbors(axis, lines, target.lineIndex);
+
+    return true;
+}
+
+function deleteSelectedGridKnot() {
+    if (!selectedGridKnot || !img.width || !img.height) {
+        return false;
+    }
+
+    const axis = selectedGridKnot.axis;
+    const lines = axis === "vertical" ? gridGuides.vertical : gridGuides.horizontal;
+    const line = lines[selectedGridKnot.lineIndex];
+    if (!line || !Array.isArray(line.knots) || line.knots.length <= 2) {
+        return false;
+    }
+
+    const knotIndex = selectedGridKnot.knotIndex;
+    if (!Number.isFinite(knotIndex) || knotIndex < 0 || knotIndex >= line.knots.length) {
+        return false;
+    }
+
+    line.knots.splice(knotIndex, 1);
+    lines[selectedGridKnot.lineIndex] = normalizeGuideLine(
+        axis,
+        line,
+        getLineCenterOnAxis(axis, line),
+        axis === "vertical" ? Math.max(1, parseInt(rowsInput.value, 10) || 1) : Math.max(1, parseInt(colsInput.value, 10) || 1)
+    );
+    constrainGuideLineAgainstNeighbors(axis, lines, selectedGridKnot.lineIndex);
+
+    selectedGridKnot = null;
+    redrawPreview();
+    return true;
+}
+
+function buildGridAwarePrompt() {
+    const basePrompt = getCurrentPrompt();
+
+    if (!img.width || !img.height) {
+        return basePrompt;
+    }
+
+    initializeGridGuidesFromInputs(false);
+    const cols = Math.max(1, parseInt(colsInput.value, 10) || 1);
+    const rows = Math.max(1, parseInt(rowsInput.value, 10) || 1);
+
+    const verticalLines = [
+        {
+            index: 0,
+            x: 0,
+            knots: [{ x: 0, y: 0 }, { x: 0, y: img.height - 1 }]
+        },
+        ...gridGuides.vertical.map((line, idx) => ({
+            index: idx + 1,
+            x: getLineCenterOnAxis("vertical", line),
+            knots: line.knots.map((k) => ({ x: Math.round(k.x), y: Math.round(k.y) }))
+        })),
+        {
+            index: cols,
+            x: img.width,
+            knots: [{ x: img.width - 1, y: 0 }, { x: img.width - 1, y: img.height - 1 }]
+        }
+    ];
+
+    const horizontalLines = [
+        {
+            index: 0,
+            y: 0,
+            knots: [{ x: 0, y: 0 }, { x: img.width - 1, y: 0 }]
+        },
+        ...gridGuides.horizontal.map((line, idx) => ({
+            index: idx + 1,
+            y: getLineCenterOnAxis("horizontal", line),
+            knots: line.knots.map((k) => ({ x: Math.round(k.x), y: Math.round(k.y) }))
+        })),
+        {
+            index: rows,
+            y: img.height,
+            knots: [{ x: 0, y: img.height - 1 }, { x: img.width - 1, y: img.height - 1 }]
+        }
+    ];
+
+    return [
+        basePrompt,
+        "",
+        "You receive two images:",
+        "1) The original spritesheet.",
+        "2) A debug overlay preview with current cut lines and grid numbers.",
+        "",
+        "Task:",
+        "- Evaluate only the current grid separators.",
+        "- Decide if lines should move and if extra knots should be inserted.",
+        "- Prefer editing existing guides over returning new sprite boxes.",
+        "",
+        "Context (do not ignore):",
+        `image_width_px: ${img.width}`,
+        `image_height_px: ${img.height}`,
+        `grid_cols: ${cols}`,
+        `grid_rows: ${rows}`,
+        `vertical_grid_lines: ${JSON.stringify(verticalLines)}`,
+        `horizontal_grid_lines: ${JSON.stringify(horizontalLines)}`,
+        "",
+        "Output rules:",
+        "- Return ONLY JSON.",
+        "- If current guides are good, return empty adjustment arrays.",
+        "- `index` refers to INTERNAL guide index (1..cols-1 for vertical, 1..rows-1 for horizontal).",
+        "- Each adjusted guide may contain 2+ knots.",
+        "- Keep knots ordered along each line (no self-crossing).",
+        "",
+        "JSON format:",
+        "{",
+        '  "grid_assessment":{"matches":true,"reason":""},',
+        '  "grid_adjustment":{',
+        '    "vertical":[{"index":1,"knots":[{"x":0,"y":0},{"x":0,"y":0}]}],',
+        '    "horizontal":[{"index":1,"knots":[{"x":0,"y":0},{"x":0,"y":0}]}]',
+        "  },",
+        '  "regions":[{"points":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}]}],',
+        '  "sprites":[{"x":0,"y":0,"width":0,"height":0}]',
+        "}"
+    ].join("\n");
+}
+
+function resetGifPreview() {
+    if (gifBlobUrl) {
+        URL.revokeObjectURL(gifBlobUrl);
+        gifBlobUrl = "";
+    }
+
+    gifPreview.src = "";
+    gifPreview.classList.add("hidden");
+    gifPlaceholder.classList.remove("hidden");
+    downloadGifButton.disabled = true;
+}
+
+function clearSprites() {
+    spriteWrapper.innerHTML = "";
+    sprites = [];
+    resetGifPreview();
+    redrawPreview();
+}
+
+function drawSourceToCanvas() {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+}
+
+function getSourceImageData() {
+    if (!img.width || !img.height) {
+        return null;
+    }
+
+    drawSourceToCanvas();
+    return ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+
+function normalizeSpriteBox(sprite) {
+    const x = Number(sprite?.x);
+    const y = Number(sprite?.y);
+    const width = Number(sprite?.width ?? sprite?.w);
+    const height = Number(sprite?.height ?? sprite?.h);
+
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(width) || !Number.isFinite(height)) {
+        return null;
+    }
+
+    if (width <= 0 || height <= 0) {
+        return null;
+    }
+
+    return {
+        x: Math.max(0, Math.floor(x)),
+        y: Math.max(0, Math.floor(y)),
+        width: Math.max(1, Math.floor(width)),
+        height: Math.max(1, Math.floor(height))
+    };
+}
+
+function getSpriteBounds(sprite) {
+    if (Array.isArray(sprite?.polygon) && sprite.polygon.length >= 3) {
+        const minX = Math.max(0, Math.min(...sprite.polygon.map((point) => point.x)));
+        const minY = Math.max(0, Math.min(...sprite.polygon.map((point) => point.y)));
+        const maxX = Math.min(img.width - 1, Math.max(...sprite.polygon.map((point) => point.x)));
+        const maxY = Math.min(img.height - 1, Math.max(...sprite.polygon.map((point) => point.y)));
+
+        return {
+            x: minX,
+            y: minY,
+            width: Math.max(1, maxX - minX + 1),
+            height: Math.max(1, maxY - minY + 1)
+        };
+    }
+
+    if (
+        Number.isFinite(sprite?.x) &&
+        Number.isFinite(sprite?.y) &&
+        Number.isFinite(sprite?.width) &&
+        Number.isFinite(sprite?.height)
+    ) {
+        return normalizeSpriteBox(sprite);
+    }
+
+    return normalizeSpriteBox(sprite);
+}
+
+function getSquareOutputSizeFromGrid() {
+    if (!img.width || !img.height) {
+        return 0;
+    }
+
+    const columns = Math.max(1, parseInt(colsInput.value, 10) || 1);
+    const rows = Math.max(1, parseInt(rowsInput.value, 10) || 1);
+    const cellWidth = Math.floor(img.width / columns);
+    const cellHeight = Math.floor(img.height / rows);
+
+    return Math.max(1, Math.max(cellWidth, cellHeight));
+}
+
+function createSpriteCanvas(sprite, keepTransparency = true) {
+    const bounds = getSpriteBounds(sprite);
+
+    if (!bounds) {
+        return null;
+    }
+
+    const shouldPadToUniformSquare = cropToSpriteToggle.checked || keepCellPaddingToggle.checked;
+    const keepSourceCellPadding = keepCellPaddingToggle.checked;
+    const sourceCellRect = keepSourceCellPadding ? getGridCellRectForBounds(bounds) : null;
+    const gridSquareSize = shouldPadToUniformSquare ? getSquareOutputSizeFromGrid() : 0;
+    const cellSquareSize = sourceCellRect ? Math.max(sourceCellRect.width, sourceCellRect.height) : 0;
+    const outputSquareSize = shouldPadToUniformSquare
+        ? Math.max(gridSquareSize, cellSquareSize, bounds.width, bounds.height)
+        : 0;
+
+    const out = document.createElement("canvas");
+    out.width = shouldPadToUniformSquare ? outputSquareSize : bounds.width;
+    out.height = shouldPadToUniformSquare ? outputSquareSize : bounds.height;
+
+    const outCtx = out.getContext("2d");
+
+    if (!keepTransparency) {
+        outCtx.fillStyle = "#ffffff";
+        outCtx.fillRect(0, 0, out.width, out.height);
+    }
+
+    let drawX = shouldPadToUniformSquare ? Math.floor((out.width - bounds.width) / 2) : 0;
+    let drawY = shouldPadToUniformSquare ? Math.floor((out.height - bounds.height) / 2) : 0;
+    let cellInsetX = 0;
+    let cellInsetY = 0;
+
+    if (keepSourceCellPadding && sourceCellRect) {
+        const leftPad = Math.max(0, bounds.x - sourceCellRect.x);
+        const topPad = Math.max(0, bounds.y - sourceCellRect.y);
+        cellInsetX = Math.floor((out.width - sourceCellRect.width) / 2);
+        cellInsetY = Math.floor((out.height - sourceCellRect.height) / 2);
+
+        drawX = cellInsetX + leftPad;
+        drawY = cellInsetY + topPad;
+        drawX = clamp(drawX, 0, Math.max(0, out.width - bounds.width));
+        drawY = clamp(drawY, 0, Math.max(0, out.height - bounds.height));
+    }
+
+    if (sourceCellRect) {
+        outCtx.drawImage(
+            img,
+            sourceCellRect.x,
+            sourceCellRect.y,
+            sourceCellRect.width,
+            sourceCellRect.height,
+            cellInsetX,
+            cellInsetY,
+            sourceCellRect.width,
+            sourceCellRect.height
+        );
+    }
+
+    if (sprite.canvasEl instanceof HTMLCanvasElement) {
+        outCtx.drawImage(sprite.canvasEl, drawX, drawY);
+    } else {
+        outCtx.drawImage(
+            img,
+            bounds.x,
+            bounds.y,
+            bounds.width,
+            bounds.height,
+            drawX,
+            drawY,
+            bounds.width,
+            bounds.height
+        );
+    }
+
+    return { canvasEl: out, bounds };
+}
+
+function getPreviewPointFromEvent(event) {
+    const rect = previewCanvas.getBoundingClientRect();
+    if (!rect.width || !rect.height || !img.width || !img.height) {
+        return null;
+    }
+
+    const scaleX = img.width / rect.width;
+    const scaleY = img.height / rect.height;
+    const x = Math.round((event.clientX - rect.left) * scaleX);
+    const y = Math.round((event.clientY - rect.top) * scaleY);
+
+    return {
+        x: Math.min(img.width - 1, Math.max(0, x)),
+        y: Math.min(img.height - 1, Math.max(0, y))
+    };
+}
+
+function startNewSpline() {
+    separatorCurves.push({ points: [] });
+    activeCurveIndex = separatorCurves.length - 1;
+    redrawPreview();
+    log(`New spline started (#${activeCurveIndex + 1})`);
+}
+
+function finishSpline() {
+    if (activeCurveIndex >= 0) {
+        const pointCount = separatorCurves[activeCurveIndex]?.points?.length || 0;
+        activeCurveIndex = -1;
+        redrawPreview();
+        log(`Spline finished (${pointCount} knots)`);
+    }
+}
+
+function clearSplines() {
+    separatorCurves = [];
+    activeCurveIndex = -1;
+    redrawPreview();
+    log("All splines cleared");
+}
+
+function sampleSpline(points, stepsPerSegment = 18) {
+    if (!Array.isArray(points) || points.length < 2) {
+        return [];
+    }
+
+    if (points.length === 2) {
+        return [points[0], points[1]];
+    }
+
+    const sampled = [];
+    for (let i = 0; i < points.length - 1; i += 1) {
+        const p0 = points[Math.max(0, i - 1)];
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = points[Math.min(points.length - 1, i + 2)];
+
+        for (let step = 0; step <= stepsPerSegment; step += 1) {
+            if (i > 0 && step === 0) {
+                continue;
+            }
+
+            const t = step / stepsPerSegment;
+            const t2 = t * t;
+            const t3 = t2 * t;
+
+            const x = 0.5 * (
+                (2 * p1.x) +
+                (-p0.x + p2.x) * t +
+                (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+                (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3
+            );
+            const y = 0.5 * (
+                (2 * p1.y) +
+                (-p0.y + p2.y) * t +
+                (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+                (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3
+            );
+
+            sampled.push({
+                x: Math.round(Math.min(img.width - 1, Math.max(0, x))),
+                y: Math.round(Math.min(img.height - 1, Math.max(0, y)))
+            });
+        }
+    }
+
+    return sampled;
+}
+
+function drawSplinePath(ctxTarget, points) {
+    if (!Array.isArray(points) || points.length < 2) {
+        return false;
+    }
+
+    const sampled = sampleSpline(points, 18);
+    if (!sampled.length) {
+        return false;
+    }
+
+    ctxTarget.beginPath();
+    ctxTarget.moveTo(sampled[0].x, sampled[0].y);
+    for (let i = 1; i < sampled.length; i += 1) {
+        ctxTarget.lineTo(sampled[i].x, sampled[i].y);
+    }
+    ctxTarget.stroke();
+    return true;
+}
+
+function drawSplineGuides() {
+    if (!separatorCurves.length) {
+        return;
+    }
+
+    separatorCurves.forEach((curve, curveIndex) => {
+        const points = Array.isArray(curve?.points) ? curve.points : [];
+        if (!points.length) {
+            return;
+        }
+
+        const isActive = curveIndex === activeCurveIndex;
+        previewCtx.lineWidth = isActive ? 3 : 2;
+        previewCtx.strokeStyle = isActive ? "#fde047" : "#f59e0b";
+        drawSplinePath(previewCtx, points);
+
+        points.forEach((point, pointIndex) => {
+            previewCtx.beginPath();
+            previewCtx.fillStyle = isActive ? "#eab308" : "#f97316";
+            previewCtx.arc(point.x, point.y, 2.8, 0, Math.PI * 2);
+            previewCtx.fill();
+
+            previewCtx.fillStyle = "#111827";
+            previewCtx.font = "10px monospace";
+            previewCtx.fillText(String(pointIndex + 1), point.x + 4, point.y - 4);
+        });
+    });
+}
+
+function buildSeparatorMaskFromSplines(width, height) {
+    const maskCanvas = document.createElement("canvas");
+    maskCanvas.width = width;
+    maskCanvas.height = height;
+    const maskCtx = maskCanvas.getContext("2d");
+    maskCtx.clearRect(0, 0, width, height);
+    maskCtx.strokeStyle = "rgba(0,0,0,1)";
+    maskCtx.lineCap = "round";
+    maskCtx.lineJoin = "round";
+    maskCtx.lineWidth = Math.max(2, Math.round(Math.min(width, height) / 180));
+
+    separatorCurves.forEach((curve) => {
+        const points = Array.isArray(curve?.points) ? curve.points : [];
+        drawSplinePath(maskCtx, points);
+    });
+
+    const imageData = maskCtx.getImageData(0, 0, width, height);
+    const mask = new Uint8Array(width * height);
+    for (let i = 0; i < mask.length; i += 1) {
+        const alpha = imageData.data[i * 4 + 3];
+        if (alpha > 20) {
+            mask[i] = 1;
+        }
+    }
+
+    return mask;
+}
+
+function drawCanvasMaskOutline(sprite) {
+    if (!(sprite?.canvasEl instanceof HTMLCanvasElement)) {
+        return false;
+    }
+
+    const originX = Number(sprite.x);
+    const originY = Number(sprite.y);
+    if (!Number.isFinite(originX) || !Number.isFinite(originY)) {
+        return false;
+    }
+
+    const sourceCtx = sprite.canvasEl.getContext("2d", { willReadFrequently: true });
+    const w = sprite.canvasEl.width;
+    const h = sprite.canvasEl.height;
+    if (!sourceCtx || w < 1 || h < 1) {
+        return false;
+    }
+
+    const imageData = sourceCtx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+    const alphaAt = (x, y) => {
+        if (x < 0 || y < 0 || x >= w || y >= h) {
+            return 0;
+        }
+        return data[(y * w + x) * 4 + 3];
+    };
+
+    let drew = false;
+    previewCtx.beginPath();
+
+    for (let y = 0; y < h; y += 1) {
+        for (let x = 0; x < w; x += 1) {
+            if (alphaAt(x, y) <= 12) {
+                continue;
+            }
+
+            const gx = originX + x;
+            const gy = originY + y;
+
+            if (alphaAt(x, y - 1) <= 12) {
+                previewCtx.moveTo(gx, gy);
+                previewCtx.lineTo(gx + 1, gy);
+                drew = true;
+            }
+            if (alphaAt(x + 1, y) <= 12) {
+                previewCtx.moveTo(gx + 1, gy);
+                previewCtx.lineTo(gx + 1, gy + 1);
+                drew = true;
+            }
+            if (alphaAt(x, y + 1) <= 12) {
+                previewCtx.moveTo(gx + 1, gy + 1);
+                previewCtx.lineTo(gx, gy + 1);
+                drew = true;
+            }
+            if (alphaAt(x - 1, y) <= 12) {
+                previewCtx.moveTo(gx, gy + 1);
+                previewCtx.lineTo(gx, gy);
+                drew = true;
+            }
+        }
+    }
+
+    if (drew) {
+        previewCtx.stroke();
+    }
+
+    return drew;
+}
+
+function drawDebugOverlay() {
+    if (!debugOverlayToggle.checked || !sprites.length || gridLineEditToggle.checked) {
+        return;
+    }
+
+    const lineWidth = Math.max(1, Math.round(Math.min(img.width, img.height) / 220));
+    previewCtx.lineWidth = lineWidth;
+    previewCtx.font = `${Math.max(10, lineWidth * 4)}px monospace`;
+
+    sprites.forEach((sprite, index) => {
+        const hue = (index * 73) % 360;
+        previewCtx.strokeStyle = `hsl(${hue}, 90%, 60%)`;
+        previewCtx.fillStyle = `hsl(${hue}, 90%, 60%)`;
+
+        if (Array.isArray(sprite?.polygon) && sprite.polygon.length >= 3) {
+            previewCtx.beginPath();
+            sprite.polygon.forEach((point, pointIndex) => {
+                if (pointIndex === 0) {
+                    previewCtx.moveTo(point.x, point.y);
+                } else {
+                    previewCtx.lineTo(point.x, point.y);
+                }
+            });
+            previewCtx.closePath();
+            previewCtx.stroke();
+        } else {
+            const bounds = getSpriteBounds(sprite);
+            if (!bounds) {
+                return;
+            }
+
+            const drewMaskOutline = drawCanvasMaskOutline(sprite);
+            if (!drewMaskOutline) {
+                previewCtx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+            previewCtx.fillText(String(index + 1), bounds.x + 4, bounds.y + 14);
+        }
+    });
+}
+
+function redrawPreview() {
+    if (!img.width || !img.height) {
+        previewCanvas.classList.add("hidden");
+        inputPlaceholder.classList.remove("hidden");
+        return;
+    }
+
+    previewCanvas.width = img.width;
+    previewCanvas.height = img.height;
+
+    previewCtx.clearRect(0, 0, img.width, img.height);
+    previewCtx.drawImage(img, 0, 0);
+
+    drawGridGuides();
+    drawDebugOverlay();
+    drawSplineGuides();
+
+    previewCanvas.classList.remove("hidden");
+    inputPlaceholder.classList.add("hidden");
+}
+
+function normalizePolygonPoints(region) {
+    const rawPoints = Array.isArray(region?.points)
+        ? region.points
+        : Array.isArray(region?.vertices)
+            ? region.vertices
+            : null;
+
+    if (!rawPoints || rawPoints.length < 3) {
+        return null;
+    }
+
+    const points = rawPoints
+        .map((point) => {
+            const x = Number(point?.x);
+            const y = Number(point?.y);
+
+            if (!Number.isFinite(x) || !Number.isFinite(y)) {
+                return null;
+            }
+
+            return {
+                x: Math.max(0, Math.floor(x)),
+                y: Math.max(0, Math.floor(y))
+            };
+        })
+        .filter((point) => point !== null);
+
+    if (points.length < 3) {
+        return null;
+    }
+
+    return points;
+}
+
+function createCanvasFromPolygon(points) {
+    const minX = Math.max(0, Math.min(...points.map((point) => point.x)));
+    const minY = Math.max(0, Math.min(...points.map((point) => point.y)));
+    const maxX = Math.min(img.width - 1, Math.max(...points.map((point) => point.x)));
+    const maxY = Math.min(img.height - 1, Math.max(...points.map((point) => point.y)));
+
+    const width = Math.max(1, maxX - minX + 1);
+    const height = Math.max(1, maxY - minY + 1);
+
+    const canvasEl = document.createElement("canvas");
+    canvasEl.width = width;
+    canvasEl.height = height;
+
+    const canvasCtx = canvasEl.getContext("2d");
+
+    canvasCtx.save();
+    canvasCtx.beginPath();
+    points.forEach((point, index) => {
+        const localX = point.x - minX;
+        const localY = point.y - minY;
+
+        if (index === 0) {
+            canvasCtx.moveTo(localX, localY);
+        } else {
+            canvasCtx.lineTo(localX, localY);
+        }
+    });
+    canvasCtx.closePath();
+    canvasCtx.clip();
+
+    canvasCtx.drawImage(img, minX, minY, width, height, 0, 0, width, height);
+    canvasCtx.restore();
+
+    return {
+        x: minX,
+        y: minY,
+        width,
+        height,
+        canvasEl,
+        polygon: points
+    };
+}
+
+function isLikelyGridLikeBoxes(boxes) {
+    if (!boxes || boxes.length < 4 || !img.width || !img.height) {
+        return false;
+    }
+
+    const widths = boxes.map((box) => box.width);
+    const heights = boxes.map((box) => box.height);
+
+    const meanW = widths.reduce((sum, value) => sum + value, 0) / widths.length;
+    const meanH = heights.reduce((sum, value) => sum + value, 0) / heights.length;
+
+    const stdW = Math.sqrt(widths.reduce((sum, value) => sum + (value - meanW) ** 2, 0) / widths.length);
+    const stdH = Math.sqrt(heights.reduce((sum, value) => sum + (value - meanH) ** 2, 0) / heights.length);
+
+    const minX = Math.min(...boxes.map((box) => box.x));
+    const minY = Math.min(...boxes.map((box) => box.y));
+    const maxX = Math.max(...boxes.map((box) => box.x + box.width));
+    const maxY = Math.max(...boxes.map((box) => box.y + box.height));
+
+    const coverArea = Math.max(1, (maxX - minX) * (maxY - minY));
+    const imageArea = img.width * img.height;
+
+    const coverageRatio = coverArea / imageArea;
+    const widthUniform = stdW / Math.max(1, meanW) < 0.15;
+    const heightUniform = stdH / Math.max(1, meanH) < 0.15;
+    const oversized = meanW > img.width * 0.32 && meanH > img.height * 0.32;
+
+    return coverageRatio > 0.75 && widthUniform && heightUniform && oversized;
+}
+
+/* ================= MODELS ================= */
+async function loadModels() {
+    if (!hasSpriteForgeProxy) {
+        modelSelect.innerHTML = "";
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "AI detection is available in the local SpriteForge server";
+        modelSelect.appendChild(opt);
+        modelSelect.disabled = true;
+        document.getElementById("aiButton").disabled = true;
+        document.getElementById("aiButton").title = "Run SpriteForge locally to use AI detection.";
+        log("Grid slicing works here. Start SpriteForge's local server for AI detection.");
+        return;
+    }
+    modelSelect.disabled = false;
+    document.getElementById("aiButton").disabled = false;
+    const provider = providerSelect.value;
+    const endpoint = getCurrentEndpoint();
+
+    try {
+        const res = await fetch(
+            `/api/models?provider=${encodeURIComponent(provider)}&endpoint=${encodeURIComponent(endpoint)}`
+        );
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Model load failed");
+        }
+
+        modelSelect.innerHTML = "";
+
+        const models = data.models || [];
+        if (!models.length) {
+            const opt = document.createElement("option");
+            opt.value = "";
+            opt.textContent = "No models found";
+            modelSelect.appendChild(opt);
+            log(`No ${provider} models found`);
+            return;
+        }
+
+        models.forEach((model) => {
+            const opt = document.createElement("option");
+            opt.value = model.name;
+            opt.textContent = model.name;
+            modelSelect.appendChild(opt);
+        });
+
+        log(`${provider} models loaded (${endpoint})`);
+    } catch (error) {
+        modelSelect.innerHTML = "";
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Model load failed";
+        modelSelect.appendChild(opt);
+        log(error.message || "Model load failed");
+    }
+}
+
+providerSelect.addEventListener("change", () => {
+    syncEndpointInputFromProvider();
+    loadModels();
+});
+
+/* ================= IMAGE ================= */
+uploadInput.onchange = (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (loadEvent) => {
+        void loadImageSource(String(loadEvent.target.result || ""), file.name).catch((error) => {
+            log(error instanceof Error ? error.message : "Failed to load image");
+        });
+    };
+
+    reader.readAsDataURL(file);
+};
+
+/* ================= GRID ================= */
+function buildSeparatorMaskFromGridGuides(width, height) {
+    initializeGridGuidesFromInputs(false);
+
+    const maskCanvas = document.createElement("canvas");
+    maskCanvas.width = width;
+    maskCanvas.height = height;
+    const maskCtx = maskCanvas.getContext("2d");
+
+    maskCtx.clearRect(0, 0, width, height);
+    maskCtx.strokeStyle = "rgba(0,0,0,1)";
+    maskCtx.lineCap = "round";
+    maskCtx.lineJoin = "round";
+    maskCtx.lineWidth = Math.max(2, Math.round(Math.min(width, height) / 220));
+
+    const drawGuideLine = (line, axis) => {
+        if (!Array.isArray(line?.knots) || line.knots.length < 2) {
+            return;
+        }
+        maskCtx.beginPath();
+        maskCtx.moveTo(line.knots[0].x, line.knots[0].y);
+        for (let i = 1; i < line.knots.length; i += 1) {
+            maskCtx.lineTo(line.knots[i].x, line.knots[i].y);
+        }
+        maskCtx.stroke();
+
+        const first = line.knots[0];
+        const last = line.knots[line.knots.length - 1];
+        maskCtx.beginPath();
+        if (axis === "vertical") {
+            maskCtx.moveTo(first.x, first.y);
+            maskCtx.lineTo(first.x, 0);
+            maskCtx.moveTo(last.x, last.y);
+            maskCtx.lineTo(last.x, height - 1);
+        } else {
+            maskCtx.moveTo(first.x, first.y);
+            maskCtx.lineTo(0, first.y);
+            maskCtx.moveTo(last.x, last.y);
+            maskCtx.lineTo(width - 1, last.y);
+        }
+        maskCtx.stroke();
+    };
+
+    gridGuides.vertical.forEach((line) => drawGuideLine(line, "vertical"));
+    gridGuides.horizontal.forEach((line) => drawGuideLine(line, "horizontal"));
+
+    const imageData = maskCtx.getImageData(0, 0, width, height);
+    const mask = new Uint8Array(width * height);
+    for (let i = 0; i < mask.length; i += 1) {
+        const alpha = imageData.data[i * 4 + 3];
+        if (alpha > 20) {
+            mask[i] = 1;
+        }
+    }
+
+    return mask;
+}
+
+function buildGridSpritesFromInputs() {
+    if (!img.width || !img.height) {
+        return [];
+    }
+
+    initializeGridGuidesFromInputs(false);
+
+    const hasDiagonalGuides =
+        gridGuides.vertical.some((line) => lineHasDiagonalOffset("vertical", line)) ||
+        gridGuides.horizontal.some((line) => lineHasDiagonalOffset("horizontal", line));
+
+    if (hasDiagonalGuides) {
+        const imageData = getSourceImageData();
+        if (!imageData) {
+            return [];
+        }
+        const separatorMask = buildSeparatorMaskFromGridGuides(imageData.width, imageData.height);
+        return detectRegionsFromSeparatorMask(separatorMask, imageData, 64);
+    }
+
+    const { xBoundaries, yBoundaries } = getGridBoundaryArrays();
+    if (xBoundaries.length < 2 || yBoundaries.length < 2) {
+        return [];
+    }
+
+    const gridSprites = [];
+    for (let row = 0; row < yBoundaries.length - 1; row += 1) {
+        for (let col = 0; col < xBoundaries.length - 1; col += 1) {
+            const x0 = xBoundaries[col];
+            const x1 = xBoundaries[col + 1];
+            const y0 = yBoundaries[row];
+            const y1 = yBoundaries[row + 1];
+            const width = x1 - x0;
+            const height = y1 - y0;
+            if (width < 1 || height < 1) {
+                continue;
+            }
+            gridSprites.push({ x: x0, y: y0, width, height });
+        }
+    }
+
+    return gridSprites;
+}
+
+function applySpritesWithOutputMode(detectedSprites, options = {}) {
+    const allowGridFallback = options.allowGridFallback !== false;
+
+    if (allowGridFallback && !cropToSpriteToggle.checked) {
+        const gridSprites = buildGridSpritesFromInputs();
+        if (gridSprites.length) {
+            sprites = gridSprites;
+            render();
+            return { mode: "grid", count: sprites.length };
+        }
+    }
+
+    sprites = detectedSprites;
+    render();
+    return { mode: "detected", count: sprites.length };
+}
+
+function sliceGrid() {
+    if (!img.width || !img.height) {
+        log("Upload an image first");
+        return;
+    }
+
+    const gridSprites = buildGridSpritesFromInputs();
+    if (!gridSprites.length) {
+        log("Grid is too dense for this image size");
+        return;
+    }
+
+    sprites = gridSprites;
+
+    render();
+    const hasIrregularCells = sprites.some((sprite) => sprite?.canvasEl instanceof HTMLCanvasElement);
+    log(hasIrregularCells ? `Grid sliced (${sprites.length} irregular regions)` : `Grid sliced (${sprites.length} cells)`);
+}
+
+/* ================= PIXEL SPLIT (DIAGONAL) ================= */
+function sampleBackgroundColor(imageData) {
+    const { data, width, height } = imageData;
+    const points = [
+        [0, 0],
+        [width - 1, 0],
+        [0, height - 1],
+        [width - 1, height - 1],
+        [Math.floor(width / 2), 0],
+        [Math.floor(width / 2), height - 1],
+        [0, Math.floor(height / 2)],
+        [width - 1, Math.floor(height / 2)]
+    ];
+
+    let sumR = 0;
+    let sumG = 0;
+    let sumB = 0;
+    let count = 0;
+
+    points.forEach(([x, y]) => {
+        const idx = (y * width + x) * 4;
+        const alpha = data[idx + 3];
+        if (alpha <= 12) {
+            return;
+        }
+
+        sumR += data[idx];
+        sumG += data[idx + 1];
+        sumB += data[idx + 2];
+        count += 1;
+    });
+
+    if (!count) {
+        return { r: 255, g: 255, b: 255, transparent: true };
+    }
+
+    return {
+        r: Math.round(sumR / count),
+        g: Math.round(sumG / count),
+        b: Math.round(sumB / count),
+        transparent: false
+    };
+}
+
+function createBackgroundMask(imageData, tolerance = 34) {
+    const { data, width, height } = imageData;
+    const total = width * height;
+    const background = new Uint8Array(total);
+    const backgroundCandidate = new Uint8Array(total);
+    const queue = new Int32Array(total);
+    const bg = sampleBackgroundColor(imageData);
+    const toleranceSq = tolerance * tolerance;
+
+    function isBackgroundCandidate(index) {
+        if (backgroundCandidate[index] !== 0) {
+            return backgroundCandidate[index] === 1;
+        }
+
+        const offset = index * 4;
+        const alpha = data[offset + 3];
+
+        if (alpha <= 12) {
+            backgroundCandidate[index] = 1;
+            return true;
+        }
+
+        if (bg.transparent) {
+            backgroundCandidate[index] = 2;
+            return false;
+        }
+
+        const dr = data[offset] - bg.r;
+        const dg = data[offset + 1] - bg.g;
+        const db = data[offset + 2] - bg.b;
+        const distSq = dr * dr + dg * dg + db * db;
+
+        const isCandidate = distSq <= toleranceSq;
+        backgroundCandidate[index] = isCandidate ? 1 : 2;
+        return isCandidate;
+    }
+
+    function enqueue(x, y, tailRef) {
+        const index = y * width + x;
+
+        if (background[index] || !isBackgroundCandidate(index)) {
+            return tailRef;
+        }
+
+        background[index] = 1;
+        queue[tailRef] = index;
+        return tailRef + 1;
+    }
+
+    let head = 0;
+    let tail = 0;
+
+    for (let x = 0; x < width; x += 1) {
+        tail = enqueue(x, 0, tail);
+        tail = enqueue(x, height - 1, tail);
+    }
+
+    for (let y = 1; y < height - 1; y += 1) {
+        tail = enqueue(0, y, tail);
+        tail = enqueue(width - 1, y, tail);
+    }
+
+    while (head < tail) {
+        const index = queue[head];
+        head += 1;
+
+        const x = index % width;
+        const y = Math.floor(index / width);
+
+        if (x > 0) tail = enqueue(x - 1, y, tail);
+        if (x < width - 1) tail = enqueue(x + 1, y, tail);
+        if (y > 0) tail = enqueue(x, y - 1, tail);
+        if (y < height - 1) tail = enqueue(x, y + 1, tail);
+    }
+
+    const edgeConnectedBackgroundCount = background.reduce((sum, value) => sum + value, 0);
+    const edgeCoverage = edgeConnectedBackgroundCount / Math.max(1, total);
+
+    // If border/grid lines fully enclose the white background, flood fill from edges
+    // underestimates true background. In that case, widen to all bg-color candidates.
+    if (!bg.transparent && edgeCoverage < 0.18) {
+        for (let i = 0; i < total; i += 1) {
+            if (isBackgroundCandidate(i)) {
+                background[i] = 1;
+            }
+        }
+    }
+
+    return background;
+}
+
+function createMaskedCanvasFromComponent(component, imageData) {
+    const { data, width: fullWidth } = imageData;
+    const spriteWidth = component.maxX - component.minX + 1;
+    const spriteHeight = component.maxY - component.minY + 1;
+
+    const canvasEl = document.createElement("canvas");
+    canvasEl.width = spriteWidth;
+    canvasEl.height = spriteHeight;
+
+    const canvasCtx = canvasEl.getContext("2d");
+    const out = canvasCtx.createImageData(spriteWidth, spriteHeight);
+
+    component.pixels.forEach((index) => {
+        const srcOffset = index * 4;
+        const px = index % fullWidth;
+        const py = Math.floor(index / fullWidth);
+
+        const localX = px - component.minX;
+        const localY = py - component.minY;
+        const dstOffset = (localY * spriteWidth + localX) * 4;
+
+        out.data[dstOffset] = data[srcOffset];
+        out.data[dstOffset + 1] = data[srcOffset + 1];
+        out.data[dstOffset + 2] = data[srcOffset + 2];
+        out.data[dstOffset + 3] = data[srcOffset + 3];
+    });
+
+    canvasCtx.putImageData(out, 0, 0);
+
+    return {
+        x: component.minX,
+        y: component.minY,
+        width: spriteWidth,
+        height: spriteHeight,
+        area: component.pixels.length,
+        canvasEl
+    };
+}
+
+function detectSeparatorLineMask(imageData) {
+    const { data, width, height } = imageData;
+    const total = width * height;
+    const darkMask = new Uint8Array(total);
+    const visited = new Uint8Array(total);
+    const queue = new Int32Array(total);
+    const separatorMask = new Uint8Array(total);
+
+    const darkThreshold = 56;
+    const alphaThreshold = 24;
+
+    for (let i = 0; i < total; i += 1) {
+        const offset = i * 4;
+        const r = data[offset];
+        const g = data[offset + 1];
+        const b = data[offset + 2];
+        const a = data[offset + 3];
+
+        if (a > alphaThreshold && r < darkThreshold && g < darkThreshold && b < darkThreshold) {
+            darkMask[i] = 1;
+        }
+    }
+
+    const neighbors = [
+        [-1, -1], [0, -1], [1, -1],
+        [-1, 0],           [1, 0],
+        [-1, 1],  [0, 1],  [1, 1]
+    ];
+
+    for (let start = 0; start < total; start += 1) {
+        if (!darkMask[start] || visited[start]) {
+            continue;
+        }
+
+        let head = 0;
+        let tail = 0;
+        queue[tail] = start;
+        tail += 1;
+        visited[start] = 1;
+
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+        const pixels = [];
+
+        while (head < tail) {
+            const index = queue[head];
+            head += 1;
+
+            const x = index % width;
+            const y = Math.floor(index / width);
+            pixels.push(index);
+
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+
+            for (let i = 0; i < neighbors.length; i += 1) {
+                const nx = x + neighbors[i][0];
+                const ny = y + neighbors[i][1];
+                if (nx < 0 || ny < 0 || nx >= width || ny >= height) {
+                    continue;
+                }
+
+                const nextIndex = ny * width + nx;
+                if (!darkMask[nextIndex] || visited[nextIndex]) {
+                    continue;
+                }
+
+                visited[nextIndex] = 1;
+                queue[tail] = nextIndex;
+                tail += 1;
+            }
+        }
+
+        const compWidth = maxX - minX + 1;
+        const compHeight = maxY - minY + 1;
+        const longEnough =
+            pixels.length > Math.max(width, height) * 0.45 ||
+            compWidth > width * 0.55 ||
+            compHeight > height * 0.55;
+        const thinEnough = Math.min(compWidth, compHeight) <= Math.max(10, Math.min(width, height) * 0.08);
+
+        if (!(longEnough && thinEnough)) {
+            continue;
+        }
+
+        pixels.forEach((pixelIndex) => {
+            separatorMask[pixelIndex] = 1;
+        });
+    }
+
+    return separatorMask;
+}
+
+function createMaskedCanvasFromRegion(region, imageData) {
+    const { data, width: fullWidth } = imageData;
+    const outWidth = region.maxX - region.minX + 1;
+    const outHeight = region.maxY - region.minY + 1;
+
+    const canvasEl = document.createElement("canvas");
+    canvasEl.width = outWidth;
+    canvasEl.height = outHeight;
+
+    const canvasCtx = canvasEl.getContext("2d");
+    const out = canvasCtx.createImageData(outWidth, outHeight);
+
+    region.pixels.forEach((index) => {
+        const srcOffset = index * 4;
+        const px = index % fullWidth;
+        const py = Math.floor(index / fullWidth);
+        const localX = px - region.minX;
+        const localY = py - region.minY;
+        const dstOffset = (localY * outWidth + localX) * 4;
+
+        out.data[dstOffset] = data[srcOffset];
+        out.data[dstOffset + 1] = data[srcOffset + 1];
+        out.data[dstOffset + 2] = data[srcOffset + 2];
+        out.data[dstOffset + 3] = data[srcOffset + 3];
+    });
+
+    canvasCtx.putImageData(out, 0, 0);
+
+    return {
+        x: region.minX,
+        y: region.minY,
+        width: outWidth,
+        height: outHeight,
+        area: region.pixels.length,
+        canvasEl
+    };
+}
+
+function detectRegionsFromSeparatorMask(separatorMask, imageData, minPixels = 64) {
+    const { width, height } = imageData;
+    const total = width * height;
+    const visited = new Uint8Array(total);
+    const queue = new Int32Array(total);
+    const neighbors = [
+        [-1, -1], [0, -1], [1, -1],
+        [-1, 0],           [1, 0],
+        [-1, 1],  [0, 1],  [1, 1]
+    ];
+
+    const regions = [];
+
+    for (let start = 0; start < total; start += 1) {
+        if (separatorMask[start] || visited[start]) {
+            continue;
+        }
+
+        let head = 0;
+        let tail = 0;
+        queue[tail] = start;
+        tail += 1;
+        visited[start] = 1;
+
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+        const pixels = [];
+
+        while (head < tail) {
+            const index = queue[head];
+            head += 1;
+
+            const x = index % width;
+            const y = Math.floor(index / width);
+            pixels.push(index);
+
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+
+            for (let i = 0; i < neighbors.length; i += 1) {
+                const nx = x + neighbors[i][0];
+                const ny = y + neighbors[i][1];
+                if (nx < 0 || ny < 0 || nx >= width || ny >= height) {
+                    continue;
+                }
+
+                const nextIndex = ny * width + nx;
+                if (separatorMask[nextIndex] || visited[nextIndex]) {
+                    continue;
+                }
+
+                visited[nextIndex] = 1;
+                queue[tail] = nextIndex;
+                tail += 1;
+            }
+        }
+
+        if (pixels.length < minPixels) {
+            continue;
+        }
+
+        regions.push({ minX, minY, maxX, maxY, pixels });
+    }
+
+    regions.sort((a, b) => (a.minY - b.minY) || (a.minX - b.minX));
+    return regions.map((region) => createMaskedCanvasFromRegion(region, imageData));
+}
+
+function detectLineSeparatedRegions(minPixels = 64) {
+    const imageData = getSourceImageData();
+    if (!imageData) {
+        return [];
+    }
+
+    const separatorMask = detectSeparatorLineMask(imageData);
+    return detectRegionsFromSeparatorMask(separatorMask, imageData, minPixels);
+}
+
+function detectConnectedSprites(minPixels = 32) {
+    const imageData = getSourceImageData();
+    if (!imageData) {
+        return [];
+    }
+
+    const { data, width, height } = imageData;
+    const total = width * height;
+
+    const backgroundMask = createBackgroundMask(imageData, 34);
+    const visited = new Uint8Array(total);
+    const queue = new Int32Array(total);
+
+    const neighbors = [
+        [-1, -1], [0, -1], [1, -1],
+        [-1, 0],           [1, 0],
+        [-1, 1],  [0, 1],  [1, 1]
+    ];
+
+    const components = [];
+
+    for (let start = 0; start < total; start += 1) {
+        if (visited[start] || backgroundMask[start]) {
+            continue;
+        }
+
+        const alpha = data[start * 4 + 3];
+        if (alpha <= 12) {
+            visited[start] = 1;
+            continue;
+        }
+
+        let head = 0;
+        let tail = 0;
+        queue[tail] = start;
+        tail += 1;
+        visited[start] = 1;
+
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+        const pixels = [];
+
+        while (head < tail) {
+            const index = queue[head];
+            head += 1;
+
+            const x = index % width;
+            const y = Math.floor(index / width);
+
+            pixels.push(index);
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+
+            for (let i = 0; i < neighbors.length; i += 1) {
+                const nx = x + neighbors[i][0];
+                const ny = y + neighbors[i][1];
+
+                if (nx < 0 || ny < 0 || nx >= width || ny >= height) {
+                    continue;
+                }
+
+                const nextIndex = ny * width + nx;
+                if (visited[nextIndex] || backgroundMask[nextIndex]) {
+                    continue;
+                }
+
+                const nextAlpha = data[nextIndex * 4 + 3];
+                visited[nextIndex] = 1;
+
+                if (nextAlpha <= 12) {
+                    continue;
+                }
+
+                queue[tail] = nextIndex;
+                tail += 1;
+            }
+        }
+
+        if (pixels.length >= minPixels) {
+            const boxWidth = maxX - minX + 1;
+            const boxHeight = maxY - minY + 1;
+            const boxArea = Math.max(1, boxWidth * boxHeight);
+            const density = pixels.length / boxArea;
+            const touchesBorder = minX === 0 || minY === 0 || maxX === width - 1 || maxY === height - 1;
+            const veryThinGuideLine =
+                (boxWidth <= 3 && boxHeight > height * 0.3) ||
+                (boxHeight <= 3 && boxWidth > width * 0.3);
+
+            if (veryThinGuideLine) {
+                continue;
+            }
+
+            if (touchesBorder && density < 0.08) {
+                continue;
+            }
+
+            components.push({ minX, minY, maxX, maxY, pixels });
+        }
+    }
+
+    components.sort((a, b) => (a.minY - b.minY) || (a.minX - b.minX));
+    return components.map((component) => createMaskedCanvasFromComponent(component, imageData));
+}
+
+function sliceDiagonal() {
+    if (!img.width || !img.height) {
+        log("Upload an image first");
+        return;
+    }
+
+    const detected = cropToSpriteToggle.checked
+        ? detectConnectedSprites(32)
+        : detectLineSeparatedRegions(128);
+
+    if (!detected.length) {
+        log(cropToSpriteToggle.checked ? "No connected sprites found" : "No line-separated regions found");
+        return;
+    }
+
+    const applied = applySpritesWithOutputMode(detected, { allowGridFallback: false });
+    log(
+        cropToSpriteToggle.checked
+            ? `Diagonal split done (${applied.count} sprites)`
+            : `Diagonal region split done (${applied.count} regions)`
+    );
+}
+
+function applySplineSplit() {
+    if (!img.width || !img.height) {
+        log("Upload an image first");
+        return;
+    }
+
+    const validCurves = separatorCurves.filter((curve) => Array.isArray(curve?.points) && curve.points.length >= 2);
+    if (!validCurves.length) {
+        log("Draw at least one spline with 2+ knots");
+        return;
+    }
+
+    const imageData = getSourceImageData();
+    if (!imageData) {
+        log("Image data unavailable");
+        return;
+    }
+
+    const separatorMask = buildSeparatorMaskFromSplines(imageData.width, imageData.height);
+    const regions = detectRegionsFromSeparatorMask(separatorMask, imageData, 128);
+
+    if (!regions.length) {
+        log("Spline split found no regions");
+        return;
+    }
+
+    sprites = regions;
+    render();
+    log(`Spline split done (${sprites.length} regions)`);
+}
+
+/* ================= SAFE JSON ================= */
+function extractJSON(text) {
+    if (!text || typeof text !== "string") {
+        return null;
+    }
+
+    const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (!match) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(match[0]);
+    } catch {
+        return null;
+    }
+}
+
+function buildAiDebugOverlayBase64() {
+    if (!img.width || !img.height) {
+        return { imageBase64: base64, previewCellCount: 0 };
+    }
+
+    initializeGridGuidesFromInputs(false);
+
+    const previousSprites = sprites;
+    const previousDebugState = debugOverlayToggle.checked;
+    const gridPreviewSprites = buildGridSpritesFromInputs();
+
+    sprites = gridPreviewSprites;
+    debugOverlayToggle.checked = true;
+    redrawPreview();
+
+    const dataUrl = previewCanvas.toDataURL("image/png");
+    const imageBase64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : base64;
+
+    sprites = previousSprites;
+    debugOverlayToggle.checked = previousDebugState;
+    redrawPreview();
+
+    return { imageBase64, previewCellCount: gridPreviewSprites.length };
+}
+
+function resolveGuideIndex(indexValue, totalLines, fallbackIndex) {
+    const numeric = Number(indexValue);
+    if (Number.isFinite(numeric)) {
+        if (numeric >= 1 && numeric <= totalLines) {
+            return Math.floor(numeric) - 1;
+        }
+        if (numeric >= 0 && numeric < totalLines) {
+            return Math.floor(numeric);
+        }
+    }
+
+    if (Number.isFinite(fallbackIndex) && fallbackIndex >= 0 && fallbackIndex < totalLines) {
+        return Math.floor(fallbackIndex);
+    }
+
+    return -1;
+}
+
+function applyAiGuideArray(axis, rawAdjustments) {
+    const lines = axis === "vertical" ? gridGuides.vertical : gridGuides.horizontal;
+    if (!Array.isArray(rawAdjustments) || !lines.length) {
+        return { changedLines: 0, addedKnots: 0 };
+    }
+
+    const subdivisions = axis === "vertical"
+        ? Math.max(1, parseInt(rowsInput.value, 10) || 1)
+        : Math.max(1, parseInt(colsInput.value, 10) || 1);
+
+    let changedLines = 0;
+    let addedKnots = 0;
+
+    rawAdjustments.forEach((adjustment, rawIndex) => {
+        const index = resolveGuideIndex(
+            adjustment?.index ?? adjustment?.line_index ?? adjustment?.line,
+            lines.length,
+            rawIndex
+        );
+        if (index < 0) {
+            return;
+        }
+
+        const line = lines[index];
+        if (!line || !Array.isArray(line.knots) || line.knots.length < 2) {
+            return;
+        }
+
+        let nextLine = { knots: line.knots.map((point) => ({ ...point })) };
+
+        if (Array.isArray(adjustment?.knots) && adjustment.knots.length >= 2) {
+            nextLine = normalizeGuideLine(axis, { knots: adjustment.knots }, getLineCenterOnAxis(axis, line), subdivisions);
+            addedKnots += Math.max(0, nextLine.knots.length - line.knots.length);
+        } else {
+            const offsetValue = Number.isFinite(Number(adjustment?.offset))
+                ? Number(adjustment.offset)
+                : (Number.isFinite(Number(adjustment)) ? Number(adjustment) : NaN);
+            if (!Number.isFinite(offsetValue)) {
+                return;
+            }
+
+            const offset = offsetValue;
+            nextLine.knots = nextLine.knots.map((point) => {
+                if (axis === "vertical") {
+                    return { x: point.x + offset, y: point.y };
+                }
+                return { x: point.x, y: point.y + offset };
+            });
+            nextLine = normalizeGuideLine(axis, nextLine, getLineCenterOnAxis(axis, line), subdivisions);
+        }
+
+        lines[index] = nextLine;
+        constrainGuideLineAgainstNeighbors(axis, lines, index);
+        lines[index] = normalizeGuideLine(axis, lines[index], getLineCenterOnAxis(axis, lines[index]), subdivisions);
+        changedLines += 1;
+    });
+
+    return { changedLines, addedKnots };
+}
+
+function applyLegacyLineOffsets(lineAdjustment) {
+    let changedLines = 0;
+    const verticalOffsets = Array.isArray(lineAdjustment?.vertical) ? lineAdjustment.vertical : [];
+    const horizontalOffsets = Array.isArray(lineAdjustment?.horizontal) ? lineAdjustment.horizontal : [];
+
+    verticalOffsets.forEach((offset, index) => {
+        if (!Number.isFinite(Number(offset)) || !gridGuides.vertical[index]) {
+            return;
+        }
+        const delta = Number(offset);
+        gridGuides.vertical[index].knots = gridGuides.vertical[index].knots.map((point) => ({
+            x: point.x + delta,
+            y: point.y
+        }));
+        changedLines += 1;
+    });
+
+    horizontalOffsets.forEach((offset, index) => {
+        if (!Number.isFinite(Number(offset)) || !gridGuides.horizontal[index]) {
+            return;
+        }
+        const delta = Number(offset);
+        gridGuides.horizontal[index].knots = gridGuides.horizontal[index].knots.map((point) => ({
+            x: point.x,
+            y: point.y + delta
+        }));
+        changedLines += 1;
+    });
+
+    return changedLines;
+}
+
+function applyAiGridAdjustments(json) {
+    if (!json || typeof json !== "object" || !img.width || !img.height) {
+        return { applied: false, changedLines: 0, addedKnots: 0 };
+    }
+
+    initializeGridGuidesFromInputs(false);
+
+    const adjustmentRoot = json.grid_adjustment && typeof json.grid_adjustment === "object"
+        ? json.grid_adjustment
+        : (json.line_adjustment && typeof json.line_adjustment === "object" ? json.line_adjustment : null);
+
+    let changedLines = 0;
+    let addedKnots = 0;
+
+    if (adjustmentRoot) {
+        const verticalResult = applyAiGuideArray("vertical", adjustmentRoot.vertical);
+        const horizontalResult = applyAiGuideArray("horizontal", adjustmentRoot.horizontal);
+        changedLines += verticalResult.changedLines + horizontalResult.changedLines;
+        addedKnots += verticalResult.addedKnots + horizontalResult.addedKnots;
+    }
+
+    if (!changedLines && json.line_adjustment && typeof json.line_adjustment === "object") {
+        changedLines += applyLegacyLineOffsets(json.line_adjustment);
+    }
+
+    if (!changedLines) {
+        return { applied: false, changedLines: 0, addedKnots: 0 };
+    }
+
+    const cols = Math.max(1, parseInt(colsInput.value, 10) || 1);
+    const rows = Math.max(1, parseInt(rowsInput.value, 10) || 1);
+
+    gridGuides.vertical = gridGuides.vertical.map((line, index) => {
+        const fallbackX = Math.round((img.width * (index + 1)) / cols);
+        return normalizeGuideLine("vertical", line, fallbackX, rows);
+    });
+    gridGuides.horizontal = gridGuides.horizontal.map((line, index) => {
+        const fallbackY = Math.round((img.height * (index + 1)) / rows);
+        return normalizeGuideLine("horizontal", line, fallbackY, cols);
+    });
+
+    gridGuides.vertical.forEach((line, index) => {
+        constrainGuideLineAgainstNeighbors("vertical", gridGuides.vertical, index);
+        gridGuides.vertical[index] = normalizeGuideLine("vertical", line, getLineCenterOnAxis("vertical", line), rows);
+    });
+    gridGuides.horizontal.forEach((line, index) => {
+        constrainGuideLineAgainstNeighbors("horizontal", gridGuides.horizontal, index);
+        gridGuides.horizontal[index] = normalizeGuideLine("horizontal", line, getLineCenterOnAxis("horizontal", line), cols);
+    });
+
+    redrawPreview();
+    return { applied: true, changedLines, addedKnots };
+}
+
+/* ================= AI ================= */
+async function aiDetect() {
+    if (!hasSpriteForgeProxy) {
+        log("AI detection needs SpriteForge's local server; grid slicing remains available in this dashboard tool.");
+        return;
+    }
+    if (!base64) {
+        log("No image");
+        return;
+    }
+
+    if (!modelSelect.value) {
+        log("No model selected");
+        return;
+    }
+
+    const provider = providerSelect.value;
+    const model = modelSelect.value;
+    const endpoint = getCurrentEndpoint();
+    const aiDebugImage = buildAiDebugOverlayBase64();
+    const selectedPrompt = buildGridAwarePrompt();
+    const startedAt = performance.now();
+
+    setLlmDebug({
+        meta: `Provider: ${provider}\nEndpoint: ${endpoint}\nModel: ${model}\nStatus: sending...\nDebug preview cells: ${aiDebugImage.previewCellCount}`,
+        prompt: selectedPrompt,
+        reply: "(waiting for LLM reply)",
+        rawBody: "(waiting for upstream response body)",
+        parsed: ""
+    });
+
+    log("AI scanning...");
+
+    let res;
+    let data;
+
+    try {
+        res = await fetch("/api/detect", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                provider,
+                endpoint,
+                model,
+                imageBase64: aiDebugImage.imageBase64 || base64,
+                referenceImageBase64: base64,
+                prompt: selectedPrompt
+            })
+        });
+
+        data = await res.json();
+    } catch (error) {
+        const elapsed = Math.round(performance.now() - startedAt);
+        const message = error instanceof Error ? error.message : "AI request failed";
+
+        setLlmDebug({
+            meta: `Provider: ${provider}\nEndpoint: ${endpoint}\nModel: ${model}\nStatus: network error\nTime: ${elapsed}ms`,
+            prompt: selectedPrompt,
+            reply: message,
+            rawBody: "",
+            parsed: ""
+        });
+
+        log("AI request failed");
+        return;
+    }
+
+    const elapsed = Math.round(performance.now() - startedAt);
+    const realPromptSent = typeof data?.promptSent === "string" && data.promptSent.trim()
+        ? data.promptSent
+        : selectedPrompt;
+    const realLlmTextOutput = typeof data?.modelText === "string"
+        ? data.modelText
+        : (typeof data?.content === "string" ? data.content : "");
+    const upstreamRawBody = typeof data?.upstreamRawText === "string"
+        ? data.upstreamRawText
+        : JSON.stringify(data?.raw ?? data, null, 2);
+
+    if (!res.ok) {
+        setLlmDebug({
+            meta: `Provider: ${provider}\nEndpoint: ${endpoint}\nModel: ${model}\nStatus: HTTP ${res.status}\nTime: ${elapsed}ms`,
+            prompt: realPromptSent,
+            reply: realLlmTextOutput || data.error || "AI request failed",
+            rawBody: upstreamRawBody || "",
+            parsed: ""
+        });
+        log(data.error || "AI request failed");
+        return;
+    }
+
+    const json = extractJSON(realLlmTextOutput || upstreamRawBody || "");
+    const gridAssessment = json?.grid_assessment;
+    const suggestedCols = Number(gridAssessment?.suggested?.cols);
+    const suggestedRows = Number(gridAssessment?.suggested?.rows);
+    const suggestionText =
+        Number.isFinite(suggestedCols) && Number.isFinite(suggestedRows) && suggestedCols > 0 && suggestedRows > 0
+            ? `\nSuggested grid: ${suggestedCols}x${suggestedRows}`
+            : "";
+
+    setLlmDebug({
+        meta: `Provider: ${provider}\nEndpoint: ${endpoint}\nModel: ${model}\nStatus: success\nTime: ${elapsed}ms${
+            gridAssessment && typeof gridAssessment.matches === "boolean"
+                ? `\nGrid match: ${gridAssessment.matches ? "yes" : "no"}${suggestionText}`
+                : ""
+        }`,
+        prompt: realPromptSent,
+        reply: realLlmTextOutput || "(empty model text)",
+        rawBody: upstreamRawBody || "",
+        parsed: json ? JSON.stringify(json, null, 2) : "(no JSON extracted)"
+    });
+
+    if (!json) {
+        log("AI returned invalid JSON");
+        return;
+    }
+
+    const adjustmentResult = applyAiGridAdjustments(json);
+    if (adjustmentResult.applied) {
+        const adjustedGrid = buildGridSpritesFromInputs();
+        if (adjustedGrid.length) {
+            sprites = adjustedGrid;
+            render();
+            log(`AI adjusted guides (${adjustmentResult.changedLines} lines, +${adjustmentResult.addedKnots} knots, ${sprites.length} slices)`);
+            return;
+        }
+    }
+
+    const rawRegions = [
+        ...(Array.isArray(json?.regions) ? json.regions : []),
+        ...(Array.isArray(json?.sprites)
+            ? json.sprites.filter((sprite) => Array.isArray(sprite?.points) || Array.isArray(sprite?.vertices))
+            : [])
+    ];
+
+    const polygonSprites = rawRegions
+        .map((region) => normalizePolygonPoints(region))
+        .filter((points) => points !== null)
+        .map((points) => createCanvasFromPolygon(points));
+
+    if (polygonSprites.length) {
+        const applied = applySpritesWithOutputMode(polygonSprites);
+        log(
+            applied.mode === "grid"
+                ? `AI done, grid split applied (${applied.count} cells)`
+                : `AI done (${applied.count} polygon sprites)`
+        );
+        return;
+    }
+
+    const aiBoxes = (Array.isArray(json?.sprites) ? json.sprites : [])
+        .map((sprite) => normalizeSpriteBox(sprite))
+        .filter((sprite) => sprite !== null);
+
+    if (!aiBoxes.length) {
+        log("AI returned no usable boxes");
+        return;
+    }
+
+    const gridMismatchReported = gridAssessment && gridAssessment.matches === false;
+    const shouldTryDiagonalRefine =
+        cropToSpriteToggle.checked &&
+        (gridMismatchReported || isLikelyGridLikeBoxes(aiBoxes));
+
+    if (shouldTryDiagonalRefine) {
+        const diagonal = detectConnectedSprites(32);
+
+        if (diagonal.length) {
+            const applied = applySpritesWithOutputMode(diagonal);
+            log(
+                applied.mode === "grid"
+                    ? `AI looked grid-like, grid split applied (${applied.count} cells)`
+                    : `AI refined to diagonal split (${applied.count} sprites)`
+            );
+            return;
+        }
+    }
+
+    const applied = applySpritesWithOutputMode(aiBoxes);
+    log(applied.mode === "grid" ? `AI done, grid split applied (${applied.count} cells)` : `AI done (${applied.count} sprites)`);
+}
+
+/* ================= GIF ================= */
+function generateGifFrameCanvases() {
+    const keepTransparency = transparencyToggle.checked;
+    return sprites
+        .map((sprite) => createSpriteCanvas(sprite, keepTransparency))
+        .filter((entry) => entry !== null)
+        .map((entry) => entry.canvasEl);
+}
+
+function generateGifPreview() {
+    if (!sprites.length) {
+        log("No sprites to animate");
+        return;
+    }
+
+    if (typeof GIF !== "function") {
+        log("GIF library not loaded");
+        return;
+    }
+
+    const frameCanvases = generateGifFrameCanvases();
+    if (!frameCanvases.length) {
+        log("No valid frames for GIF");
+        return;
+    }
+
+    const keepTransparency = transparencyToggle.checked;
+    const delay = Math.max(30, parseInt(gifDelayInput.value, 10) || 120);
+
+    const maxWidth = Math.max(...frameCanvases.map((frame) => frame.width));
+    const maxHeight = Math.max(...frameCanvases.map((frame) => frame.height));
+
+    const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: maxWidth,
+        height: maxHeight,
+        workerScript: "vendor/gif.worker.js"
+    });
+
+    frameCanvases.forEach((frameCanvas) => {
+        const composed = document.createElement("canvas");
+        composed.width = maxWidth;
+        composed.height = maxHeight;
+
+        const composedCtx = composed.getContext("2d");
+
+        if (!keepTransparency) {
+            composedCtx.fillStyle = "#ffffff";
+            composedCtx.fillRect(0, 0, maxWidth, maxHeight);
+        }
+
+        const offsetX = Math.floor((maxWidth - frameCanvas.width) / 2);
+        const offsetY = Math.floor((maxHeight - frameCanvas.height) / 2);
+        composedCtx.drawImage(frameCanvas, offsetX, offsetY);
+
+        gif.addFrame(composed, { delay, copy: true });
+    });
+
+    log("Rendering GIF...");
+
+    gif.on("finished", (blob) => {
+        resetGifPreview();
+        gifBlobUrl = URL.createObjectURL(blob);
+
+        gifPreview.src = gifBlobUrl;
+        gifPreview.classList.remove("hidden");
+        gifPlaceholder.classList.add("hidden");
+        downloadGifButton.disabled = false;
+
+        log(`GIF ready (${frameCanvases.length} frames)`);
+    });
+
+    gif.render();
+}
+
+function downloadGif() {
+    if (!gifBlobUrl) {
+        log("Generate GIF first");
+        return;
+    }
+
+    const anchor = document.createElement("a");
+    anchor.href = gifBlobUrl;
+    anchor.download = "sprites-preview.gif";
+    anchor.click();
+}
+
+/* ================= RENDER ================= */
+function render() {
+    spriteWrapper.innerHTML = "";
+    resetGifPreview();
+
+    const keepTransparency = transparencyToggle.checked;
+
+    sprites.forEach((sprite, index) => {
+        const rendered = createSpriteCanvas(sprite, keepTransparency);
+        if (!rendered) {
+            return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "bg-slate-950 border border-slate-800 rounded p-2";
+
+        const frame = document.createElement("div");
+        frame.className = "h-32 rounded flex items-center justify-center overflow-hidden " + (keepTransparency ? "checkerboard" : "bg-white");
+
+        const canvasEl = rendered.canvasEl;
+        canvasEl.style.maxWidth = "100%";
+        canvasEl.style.maxHeight = "100%";
+
+        frame.appendChild(canvasEl);
+        card.appendChild(frame);
+
+        const info = document.createElement("div");
+        info.className = "text-[10px] text-gray-400 mt-1";
+        info.textContent = `#${index + 1} ${canvasEl.width}x${canvasEl.height}`;
+        card.appendChild(info);
+
+        spriteWrapper.appendChild(card);
+    });
+
+    redrawPreview();
+}
+
+transparencyToggle.addEventListener("change", () => {
+    render();
+});
+
+keepCellPaddingToggle.addEventListener("change", () => {
+    if (sprites.length) {
+        render();
+    }
+});
+
+cropToSpriteToggle.addEventListener("change", () => {
+    if (!sprites.length) {
+        return;
+    }
+
+    if (!cropToSpriteToggle.checked) {
+        const gridSprites = buildGridSpritesFromInputs();
+        if (gridSprites.length) {
+            sprites = gridSprites;
+            log(`Grid split applied (${sprites.length} cells)`);
+        }
+    }
+
+    render();
+});
+
+debugOverlayToggle.addEventListener("change", () => {
+    redrawPreview();
+});
+
+function updatePreviewCursor() {
+    if (activeGridDrag) {
+        previewCanvas.style.cursor = "grabbing";
+        return;
+    }
+    if (gridLineEditToggle.checked) {
+        previewCanvas.style.cursor = "grab";
+        return;
+    }
+    if (splineEditToggle.checked) {
+        previewCanvas.style.cursor = "crosshair";
+        return;
+    }
+    previewCanvas.style.cursor = "default";
+}
+
+gridLineEditToggle.addEventListener("change", () => {
+    if (gridLineEditToggle.checked && splineEditToggle.checked) {
+        splineEditToggle.checked = false;
+        activeCurveIndex = -1;
+    }
+    if (!gridLineEditToggle.checked) {
+        selectedGridKnot = null;
+        activeGridDrag = null;
+    }
+    initializeGridGuidesFromInputs(false);
+    updatePreviewCursor();
+    redrawPreview();
+});
+
+const onGridDensityInputChanged = () => {
+    initializeGridGuidesFromInputs(true);
+    redrawPreview();
+};
+
+colsInput.addEventListener("change", onGridDensityInputChanged);
+rowsInput.addEventListener("change", onGridDensityInputChanged);
+
+previewCanvas.addEventListener("pointerdown", (event) => {
+    if (!gridLineEditToggle.checked || !img.width || !img.height) {
+        return;
+    }
+
+    const point = getPreviewPointFromEvent(event);
+    if (!point) {
+        return;
+    }
+
+    const rect = previewCanvas.getBoundingClientRect();
+    const target = getGridDragTarget(point, rect);
+    if (!target) {
+        selectedGridKnot = null;
+        redrawPreview();
+        return;
+    }
+
+    const lines = target.axis === "vertical" ? gridGuides.vertical : gridGuides.horizontal;
+    const line = lines[target.lineIndex];
+    if (!line || !Array.isArray(line.knots) || line.knots.length < 2) {
+        return;
+    }
+
+    selectedGridKnot = target.kind === "knot"
+        ? {
+            axis: target.axis,
+            lineIndex: target.lineIndex,
+            knotIndex: target.knotIndex
+        }
+        : null;
+    redrawPreview();
+
+    activeGridDrag = {
+        ...target,
+        startPoint: point,
+        initialKnots: line.knots.map((knot) => ({ x: knot.x, y: knot.y }))
+    };
+
+    previewCanvas.setPointerCapture(event.pointerId);
+    updatePreviewCursor();
+    event.preventDefault();
+});
+
+previewCanvas.addEventListener("pointermove", (event) => {
+    if (!activeGridDrag) {
+        return;
+    }
+
+    const point = getPreviewPointFromEvent(event);
+    if (!point) {
+        return;
+    }
+
+    applyGridDrag(activeGridDrag, point);
+    redrawPreview();
+    event.preventDefault();
+});
+
+const endGridDrag = () => {
+    if (!activeGridDrag) {
+        return;
+    }
+
+    const axisLabel = activeGridDrag.axis === "vertical" ? "vertical" : "horizontal";
+    const indexLabel = activeGridDrag.lineIndex + 1;
+    activeGridDrag = null;
+    updatePreviewCursor();
+    redrawPreview();
+    log(`Grid ${axisLabel} line ${indexLabel} adjusted`);
+};
+
+previewCanvas.addEventListener("pointerup", endGridDrag);
+previewCanvas.addEventListener("pointercancel", endGridDrag);
+previewCanvas.addEventListener("lostpointercapture", endGridDrag);
+
+splineEditToggle.addEventListener("change", () => {
+    if (splineEditToggle.checked && gridLineEditToggle.checked) {
+        gridLineEditToggle.checked = false;
+        activeGridDrag = null;
+    }
+    updatePreviewCursor();
+    redrawPreview();
+});
+
+previewCanvas.addEventListener("click", (event) => {
+    if (gridLineEditToggle.checked) {
+        return;
+    }
+
+    if (!splineEditToggle.checked || !img.width || !img.height) {
+        return;
+    }
+
+    if (activeCurveIndex < 0) {
+        startNewSpline();
+    }
+
+    const point = getPreviewPointFromEvent(event);
+    if (!point) {
+        return;
+    }
+
+    separatorCurves[activeCurveIndex].points.push(point);
+    redrawPreview();
+    log(`Spline #${activeCurveIndex + 1}: knot ${separatorCurves[activeCurveIndex].points.length} added`);
+});
+
+previewCanvas.addEventListener("dblclick", (event) => {
+    if (!gridLineEditToggle.checked || !img.width || !img.height) {
+        return;
+    }
+
+    const point = getPreviewPointFromEvent(event);
+    if (!point) {
+        return;
+    }
+
+    const rect = previewCanvas.getBoundingClientRect();
+    const inserted = insertGridKnotAtPoint(point, rect);
+    if (inserted) {
+        redrawPreview();
+        log("Grid knot inserted");
+    }
+
+    event.preventDefault();
+});
+
+document.addEventListener("keydown", (event) => {
+    if (!gridLineEditToggle.checked) {
+        return;
+    }
+
+    if (event.key !== "Delete" && event.key !== "Backspace") {
+        return;
+    }
+
+    const activeTag = document.activeElement?.tagName;
+    if (activeTag === "INPUT" || activeTag === "TEXTAREA") {
+        return;
+    }
+
+    if (deleteSelectedGridKnot()) {
+        event.preventDefault();
+        log("Grid knot deleted");
+    }
+});
+
+endpointInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        saveEndpointForProvider();
+    }
+});
+
+/* ================= INIT ================= */
+async function initializeApp() {
+    initializePromptEditor();
+    setLlmDebug({
+        meta: "No AI request yet",
+        prompt: promptInput.value,
+        reply: "",
+        parsed: ""
+    });
+
+    await initializeProviderEndpoints();
+    updatePreviewCursor();
+    await loadModels();
+}
+
+initializeApp();
+
+function describeCurrentAssets() {
+    const descriptors = [];
+    if (gifPreview && !gifPreview.classList.contains("hidden") && gifPreview.src) {
+        descriptors.push({
+            kind: "gif",
+            title: "SpriteForge GIF Preview",
+            fileName: "sprites-preview.gif",
+            mimeType: "image/gif",
+            sourceUrl: gifPreview.src,
+            previewKind: "gif",
+            previewUrl: gifPreview.src,
+            metadata: { sourceTool: "spritesheet-utility", spriteCount: sprites.length }
+        });
+    }
+    if (previewCanvas.width && previewCanvas.height) {
+        const dataUrl = previewCanvas.toDataURL("image/png");
+        descriptors.push({
+            kind: "image",
+            title: "SpriteForge Split Preview",
+            fileName: "spritesheet-preview.png",
+            mimeType: "image/png",
+            dataUrl,
+            width: previewCanvas.width,
+            height: previewCanvas.height,
+            previewKind: "image",
+            previewUrl: dataUrl,
+            metadata: { sourceTool: "spritesheet-utility", spriteCount: sprites.length }
+        });
+    }
+    return descriptors;
+}
+
+window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+
+if (window.registerDashboardToolBridge) {
+    window.registerDashboardToolBridge({
+        onLoadAsset: payload => loadImageSource(payload && (payload.dataUrl || payload.imageUrl || payload.previewImageUrl || payload.url), payload && (payload.fileName || payload.imageFileName || "dashboard-image.png")),
+        onExportImage: () => {
+            if (!previewCanvas.width || !previewCanvas.height) throw new Error("Load an image first.");
+            return {
+                dataUrl: previewCanvas.toDataURL("image/png"),
+                fileName: "spritesheet-preview.png",
+                width: previewCanvas.width,
+                height: previewCanvas.height
+            };
+        },
+        onDescribeCurrentAssets: describeCurrentAssets
+    });
+}
+</script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

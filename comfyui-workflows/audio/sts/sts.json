@@ -1,0 +1,121 @@
+{
+  "1": {
+    "inputs": {
+      "string": [
+        "7",
+        0
+      ],
+      "strip_newlines": true
+    },
+    "class_type": "StringConstantMultiline",
+    "_meta": {
+      "title": "String Constant Multiline"
+    }
+  },
+  "2": {
+    "inputs": {
+      "value": 0.9
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "Speed"
+    }
+  },
+  "3": {
+    "inputs": {
+      "speaker_name": "am_puck"
+    },
+    "class_type": "KokoroSpeaker",
+    "_meta": {
+      "title": "Kokoro Speaker"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": [
+        "1",
+        0
+      ],
+      "speed": [
+        "2",
+        0
+      ],
+      "lang": "English",
+      "speaker": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "KokoroGenerator",
+    "_meta": {
+      "title": "Kokoro Generator"
+    }
+  },
+  "5": {
+    "inputs": {
+      "filename_prefix": "audio/ComfyUI",
+      "quality": "V0",
+      "audioUI": "",
+      "audio": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "SaveAudioMP3",
+    "_meta": {
+      "title": "Save Audio (MP3)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "model": "large-v3-turbo",
+      "language": "auto",
+      "prompt": "",
+      "audio": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "Apply Whisper",
+    "_meta": {
+      "title": "Apply Whisper"
+    }
+  },
+  "8": {
+    "inputs": {
+      "preview": "",
+      "source": [
+        "7",
+        1
+      ]
+    },
+    "class_type": "PreviewAny",
+    "_meta": {
+      "title": "Preview Alignments"
+    }
+  },
+  "9": {
+    "inputs": {
+      "preview": "",
+      "source": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "PreviewAny",
+    "_meta": {
+      "title": "Preview Text"
+    }
+  },
+  "11": {
+    "inputs": {
+      "audio": "Alle meine Entchen - Kinderlieder zum Mitsingen Sing Kinderlieder - Sing mit mir - Kinderlieder (720p, h264).mp4",
+      "start_time": 0,
+      "duration": 0
+    },
+    "class_type": "VHS_LoadAudioUpload",
+    "_meta": {
+      "title": "Load Audio (Upload)🎥🅥🅗🅢"
+    }
+  }
+}

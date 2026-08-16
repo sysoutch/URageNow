@@ -1,0 +1,56 @@
+  .messenger-runtime-launch-config {
+    display: grid;
+    gap: 10px;
+  }
+
+  .messenger-runtime-launch-note {
+    font-size: 11px;
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--muted, #b7c4df) 84%, white 10%);
+  }
+
+  .messenger-runtime-launch-source {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--panel) 78%, black 22%);
+    color: #eef4ff;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .messenger-runtime-manual-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .messenger-runtime-actions {
+    margin: 0;
+    gap: 8px;
+  }
+
+  .messenger-runtime-actions button {
+    flex: 1 1 auto;
+    min-height: 34px;
+    padding: 7px 8px;
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .messenger-runtime-history {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #eaf1ff;
+  }

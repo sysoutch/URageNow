@@ -1,0 +1,62 @@
+:root {
+  --bg: #050505;
+  --accent: #00ff41;
+  --ui-panel: #1a1a1a;
+  --ui-border: #333;
+  --ui-text: #ffffff;
+}
+
+body[data-dashboard-theme="fire"] {
+  --bg: #100806;
+  --accent: #ff7b42;
+  --ui-panel: #1b0f0d;
+  --ui-border: rgba(255, 137, 78, 0.24);
+  --ui-text: #f8f2ee;
+}
+
+body[data-dashboard-theme="water"] {
+  --bg: #07111b;
+  --accent: #5daeff;
+  --ui-panel: #0c1b29;
+  --ui-border: rgba(93, 174, 255, 0.24);
+  --ui-text: #eef7ff;
+}
+
+body[data-dashboard-theme="nature"] {
+  --bg: #09140c;
+  --accent: #8fd36b;
+  --ui-panel: #122016;
+  --ui-border: rgba(143, 211, 107, 0.24);
+  --ui-text: #f3fbf0;
+}
+
+body[data-dashboard-theme="rock"] {
+  --bg: #13100c;
+  --accent: #d1c2ad;
+  --ui-panel: #1d1914;
+  --ui-border: rgba(209, 194, 173, 0.24);
+  --ui-text: #f6f2eb;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ui-text);
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+#visualizerCanvas {
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--ui-border);
+  box-shadow: 0 0 60px rgba(0, 255, 65, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+}

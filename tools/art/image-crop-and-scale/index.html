@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Crop & Scale</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <script src="../../shared/dashboard-tool-bridge.js"></script>
+    <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+<div class="sidebar" data-dashboard-tool-sidebar data-dashboard-tool-sidebar-label="Crop Controls">
+    <div class="header-row">
+        <h1>Image Crop<br>& Scale</h1>
+    </div>
+    
+    <div class="control-group">
+        <label>Platform Mode</label>
+        <select id="mode-select">
+            <option value="unity">Unity Publisher Portal</option>
+            <option value="steam">Steam Store</option>
+            <option value="epic">Epic Games Store</option>
+            <option value="mobile">App Store & Play Store</option>
+            <option value="social">Social Media</option>
+            <option value="custom">Custom Dimensions</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label>Global Strategy</label>
+        <select id="global-strategy">
+            <option value="cover">Crop to Fill</option>
+            <option value="contain">Scale to Fit</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label>Padding Background</label>
+        <input type="color" id="bg-picker" value="#000000">
+    </div>
+
+    <div class="control-group">
+        <button class="btn btn-outline" style="font-size:0.7rem; padding:5px;" id="reset-focus">🎯 Reset Focus Center</button>
+    </div>
+
+    <div id="custom-ui" class="control-group" style="display:none;">
+        <label>Custom Size</label>
+        <div style="display:flex; gap:5px;">
+            <input type="number" id="custom-w" placeholder="W" value="1920">
+            <input type="number" id="custom-h" placeholder="H" value="1080">
+        </div>
+        <button class="btn btn-primary" id="add-custom" style="margin-top:5px; font-size:0.7rem;">+ Add Crop</button>
+    </div>
+
+     <div class="control-group">
+         <label>Source Image</label>
+          <div id="crop-upload-wrapper">
+              <label class="upload-card" for="file-input">
+                  <span class="upload-card-icon arrow-icon">&#8595;</span>
+                  <strong>Choose a source image</strong>
+                  <span>or drag it here.</span>
+                  <input type="file" id="file-input" accept="image/*" hidden>
+              </label>
+          </div>
+     </div>
+
+    <button id="download-all-btn" class="btn btn-success" disabled>📦 Download All (.zip)</button>
+</div>
+
+<div class="main">
+    <div class="grid" id="previews"></div>
+</div>
+
+<script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

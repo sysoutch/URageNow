@@ -1,0 +1,261 @@
+.ask-composer-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.ask-composer-context-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.ask-composer-context-badge {
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 86%, var(--accent) 14%);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0.34rem 0.55rem;
+}
+
+.ask-composer-context-badge.is-overridden {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.ask-composer-reply-override {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.ask-composer-reply-override select {
+  min-width: 10rem;
+  width: auto;
+  min-height: 2rem;
+  padding-block: 0.25rem;
+  font-size: 0.78rem;
+}
+
+.ask-composer-message-row {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px;
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 92%, transparent) !important;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--panel) 92%, black 8%);
+}
+
+.ask-composer-message-row:focus-within {
+  border-color: color-mix(in srgb, var(--studio-control-accent) 68%, white 8%) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--studio-control-accent) 18%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.ask-composer-message-row.is-recording {
+  border-color: var(--danger, #ef5350) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger, #ef5350) 20%, transparent) !important;
+}
+
+.ask-recording-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.45rem;
+  color: color-mix(in srgb, var(--danger, #ef5350) 75%, white 25%);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.ask-recording-status::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--danger, #ef5350);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger, #ef5350) 65%, transparent);
+  animation: ask-recording-pulse 1.15s ease-out infinite;
+}
+
+.ask-composer-icon-button.is-recording {
+  color: var(--danger, #ef5350) !important;
+  background: color-mix(in srgb, var(--danger, #ef5350) 16%, transparent) !important;
+}
+
+@keyframes ask-recording-pulse {
+  70% { box-shadow: 0 0 0 0.5rem transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.ask-composer-message-row .ask-prompt-command-anchor {
+  align-self: stretch;
+}
+
+.ask-composer-message-row #ask-prompt,
+.ask-composer-message-row #ask-prompt:focus {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  border: none !important;
+  border-width: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.ask-composer-message-row :is(.ask-upload-menu > summary, .ask-composer-icon-button, #ask-button) {
+  border-block: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.ask-composer-message-row .ask-upload-menu > summary {
+  border: 0;
+}
+
+.ask-composer-message-row .ask-composer-send-actions {
+  display: flex;
+  align-items: end;
+  gap: 0;
+  height: auto;
+  align-self: end;
+}
+
+.ask-composer-message-row .ask-composer-send-actions > * {
+  height: 56px;
+  align-self: end;
+}
+
+/* The record control is the contextual primary action: it becomes Send when
+ * there is message content.  Keep legacy secondary send targets out of the
+ * compact composer without removing their bindings. */
+.ask-composer-message-row #ask-button {
+  display: none;
+}
+
+.ask-chat-settings-dialog {
+  width: min(760px, calc(100vw - 2rem));
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border));
+  border-radius: 0.8rem;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 94%, black 6%);
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 48%);
+}
+
+.ask-chat-settings-dialog::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.ask-chat-settings-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0;
+}
+
+.ask-chat-settings-header h3 {
+  margin: 0.2rem 0 0;
+}
+
+.ask-chat-settings-dialog .ask-send-mode-row {
+  padding: 1rem;
+}
+
+.ask-composer-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  padding-inline: 0;
+}
+
+.ask-upload-menu {
+  position: relative;
+  z-index: 100;
+  align-self: end;
+}
+
+.ask-upload-menu > summary {
+  height: 56px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.ask-upload-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ask-upload-menu-panel {
+  position: absolute;
+  z-index: 101;
+  top: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  gap: 6px;
+  min-width: 184px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 46%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel) 94%, black 6%);
+  box-shadow: 0 14px 28px rgb(0 0 0 / 32%);
+}
+
+.ask-upload-menu:not([open]) .ask-upload-menu-panel {
+  display: none;
+}
+
+.ask-upload-menu-panel button {
+  width: 100%;
+  min-height: 42px;
+  justify-content: flex-start;
+}
+
+.ask-composer-send-actions {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  align-self: end;
+}
+
+.ask-composer-send-actions #ask-button {
+  min-width: 112px;
+  height: 56px;
+}
+
+.ask-rod-composer .ask-prompt-command-anchor > textarea {
+  min-height: 168px;
+  resize: vertical;
+}
+
+@media (max-width: 640px) {
+  .ask-composer-reply-override,
+  .ask-composer-reply-override select {
+    width: 100%;
+  }
+
+  .ask-composer-message-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ask-composer-send-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}

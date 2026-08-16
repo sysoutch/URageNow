@@ -1,0 +1,417 @@
+// =========================================================
+// ABOUT OVERLAY - "How The Studio Works" Redesign
+// =========================================================
+
+.about-overlay-panel {
+  width: min(1480px, calc(100% - 16px)) !important;
+  max-height: calc(100vh - 16px);
+}
+
+.about-overlay-panel .runtime-overlay-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.about-overlay-panel .panel-kicker {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--studio-accent-1, #4ade80);
+  margin-bottom: 4px;
+}
+
+.about-overlay-panel .runtime-overlay-title-wrap h3 {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #ffffff;
+  margin: 0;
+}
+
+.about-subtitle {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--studio-accent-soft, rgba(74, 222, 128, 0.7));
+  font-weight: 400;
+}
+
+// Timeline connector bar at top
+.about-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 24px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+// Continuous timeline connector line
+.about-timeline::before {
+  content: "";
+  position: absolute;
+  top: 38px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--studio-accent-1) 50%, transparent),
+    color-mix(in srgb, var(--studio-accent-soft) 30%, transparent),
+    color-mix(in srgb, var(--studio-accent-1) 50%, transparent));
+  pointer-events: none;
+}
+
+.about-timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  min-width: 100px;
+  position: relative;
+  z-index: 1;
+}
+
+.about-timeline-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: 34px;
+  color: var(--studio-accent-1, #4ade80);
+  opacity: 0.5;
+  transition: all 300ms ease;
+}
+
+.about-timeline-step.active .about-timeline-icon {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--studio-accent-1) 50%, transparent));
+}
+
+.about-timeline-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--studio-accent-1) 60%, transparent);
+  transition: color 300ms ease;
+}
+
+.about-timeline-step.active .about-timeline-label {
+  color: var(--studio-accent-1, #4ade80);
+}
+
+.about-timeline-desc {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 90px;
+}
+
+.about-timeline-arrow {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 20px;
+  font-size: 22px;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--studio-accent-1) 30%, transparent);
+}
+
+// Main workflow grid - 5 columns on desktop
+.about-workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.about-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 16px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1) 15%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--studio-accent-soft) 60%, rgba(20, 50, 30, 0.4)) 0%, rgba(12, 30, 18, 0.8) 100%);
+  transition: all 300ms ease;
+}
+
+.about-panel:hover {
+  border-color: color-mix(in srgb, var(--studio-accent-1) 30%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--studio-accent-soft) 70%, rgba(25, 60, 35, 0.5)) 0%, rgba(15, 35, 20, 0.85) 100%);
+}
+
+.about-panel-active {
+  border-color: color-mix(in srgb, var(--studio-accent-1) 40%, transparent);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--studio-accent-soft) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--studio-accent-1) 15%, transparent);
+}
+
+.about-panel-number {
+  position: absolute;
+  top: -12px;
+  left: 14px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--studio-accent-1, #16a34a) 0%, var(--studio-accent-2, #15803d) 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--studio-accent-1) 40%, transparent);
+}
+
+.about-panel-icon {
+  width: 56px;
+  height: 56px;
+  color: var(--studio-accent-1, #4ade80);
+  opacity: 0.9;
+}
+
+.about-panel-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.about-panel-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+// Tags for panel 1
+.about-panel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.about-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--studio-accent-soft) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1) 20%, transparent);
+  color: var(--studio-accent-1, #86efac);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.about-tag :is(svg, .bi) {
+  opacity: 0.7;
+}
+
+// Section labels and lists
+.about-panel-section {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--studio-accent-1) 10%, transparent);
+}
+
+.about-section-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--studio-accent-1, #4ade80);
+  margin-bottom: 8px;
+}
+
+.about-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.about-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-list li :is(svg, .bi):first-child {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+// Check list items
+.about-check-list li {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-check-list li :is(svg, .bi):last-child {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.about-list-success {
+  margin-left: auto;
+  color: #4ade80;
+}
+
+// Example run section
+.about-example-run {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--studio-accent-soft) 40%, rgba(20, 50, 30, 0.2)) 0%, rgba(12, 30, 18, 0.6) 100%);
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1) 15%, transparent);
+}
+
+.about-example-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-example-header :is(svg, .bi) {
+  color: var(--studio-accent-1, #4ade80);
+}
+
+.about-example-label {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--studio-accent-1, #4ade80);
+}
+
+.about-example-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.about-example-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.about-example-step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--studio-accent-soft) 6%, rgba(20, 50, 30, 0.2));
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1) 15%, transparent);
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.about-example-output {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--studio-accent-soft) 10%, rgba(20, 50, 30, 0.2)) 0%, color-mix(in srgb, var(--studio-accent-1) 8%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--studio-accent-1) 30%, transparent);
+}
+
+.about-example-step-label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--studio-accent-1, #4ade80);
+}
+
+.about-example-step-value {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+.about-example-arrow {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 16px;
+  font-size: 18px;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--studio-accent-1) 35%, transparent);
+}
+
+// Tip footer
+.about-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--studio-accent-1) 60%, transparent);
+  text-align: center;
+}
+
+.about-tip :is(svg, .bi) {
+  flex-shrink: 0;
+  opacity: 0.7;
+  color: var(--studio-accent-1, #4ade80);
+}
+
+// Responsive - tablet
+@media (max-width: 1200px) {
+  .about-workflow-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// Responsive - mobile
+@media (max-width: 768px) {
+  .about-overlay-panel {
+    padding: 16px;
+  }
+
+  .about-workflow-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .about-timeline {
+    display: none;
+  }
+
+  .about-example-flow {
+    flex-wrap: nowrap;
+  }
+
+  .about-example-step {
+    min-width: 90px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-workflow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-example-flow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .about-example-arrow {
+    transform: rotate(90deg);
+  }
+}

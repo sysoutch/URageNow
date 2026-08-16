@@ -1,0 +1,84 @@
+:root {
+  --tab-bg: rgba(255,255,255,0.06);
+  --tab-active: rgba(143,211,106,0.18);
+  --tab-text: #bdc8aa;
+  --tab-active-text: #fff;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.map-generator-app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px 0;
+  background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(199,221,167,0.12);
+  z-index: 100;
+}
+
+.tab-btn {
+  min-height: 40px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: var(--tab-bg);
+  color: var(--tab-text);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.tab-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.tab-btn.active {
+  background: var(--tab-active);
+  color: var(--tab-active-text);
+  border-color: rgba(143,211,106,0.3);
+}
+
+.tab-btn i {
+  margin-right: 6px;
+}
+
+/* Tab content containers */
+.tab-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+
+.tab-panel {
+  display: none;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.tab-panel.active {
+  display: flex;
+}
+
+/* Iframe fills its panel */
+.tab-panel iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}

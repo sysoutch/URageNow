@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Extractor | Pro Suite</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/tools/shared/css/sidebar-scrollview.css">
+    <link rel="stylesheet" href="/tools/shared/css/components/upload-card.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-dashboard-theme="fire">
+
+<header class="app-header">
+    <h1>COLOR PALETTE EXTRACTOR</h1>
+    <p>Professional Extraction, WCAG Analysis & Production Asset Generation</p>
+</header>
+
+<div class="app-container">
+    <main class="card">
+        <div class="drop-section">
+            <label class="upload-card" for="file-input">
+                <span class="upload-card-icon arrow-icon">&#8595;</span>
+                <strong>Choose an image</strong>
+                <span>or drag it here to analyze.</span>
+                <input type="file" id="file-input" hidden accept="image/*">
+            </label>
+            <img id="image-preview" alt="Preview">
+        </div>
+
+        <div class="controls">
+            <div class="field">
+                <label>Swatches: <span id="c-val" style="color:var(--p)">16</span></label>
+                <input type="range" id="c-count" min="4" max="64" value="16">
+            </div>
+            <div class="field">
+                <label>Sort By</label>
+                <select id="sort">
+                    <option value="freq">Popularity</option>
+                    <option value="lum">Luminance</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>View</label>
+                <select id="layout">
+                    <option value="grid">Grid</option>
+                    <option value="strip">Strip</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="palette-output" class="grid-view"></div>
+        <button class="btn-export" style="margin-top:20px" onclick="downloadTexture()">💾 Download Texture Map (.png)</button>
+    </main>
+
+    <aside class="sidebar">
+        <div class="card">
+            <label>Accessibility Hub</label>
+            <div id="contrast-list" style="margin-top:15px"></div>
+        </div>
+        
+        <div class="card">
+            <div class="sidebar-header">
+                <label>History Log</label>
+                <button class="btn-clear" onclick="clearHistory()">Clear</button>
+            </div>
+            <div id="history-list" class="history-container">
+                <p style="font-size: 11px; color: var(--text-dim); text-align: center; padding: 20px;">No history records found.</p>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<canvas id="main-canvas"></canvas>
+<input type="color" id="hidden-picker" class="hidden-picker">
+    <script src="script.js"></script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

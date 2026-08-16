@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f0f0f0"/>
+  
+  <!-- Button -->
+  <rect x="100" y="100" width="200" height="60" rx="10" fill="#3498db" stroke="#2980b9" stroke-width="2"/>
+  <text x="200" y="135" font-family="Arial" font-size="20" fill="white" text-anchor="middle" alignment-baseline="middle">Click Me</text>
+  
+  <!-- Animation indicator -->
+  <circle cx="320" cy="40" r="15" fill="#e74c3c" opacity="0.8"/>
+  <path d="M310,30 L330,50 M330,30 L310,50" stroke="white" stroke-width="3" fill="none"/>
+  
+  <!-- Size indicator -->
+  <rect x="30" y="250" width="40" height="40" fill="#2ecc71" opacity="0.8"/>
+  <rect x="80" y="250" width="60" height="40" fill="#2ecc71" opacity="0.8"/>
+  <rect x="150" y="250" width="80" height="40" fill="#2ecc71" opacity="0.8"/>
+  
+  <!-- Shape indicators -->
+  <rect x="250" y="250" width="40" height="40" rx="0" fill="#9b59b6" opacity="0.8"/>
+  <rect x="300" y="250" width="40" height="40" rx="20" fill="#9b59b6" opacity="0.8"/>
+  <rect x="350" y="250" width="40" height="40" rx="20" fill="#9b59b6" opacity="0.8"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" font-family="Arial" font-size="16" fill="#2c3e50" text-anchor="middle">HTML Button Generator</text>
+</svg>

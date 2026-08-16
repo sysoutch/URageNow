@@ -1,0 +1,157 @@
+  @media (max-width: 1500px) {
+    .resource-hub-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 1180px) {
+    /* Desktop mode replaces the browser frame with this scrolling panel. */
+    body.tools-desktop-mode .tools-workspace-card {
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    body.tools-desktop-mode .tool-import-panel {
+      align-content: start;
+      min-height: max-content;
+    }
+
+    body.tools-desktop-mode .tool-import-form {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    body.tools-desktop-mode .tool-import-form > .field:first-child {
+      grid-column: 1 / -1;
+    }
+
+    .view[data-view-panel="blender-addons"].active,
+    .view[data-view-panel="assets"].active {
+      overflow: hidden;
+    }
+
+    .resource-hub-layout {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .resource-hub-card {
+      grid-template-columns: 38px minmax(0, 1fr);
+    }
+
+    .resource-manager-toolbar,
+    .resource-manager-inline-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .resource-manager-inline-form {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .resource-hub-main {
+      height: 100%;
+      min-height: 0;
+    }
+
+    .resource-manager-status {
+      max-width: none;
+      text-align: left;
+    }
+
+    .tools-dashboard-toolbar {
+      grid-template-columns: 1fr;
+    }
+
+    .tools-workspace-empty {
+      min-height: 260px;
+    }
+  }
+
+  @media (max-width: 980px) {
+    body:is(.view-tools-active, .view-blender-addons-active, .view-assets-active) .app-shell {
+      grid-template-columns: 1fr !important;
+    }
+
+    .view[data-view-panel="tools"].active {
+      padding: 0;
+    }
+
+    .tools-workspace-open-link {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .resource-hub-main {
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .resource-manager-toolbar,
+    .resource-manager-panel {
+      padding: 10px;
+    }
+
+    .resource-manager-panel-head {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .resource-platform-tabs {
+      width: 100% !important;
+    }
+
+    .resource-platform-tabs > button {
+      min-width: 0 !important;
+      flex: 1 1 0 !important;
+    }
+
+    .tools-dashboard-toolbar {
+      gap: 8px;
+    }
+
+    .tools-workspace-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .desktop-tool-dropzone,
+    .desktop-tool-path-row,
+    .tool-import-form,
+    .tool-release-select-row,
+    .tool-import-actions {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .resource-hub-platform-button {
+      grid-template-columns: 28px minmax(0, 1fr);
+    }
+
+    .resource-hub-platform-button .resource-hub-count {
+      display: none;
+    }
+
+    .desktop-tool-card-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tools-workspace-footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .tools-workspace-footer-actions {
+      justify-content: stretch;
+    }
+
+    .tools-workspace-footer-button {
+      flex: 1 1 140px;
+    }
+
+    .tools-workspace-export-body {
+      grid-template-columns: 1fr;
+    }
+  }

@@ -1,0 +1,376 @@
+/**
+ * Shared tool sidebar and foldout pattern.
+ *
+ * This file is injected after the shared dashboard component theme so sidebar
+ * layout, scrolling, and disclosure arrows have one final source of truth.
+ */
+
+:root {
+  --tool-sidebar-width: clamp(300px, 24vw, 360px);
+  --tool-sidebar-gap: 10px;
+  --tool-sidebar-padding: 14px;
+  --tool-sidebar-radius: var(--tool-radius, 13px);
+  --tool-sidebar-radius-sm: var(--tool-radius-sm, 10px);
+  --tool-sidebar-bg: var(--tool-surface-strong, var(--surface-strong, var(--surface, Canvas)));
+  --tool-sidebar-panel-bg: var(--tool-surface, var(--surface, Canvas));
+  --tool-sidebar-line: var(--tool-line, var(--border, currentColor));
+  --tool-sidebar-accent: var(--tool-accent, var(--accent, currentColor));
+  --tool-sidebar-text: var(--tool-text, var(--text, CanvasText));
+  --tool-sidebar-muted: var(--tool-muted, var(--text-dim, currentColor));
+}
+
+.tool-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+body[data-dashboard-theme] {
+  width: 100%;
+  max-width: 100%;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+
+/* Dashboard workspaces externalize a tool's control rail. In that mode the
+   iframe, not the document, defines the viewport; content must be allowed to
+   grow and scroll instead of being clipped by the normal standalone 100vh shell. */
+body[data-dashboard-theme][data-dashboard-sidebar-externalized="true"] {
+  height: auto !important;
+  min-height: 100% !important;
+  max-height: none !important;
+  overflow: auto !important;
+  scrollbar-gutter: stable;
+}
+
+body[data-dashboard-theme][data-dashboard-sidebar-externalized="true"] :where(.tool-layout, .tool-shell) {
+  height: auto !important;
+  min-height: 100% !important;
+}
+
+/* Dashboard workspaces externalize a tool's control rail. In that mode the
+   iframe, not the document, defines the viewport; content must be allowed to
+   grow and scroll instead of being clipped by the normal standalone 100vh shell. */
+body[data-dashboard-theme][data-dashboard-sidebar-externalized="true"] {
+  height: auto !important;
+  min-height: 100% !important;
+  max-height: none !important;
+  overflow: auto !important;
+  scrollbar-gutter: stable;
+}
+
+body[data-dashboard-theme][data-dashboard-sidebar-externalized="true"] :where(.tool-layout, .tool-shell) {
+  height: auto !important;
+  min-height: 100% !important;
+}
+
+html:has(body[data-dashboard-scroll-document]),
+body[data-dashboard-theme][data-dashboard-scroll-document] {
+  height: auto !important;
+  min-height: 100% !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable;
+}
+
+body[data-dashboard-theme] .tool-layout {
+  height: 100vh !important;
+  min-height: 0 !important;
+}
+
+.sidebar,
+.tool-sidebar,
+body[data-dashboard-theme] :where(.tool-layout > .sidebar, .tool-shell > .tool-sidebar) {
+  flex: 0 0 var(--tool-sidebar-width);
+  width: var(--tool-sidebar-width);
+  min-width: min(280px, 100%);
+  max-width: 400px;
+  height: 100vh;
+  min-height: 0;
+  padding: var(--tool-sidebar-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--tool-sidebar-gap);
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--tool-sidebar-accent) 7%, transparent), transparent 34%),
+    var(--tool-sidebar-bg) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--tool-sidebar-text);
+}
+
+body[data-dashboard-theme] :where(
+  .app > .left-rail,
+  .app > .right-rail,
+  #app > .left,
+  #app > .right,
+  #app > aside.panel,
+  #app-container > #sidebar,
+  .app-container > aside.sidebar
+) {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--tool-sidebar-accent) 7%, transparent), transparent 34%),
+    var(--tool-sidebar-bg) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--tool-sidebar-text) !important;
+}
+
+body[data-dashboard-theme] :where(.tool-layout > .main-content, .tool-layout > .main, .tool-shell > .workspace, .app-container > main) {
+  flex: 1 1 auto;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+
+.sidebar::-webkit-scrollbar,
+.tool-sidebar::-webkit-scrollbar,
+body[data-dashboard-theme] :where(.left-rail, .right-rail, .left, .right, aside.panel, #sidebar, aside.sidebar)::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.tool-sidebar::-webkit-scrollbar-track,
+body[data-dashboard-theme] :where(.left-rail, .right-rail, .left, .right, aside.panel, #sidebar, aside.sidebar)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.tool-sidebar::-webkit-scrollbar-thumb,
+body[data-dashboard-theme] :where(.left-rail, .right-rail, .left, .right, aside.panel, #sidebar, aside.sidebar)::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tool-sidebar-accent) 58%, transparent);
+}
+
+body[data-dashboard-theme] :where(.sidebar, .tool-sidebar, .left-rail, .right-rail, .left, .right, #sidebar, aside.panel) {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--tool-sidebar-accent) 58%, transparent) transparent;
+}
+
+body[data-dashboard-theme] :where(
+  .sidebar > .control-group,
+  .tool-sidebar > .control-group,
+  .left-rail > .panel,
+  .right-rail .side-panel,
+  .right-rail .code-panel,
+  #app > aside.panel > .section,
+  #sidebar > .control-group,
+  .tool-sidebar > .field-stack
+) {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--tool-sidebar-accent) 22%, transparent) !important;
+  border-radius: var(--tool-sidebar-radius);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--tool-sidebar-accent) 6%, transparent), transparent 72%),
+    var(--tool-sidebar-panel-bg) !important;
+  box-shadow: none !important;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+) {
+  min-width: 0;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--tool-sidebar-accent) 26%, transparent) !important;
+  border-radius: var(--tool-sidebar-radius) !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--tool-sidebar-accent) 8%, transparent), transparent 68%),
+    var(--tool-sidebar-panel-bg) !important;
+  box-shadow: none !important;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+) > summary {
+  min-height: 38px;
+  display: grid !important;
+  grid-template-columns: minmax(72px, 0.55fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 8px 11px;
+  color: var(--tool-sidebar-text) !important;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  list-style: none !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body[data-dashboard-theme] .foldout > summary {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+) > summary::marker {
+  content: "" !important;
+  font-size: 0 !important;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+) > summary::-webkit-details-marker {
+  display: none !important;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+) > summary::after {
+  content: "" !important;
+  width: 8px !important;
+  height: 8px !important;
+  justify-self: end;
+  margin-left: 8px !important;
+  border: 0 !important;
+  border-right: 2px solid color-mix(in srgb, var(--tool-sidebar-accent) 84%, var(--tool-sidebar-text) 16%) !important;
+  border-bottom: 2px solid color-mix(in srgb, var(--tool-sidebar-accent) 84%, var(--tool-sidebar-text) 16%) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: rotate(45deg) !important;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel[open],
+  details.control-group[open],
+  .pool-sub-foldout[open],
+  .tool-foldout[open],
+  .foldout[open]
+) > summary {
+  border-bottom: 1px solid color-mix(in srgb, var(--tool-sidebar-accent) 26%, transparent) !important;
+  background: color-mix(in srgb, var(--tool-sidebar-accent) 8%, transparent) !important;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel[open],
+  details.control-group[open],
+  .pool-sub-foldout[open],
+  .tool-foldout[open],
+  .foldout[open]
+) > summary::after {
+  transform: translateY(3px) rotate(225deg) !important;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+) > summary :where(.summary-title, .eyebrow, label, strong) {
+  min-width: 0;
+  color: var(--tool-sidebar-text) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+) > summary :where(.summary-meta, .muted, small, p) {
+  min-width: 0;
+  color: var(--tool-sidebar-muted) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body[data-dashboard-theme] :where(
+  details.sidebar-panel,
+  details.control-group,
+  .pool-sub-foldout,
+  .tool-foldout,
+  .foldout
+)[open] > summary ~ * {
+  max-height: none !important;
+  opacity: 1 !important;
+}
+
+body[data-dashboard-theme] :where(.sidebar, .tool-sidebar) :where(input, textarea, select, button, .btn, .button),
+body[data-dashboard-theme] :where(.left-rail, .right-rail, .left, .right, #sidebar, aside.panel) :where(input, textarea, select, button, .btn, .button) {
+  max-width: 100%;
+}
+
+@media (max-width: 800px) {
+  body[data-dashboard-theme] {
+    overflow-y: auto !important;
+  }
+
+  .tool-layout,
+  body[data-dashboard-theme] .tool-layout {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+
+  .sidebar,
+  .tool-sidebar,
+  body[data-dashboard-theme] :where(.tool-layout > .sidebar, .tool-shell > .tool-sidebar) {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: 52vh !important;
+    flex-basis: auto !important;
+  }
+
+  body[data-dashboard-theme] :where(
+    details.sidebar-panel,
+    details.control-group,
+    .pool-sub-foldout,
+    .tool-foldout,
+    .foldout
+  ) > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  body[data-dashboard-theme] :where(
+    details.sidebar-panel,
+    details.control-group,
+    .pool-sub-foldout,
+    .tool-foldout,
+    .foldout
+  ) > summary :where(.summary-meta, .muted, small, p) {
+    grid-column: 1 / -1;
+  }
+}

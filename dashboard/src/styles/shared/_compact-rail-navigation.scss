@@ -1,0 +1,130 @@
+// The compact rail is an intentional labelled navigation mode, not an
+// icon-only fallback. Keeping the labels in the document flow makes every
+// available section discoverable without relying on hover tooltips.
+@media (min-width: 981px) {
+  body:not(.studio-rail-expanded) :is(.server-rail, .side-nav) {
+    padding: 0 !important;
+    gap: 0 !important;
+    background:
+      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--rail-sidebar-accent) 12%, transparent), transparent 32%),
+      linear-gradient(180deg, color-mix(in srgb, var(--rail-sidebar-bg) 96%, black 4%), var(--rail-sidebar-bg)) !important;
+  }
+
+  body:not(.studio-rail-expanded) :is(.rail-home-wrap, .rail-studio-workflows, .rail-tools-categories, .rail-resource-sections, .rail-bottom) {
+    width: 100% !important;
+    gap: 0 !important;
+    border: 0 !important;
+  }
+
+  body:not(.studio-rail-expanded) :is(.rail-nav-button, .rail-settings-button, .rail-resource-section-button) {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 62px !important;
+    padding: 7px 4px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 26px minmax(12px, auto) !important;
+    grid-auto-flow: row !important;
+    justify-items: center !important;
+    align-content: center !important;
+    gap: 3px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 68%, transparent) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: color-mix(in srgb, var(--ink) 80%, var(--muted) 20%) !important;
+    transform: none !important;
+  }
+
+  body:not(.studio-rail-expanded) :is(.rail-nav-button, .rail-settings-button, .rail-resource-section-button):is(:hover, .active, .active-focus, [aria-pressed="true"]) {
+    background: transparent !important;
+    box-shadow: inset 2px 0 0 var(--rail-nav-color, var(--rail-sidebar-accent)) !important;
+    color: var(--rail-nav-color, var(--ink)) !important;
+  }
+
+  body:not(.studio-rail-expanded) :is(.rail-home-mark, .rail-tools-category-icon, .rail-studio-workflow-icon, .rail-resource-section-icon, .rail-settings-button > span:first-child) {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 0 !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body:not(.studio-rail-expanded) :is(.rail-home-label, .rail-profile-label, .rail-tools-label, .rail-blender-addons-label, .rail-assets-label, .rail-studio-workflow-label, .rail-tools-category-label, .rail-resource-section-label, .rail-blender-addon-label, .rail-asset-label, .rail-bottom-label) {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 76px !important;
+    max-height: 25px !important;
+    overflow: hidden !important;
+    color: currentColor !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.12 !important;
+    text-align: center !important;
+    text-transform: none !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+
+  body:not(.studio-rail-expanded) :is(.rail-home-label.dashboard-wordmark, .rail-resource-section-sub, .rail-blender-addon-sub, .rail-tools-category-count) {
+    display: none !important;
+  }
+
+  body:not(.studio-rail-expanded) .rail-app-button {
+    min-height: 78px !important;
+  }
+
+  body:not(.studio-rail-expanded) .rail-app-button .rail-home-mark {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body:not(.studio-rail-expanded) .rail-app-button .rail-home-mark-logo {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  body:not(.studio-rail-expanded) .rail-theme-switcher {
+    width: 100% !important;
+    padding: 8px 4px !important;
+    border: 0 !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 68%, transparent) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body:not(.studio-rail-expanded) .rail-theme-picker {
+    width: 100% !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--rail-sidebar-border) 68%, transparent) !important;
+  }
+
+  body:not(.studio-rail-expanded) .rail-theme-picker-summary {
+    min-height: 54px;
+    display: grid;
+    grid-template-columns: 1fr;
+    place-items: center;
+    gap: 3px;
+    color: color-mix(in srgb, var(--ink) 82%, var(--muted) 18%);
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: 800;
+    list-style: none;
+  }
+
+  body:not(.studio-rail-expanded) .rail-theme-picker-summary::-webkit-details-marker,
+  body:not(.studio-rail-expanded) .rail-theme-picker-chevron {
+    display: none;
+  }
+
+  body:not(.studio-rail-expanded) .rail-theme-picker:not([open]) .rail-theme-switcher {
+    display: none !important;
+  }
+}

@@ -1,0 +1,300 @@
+  @media (max-width: 1520px) {
+
+    .ask-rod-workspace,
+    .model3d-studio-workspace,
+    .image-studio-workspace,
+    .audio-studio-workspace,
+    .music-studio-workspace,
+    .video-studio-workspace {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      height: auto;
+      align-items: start;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-studio-workspace {
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-studio-main,
+    body.view-ai-active #model3d-studio-card .model3d-studio-side {
+      flex: 0 0 auto;
+      height: auto;
+    }
+
+    body.view-ai-active #model3d-studio-card {
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-studio-workspace {
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-studio-main {
+      flex: 1 1 auto;
+      min-height: 0;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .model3d-generation-grid,
+    .image-studio-option-grid,
+    .image-workflow-input-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .studio-card-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ask-rod-side,
+    .model3d-studio-side,
+    .image-studio-side,
+    .audio-studio-side,
+    .music-studio-side,
+    .video-studio-side {
+      overflow: visible;
+      padding-right: 0;
+      padding-left: 0;
+      border-left: 0;
+      border-radius: 0;
+      background: transparent;
+      height: auto;
+    }
+
+    body.studio-workflow-focused .model3d-studio-main {
+      display: flex;
+      flex-direction: column;
+      grid-template-rows: none;
+    }
+
+    body.studio-workflow-focused .model3d-studio-panel.active {
+      overflow: visible;
+      padding-right: 0;
+    }
+  }
+
+  @media (max-width: 1820px) {
+    body.view-ai-active.studio-right-sidebar-active .model3d-generation-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 1500px) {
+    body.view-ai-active #model3d-studio-card .model3d-main-threejs-panel {
+      min-height: calc(clamp(300px, 32vh, 420px) + 310px);
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-main-viewer-shell {
+      grid-template-columns: 1fr;
+      grid-template-rows: clamp(300px, 32vh, 420px) auto auto;
+      min-height: calc(clamp(300px, 32vh, 420px) + 220px);
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-canvas-stage {
+      grid-column: 1;
+      grid-row: 1;
+      height: clamp(300px, 32vh, 420px);
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-viewer-flyout {
+      grid-column: 1;
+      grid-row: 2;
+      max-height: none;
+      overflow: visible;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-viewer-overlay {
+      grid-column: 1;
+      grid-row: 3;
+    }
+  }
+
+  @media (max-width: 1180px) {
+
+    .ask-rod-workspace,
+    .studio-workflow-layout,
+    .model3d-studio-workspace,
+    .image-studio-workspace,
+    .audio-studio-workspace,
+    .music-studio-workspace,
+    .video-studio-workspace {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .studio-workflow-side-resizer {
+      display: none;
+    }
+
+    .studio-workflow-settings-footer {
+      align-items: center;
+      flex-direction: row;
+      gap: 6px;
+      padding: 6px 8px;
+    }
+
+    .studio-workflow-settings-footer-copy {
+      flex: 0 0 auto;
+      gap: 6px;
+    }
+
+    .studio-workflow-settings-footer-hint {
+      display: none;
+    }
+
+    .studio-workflow-settings-footer-actions {
+      width: auto;
+      justify-content: flex-start;
+    }
+
+    .studio-workflow-settings-button {
+      flex: 0 0 auto;
+      justify-content: center;
+    }
+
+    .ask-rod-composer .studio-prompt-presets,
+    .image-prompt-card .studio-prompt-presets {
+      grid-template-columns: 1fr;
+    }
+
+    .model3d-image-upload-button {
+      min-height: 132px;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-main-threejs-panel {
+      grid-template-rows: auto minmax(280px, 1fr) auto;
+      min-height: 760px;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-main-viewer-shell {
+      min-height: 560px;
+      grid-template-columns: 1fr;
+      grid-template-rows: minmax(260px, 1fr) auto auto;
+      max-height: none;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-canvas-stage {
+      height: 280px;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-viewer-flyout {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    body.view-ai-active #model3d-studio-card .model3d-preview-quick-actions {
+      grid-template-columns: 1fr;
+    }
+
+    body.view-ai-active #audio-studio-card .audio-studio-prompt-card,
+    body.view-ai-active #audio-studio-card .audio-option-row,
+    body.view-ai-active #audio-studio-card .audio-studio-lower-grid,
+    body.view-ai-active #music-studio-card .music-option-row {
+      grid-template-columns: 1fr;
+    }
+
+    body.view-ai-active #audio-studio-card .audio-action-stack {
+      padding-top: 0;
+    }
+
+    .model3d-preview-actions button {
+      flex-basis: 140px;
+    }
+
+    .model3d-edit-grid,
+    .model3d-source-item {
+      grid-template-columns: 1fr;
+    }
+
+    .model3d-source-item-thumb-wrap {
+      width: 100%;
+      height: 140px;
+    }
+
+    .model3d-viewer-flyout {
+      grid-column: 1;
+      grid-row: 2;
+      width: 100%;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-height: none;
+    }
+
+    .model3d-viewer-overlay {
+      position: static;
+      grid-column: 1;
+      grid-row: 3;
+      right: 12px;
+      bottom: 12px;
+    }
+  }
+
+  @media (max-width: 760px) {
+
+    body.view-ai-active #image-studio-card .studio-card-header,
+    body.view-ai-active #model3d-card .studio-card-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    body.view-ai-active #image-studio-card .image-studio-preview-tools {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    body.view-ai-active #imagegen-preview,
+    body.view-ai-active #image-preview-reveal {
+      min-height: clamp(210px, 34vh, 360px);
+      max-height: 420px;
+      padding: 8px;
+    }
+
+    body.view-ai-active #image-studio-card .image-studio-preview-panel.has-workflow-size #imagegen-preview,
+    body.view-ai-active #image-studio-card .image-studio-preview-panel.has-workflow-size #image-preview-reveal {
+      min-height: 0;
+      padding: 0;
+    }
+
+    body.view-ai-active #image-studio-card .studio-prompt-presets,
+    .ask-rod-composer .studio-prompt-presets,
+    .image-prompt-card .studio-prompt-presets,
+    .image-prompt-presets-foldout .studio-prompt-presets,
+    .image-studio-option-grid,
+    .image-workflow-input-grid,
+    .model3d-generation-grid,
+    .model3d-three-viewer-layout,
+    .model3d-three-metadata-grid,
+    .model3d-three-action-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .image-studio-option-grid>.field,
+    .image-workflow-input-grid>.field,
+    .studio-step-card {
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    .image-studio-preview-panel,
+    body.view-ai-active #image-studio-card .image-studio-preview-panel {
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    .image-generation-controls-summary .hint {
+      display: none;
+    }
+
+    .studio-workflow-settings-footer-actions {
+      display: flex;
+    }
+  }

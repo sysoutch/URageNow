@@ -1,0 +1,9 @@
+{
+  "suite": "3dsmax",
+  "displayName": "3ds Max",
+  "scripts": [
+    {"id": "scene-report", "path": "scene/scene_report.ms", "title": "Scene Report", "kind": "maxscript"},
+    {"id": "reset-selected-xform", "path": "transform/reset_selected_xform.ms", "title": "Reset Selected XForm", "kind": "maxscript"},
+    {"id": "export-selected-fbx", "path": "export/export_selected_fbx.ms", "title": "Export Selected FBX", "kind": "maxscript"}
+  ]
+}

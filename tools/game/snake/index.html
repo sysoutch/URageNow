@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Snake - AI Mode</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background-color: #1a1a2e; color: white; font-family: 'Segoe UI', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+        }
+        .game-container { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 0 30px rgba(0,255,0,0.3); }
+        canvas { background-color: #0a0a1a; display: block; }
+        h1 { margin-bottom: 20px; text-shadow: 0 0 15px #0f0; font-size: 2em; }
+        
+        .controls { 
+            position: absolute; bottom: 10px; left: 10px; right: 10px; 
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px;
+        }
+        
+        .ui-panel { display: flex; gap: 40px; margin-top: 15px; font-size: 16px; }
+        button { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 5px;}
+        button:hover { background: #45a049; }
+        button.ai-mode { background: #2196F3; }
+        button.ai-mode.active { background: #ff9800; box-shadow: 0 0 10px #ff9800; }
+        
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+        .modal h2 { color: #0f0; margin-bottom: 15px; font-size: 24px; }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+    <h1>🐍 SNAKE AI</h1>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        
+        <!-- Start Screen -->
+        <div id="startModal" class="modal">
+            <h2>PRESS ANY ARROW KEY TO START</h2>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverModal" class="modal" style="display: none;">
+            <h2 style="color: red;">GAME OVER</h2>
+            <p style="font-size: 18px; margin-bottom: 15px;">Score: <span id="finalScore">0</span></p>
+            <button onclick="resetGame()">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <div class="ui-panel">
+        <span>🏆 High Score: <b id="highScore">0</b></span>
+        <span>📊 Score: <b id="scoreBoard">0</b></span>
+        <span>⚡ Speed: <b id="speedDisplay">1x</b></span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button onclick="toggleAI()" id="aiBtn" class="ai-mode">🤖 AI MODE: OFF</button>
+		<button onclick="cycleAI()" id="modeBtn">MODE: BALANCED</button>
+        <span style="font-size: 12px; color: #aaa;">Use Arrow Keys or Toggle AI</span>
+    </div>
+
+    <script>
+	const canvas = document.getElementById('gameCanvas');
+	const ctx = canvas.getContext('2d');
+
+	const TILE_COUNT = 20;
+	const GRID_SIZE = 20;
+
+	let state = {
+		snake: [],
+		food: null,
+		direction: 'right',
+		nextDirection: 'right',
+		score: 0,
+		highScore: parseInt(localStorage.getItem('snakeHigh')) || 0,
+		speedLevel: 1,
+		isRunning: false,
+		lastTime: 0,
+		timeAccumulator: 0,
+		aiMode: false,
+		aiType: 'balanced' // NEW: greedy | safe | survival | balanced
+	};
+
+	function init() {
+		state.snake = [];
+		for (let i = 0; i < 5; i++) {
+			state.snake.push({ x: 10 - i, y: 10 });
+		}
+		state.food = spawnFood();
+		state.score = 0;
+		state.speedLevel = 1;
+		generateHamiltonianCycle();
+		updateUI();
+	}
+
+	function perfectMove() {
+		const head = state.snake[0];
+		const tail = state.snake[state.snake.length - 1];
+
+		const headIndex = getCycleIndex(head);
+		const tailIndex = getCycleIndex(tail);
+		const foodIndex = getCycleIndex(state.food);
+
+		// distance along cycle
+		const distToFood = cycleDistance(headIndex, foodIndex);
+		const distToTail = cycleDistance(headIndex, tailIndex);
+
+		// 👉 only allow shortcut if food is before tail in cycle
+		const canShortcut = distToFood < distToTail || distToFood < 10;
+
+		if (canShortcut) {
+			const move = shortestPathMoveToFood();
+			if (move) return move;
+		}
+
+		// fallback: follow cycle
+		return followCycle();
+	}
+
+	function getCycleIndex(pos) {
+		return hamiltonianPath.findIndex(p => p.x === pos.x && p.y === pos.y);
+	}
+
+	function cycleDistance(from, to) {
+		if (to >= from) return to - from;
+		return hamiltonianPath.length - from + to;
+	}
+
+	function followCycle() {
+		const head = state.snake[0];
+		const index = getCycleIndex(head);
+		const next = hamiltonianPath[(index + 1) % hamiltonianPath.length];
+		return directionTo(head, next);
+	}
+
+	function shortestPathMoveToFood() {
+		const moves = getSafeMoves();
+
+		let bestMove = null;
+		let bestScore = -Infinity;
+
+		for (const m of moves) {
+			const sim = simulateMove(m);
+			if (!sim) continue;
+
+			const dist = bfsDistance(sim.head, state.food, sim.snake);
+			if (dist === Infinity) continue;
+
+			const space = floodFill(sim.head, sim.snake);
+
+			const tailReachable =
+				bfsDistance(sim.head, sim.snake[sim.snake.length - 1], sim.snake) !== Infinity;
+
+			// 🧠 NEW: small lookahead
+			const futureSafe = simulateFuture(sim.snake, 3);
+
+			let score = 0;
+
+			score += (50 - dist) * 3;   // strongly prefer closer food
+			score += space;             // prefer open area
+
+			if (!tailReachable) score -= 1000;
+			if (!futureSafe) score -= 1500;
+
+			// 🚫 only mildly discourage breaking cycle (NOT block it)
+			const newHeadIdx = getCycleIndex(sim.head);
+			const tailIdx = getCycleIndex(sim.snake[sim.snake.length - 1]);
+			const cycleGap = cycleDistance(newHeadIdx, tailIdx);
+
+			if (cycleGap < 3) score -= 500; // only punish dangerous cuts
+
+			if (score > bestScore) {
+				bestScore = score;
+				bestMove = m;
+			}
+		}
+
+		return bestMove;
+	}
+	
+	function directionTo(from, to) {
+		if (to.x === (from.x + 1) % TILE_COUNT) return 'right';
+		if (to.x === (from.x - 1 + TILE_COUNT) % TILE_COUNT) return 'left';
+		if (to.y === (from.y + 1) % TILE_COUNT) return 'down';
+		if (to.y === (from.y - 1 + TILE_COUNT) % TILE_COUNT) return 'up';
+	}
+	
+	function spawnFood() {
+		let food;
+		while (true) {
+			food = {
+				x: Math.floor(Math.random() * TILE_COUNT),
+				y: Math.floor(Math.random() * TILE_COUNT)
+			};
+			if (!state.snake.some(s => s.x === food.x && s.y === food.y)) break;
+		}
+		return food;
+	}
+
+	function startGame() {
+		state.isRunning = true;
+		document.getElementById('startModal').style.display = 'none';
+		document.getElementById('gameOverModal').style.display = 'none';
+		state.lastTime = performance.now();
+		requestAnimationFrame(gameLoop);
+	}
+
+	function gameOver() {
+		state.isRunning = false;
+		if (state.score > state.highScore) {
+			state.highScore = state.score;
+			localStorage.setItem('snakeHigh', state.highScore);
+			document.getElementById('highScore').textContent = state.highScore;
+		}
+		document.getElementById('finalScore').textContent = state.score;
+		document.getElementById('gameOverModal').style.display = 'flex';
+	}
+
+	function gameLoop(ts) {
+		if (!state.isRunning) return;
+
+		const dt = ts - state.lastTime;
+		state.lastTime = ts;
+
+		const speeds = [100,95,90,85,80,75,70,65,60,55,50];
+		const interval = speeds[Math.min(state.speedLevel - 1, speeds.length - 1)];
+
+		state.timeAccumulator += dt;
+
+		if (state.timeAccumulator >= interval) {
+			gameLogic();
+			state.timeAccumulator -= interval;
+		}
+
+		draw();
+		requestAnimationFrame(gameLoop);
+	}
+
+	//// 🧠 AI SYSTEM ////
+
+	function getAIMove() {
+		if (!state.aiMode) return null;
+
+		switch (state.aiType) {
+			case 'greedy': return greedyMove();
+			case 'safe': return safeMove();
+			case 'survival': return followTail();
+			case 'balanced': return balancedMove();
+			case 'perfect': return perfectMove();
+		}
+	}
+
+	// --- GREEDY (original style) ---
+	function greedyMove() {
+		const moves = getSafeMoves();
+		let best = moves[0];
+		let bestDist = Infinity;
+
+		for (const m of moves) {
+			const sim = simulateMove(m);
+			const dist = bfsDistance(sim.head, state.food, sim.snake);
+			if (dist < bestDist) {
+				bestDist = dist;
+				best = m;
+			}
+		}
+		return best;
+	}
+
+	// --- SAFE ---
+	function safeMove() {
+		return scoredMove({ spaceWeight: 2, foodWeight: 1, survivalWeight: 1000 });
+	}
+
+	// --- BALANCED ---
+	function balancedMove() {
+		return scoredMove({ spaceWeight: 1.5, foodWeight: 2, survivalWeight: 800 });
+	}
+
+	// --- CORE SCORING ---
+	function scoredMove(weights) {
+		const moves = getSafeMoves();
+		let bestMove = null;
+		let bestScore = -Infinity;
+
+		for (const move of moves) {
+			const sim = simulateMove(move);
+			if (!sim) continue;
+
+			// 🔮 Lookahead (simulate future)
+			const survivalDepth = simulateFuture(sim.snake, 4);
+
+			const dist = bfsDistance(sim.head, state.food, sim.snake);
+			const space = floodFill(sim.head, sim.snake);
+
+			const tailReachable =
+				bfsDistance(sim.head, sim.snake[sim.snake.length - 1], sim.snake) !== Infinity;
+
+			let score = 0;
+
+			// 🚫 punish future death
+			if (!survivalDepth) score -= 2000;
+
+			// 🚫 punish no tail access
+			if (!tailReachable) score -= weights.survivalWeight;
+
+			// 🧠 prefer space
+			score += space * weights.spaceWeight;
+
+			// 🍎 food attraction
+			if (dist !== Infinity) score += (50 - dist) * weights.foodWeight;
+
+			// 🚫 discourage wrapping unless needed
+			if (isWrapMove(state.snake[0], move)) {
+				score -= 15;
+			}
+
+			if (score > bestScore) {
+				bestScore = score;
+				bestMove = move;
+			}
+		}
+
+		return bestMove || followTail();
+	}
+	
+	function simulateFuture(snake, depth) {
+		let testSnake = JSON.parse(JSON.stringify(snake));
+
+		for (let i = 0; i < depth; i++) {
+			const moves = getFutureSafeMoves(testSnake);
+			if (moves.length === 0) return false;
+
+			// pick safest move (max space)
+			let bestMove = moves[0];
+			let bestSpace = -1;
+
+			for (const m of moves) {
+				const sim = simulateFutureMove(testSnake, m);
+				const space = floodFill(sim.head, sim.snake);
+
+				if (space > bestSpace) {
+					bestSpace = space;
+					bestMove = m;
+				}
+			}
+
+			const result = simulateFutureMove(testSnake, bestMove);
+			testSnake = result.snake;
+		}
+
+		return true;
+	}
+	
+	function getFutureSafeMoves(snake) {
+		const head = snake[0];
+		const moves = ['up','down','left','right'];
+
+		return moves.filter(move => {
+			const sim = simulateFutureMove(snake, move);
+			return sim !== null;
+		});
+	}
+
+	function simulateFutureMove(snake, move) {
+		const newSnake = JSON.parse(JSON.stringify(snake));
+		const head = { ...newSnake[0] };
+
+		if (move === 'up') head.y--;
+		if (move === 'down') head.y++;
+		if (move === 'left') head.x--;
+		if (move === 'right') head.x++;
+
+		if (head.x < 0) head.x = TILE_COUNT - 1;
+		if (head.x >= TILE_COUNT) head.x = 0;
+		if (head.y < 0) head.y = TILE_COUNT - 1;
+		if (head.y >= TILE_COUNT) head.y = 0;
+
+		if (newSnake.some(s => s.x === head.x && s.y === head.y)) return null;
+
+		newSnake.unshift(head);
+		newSnake.pop();
+
+		return { head, snake: newSnake };
+	}
+
+	function isWrapMove(head, move) {
+		if (move === 'left' && head.x === 0) return true;
+		if (move === 'right' && head.x === TILE_COUNT - 1) return true;
+		if (move === 'up' && head.y === 0) return true;
+		if (move === 'down' && head.y === TILE_COUNT - 1) return true;
+		return false;
+	}
+
+	// --- HELPERS ---
+	function getSafeMoves() {
+		const head = state.snake[0];
+		const moves = ['up','down','left','right'];
+		const opposite = { up:'down', down:'up', left:'right', right:'left' };
+
+		return moves.filter(move => {
+			if (opposite[state.direction] === move) return false;
+			const sim = simulateMove(move);
+			return sim !== null;
+		});
+	}
+
+	function simulateMove(move) {
+		const snake = JSON.parse(JSON.stringify(state.snake));
+		const head = { ...snake[0] };
+
+		if (move === 'up') head.y--;
+		if (move === 'down') head.y++;
+		if (move === 'left') head.x--;
+		if (move === 'right') head.x++;
+
+		if (head.x < 0) head.x = TILE_COUNT - 1;
+		if (head.x >= TILE_COUNT) head.x = 0;
+		if (head.y < 0) head.y = TILE_COUNT - 1;
+		if (head.y >= TILE_COUNT) head.y = 0;
+
+		if (snake.some(s => s.x === head.x && s.y === head.y)) return null;
+
+		snake.unshift(head);
+
+		if (!(head.x === state.food.x && head.y === state.food.y)) {
+			snake.pop();
+		}
+
+		return { head, snake };
+	}
+
+	function bfsDistance(start, target, snake) {
+		let queue = [{ ...start, dist: 0 }];
+		let visited = new Set([`${start.x},${start.y}`]);
+
+		while (queue.length) {
+			const cur = queue.shift();
+			if (cur.x === target.x && cur.y === target.y) return cur.dist;
+
+			const dirs = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
+
+			for (const d of dirs) {
+				let nx = cur.x + d.x;
+				let ny = cur.y + d.y;
+
+				if (nx < 0) nx = TILE_COUNT - 1;
+				if (nx >= TILE_COUNT) nx = 0;
+				if (ny < 0) ny = TILE_COUNT - 1;
+				if (ny >= TILE_COUNT) ny = 0;
+
+				const key = `${nx},${ny}`;
+				if (visited.has(key)) continue;
+
+				if (!snake.some(s => s.x === nx && s.y === ny)) {
+					visited.add(key);
+					queue.push({ x: nx, y: ny, dist: cur.dist + 1 });
+				}
+			}
+		}
+
+		return Infinity;
+	}
+
+	function floodFill(start, snake) {
+		let visited = new Set();
+		let queue = [start];
+		let count = 0;
+
+		while (queue.length) {
+			const { x, y } = queue.shift();
+			const key = `${x},${y}`;
+			if (visited.has(key)) continue;
+			if (snake.some(s => s.x === x && s.y === y)) continue;
+
+			visited.add(key);
+			count++;
+
+			const dirs = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
+
+			for (const d of dirs) {
+				let nx = x + d.x;
+				let ny = y + d.y;
+
+				if (nx < 0) nx = TILE_COUNT - 1;
+				if (nx >= TILE_COUNT) nx = 0;
+				if (ny < 0) ny = TILE_COUNT - 1;
+				if (ny >= TILE_COUNT) ny = 0;
+
+				queue.push({x:nx,y:ny});
+			}
+		}
+		return count;
+	}
+
+	// --- SURVIVAL ---
+	function followTail() {
+		const tail = state.snake[state.snake.length - 1];
+		const moves = getSafeMoves();
+
+		let bestMove = null;
+		let bestScore = -Infinity;
+
+		for (const m of moves) {
+			const sim = simulateMove(m);
+			if (!sim) continue;
+
+			const dist = bfsDistance(sim.head, tail, sim.snake);
+			const space = floodFill(sim.head, sim.snake);
+
+			let score = 0;
+
+			// prefer tail following
+			score += (50 - dist);
+
+			// strongly prefer large open areas
+			score += space * 3;
+
+			// avoid wrap traps
+			if (isWrapMove(state.snake[0], m)) score -= 20;
+
+			if (score > bestScore) {
+				bestScore = score;
+				bestMove = m;
+			}
+		}
+
+		return bestMove;
+	}
+
+	//// GAME LOGIC ////
+
+	function gameLogic() {
+		let nextDir = state.nextDirection;
+
+		if (state.aiMode) {
+			const aiMove = getAIMove();
+			if (aiMove) nextDir = aiMove;
+		}
+
+		const opposite = { up:'down', down:'up', left:'right', right:'left' };
+		if (opposite[state.direction] !== nextDir) {
+			state.direction = nextDir;
+		}
+
+		const head = { ...state.snake[0] };
+
+		if (state.direction === 'up') head.y--;
+		if (state.direction === 'down') head.y++;
+		if (state.direction === 'left') head.x--;
+		if (state.direction === 'right') head.x++;
+
+		if (head.x < 0) head.x = TILE_COUNT - 1;
+		if (head.x >= TILE_COUNT) head.x = 0;
+		if (head.y < 0) head.y = TILE_COUNT - 1;
+		if (head.y >= TILE_COUNT) head.y = 0;
+
+		if (state.snake.some(s => s.x === head.x && s.y === head.y)) {
+			gameOver();
+			return;
+		}
+
+		state.snake.unshift(head);
+
+		if (head.x === state.food.x && head.y === state.food.y) {
+			state.score += 10;
+			state.food = spawnFood();
+		} else {
+			state.snake.pop();
+		}
+
+		updateUI();
+	}
+
+	//// UI ////
+
+	function toggleAI() {
+		state.aiMode = !state.aiMode;
+		updateUI();
+	}
+
+	function cycleAI() {
+		const modes = ['greedy','safe','balanced','survival','perfect'];
+		let i = modes.indexOf(state.aiType);
+		state.aiType = modes[(i + 1) % modes.length];
+		updateUI();
+	}
+	
+	let hamiltonianPath = [];
+
+	function generateHamiltonianCycle() {
+		hamiltonianPath = [];
+
+		for (let y = 0; y < TILE_COUNT; y++) {
+			if (y % 2 === 0) {
+				for (let x = 0; x < TILE_COUNT; x++) {
+					hamiltonianPath.push({ x, y });
+				}
+			} else {
+				for (let x = TILE_COUNT - 1; x >= 0; x--) {
+					hamiltonianPath.push({ x, y });
+				}
+			}
+		}
+	}
+	
+	function draw() {
+		ctx.fillStyle = '#0a0a1a';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		// Grid
+		ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+		for (let i = 0; i <= TILE_COUNT; i++) {
+			ctx.beginPath();
+			ctx.moveTo(i * GRID_SIZE, 0);
+			ctx.lineTo(i * GRID_SIZE, canvas.height);
+			ctx.stroke();
+
+			ctx.beginPath();
+			ctx.moveTo(0, i * GRID_SIZE);
+			ctx.lineTo(canvas.width, i * GRID_SIZE);
+			ctx.stroke();
+		}
+
+		// Snake
+		state.snake.forEach((seg, idx) => {
+			const x = seg.x * GRID_SIZE;
+			const y = seg.y * GRID_SIZE;
+
+			ctx.fillStyle = idx === 0
+				? '#0f0'
+				: `rgba(0, ${Math.floor(255*(1-idx/(state.snake.length+5)))}, 68, 1)`;
+
+			ctx.fillRect(x + 2, y + 2, GRID_SIZE - 4, GRID_SIZE - 4);
+
+			// Eyes
+			if (idx === 0) {
+				ctx.fillStyle = '#fff';
+				if (state.direction === 'up') {
+					ctx.fillRect(x+6,y+2,4,4);
+					ctx.fillRect(x+10,y+2,4,4);
+				}
+				if (state.direction === 'down') {
+					ctx.fillRect(x+6,y+12,4,4);
+					ctx.fillRect(x+10,y+12,4,4);
+				}
+				if (state.direction === 'left') {
+					ctx.fillRect(x+2,y+8,4,4);
+					ctx.fillRect(x+2,y+12,4,4);
+				}
+				if (state.direction === 'right') {
+					ctx.fillRect(x+12,y+8,4,4);
+					ctx.fillRect(x+12,y+12,4,4);
+				}
+			}
+		});
+
+		// Food
+		if (state.food) {
+			ctx.fillStyle = '#f0f';
+			ctx.fillRect(
+				state.food.x * GRID_SIZE + 2,
+				state.food.y * GRID_SIZE + 2,
+				GRID_SIZE - 4,
+				GRID_SIZE - 4
+			);
+		}
+		
+		if (state.aiMode) {
+
+			if (state.aiType === 'perfect') {
+				ctx.strokeStyle = 'rgba(0,150,255,0.2)';
+				ctx.beginPath();
+
+				hamiltonianPath.forEach((p, i) => {
+					const x = p.x * GRID_SIZE + GRID_SIZE/2;
+					const y = p.y * GRID_SIZE + GRID_SIZE/2;
+
+					if (i === 0) ctx.moveTo(x, y);
+					else ctx.lineTo(x, y);
+				});
+
+				ctx.stroke();
+			} else {
+				ctx.fillStyle = 'rgba(0,255,255,0.15)';
+
+				const head = state.snake[0];
+				const visited = new Set();
+				const queue = [head];
+
+				while (queue.length) {
+					const { x, y } = queue.shift();
+					const key = `${x},${y}`;
+					if (visited.has(key)) continue;
+					if (state.snake.some(s => s.x === x && s.y === y)) continue;
+
+					visited.add(key);
+
+					ctx.fillRect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+
+					const dirs = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
+					for (const d of dirs) {
+						let nx = x + d.x;
+						let ny = y + d.y;
+
+						if (nx < 0) nx = TILE_COUNT - 1;
+						if (nx >= TILE_COUNT) nx = 0;
+						if (ny < 0) ny = TILE_COUNT - 1;
+						if (ny >= TILE_COUNT) ny = 0;
+
+						queue.push({x:nx,y:ny});
+					}
+				}
+			}
+		}
+	}
+
+	function updateUI() {
+		document.getElementById('scoreBoard').textContent = state.score;
+
+		const btn = document.getElementById('aiBtn');
+		btn.textContent = state.aiMode ? "🤖 AI: ON" : "🤖 AI: OFF";
+
+		const modeBtn = document.getElementById('modeBtn');
+		if (modeBtn) modeBtn.textContent = "MODE: " + state.aiType.toUpperCase();
+	}
+
+	function resetGame() {
+		init();
+		startGame();
+	}
+
+	document.addEventListener('keydown', e => {
+		if (e.key === 'ArrowUp') state.nextDirection = 'up';
+		if (e.key === 'ArrowDown') state.nextDirection = 'down';
+		if (e.key === 'ArrowLeft') state.nextDirection = 'left';
+		if (e.key === 'ArrowRight') state.nextDirection = 'right';
+		if (!state.isRunning) startGame();
+	});
+
+	init();
+	draw();
+    </script>
+    <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URage Dialogue Engine</title>
+    <script src="../../shared/dashboard-theme.js"></script>
+    <style>
+        :root {
+            --bg: #120d0d;
+            --panel: rgba(24, 14, 14, 0.92);
+            --panel-strong: rgba(18, 11, 11, 0.98);
+            --line: rgba(255, 180, 128, 0.18);
+            --accent: #ff8a4d;
+            --logic-accent: #ffd47c;
+            --text: #f6f1ee;
+            --muted: #c8b6ae;
+        }
+        body[data-dashboard-theme="water"] { --bg: #0d1522; --panel: rgba(12, 21, 37, 0.94); --panel-strong: rgba(10, 17, 29, 0.98); --line: rgba(114, 190, 255, 0.18); --accent: #59b6ff; --logic-accent: #a8e4ff; --text: #eef5ff; --muted: #a9bfd8; }
+        body[data-dashboard-theme="nature"] { --bg: #11170f; --panel: rgba(18, 24, 16, 0.94); --panel-strong: rgba(13, 19, 11, 0.98); --line: rgba(146, 213, 120, 0.18); --accent: #82cd5f; --logic-accent: #dced94; --text: #f2f8ee; --muted: #bccfaf; }
+        body[data-dashboard-theme="rock"] { --bg: #151515; --panel: rgba(24, 24, 24, 0.95); --panel-strong: rgba(16, 16, 16, 0.98); --line: rgba(196, 190, 176, 0.18); --accent: #c4ae8a; --logic-accent: #e5d5b8; --text: #f2efea; --muted: #b7aea2; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column; /* Changed to column for footer support */
+            height: 100vh;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        /* --- Sidebar --- */
+        #sidebar {
+            width: 260px;
+            background: var(--panel);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 800;
+            border-bottom: 1px solid var(--line);
+            background: var(--panel-strong);
+        }
+
+        .var-list { padding: 15px; flex-grow: 1; overflow-y: auto; }
+        .var-item {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        /* --- Main Area --- */
+        #main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        header {
+            padding: 12px 20px;
+            background: var(--panel);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+        }
+
+        #viewport {
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+            background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        #canvas-content {
+            position: absolute;
+            top: 0; left: 0;
+            transform-origin: 0 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #svg-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 10000px; height: 10000px;
+            pointer-events: none;
+        }
+
+        /* --- Nodes --- */
+        .node {
+            position: absolute; width: 240px;
+            background: var(--panel); border: 2px solid var(--line);
+            border-radius: 6px; z-index: 10;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            pointer-events: auto;
+        }
+
+        .node-type-choice { border-style: dashed !important; border-radius: 0px !important; }
+
+        .node-header {
+            background: rgba(255,255,255,0.03); padding: 6px 10px;
+            font-size: 10px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid var(--line); color: var(--muted);
+        }
+
+        .node-content { padding: 10px; }
+        label { font-size: 9px; color: var(--muted); font-weight: bold; display: block; margin-top: 5px; }
+
+        select, textarea, input {
+            width: 100%; background: var(--panel-strong); border: 1px solid var(--line);
+            color: #fff; padding: 6px; border-radius: 4px;
+            font-size: 11px; margin-bottom: 4px; box-sizing: border-box;
+        }
+
+        .logic-field { border-color: var(--logic-accent); color: var(--logic-accent); }
+        textarea { height: 40px; resize: none; }
+
+        /* --- Connectors --- */
+        .dot {
+            width: 14px; height: 14px; background: #444; border-radius: 50%;
+            position: absolute; top: 50%; transform: translateY(-50%);
+            border: 3px solid var(--node-bg); cursor: crosshair;
+        }
+        .out-dot { right: -9px; background: var(--accent); }
+        .in-dot { left: -9px; }
+
+        button {
+            background: var(--panel-strong); color: white; border: 1px solid var(--line);
+            padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;
+        }
+        .btn-add { background: var(--accent); border: none; font-weight: bold; }
+        .btn-export { background: var(--logic-accent); color: #151515; border: none; font-weight: bold; }
+    </style>
+</head>
+<body data-dashboard-theme="fire">
+
+<div class="app-wrapper">
+    <aside id="sidebar">
+        <div class="sidebar-header">VARIABLE MANAGER</div>
+        <div class="var-list" id="varList">
+            </div>
+        <div style="padding:15px; border-top: 1px solid #333;">
+            <button onclick="addVariable()" style="width:100%">+ Add Variable</button>
+        </div>
+    </aside>
+
+    <main id="main">
+        <header>
+            <div><strong>URAGE</strong> ENGINE <span id="zoomDisplay" style="margin-left:15px; color:#666; font-size:12px;">100%</span></div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-add" onclick="addNode()">+ NEW NODE</button>
+                <button class="btn-export" onclick="exportData()">EXPORT ENGINE DATA</button>
+            </div>
+        </header>
+
+        <div id="viewport">
+            <div id="canvas-content">
+                <svg id="svg-layer"></svg>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    window.registerDashboardThemeSync();
+    const characters = [
+        { name: "Protagonist", color: "#00e5ff" },
+        { name: "Antagonist", color: "#ff4d4d" },
+        { name: "System", color: "#ffffff" },
+        { name: "Villager", color: "#4dff4d" }
+    ];
+
+    let nodes = [];
+    let connections = [];
+    let variables = ["gold", "has_key"];
+    let nodeIdCounter = 1;
+    
+    // Zoom/Pan State
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+    let isPanning = false;
+
+    const viewport = document.getElementById('viewport');
+    const content = document.getElementById('canvas-content');
+    const svgLayer = document.getElementById('svg-layer');
+
+    function init() {
+        renderVariables();
+        // Add a sample dialogue tree with actual text
+        addNode(100, 100);
+        addNode(300, 100);
+        addNode(300, 200);
+        addNode(500, 100);
+        
+        // Set properties for the nodes
+        setTimeout(() => {
+            nodes[0].text = "Hello there! What brings you to this village?";
+            nodes[0].character = "Villager";
+            nodes[1].text = "I'm looking for information about the ancient ruins.";
+            nodes[1].character = "Protagonist";
+            nodes[2].type = "choice";
+            nodes[2].text = "What do you know about them?";
+            nodes[2].character = "Villager";
+            nodes[3].text = "They're said to hold great treasures, but also great dangers.";
+            nodes[3].character = "Villager";
+            
+            // Connect the nodes to form a simple tree
+            connections.push({ from: 1, to: 2 });
+            connections.push({ from: 1, to: 3 });
+            connections.push({ from: 2, to: 4 });
+            
+            // Re-render nodes to show all updated fields
+            nodes.forEach(node => {
+                const el = document.getElementById(`node-${node.id}`);
+                if (el) {
+                    // Update all fields in the rendered node
+                    const typeSelect = el.querySelector('select[onchange^="updateNode"]:first-child');
+                    const characterSelect = el.querySelector('select[onchange^="updateNode"]:last-child');
+                    const conditionInput = el.querySelector('input.logic-field');
+                    const actionInput = el.querySelector('input.logic-field:last-child');
+                    const textarea = el.querySelector('textarea');
+                    
+                    if (typeSelect) typeSelect.value = node.type;
+                    if (characterSelect) characterSelect.value = node.character;
+                    if (conditionInput) conditionInput.value = node.condition;
+                    if (actionInput) actionInput.value = node.action;
+                    if (textarea) textarea.value = node.text;
+                }
+            });
+            
+            drawLinks();
+        }, 100);
+        
+        // Mouse Wheel Zoom
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const newScale = Math.min(Math.max(0.2, scale * delta), 2);
+            
+            // Zoom toward mouse position
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            offsetX -= (mouseX / newScale - mouseX / scale) * newScale;
+            offsetY -= (mouseY / newScale - mouseY / scale) * newScale;
+            
+            scale = newScale;
+            updateTransform();
+        }, { passive: false });
+
+        // Middle Mouse Pan
+        viewport.onmousedown = (e) => {
+            if (e.button === 1 || e.target === viewport) {
+                isPanning = true;
+                viewport.style.cursor = 'grabbing';
+            }
+        };
+
+        window.onmousemove = (e) => {
+            if (isPanning) {
+                offsetX += e.movementX;
+                offsetY += e.movementY;
+                updateTransform();
+            }
+            if (draggingNode) {
+                // Dragging must account for scale
+                const x = (e.clientX - dragOffset.x - offsetX) / scale;
+                const y = (e.clientY - dragOffset.y - offsetY) / scale;
+                draggingNode.style.left = x + 'px';
+                draggingNode.style.top = y + 'px';
+                const node = nodes.find(n => n.id === parseInt(draggingNode.id.split('-')[1]));
+                node.x = x; node.y = y;
+                drawLinks();
+            }
+        };
+
+        window.onmouseup = () => {
+            isPanning = false;
+            draggingNode = null;
+            viewport.style.cursor = 'grab';
+        };
+    }
+
+    function updateTransform() {
+        content.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        document.getElementById('zoomDisplay').innerText = Math.round(scale * 100) + "%";
+    }
+
+    function addVariable() {
+        const name = prompt("Variable Name:");
+        if (name) {
+            variables.push(name);
+            renderVariables();
+        }
+    }
+
+    function renderVariables() {
+        const list = document.getElementById('varList');
+        list.innerHTML = variables.map((v, i) => `
+            <div class="var-item">
+                <input value="${v}" onchange="variables[${i}]=this.value" style="margin:0">
+                <button onclick="variables.splice(${i},1);renderVariables()">×</button>
+            </div>
+        `).join('');
+    }
+
+    // --- Node Core Logic ---
+    let draggingNode = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    function addNode(x = 100, y = 100) {
+        const node = { id: nodeIdCounter++, x, y, type: "speech", character: characters[0].name, text: "", condition: "", action: "" };
+        nodes.push(node);
+        renderNode(node);
+    }
+
+    function renderNode(node) {
+        const div = document.createElement('div');
+        div.className = `node node-type-${node.type}`;
+        div.id = `node-${node.id}`;
+        div.style.left = node.x + 'px'; div.style.top = node.y + 'px';
+        div.style.borderColor = characters.find(c => c.name === node.character).color;
+
+        div.innerHTML = `
+            <div class="node-header"><span>#${node.id}</span><span style="cursor:pointer" onclick="removeNode(${node.id})">×</span><span style="cursor:pointer" onclick="duplicateNode(${node.id})" style="margin-left:5px;">⧉</span></div>
+            <div class="node-content">
+                <label>TYPE</label>
+                <select onchange="updateNode(${node.id}, 'type', this.value)">
+                    <option value="speech" ${node.type === 'speech' ? 'selected' : ''}>Speech</option>
+                    <option value="choice" ${node.type === 'choice' ? 'selected' : ''}>Choice</option>
+                </select>
+                <label>CHARACTER</label>
+                <select onchange="updateNode(${node.id}, 'character', this.value)">
+                    ${characters.map(c => `<option value="${c.name}" ${c.name === node.character ? 'selected' : ''}>${c.name}</option>`).join('')}
+                </select>
+                <label>IF (CONDITION)</label>
+                <input type="text" class="logic-field" value="${node.condition}" oninput="updateNode(${node.id}, 'condition', this.value)">
+                <textarea oninput="updateNode(${node.id}, 'text', this.value)" placeholder="Text...">${node.text}</textarea>
+                <label>SET (ACTION)</label>
+                <input type="text" class="logic-field" value="${node.action}" oninput="updateNode(${node.id}, 'action', this.value)">
+            </div>
+            <div class="dot in-dot"></div><div class="dot out-dot" onmousedown="initLink(event, ${node.id})"></div>
+        `;
+
+        div.onmousedown = (e) => {
+            if (e.target.closest('.dot') || ['SELECT', 'TEXTAREA', 'INPUT'].includes(e.target.tagName)) return;
+            draggingNode = div;
+            dragOffset.x = e.clientX - (div.offsetLeft * scale + offsetX);
+            dragOffset.y = e.clientY - (div.offsetTop * scale + offsetY);
+        };
+        content.appendChild(div);
+    }
+
+    function updateNode(id, field, value) {
+        const node = nodes.find(n => n.id === id);
+        node[field] = value;
+        const el = document.getElementById(`node-${id}`);
+        if (field === 'type') el.className = `node node-type-${value}`;
+        if (field === 'character') el.style.borderColor = characters.find(c => c.name === value).color;
+        drawLinks();
+    }
+
+    function initLink(e, fromId) {
+        e.stopPropagation();
+        const onLinkEnd = (ev) => {
+            const targetIn = ev.target.closest('.in-dot');
+            if (targetIn) {
+                const toId = parseInt(targetIn.parentElement.id.split('-')[1]);
+                if (fromId !== toId) { connections.push({ from: fromId, to: toId }); drawLinks(); }
+            }
+            window.removeEventListener('mouseup', onLinkEnd);
+        };
+        window.addEventListener('mouseup', onLinkEnd);
+    }
+
+    function drawLinks() {
+        svgLayer.innerHTML = '';
+        connections.forEach(c => {
+            const n1 = document.getElementById(`node-${c.from}`);
+            const n2 = document.getElementById(`node-${c.to}`);
+            if (!n1 || !n2) return;
+            const x1 = n1.offsetLeft + 240, y1 = n1.offsetTop + (n1.offsetHeight/2);
+            const x2 = n2.offsetLeft, y2 = n2.offsetTop + (n2.offsetHeight/2);
+            const color = characters.find(chr => chr.name === nodes.find(n => n.id === c.from).character).color;
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 50} ${y1}, ${x2 - 50} ${y2}, ${x2} ${y2}`);
+            path.setAttribute("stroke", color); path.setAttribute("stroke-width", "3"); path.setAttribute("fill", "none");
+            svgLayer.appendChild(path);
+        });
+    }
+
+    function removeNode(id) {
+        nodes = nodes.filter(n => n.id !== id);
+        connections = connections.filter(c => c.from !== id && c.to !== id);
+        document.getElementById(`node-${id}`).remove();
+        drawLinks();
+    }
+
+    function duplicateNode(id) {
+        const nodeToDuplicate = nodes.find(n => n.id === id);
+        if (nodeToDuplicate) {
+            // Create a new node with incremented ID and slightly offset position
+            const newNode = { 
+                id: nodeIdCounter++, 
+                x: nodeToDuplicate.x + 30, 
+                y: nodeToDuplicate.y + 30, 
+                type: nodeToDuplicate.type,
+                character: nodeToDuplicate.character,
+                text: nodeToDuplicate.text,
+                condition: nodeToDuplicate.condition,
+                action: nodeToDuplicate.action
+            };
+            nodes.push(newNode);
+            renderNode(newNode);
+        }
+    }
+
+    function exportData() {
+        const blob = new Blob([JSON.stringify({ variables, nodes, connections }, null, 2)], {type : 'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'urage_engine_data.json'; a.click();
+    }
+
+    function describeCurrentAssets() {
+        const text = JSON.stringify({ variables, nodes, connections }, null, 2);
+        return [{
+            kind: 'text',
+            title: 'Dialogue Tree Engine Data',
+            fileName: 'urage_engine_data.json',
+            mimeType: 'application/json',
+            textContent: text,
+            previewKind: 'text',
+            previewText: text,
+            sourceDetail: 'Dialogue tree graph data for engine import.',
+            metadata: { sourceTool: 'dialogue-tree-visualizer', resourceFormat: 'dialogue-tree-json' }
+        }];
+    }
+
+    window.__urageToolDescribeCurrentAssets = describeCurrentAssets;
+    window.__urageToolDescribeCurrentAsset = () => describeCurrentAssets()[0] || null;
+
+    init();
+</script>
+  <script src="../../shared/dashboard-current-output-autodescribe.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+body.view-ai-active {
+  .studio-component-form {
+    min-width: 0;
+  }
+
+  .studio-component-form-section {
+    min-width: 0;
+    border: 1px solid var(--dashboard-card-border, var(--panel-border));
+    background: var(--dashboard-card-bg, var(--panel-soft));
+  }
+
+  .studio-component-form-section > :is(.field, label, input, select, textarea, .row) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .studio-component-form :is(.field, .video-setting-row, .music-option-row) {
+    min-width: 0;
+  }
+
+  .studio-component-form :is(input, select, textarea) {
+    max-width: 100%;
+  }
+
+  .studio-component-form :is(button, .mini-button) {
+    min-height: var(--dashboard-control-height, 40px);
+  }
+
+  .studio-component-status {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .studio-component-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-component-gap, 8px);
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .studio-component-toolbar :is(button, .mini-button, .studio-tool-picker) {
+    min-width: 0;
+  }
+
+  .studio-component-preview-card,
+  .studio-component-metadata,
+  .studio-component-queue,
+  .studio-component-advanced-settings {
+    min-width: 0;
+    max-width: 100%;
+    border-color: var(--dashboard-card-border, var(--panel-border));
+    background: var(--dashboard-card-bg, var(--panel-soft));
+  }
+
+  .studio-component-preview-card :is(img, video, canvas, audio) {
+    display: block;
+    max-width: 100%;
+  }
+
+  .studio-component-metadata {
+    overflow-wrap: anywhere;
+  }
+
+  .studio-component-queue {
+    overflow: hidden;
+  }
+
+  .studio-component-queue > :last-child {
+    min-width: 0;
+    overflow: auto;
+  }
+
+  .studio-component-empty-state {
+    display: grid;
+    place-items: center;
+    min-height: 88px;
+    padding: var(--dashboard-card-padding, 12px);
+    border: 1px dashed var(--dashboard-card-border, var(--panel-border));
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .studio-component-advanced-settings > summary {
+    min-height: var(--dashboard-control-height, 40px);
+    display: flex;
+    align-items: center;
+    gap: var(--dashboard-component-gap, 8px);
+  }
+}
+
+@media (max-width: 720px) {
+  body.view-ai-active {
+    .studio-component-toolbar {
+      flex-wrap: wrap;
+    }
+
+    .studio-component-toolbar :is(button, .mini-button, .studio-tool-picker) {
+      flex: 1 1 132px;
+    }
+  }
+}
