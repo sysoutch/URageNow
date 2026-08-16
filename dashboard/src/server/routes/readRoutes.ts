@@ -71,6 +71,7 @@ type DashboardInstallerSpec = {
   command: string;
   args: string[];
   cwd?: string;
+  windowsVerbatimArguments?: boolean;
   comfyUiInstallRoot?: string;
 };
 
@@ -408,6 +409,9 @@ async function resolveInstallerSpec(installerId: DashboardInstallerId, installPa
       command: "cmd.exe",
       args: ["/d", "/s", "/c", `call "${scriptPath}" "${comfyUiInstallRoot}"`],
       cwd: path.dirname(scriptPath),
+      // cmd.exe parses its command tail itself. Let it receive the nested path
+      // quotes unchanged instead of Node escaping them for a normal executable.
+      windowsVerbatimArguments: process.platform === "win32",
       comfyUiInstallRoot
     };
   }
@@ -425,7 +429,8 @@ async function runInstaller(spec: DashboardInstallerSpec): Promise<{
     const child = spawn(spec.command, spec.args, {
       cwd: spec.cwd || repoRoot,
       env: process.env,
-      windowsHide: true
+      windowsHide: true,
+      windowsVerbatimArguments: spec.windowsVerbatimArguments
     });
     let stdout = "";
     let stderr = "";
