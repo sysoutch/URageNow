@@ -923,7 +923,7 @@ ${renderDashboardMobileNav()}
                   <option value="administrator">Current account as administrator (UAC)</option>
                   <option value="other-user">Another Windows account (prompts locally)</option>
                 </select>
-                <div class="hint">Elevation and another-account launch are available for ComfyUI only.</div>
+                <div class="hint">Elevation and another-account launch are available for Python and ComfyUI.</div>
               </div>
               <div class="field hidden" id="installer-run-as-user-field">
                 <label for="installer-run-as-user-input">Windows user name</label>
@@ -936,6 +936,8 @@ ${renderDashboardMobileNav()}
               </div>
             </section>
             <div class="hint" id="settings-install-status">Installer status: ready.</div>
+            <div class="row"><h5>ComfyUI Installer Log</h5><button class="secondary" id="comfy-installer-log-refresh-button" type="button">Refresh log</button></div>
+            <pre class="comfy-runtime-progress" id="comfy-installer-log-output">No ComfyUI installer log yet.</pre>
           </article>
         </div>
         <div class="settings-overlay-subpanel" data-settings-subpanel="ffmpeg">

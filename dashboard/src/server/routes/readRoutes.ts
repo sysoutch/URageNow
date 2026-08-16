@@ -65,6 +65,7 @@ const dashboardThemeRelativePaths: Record<DashboardThemeTarget, string[]> = {
   whatsapp: ["dashboard/assets/messengers/whatsapp/theme.json"],
   studio: ["dashboard/dashboard-theme-studio.json"]
 };
+let latestComfyInstallerLogPath = "";
 type DashboardInstallerId = "python" | "ollama" | "lmstudio" | "comfyui" | "blender" | "ffmpeg";
 type DashboardInstallerExecutionMode = "standard" | "administrator" | "other-user";
 type DashboardInstallerSpec = {
@@ -85,7 +86,7 @@ function isDashboardResourcePoolKind(value: string | null | undefined): value is
 }
 
 function isSafeInstallerPath(value: string): boolean {
-  return path.isAbsolute(value) && !/["&|<>^]/.test(value);
+  return path.isAbsolute(value) && !/["&|<>^%!]/.test(value);
 }
 
 function normalizeThemeVariables(value: unknown): Record<string, string> {
@@ -369,14 +370,34 @@ function quotePowerShellLiteral(value: string): string {
   return `'${value.replace(/'/g, "''")}'`;
 }
 
+function createInteractiveWindowsInstallerSpec(id: DashboardInstallerId, label: string, command: string, args: string[], executionMode: DashboardInstallerExecutionMode, runAsUser: string): DashboardInstallerSpec {
+  const commandLine = [command, ...args].map(value => /\s/.test(value) ? `"${value}"` : value).join(" ");
+  if (executionMode === "administrator") {
+    return {
+      id, label, command: "powershell.exe",
+      args: ["-NoProfile", "-Command", `Start-Process -FilePath ${quotePowerShellLiteral(command)} -ArgumentList @(${args.map(quotePowerShellLiteral).join(", ")}) -Verb RunAs`],
+      windowsHide: false, launchesInteractively: true
+    };
+  }
+  return {
+    id, label, command: "powershell.exe",
+    args: ["-NoProfile", "-Command", `Start-Process -FilePath 'runas.exe' -ArgumentList @(${quotePowerShellLiteral(`/user:${runAsUser}`)}, ${quotePowerShellLiteral(`cmd.exe /d /s /k ${commandLine}`)})`],
+    windowsHide: false, launchesInteractively: true
+  };
+}
+
 async function resolveInstallerSpec(installerId: DashboardInstallerId, installPath = "", executionMode: DashboardInstallerExecutionMode = "standard", runAsUser = ""): Promise<DashboardInstallerSpec | null> {
   const locationArgs = installPath ? ["--location", installPath] : [];
   if (installerId === "python") {
+    const args = ["install", "--id", "Python.Python.3.12", "-e", "--accept-package-agreements", "--accept-source-agreements", ...locationArgs];
+    if (executionMode !== "standard") {
+      return createInteractiveWindowsInstallerSpec("python", "Python 3.12", "winget", args, executionMode, runAsUser);
+    }
     return {
       id: "python",
       label: "Python 3.12",
       command: "winget",
-      args: ["install", "--id", "Python.Python.3.12", "-e", "--accept-package-agreements", "--accept-source-agreements", ...locationArgs]
+      args
     };
   }
   if (installerId === "ollama") {
@@ -429,18 +450,20 @@ async function resolveInstallerSpec(installerId: DashboardInstallerId, installPa
     const comfyUiInstallRoot = installPath || configuredRoot || resolveRepoPath("data", "comfyui");
     const stagedScriptPath = await stageComfyInstallerScript(scriptPath, comfyUiInstallRoot);
     const commandTail = `call "${stagedScriptPath}" "${comfyUiInstallRoot}"`;
+    const logPath = path.join(comfyUiInstallRoot, "install-comfyui.log");
+    const interactiveCommand = `& cmd.exe /d /s /c ${quotePowerShellLiteral(commandTail)} 2>&1 | Tee-Object -FilePath ${quotePowerShellLiteral(logPath)} -Append`;
     if (executionMode === "administrator") {
       return {
         id: "comfyui", label: "ComfyUI", command: "powershell.exe",
-        args: ["-NoProfile", "-Command", `Start-Process -FilePath 'cmd.exe' -WorkingDirectory ${quotePowerShellLiteral(comfyUiInstallRoot)} -ArgumentList @('/d', '/s', '/k', ${quotePowerShellLiteral(commandTail)}) -Verb RunAs`],
-        windowsHide: false, launchesInteractively: true, comfyUiInstallRoot
+        args: ["-NoProfile", "-Command", `Start-Process -FilePath 'powershell.exe' -WorkingDirectory ${quotePowerShellLiteral(comfyUiInstallRoot)} -ArgumentList @('-NoExit', '-NoProfile', '-Command', ${quotePowerShellLiteral(interactiveCommand)}) -Verb RunAs`],
+        logPath, windowsHide: false, launchesInteractively: true, comfyUiInstallRoot
       };
     }
     if (executionMode === "other-user") {
       return {
         id: "comfyui", label: "ComfyUI", command: "powershell.exe",
-        args: ["-NoProfile", "-Command", `Start-Process -FilePath 'runas.exe' -ArgumentList @(${quotePowerShellLiteral(`/user:${runAsUser}`)}, ${quotePowerShellLiteral(`cmd.exe /d /s /k ${commandTail}`)})`],
-        windowsHide: false, launchesInteractively: true, comfyUiInstallRoot
+        args: ["-NoProfile", "-Command", `Start-Process -FilePath 'runas.exe' -ArgumentList @(${quotePowerShellLiteral(`/user:${runAsUser}`)}, ${quotePowerShellLiteral(`powershell.exe -NoExit -NoProfile -Command ${interactiveCommand}`)})`],
+        logPath, windowsHide: false, launchesInteractively: true, comfyUiInstallRoot
       };
     }
     return {
@@ -449,7 +472,7 @@ async function resolveInstallerSpec(installerId: DashboardInstallerId, installPa
       command: "cmd.exe",
       args: ["/d", "/s", "/c", `call "${stagedScriptPath}" "${comfyUiInstallRoot}"`],
       cwd: comfyUiInstallRoot,
-      logPath: path.join(comfyUiInstallRoot, "install-comfyui.log"),
+      logPath,
       windowsHide: false,
       // cmd.exe parses its command tail itself. Let it receive the nested path
       // quotes unchanged instead of Node escaping them for a normal executable.
@@ -719,8 +742,8 @@ async function handlePostApiInstallersRun(request: IncomingMessage, response: Se
     sendJson(response, 400, { error: "installPath must be an absolute folder path without command characters." });
     return;
   }
-  if (executionMode !== "standard" && installerId !== "comfyui") {
-    sendJson(response, 400, {error: "Elevation and alternate-user launches are currently supported for ComfyUI only."});
+  if (executionMode !== "standard" && installerId !== "comfyui" && installerId !== "python") {
+    sendJson(response, 400, {error: "Elevation and alternate-user launches are currently supported for Python and ComfyUI only."});
     return;
   }
   if (executionMode === "other-user" && !/^[A-Za-z0-9_.-]+(?:\\[A-Za-z0-9_.-]+)?$/.test(runAsUser)) {
@@ -735,6 +758,9 @@ async function handlePostApiInstallersRun(request: IncomingMessage, response: Se
   if (!spec) {
     sendJson(response, 404, { error: `Installer script/config for "${installerId}" was not found.` });
     return;
+  }
+  if (spec.id === "comfyui" && spec.logPath) {
+    latestComfyInstallerLogPath = spec.logPath;
   }
   dependencies.runtimeState.recordAction("dashboard:installer:start", `Running installer for ${spec.label}${requestedInstallPath ? ` at ${requestedInstallPath}` : " using the default location"}.`);
   const result = await runInstaller(spec);
@@ -761,6 +787,18 @@ async function handlePostApiInstallersRun(request: IncomingMessage, response: Se
     launchesInteractively: spec.launchesInteractively === true,
     comfyUiRuntime
   });
+}
+
+async function handleGetComfyInstallerLog(_request: IncomingMessage, response: ServerResponse): Promise<void> {
+  const configuredRuntime = await getComfyUiRuntimeStatus();
+  const logPath = latestComfyInstallerLogPath
+    || path.join(configuredRuntime.workingDirectory || resolveRepoPath("data", "comfyui"), "install-comfyui.log");
+  try {
+    const output = await readFile(logPath, "utf8");
+    sendJson(response, 200, {logPath, output: output.slice(-24_000), available: true});
+  } catch {
+    sendJson(response, 200, {logPath, output: "No ComfyUI installer log yet.", available: false});
+  }
 }
 
 async function handleGetApiGuilds(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
@@ -1211,6 +1249,7 @@ const dashboardReadRouteTable = createDashboardRouteTable([
   postRoute("/api/messenger-runtimes/control", handlePostApiMessengerRuntimesControl),
   postRoute("/api/dashboard/restart", handlePostApiDashboardRestart),
   postRoute("/api/installers/run", handlePostApiInstallersRun),
+  getRoute("/api/installers/comfyui/log", handleGetComfyInstallerLog),
   getRoute("/api/guilds", handleGetApiGuilds),
   getRoute("/api/guild-permissions", handleGetApiGuildPermissions),
   getRoute("/api/channel-permissions", handleGetApiChannelPermissions),

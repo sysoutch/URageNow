@@ -7,15 +7,17 @@ setlocal enabledelayedexpansion
 echo ------------------------------
 echo 0. Check if Python is available
 echo ------------------------------
-set "PYTHON_LAUNCHER=python"
-python -c "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 12) else 1)" >nul 2>&1
-if errorlevel 1 (
-    py -3.12 --version >nul 2>&1
-    if errorlevel 1 (
-        echo [ERROR] Python 3.12 is required. Install it first from URage NOW Settings ^> Setup ^> Install.
-        exit /b 1
-    )
-    set "PYTHON_LAUNCHER=py -3.12"
+set "PYTHON_FOUND="
+for /f "delims=" %%P in ('python -c "import sys; print(sys.executable) if sys.version_info[:2] == (3, 12) else sys.exit(1)" 2^>nul') do set "PYTHON_FOUND=%%P"
+if not defined PYTHON_FOUND (
+    for /f "delims=" %%P in ('py -3.12 -c "import sys; print(sys.executable)" 2^>nul') do set "PYTHON_FOUND=%%P"
+)
+if not defined PYTHON_FOUND if exist "%LOCALAPPDATA%\Programs\Python\Python312\python.exe" (
+    set "PYTHON_FOUND=%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
+)
+if not defined PYTHON_FOUND (
+    echo [ERROR] Python 3.12 is required. Install it first from URage NOW Settings ^> Setup ^> Install.
+    exit /b 1
 )
 
 :: ------------------------------
@@ -24,16 +26,10 @@ if errorlevel 1 (
 echo ------------------------------
 echo 1. Get Python path and check version
 echo ------------------------------
-for /f "delims=" %%P in ('%PYTHON_LAUNCHER% -c "import sys; print(sys.executable)"') do (
-    set PYTHON_FOUND=%%P
-    goto :found
-)
-
 :found
 echo Found Python: %PYTHON_FOUND%
 
-:: Optionally verify version is 3.12
-for /f "tokens=2 delims= " %%V in ('%PYTHON_LAUNCHER% --version') do (
+for /f "tokens=2 delims= " %%V in ('"%PYTHON_FOUND%" --version') do (
     set PY_VERSION=%%V
 )
 

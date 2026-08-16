@@ -1465,6 +1465,16 @@ function createDashboardOverlayHelpers(input) {
     const executionModeSelect = document.getElementById("installer-execution-mode-select");
     const runAsUserField = document.getElementById("installer-run-as-user-field");
     const runAsUserInput = document.getElementById("installer-run-as-user-input");
+    const refreshComfyInstallerLog = async () => {
+      const output = document.getElementById("comfy-installer-log-output");
+      if (!output) return;
+      const payload = await request("/api/installers/comfyui/log");
+      output.textContent = String(payload.output || "No ComfyUI installer log yet.");
+      output.scrollTop = output.scrollHeight;
+    };
+    bindClick("comfy-installer-log-refresh-button", () => void refreshComfyInstallerLog().catch(error => setOutput(describeClientError(error, "Failed to load the ComfyUI installer log."))));
+    void refreshComfyInstallerLog().catch(() => {});
+    window.setInterval(() => void refreshComfyInstallerLog().catch(() => {}), 1_500);
     const updateInstallerLocationUi = () => {
       const usesCustomPath = locationMode?.value === "custom";
       customPathField?.classList.toggle("hidden", !usesCustomPath);
@@ -1472,7 +1482,7 @@ function createDashboardOverlayHelpers(input) {
     };
     locationMode?.addEventListener("change", updateInstallerLocationUi);
     const updateInstallerExecutionUi = () => {
-      const supportsAlternateLaunch = selectedInstallerId === "comfyui";
+      const supportsAlternateLaunch = selectedInstallerId === "python" || selectedInstallerId === "comfyui";
       executionModeField?.classList.toggle("hidden", !supportsAlternateLaunch);
       if (!supportsAlternateLaunch && executionModeSelect) executionModeSelect.value = "standard";
       const usesOtherUser = supportsAlternateLaunch && executionModeSelect?.value === "other-user";
@@ -1505,7 +1515,7 @@ function createDashboardOverlayHelpers(input) {
     bindClick("installer-confirm-button", async () => {
       if (!selectedInstallerId) return;
       const installPath = locationMode?.value === "custom" ? String(customPathInput?.value || "").trim() : "";
-      const executionMode = selectedInstallerId === "comfyui" ? String(executionModeSelect?.value || "standard") : "standard";
+      const executionMode = selectedInstallerId === "python" || selectedInstallerId === "comfyui" ? String(executionModeSelect?.value || "standard") : "standard";
       const runAsUser = executionMode === "other-user" ? String(runAsUserInput?.value || "").trim() : "";
       if (locationMode?.value === "custom" && !installPath) {
         setOutput("Enter an absolute installation folder or choose the default location.");
@@ -1518,6 +1528,9 @@ function createDashboardOverlayHelpers(input) {
         return;
       }
       await input.runInstallerFromUi?.(selectedInstallerId, installPath, executionMode, runAsUser);
+      if (selectedInstallerId === "comfyui") {
+        void refreshComfyInstallerLog().catch(() => {});
+      }
     });
     bindClick("open-runtime-overlay-button", () => {
       setSettingsOverlayOpen(false);
