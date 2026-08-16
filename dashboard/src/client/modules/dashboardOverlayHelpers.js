@@ -1447,6 +1447,7 @@ function createDashboardOverlayHelpers(input) {
       }
     });
     const installerDetails = {
+      python: {label: "Python 3.12", description: "Installs the required Python runtime for ComfyUI and its Hunyuan 3D extensions. Install this before ComfyUI."},
       ollama: {label: "Ollama", description: "Installs the local model runtime used for text and vision models."},
       lmstudio: {label: "LM Studio", description: "Installs the local model server and desktop model manager."},
       comfyui: {label: "ComfyUI", description: "Creates a Python environment, clones ComfyUI and the configured Hunyuan 3D extensions. This can download several GB."},
@@ -1460,12 +1461,25 @@ function createDashboardOverlayHelpers(input) {
     const locationMode = document.getElementById("installer-location-mode-select");
     const customPathField = document.getElementById("installer-custom-path-field");
     const customPathInput = document.getElementById("installer-custom-path-input");
+    const executionModeField = document.getElementById("installer-execution-mode-field");
+    const executionModeSelect = document.getElementById("installer-execution-mode-select");
+    const runAsUserField = document.getElementById("installer-run-as-user-field");
+    const runAsUserInput = document.getElementById("installer-run-as-user-input");
     const updateInstallerLocationUi = () => {
       const usesCustomPath = locationMode?.value === "custom";
       customPathField?.classList.toggle("hidden", !usesCustomPath);
       if (usesCustomPath) customPathInput?.focus();
     };
     locationMode?.addEventListener("change", updateInstallerLocationUi);
+    const updateInstallerExecutionUi = () => {
+      const supportsAlternateLaunch = selectedInstallerId === "comfyui";
+      executionModeField?.classList.toggle("hidden", !supportsAlternateLaunch);
+      if (!supportsAlternateLaunch && executionModeSelect) executionModeSelect.value = "standard";
+      const usesOtherUser = supportsAlternateLaunch && executionModeSelect?.value === "other-user";
+      runAsUserField?.classList.toggle("hidden", !usesOtherUser);
+      if (usesOtherUser) runAsUserInput?.focus();
+    };
+    executionModeSelect?.addEventListener("change", updateInstallerExecutionUi);
     document.querySelectorAll("[data-installer-review-button=\"true\"]").forEach(button => {
       button.addEventListener("click", event => {
         const installerId = String(event.currentTarget.getAttribute("data-installer-id") || "").trim().toLowerCase();
@@ -1476,8 +1490,11 @@ function createDashboardOverlayHelpers(input) {
         if (reviewDescription) reviewDescription.textContent = `${detail.description} Default is recommended. A custom path is passed to the installer when it supports one.`;
         if (locationMode) locationMode.value = "default";
         if (customPathInput) customPathInput.value = "";
+        if (executionModeSelect) executionModeSelect.value = "standard";
+        if (runAsUserInput) runAsUserInput.value = "";
         reviewCard?.classList.remove("hidden");
         updateInstallerLocationUi();
+        updateInstallerExecutionUi();
         reviewCard?.scrollIntoView({block: "nearest", behavior: "smooth"});
       });
     });
@@ -1488,12 +1505,19 @@ function createDashboardOverlayHelpers(input) {
     bindClick("installer-confirm-button", async () => {
       if (!selectedInstallerId) return;
       const installPath = locationMode?.value === "custom" ? String(customPathInput?.value || "").trim() : "";
+      const executionMode = selectedInstallerId === "comfyui" ? String(executionModeSelect?.value || "standard") : "standard";
+      const runAsUser = executionMode === "other-user" ? String(runAsUserInput?.value || "").trim() : "";
       if (locationMode?.value === "custom" && !installPath) {
         setOutput("Enter an absolute installation folder or choose the default location.");
         customPathInput?.focus();
         return;
       }
-      await input.runInstallerFromUi?.(selectedInstallerId, installPath);
+      if (executionMode === "other-user" && !runAsUser) {
+        setOutput("Enter the Windows account to use.");
+        runAsUserInput?.focus();
+        return;
+      }
+      await input.runInstallerFromUi?.(selectedInstallerId, installPath, executionMode, runAsUser);
     });
     bindClick("open-runtime-overlay-button", () => {
       setSettingsOverlayOpen(false);

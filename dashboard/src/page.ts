@@ -891,6 +891,7 @@ ${renderDashboardMobileNav()}
             <h4>Install Tools</h4>
             <div class="hint">Review the purpose and install location before an installer is allowed to run.</div>
             <div class="settings-install-grid">
+              <button class="secondary" data-installer-review-button="true" data-installer-id="python" type="button">Review Python 3.12</button>
               <button class="secondary" data-installer-review-button="true" data-installer-id="ollama" type="button">Review Ollama</button>
               <button class="secondary" data-installer-review-button="true" data-installer-id="lmstudio" type="button">Review LM Studio</button>
               <button class="secondary" data-installer-review-button="true" data-installer-id="comfyui" type="button">Review ComfyUI</button>
@@ -914,6 +915,20 @@ ${renderDashboardMobileNav()}
                 <label for="installer-custom-path-input">Custom installation folder</label>
                 <input id="installer-custom-path-input" placeholder="C:\\Tools\\URage\\ComfyUI">
                 <div class="hint" id="installer-custom-path-hint">Use an absolute folder path.</div>
+              </div>
+              <div class="field" id="installer-execution-mode-field">
+                <label for="installer-execution-mode-select">Windows account</label>
+                <select id="installer-execution-mode-select">
+                  <option value="standard">Current account</option>
+                  <option value="administrator">Current account as administrator (UAC)</option>
+                  <option value="other-user">Another Windows account (prompts locally)</option>
+                </select>
+                <div class="hint">Elevation and another-account launch are available for ComfyUI only.</div>
+              </div>
+              <div class="field hidden" id="installer-run-as-user-field">
+                <label for="installer-run-as-user-input">Windows user name</label>
+                <input id="installer-run-as-user-input" placeholder="COMPUTER\\user or DOMAIN\\user">
+                <div class="hint">Windows prompts for this account’s password in a local terminal; it is never sent to the dashboard.</div>
               </div>
               <div class="row">
                 <button id="installer-confirm-button" type="button">Install selected tool</button>

@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { spawn } from "node:child_process";
-import { readFile, stat } from "node:fs/promises";
+import { createWriteStream } from "node:fs";
+import { copyFile, mkdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import QRCode from "qrcode";
 import { getDashboardClientScript } from "../../clientScript.js";
@@ -64,14 +65,18 @@ const dashboardThemeRelativePaths: Record<DashboardThemeTarget, string[]> = {
   whatsapp: ["dashboard/assets/messengers/whatsapp/theme.json"],
   studio: ["dashboard/dashboard-theme-studio.json"]
 };
-type DashboardInstallerId = "ollama" | "lmstudio" | "comfyui" | "blender" | "ffmpeg";
+type DashboardInstallerId = "python" | "ollama" | "lmstudio" | "comfyui" | "blender" | "ffmpeg";
+type DashboardInstallerExecutionMode = "standard" | "administrator" | "other-user";
 type DashboardInstallerSpec = {
   id: DashboardInstallerId;
   label: string;
   command: string;
   args: string[];
   cwd?: string;
+  logPath?: string;
+  windowsHide?: boolean;
   windowsVerbatimArguments?: boolean;
+  launchesInteractively?: boolean;
   comfyUiInstallRoot?: string;
 };
 
@@ -353,8 +358,27 @@ async function resolveComfyInstallerScriptPath(): Promise<string | null> {
   return null;
 }
 
-async function resolveInstallerSpec(installerId: DashboardInstallerId, installPath = ""): Promise<DashboardInstallerSpec | null> {
+async function stageComfyInstallerScript(sourcePath: string, installRoot: string): Promise<string> {
+  await mkdir(installRoot, {recursive: true});
+  const stagedPath = path.join(installRoot, path.basename(sourcePath));
+  await copyFile(sourcePath, stagedPath);
+  return stagedPath;
+}
+
+function quotePowerShellLiteral(value: string): string {
+  return `'${value.replace(/'/g, "''")}'`;
+}
+
+async function resolveInstallerSpec(installerId: DashboardInstallerId, installPath = "", executionMode: DashboardInstallerExecutionMode = "standard", runAsUser = ""): Promise<DashboardInstallerSpec | null> {
   const locationArgs = installPath ? ["--location", installPath] : [];
+  if (installerId === "python") {
+    return {
+      id: "python",
+      label: "Python 3.12",
+      command: "winget",
+      args: ["install", "--id", "Python.Python.3.12", "-e", "--accept-package-agreements", "--accept-source-agreements", ...locationArgs]
+    };
+  }
   if (installerId === "ollama") {
     return {
       id: "ollama",
@@ -403,12 +427,30 @@ async function resolveInstallerSpec(installerId: DashboardInstallerId, installPa
       ? configuredRuntime.workingDirectory
       : "";
     const comfyUiInstallRoot = installPath || configuredRoot || resolveRepoPath("data", "comfyui");
+    const stagedScriptPath = await stageComfyInstallerScript(scriptPath, comfyUiInstallRoot);
+    const commandTail = `call "${stagedScriptPath}" "${comfyUiInstallRoot}"`;
+    if (executionMode === "administrator") {
+      return {
+        id: "comfyui", label: "ComfyUI", command: "powershell.exe",
+        args: ["-NoProfile", "-Command", `Start-Process -FilePath 'cmd.exe' -WorkingDirectory ${quotePowerShellLiteral(comfyUiInstallRoot)} -ArgumentList @('/d', '/s', '/k', ${quotePowerShellLiteral(commandTail)}) -Verb RunAs`],
+        windowsHide: false, launchesInteractively: true, comfyUiInstallRoot
+      };
+    }
+    if (executionMode === "other-user") {
+      return {
+        id: "comfyui", label: "ComfyUI", command: "powershell.exe",
+        args: ["-NoProfile", "-Command", `Start-Process -FilePath 'runas.exe' -ArgumentList @(${quotePowerShellLiteral(`/user:${runAsUser}`)}, ${quotePowerShellLiteral(`cmd.exe /d /s /k ${commandTail}`)})`],
+        windowsHide: false, launchesInteractively: true, comfyUiInstallRoot
+      };
+    }
     return {
       id: "comfyui",
       label: "ComfyUI",
       command: "cmd.exe",
-      args: ["/d", "/s", "/c", `call "${scriptPath}" "${comfyUiInstallRoot}"`],
-      cwd: path.dirname(scriptPath),
+      args: ["/d", "/s", "/c", `call "${stagedScriptPath}" "${comfyUiInstallRoot}"`],
+      cwd: comfyUiInstallRoot,
+      logPath: path.join(comfyUiInstallRoot, "install-comfyui.log"),
+      windowsHide: false,
       // cmd.exe parses its command tail itself. Let it receive the nested path
       // quotes unchanged instead of Node escaping them for a normal executable.
       windowsVerbatimArguments: process.platform === "win32",
@@ -429,9 +471,13 @@ async function runInstaller(spec: DashboardInstallerSpec): Promise<{
     const child = spawn(spec.command, spec.args, {
       cwd: spec.cwd || repoRoot,
       env: process.env,
-      windowsHide: true,
+      windowsHide: spec.windowsHide ?? true,
       windowsVerbatimArguments: spec.windowsVerbatimArguments
     });
+    const log = spec.logPath ? createWriteStream(spec.logPath, {flags: "a"}) : null;
+    if (log) {
+      log.write(`\n\n=== ${spec.label} installer started ${new Date().toISOString()} ===\n`);
+    }
     let stdout = "";
     let stderr = "";
     const maxOutputLength = 12_000;
@@ -441,11 +487,15 @@ async function runInstaller(spec: DashboardInstallerSpec): Promise<{
     };
     child.stdout?.on("data", chunk => {
       stdout = appendOutput(stdout, chunk);
+      log?.write(chunk);
     });
     child.stderr?.on("data", chunk => {
       stderr = appendOutput(stderr, chunk);
+      log?.write(chunk);
     });
     child.once("error", error => {
+      log?.write(`\n[launcher error] ${error instanceof Error ? error.message : String(error)}\n`);
+      log?.end();
       resolve({
         ok: false,
         exitCode: null,
@@ -455,6 +505,8 @@ async function runInstaller(spec: DashboardInstallerSpec): Promise<{
       });
     });
     child.once("close", (exitCode, signal) => {
+      log?.write(`\n=== ${spec.label} installer finished (exit ${exitCode ?? "unknown"}) ===\n`);
+      log?.end();
       resolve({
         ok: exitCode === 0,
         exitCode: typeof exitCode === "number" ? exitCode : null,
@@ -653,7 +705,7 @@ async function handlePostApiDashboardRestart(request: IncomingMessage, response:
 async function handlePostApiInstallersRun(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
   const installerId: DashboardInstallerId | null =
-    body.installerId === "ollama" || body.installerId === "lmstudio" || body.installerId === "comfyui" || body.installerId === "blender" || body.installerId === "ffmpeg"
+    body.installerId === "python" || body.installerId === "ollama" || body.installerId === "lmstudio" || body.installerId === "comfyui" || body.installerId === "blender" || body.installerId === "ffmpeg"
       ? body.installerId
       : null;
   if (!installerId) {
@@ -661,11 +713,25 @@ async function handlePostApiInstallersRun(request: IncomingMessage, response: Se
     return;
   }
   const requestedInstallPath = typeof body.installPath === "string" ? body.installPath.trim() : "";
+  const executionMode: DashboardInstallerExecutionMode = body.executionMode === "administrator" || body.executionMode === "other-user" ? body.executionMode : "standard";
+  const runAsUser = typeof body.runAsUser === "string" ? body.runAsUser.trim() : "";
   if (requestedInstallPath && !isSafeInstallerPath(requestedInstallPath)) {
     sendJson(response, 400, { error: "installPath must be an absolute folder path without command characters." });
     return;
   }
-  const spec = await resolveInstallerSpec(installerId, requestedInstallPath);
+  if (executionMode !== "standard" && installerId !== "comfyui") {
+    sendJson(response, 400, {error: "Elevation and alternate-user launches are currently supported for ComfyUI only."});
+    return;
+  }
+  if (executionMode === "other-user" && !/^[A-Za-z0-9_.-]+(?:\\[A-Za-z0-9_.-]+)?$/.test(runAsUser)) {
+    sendJson(response, 400, {error: "Enter a Windows user name such as user, COMPUTER\\user, or DOMAIN\\user."});
+    return;
+  }
+  if (executionMode !== "standard" && !isLoopbackRequest(request)) {
+    sendJson(response, 403, {error: "Elevated and alternate-user installers must be started from the dashboard host."});
+    return;
+  }
+  const spec = await resolveInstallerSpec(installerId, requestedInstallPath, executionMode, runAsUser);
   if (!spec) {
     sendJson(response, 404, { error: `Installer script/config for "${installerId}" was not found.` });
     return;
@@ -691,6 +757,8 @@ async function handlePostApiInstallersRun(request: IncomingMessage, response: Se
     signal: result.signal,
     stdout: result.stdout,
     stderr: result.stderr,
+    logPath: spec.logPath,
+    launchesInteractively: spec.launchesInteractively === true,
     comfyUiRuntime
   });
 }

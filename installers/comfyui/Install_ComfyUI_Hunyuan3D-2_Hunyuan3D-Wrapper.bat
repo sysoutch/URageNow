@@ -7,12 +7,15 @@ setlocal enabledelayedexpansion
 echo ------------------------------
 echo 0. Check if Python is available
 echo ------------------------------
-where python >nul 2>&1
+set "PYTHON_LAUNCHER=python"
+python -c "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 12) else 1)" >nul 2>&1
 if errorlevel 1 (
-    echo [ERROR] Python is not installed or not in PATH.
-    echo Opening Python 3.12.10 download page...
-    start https://www.python.org/downloads/release/python-31210/
-    exit /b 1
+    py -3.12 --version >nul 2>&1
+    if errorlevel 1 (
+        echo [ERROR] Python 3.12 is required. Install it first from URage NOW Settings ^> Setup ^> Install.
+        exit /b 1
+    )
+    set "PYTHON_LAUNCHER=py -3.12"
 )
 
 :: ------------------------------
@@ -21,7 +24,7 @@ if errorlevel 1 (
 echo ------------------------------
 echo 1. Get Python path and check version
 echo ------------------------------
-for /f "delims=" %%P in ('where python') do (
+for /f "delims=" %%P in ('%PYTHON_LAUNCHER% -c "import sys; print(sys.executable)"') do (
     set PYTHON_FOUND=%%P
     goto :found
 )
@@ -30,7 +33,7 @@ for /f "delims=" %%P in ('where python') do (
 echo Found Python: %PYTHON_FOUND%
 
 :: Optionally verify version is 3.12
-for /f "tokens=2 delims= " %%V in ('python --version') do (
+for /f "tokens=2 delims= " %%V in ('%PYTHON_LAUNCHER% --version') do (
     set PY_VERSION=%%V
 )
 
@@ -61,7 +64,7 @@ echo 3. Create virtual environment
 echo ------------------------------
 if not exist "%PYTHON_EXE%" (
     echo Creating virtual environment...
-    python -m venv "%VENV_DIR%"
+    "%PYTHON_FOUND%" -m venv "%VENV_DIR%"
 )
 
 :: ------------------------------

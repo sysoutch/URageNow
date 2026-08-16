@@ -513,6 +513,7 @@ function createDashboardSettingsRuntimeHelpers(input) {
     }
   }
   function getInstallerLabel(installerId) {
+    if (installerId === "python") return "Python 3.12";
     if (installerId === "ollama") return "Ollama";
     if (installerId === "lmstudio") return "LM Studio";
     if (installerId === "comfyui") return "ComfyUI";
@@ -527,7 +528,7 @@ function createDashboardSettingsRuntimeHelpers(input) {
     const stringified = String(error ?? "").trim();
     return stringified || fallback || "Unknown error";
   }
-  async function runInstallerFromUi(installerId, installPath = "") {
+  async function runInstallerFromUi(installerId, installPath = "", executionMode = "standard", runAsUser = "") {
     const label = getInstallerLabel(installerId);
     const buttons = Array.from(document.querySelectorAll("[data-installer-review-button=\"true\"], #installer-confirm-button"));
     buttons.forEach(button => {
@@ -535,7 +536,12 @@ function createDashboardSettingsRuntimeHelpers(input) {
     });
     setQuickInstallerStatus("Installer status: running " + label + "...");
     try {
-      const result = await request("/api/installers/run", { installerId, installPath });
+      const result = await request("/api/installers/run", { installerId, installPath, executionMode, runAsUser });
+      if (result.launchesInteractively) {
+        setQuickInstallerStatus("Installer status: " + label + " started in a Windows terminal.");
+        setOutput(label + " was started in a Windows terminal. Complete the UAC or Windows credential prompt there.");
+        return;
+      }
       const exitCodeText = typeof result.exitCode === "number" ? String(result.exitCode) : "0";
       setQuickInstallerStatus("Installer status: " + label + " finished (exit " + exitCodeText + ").");
       if (installerId === "ffmpeg") {
@@ -552,7 +558,13 @@ function createDashboardSettingsRuntimeHelpers(input) {
           setQuickFfmpegSettingsStatus("FFmpeg installer finished. Save the executable path here if PATH has not refreshed yet.");
         }
       }
-      setOutput(label + " installer completed.");
+      const output = String(result.stdout || result.stderr || "").trim();
+      const logPath = String(result.logPath || "").trim();
+      setOutput([
+        label + " installer completed.",
+        logPath ? "Log: " + logPath : "",
+        output
+      ].filter(Boolean).join("\n\n"));
     } catch (error) {
       const detail = describeClientError(error, label + " installer failed.");
       setQuickInstallerStatus("Installer status: failed for " + label + ". " + detail.slice(0, 280));

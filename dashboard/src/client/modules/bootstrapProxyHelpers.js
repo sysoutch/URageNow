@@ -118,7 +118,7 @@ function createDashboardSettingsRuntimeProxyHelpers(input) {
     saveMessengerRuntimeSettingsFromUi: () => helpers?.saveMessengerRuntimeSettingsFromUi?.(),
     loadMessengerRuntimes: () => helpers?.loadMessengerRuntimes?.(),
     controlSelectedMessengerRuntime: action => helpers?.controlSelectedMessengerRuntime?.(action),
-    runInstallerFromUi: (installerId, installPath) => helpers?.runInstallerFromUi?.(installerId, installPath),
+    runInstallerFromUi: (...args) => helpers?.runInstallerFromUi?.(...args),
     describeClientError: (error, fallback) => helpers?.describeClientError?.(error, fallback) ?? fallback ?? String(error?.message || error || "Unknown error"),
     setRefreshStatus: (id, label, value) => helpers?.setRefreshStatus?.(id, label, value),
     setComfyPathSettingsStatus: (text, statusId) => helpers?.setComfyPathSettingsStatus?.(text, statusId),
