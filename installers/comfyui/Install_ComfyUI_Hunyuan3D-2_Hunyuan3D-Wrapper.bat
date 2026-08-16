@@ -44,9 +44,9 @@ echo ------------------------------
 echo 2. Set up paths
 echo ------------------------------
 if not "%~1"=="" (
-    set ROOT_DIR=%~1
+    set "ROOT_DIR=%~1"
 ) else (
-    for %%I in ("%~dp0..\..\data\comfyui") do set ROOT_DIR=%%~fI
+    for %%I in ("%~dp0..\..\data\comfyui") do set "ROOT_DIR=%%~fI"
 )
 echo Install root: %ROOT_DIR%
 if not exist "%ROOT_DIR%" mkdir "%ROOT_DIR%"
@@ -189,3 +189,4 @@ echo 13. Setup complete
 echo ------------------------------
 echo URAGE_COMFYUI_ROOT=%ROOT_DIR%
 echo ComfyUI is installed. Start it from URage NOW Settings ^> Setup ^> ComfyUI.
+exit /b 0

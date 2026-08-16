@@ -29,7 +29,7 @@ import {
   getDashboardNetworkConfiguration,
   saveDashboardNetworkConfiguration
 } from "../companion/dashboardNetworkConfiguration.js";
-import {saveComfyUiRuntimeConfiguration} from "../comfyUi/comfyUiRuntimeManager.js";
+import {getComfyUiRuntimeStatus, saveComfyUiRuntimeConfiguration} from "../comfyUi/comfyUiRuntimeManager.js";
 
 const uploadedModelImagesDirectory = path.resolve(appConfig.dataDirectory, "uploaded-model-images");
 const dashboardLogoRelativePaths = ["dashboard/logo.png"];
@@ -397,12 +397,16 @@ async function resolveInstallerSpec(installerId: DashboardInstallerId, installPa
     if (!scriptPath) {
       return null;
     }
-    const comfyUiInstallRoot = installPath || resolveRepoPath("data", "comfyui");
+    const configuredRuntime = await getComfyUiRuntimeStatus();
+    const configuredRoot = configuredRuntime.workingDirectory && await canAccessPath(configuredRuntime.workingDirectory)
+      ? configuredRuntime.workingDirectory
+      : "";
+    const comfyUiInstallRoot = installPath || configuredRoot || resolveRepoPath("data", "comfyui");
     return {
       id: "comfyui",
       label: "ComfyUI",
       command: "cmd.exe",
-      args: ["/d", "/s", "/c", `"${scriptPath}" "${comfyUiInstallRoot}"`],
+      args: ["/d", "/s", "/c", `call "${scriptPath}" "${comfyUiInstallRoot}"`],
       cwd: path.dirname(scriptPath),
       comfyUiInstallRoot
     };

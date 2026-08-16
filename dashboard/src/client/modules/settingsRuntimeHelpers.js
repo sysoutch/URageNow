@@ -554,8 +554,9 @@ function createDashboardSettingsRuntimeHelpers(input) {
       }
       setOutput(label + " installer completed.");
     } catch (error) {
-      setQuickInstallerStatus("Installer status: failed for " + label + ".");
-      setOutput(describeClientError(error, label + " installer failed."));
+      const detail = describeClientError(error, label + " installer failed.");
+      setQuickInstallerStatus("Installer status: failed for " + label + ". " + detail.slice(0, 280));
+      setOutput(detail);
     } finally {
       buttons.forEach(button => {
         button.disabled = false;
