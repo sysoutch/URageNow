@@ -1,15 +1,9 @@
 /**
- * Neutral dashboard process entrypoint.
+ * Shared runtime composition entrypoint.
  *
- * Messenger processes are opt-in and are controlled through Dashboard Settings.
- * The legacy Discord composition module still supplies feature adapters while
- * those adapters are moved into dedicated runtime packages incrementally.
+ * Its launch role is configured by the caller. In particular, do not override
+ * DASHBOARD_ENABLED here: run-server.cmd deliberately runs headless, while
+ * run-dashboard.cmd owns the dashboard HTTP server.
  */
-process.env.DASHBOARD_ENABLED = "true";
-process.env.DISCORD_RUNTIME_AUTOSTART = "false";
-process.env.TELEGRAM_BOT_AUTOSTART = "false";
-process.env.MATRIX_BOT_AUTOSTART = "false";
-process.env.WHATSAPP_BOT_AUTOSTART = "false";
-process.env.DISCORD_TOKEN_RUNTIME ||= "";
 
 await import("../bots/discord-bot/src/index.js");

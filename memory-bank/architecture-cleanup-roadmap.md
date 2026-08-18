@@ -155,6 +155,11 @@ Dashboard navigation regressions fixed:
 - Image Studio custom dimensions include an aspect-ratio lock that keeps width and height synchronized on the existing 8-pixel resolution step.
 - Image Studio preview metadata now reflects the selected image's dimensions, steps, CFG, and seed instead of static placeholder values.
 - 3D Studio inspector LOD generation now uses a dedicated `blender-scripts/decimate/decimateToFaces.py` pipeline, persists independently downloadable LOD artifacts, and derives automatic levels from inspected face counts instead of reusing the low-poly variant action.
+- Low-poly conversion preserves source UVs before the installed LowPolyUV addon samples them, so palette colors match the visible source texture. New conversions export self-contained GLB artifacts rather than round-tripping through FBX; existing FBX low-poly variants remain readable.
+- An empty Chat Studio session uses a centered, theme-aware mascot badge and the concise “Wow, such empty!” state instead of an instructional placeholder.
+- Fresh Chat Studio messages use a short pop-in animation in the dashboard and Android companion; only newly appended messages animate, so transcript re-renders do not replay motion for history.
+- Chat Studio message controls are compact, tooltip-labelled icons: task details, edit, and delete sit at the upper right, while speech and copy actions sit at the lower right. Task metadata opens as an anchored floating panel instead of expanding the bubble.
+- Chat Studio defaults to deleting successfully sent voice recordings: the dashboard does not persist an STT source artifact or retain its base64 data in chat history, and Android removes the local recording after a successful transcription. Each client exposes a preference to retain sent voice recordings instead.
 
 ## Phase 5: Consolidate CSS And SCSS Ownership
 
@@ -228,6 +233,7 @@ Completed:
 - dashboard settings initialization, legacy migration, and queued-write validation
 - dashboard server lifecycle and route smoke validation with fake runtime dependencies
 - aggregate `npm run check` across architecture, paths, Discord, worker, dashboard, and tool contracts
+- interactive runtime shutdown validation: Ctrl+C is handled by the Node runtime, reports the impact on embedded Discord, external messengers, and reachable ComfyUI, and leaves the server alive when the operator answers `n`.
 
 ## Recommended Sequence
 

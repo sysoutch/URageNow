@@ -29,11 +29,7 @@ function run(command, commandArgs, options = {}) {
 
 const dashboardEnv = {
   ...process.env,
-  DASHBOARD_ENABLED: "true",
-  DISCORD_RUNTIME_AUTOSTART: "false",
-  TELEGRAM_BOT_AUTOSTART: "false",
-  MATRIX_BOT_AUTOSTART: "false",
-  WHATSAPP_BOT_AUTOSTART: "false"
+  DASHBOARD_ENABLED: "true"
 };
 
 if (!dashboardEnv.DISCORD_TOKEN_RUNTIME) {

@@ -86,6 +86,7 @@ export const dashboardClientScriptParts: DashboardClientScriptPart[] = [
     { relativePath: "client/modules/dashboard/chat/replyStyleEditor.js", required: false },
       { relativePath: "client/modules/dashboard/chat/composerContextController.js", required: false },
       { relativePath: "client/modules/dashboard/chat/slashCommandController.js", required: false },
+      { relativePath: "client/modules/dashboard/chat/emptyStateMascot.js", required: false },
       { relativePath: "client/modules/aiActionHelpers.js", required: false },
   { relativePath: "client/modules/dashboard/image/poolHelpers.js", required: false },
   { relativePath: "client/modules/automationViewHelpers.js", required: false },

@@ -28,6 +28,7 @@ function createDashboardAiActionHelpers(input) {
   const askAutoTriggerSkillsStorageKey = "urage-ask-auto-trigger-skills";
   const askAutoRunSkillsStorageKey = "urage-ask-auto-run-skills";
   const askAutoTtsStorageKey = "urage-ask-auto-tts";
+  const askDeleteSentVoiceStorageKey = "urage-ask-delete-sent-voice";
   const askTtsVoiceStorageKey = "urage-ask-tts-voice";
   const askTtsModeStorageKey = "urage-ask-tts-mode";
   const askChatStorageKey = "urage-ask-chat-sessions-v2";
@@ -35,6 +36,7 @@ function createDashboardAiActionHelpers(input) {
   const askChatMaxMessages = 120;
   const askChatMaxImagePayload = 180_000;
   const askModelPreviewControllers = new Map();
+  const askBubblePopInMessageIds = new Set();
   const codeExtensionByLanguage = {
     javascript: "js",
     js: "js",
@@ -82,6 +84,8 @@ function createDashboardAiActionHelpers(input) {
     lowpoly: "bounding-box-circles",
     edit: "pencil-square",
     delete: "trash3",
+    copy: "clipboard",
+    info: "info-circle",
     busy: "hourglass-split"
   };
 
@@ -106,10 +110,11 @@ function createDashboardAiActionHelpers(input) {
     const autoTriggerSkillsToggle = document.getElementById("ask-auto-trigger-skills");
     const autoRunSkillsToggle = document.getElementById("ask-auto-run-skills");
     const autoTtsToggle = document.getElementById("ask-auto-tts");
+    const deleteSentVoiceToggle = document.getElementById("ask-delete-sent-voice");
     const ttsVoiceSelect = document.getElementById("ask-tts-voice");
     const ttsModeSelect = document.getElementById("ask-tts-mode");
     const shortcutHint = document.getElementById("ask-send-shortcut-hint");
-    return { autoEnterToggle, autoTriggerSkillsToggle, autoRunSkillsToggle, autoTtsToggle, ttsVoiceSelect, ttsModeSelect, shortcutHint };
+    return { autoEnterToggle, autoTriggerSkillsToggle, autoRunSkillsToggle, autoTtsToggle, deleteSentVoiceToggle, ttsVoiceSelect, ttsModeSelect, shortcutHint };
   }
   function getAskPersonalityNodes() {
     const select = document.getElementById("ask-personality-select");
@@ -1389,6 +1394,9 @@ function createDashboardAiActionHelpers(input) {
       return;
     }
     session.messages.push(message);
+    if (message?.id) {
+      askBubblePopInMessageIds.add(message.id);
+    }
     if (session.messages.length > askChatMaxMessages) {
       session.messages = session.messages.slice(-askChatMaxMessages);
     }
@@ -1490,6 +1498,14 @@ function createDashboardAiActionHelpers(input) {
       return false;
     }
   }
+  function readAskDeleteSentVoicePreference() {
+    try {
+      const value = window.localStorage.getItem(askDeleteSentVoiceStorageKey);
+      return value === null || value === "true";
+    } catch {
+      return true;
+    }
+  }
   function readAskTtsVoicePreference() {
     try {
       return normalizeAskTtsVoicePreference(window.localStorage.getItem(askTtsVoiceStorageKey) || "female");
@@ -1508,6 +1524,12 @@ function createDashboardAiActionHelpers(input) {
   function isAskAutoTtsEnabled() {
     const { autoTtsToggle } = getAskSendModeNodes();
     return autoTtsToggle && typeof autoTtsToggle.checked === "boolean" ? autoTtsToggle.checked : false;
+  }
+  function shouldDeleteSentAskVoice() {
+    const { deleteSentVoiceToggle } = getAskSendModeNodes();
+    return deleteSentVoiceToggle && typeof deleteSentVoiceToggle.checked === "boolean"
+      ? deleteSentVoiceToggle.checked
+      : true;
   }
   function updateAskShortcutHint() {
     const { shortcutHint } = getAskSendModeNodes();
@@ -1565,6 +1587,18 @@ function createDashboardAiActionHelpers(input) {
     }
     try {
       window.localStorage.setItem(askAutoTtsStorageKey, enabled === true ? "true" : "false");
+    } catch {}
+  }
+  function setAskDeleteSentVoiceEnabled(enabled, persist) {
+    const { deleteSentVoiceToggle } = getAskSendModeNodes();
+    if (deleteSentVoiceToggle) {
+      deleteSentVoiceToggle.checked = enabled !== false;
+    }
+    if (persist === false) {
+      return;
+    }
+    try {
+      window.localStorage.setItem(askDeleteSentVoiceStorageKey, enabled !== false ? "true" : "false");
     } catch {}
   }
   function setAskTtsVoicePreference(value, persist) {
@@ -2186,11 +2220,10 @@ function createDashboardAiActionHelpers(input) {
     }
     const details = document.createElement("details");
     details.className = "ask-task-info";
-    // Task metadata can be useful while debugging, but it should not take over
-    // the conversation every time an assistant message is rendered.
-    details.open = false;
     const summary = document.createElement("summary");
-    summary.textContent = "Task Info";
+    summary.setAttribute("aria-label", "Show task information");
+    summary.title = "Task information";
+    summary.innerHTML = "<i class=\"bi bi-info-circle\" aria-hidden=\"true\"></i>";
     details.appendChild(summary);
     const content = document.createElement("div");
     content.className = "ask-task-info-content";
@@ -2245,12 +2278,15 @@ function createDashboardAiActionHelpers(input) {
     details.appendChild(content);
     return details;
   }
-  function createAskBubbleUtilityActionRow(session, message) {
+  function createAskBubbleTopActionRow(session, message, taskInfo) {
     if (!session || !message) {
       return null;
     }
     const row = document.createElement("div");
-    row.className = "row chat-bubble-action-row ask-bubble-utility-action-row";
+    row.className = "ask-bubble-top-action-row";
+    if (taskInfo) {
+      row.appendChild(taskInfo);
+    }
     if (!message.pending) {
       const editButton = document.createElement("button");
       editButton.className = "secondary mini-button";
@@ -2973,11 +3009,13 @@ function createDashboardAiActionHelpers(input) {
       }
     );
   }
-  function createAskAssistantActionRow(message) {
+  function createAskBubbleLowerActionRow(message) {
     const row = document.createElement("div");
-    row.className = "row chat-bubble-action-row ask-bubble-assistant-action-row";
+    row.className = "row chat-bubble-action-row ask-bubble-lower-action-row";
     const text = String(message && message.text ? message.text : "").trim();
+    const assistantMessage = message && message.role === "assistant";
     if (text && !(message && message.pending)) {
+      if (assistantMessage) {
       const ttsButton = document.createElement("button");
       ttsButton.className = "secondary mini-button";
       ttsButton.type = "button";
@@ -2993,6 +3031,16 @@ function createDashboardAiActionHelpers(input) {
         setAskQuickActionButtonContent(ttsButton, "Stop Speech", "ttsStop");
       });
       row.appendChild(ttsButton);
+      }
+      row.appendChild(createAskQuickActionButton("Copy message", "copy", "Copy message", "Copying...", async () => {
+        if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+          throw new Error("This browser does not allow copying from the clipboard API.");
+        }
+        await navigator.clipboard.writeText(text);
+        input.setOutput("Message copied to clipboard.");
+      }));
+    }
+    if (assistantMessage) {
       const codeBlocks = collectCodeBlocksFromMarkdown(text);
       if (codeBlocks.length > 0) {
         row.appendChild(createAskQuickActionButton("Save Code", "save", "Save Code", "Saving...", async () => {
@@ -3173,15 +3221,22 @@ function createDashboardAiActionHelpers(input) {
     clearNode(messageList);
     const session = getActiveAskSession();
     if (!session || !Array.isArray(session.messages) || session.messages.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "ask-chat-empty";
-      empty.textContent = "No messages yet. Send a prompt, image, or 3D model to start this chat.";
+      messageList.classList.add("is-empty");
+      const empty = typeof createDashboardChatEmptyState === "function"
+        ? createDashboardChatEmptyState()
+        : document.createElement("div");
+      if (!empty.className) {
+        empty.className = "ask-chat-empty";
+        empty.textContent = "Wow, such empty!";
+      }
       messageList.appendChild(empty);
       return;
     }
+    messageList.classList.remove("is-empty");
     session.messages.forEach(message => {
       const article = document.createElement("article");
-      article.className = "chat-bubble " + (message.role === "assistant" ? "assistant-bubble" : "user-bubble") + (message.error ? " is-error" : "");
+      const shouldPopIn = Boolean(message.id && askBubblePopInMessageIds.delete(message.id));
+      article.className = "chat-bubble " + (message.role === "assistant" ? "assistant-bubble" : "user-bubble") + (message.error ? " is-error" : "") + (shouldPopIn ? " is-entering" : "");
       article.setAttribute("data-ask-message-id", message.id);
       const role = document.createElement("div");
       role.className = "chat-role";
@@ -3194,10 +3249,6 @@ function createDashboardAiActionHelpers(input) {
           const sourceLabel = message.usedSkill.source === "explicit" ? "manual" : "auto";
           skillTag.textContent = "Skill: " + message.usedSkill.id + " (" + sourceLabel + ")";
           article.appendChild(skillTag);
-        }
-        const taskInfo = createAskTaskInfoBlock(message);
-        if (taskInfo) {
-          article.appendChild(taskInfo);
         }
         const body = document.createElement("div");
         body.className = "chat-bubble-body";
@@ -3217,16 +3268,16 @@ function createDashboardAiActionHelpers(input) {
         if (clarificationPanel) {
           article.appendChild(clarificationPanel);
         }
-        const actionRow = createAskAssistantActionRow(message);
-        if (actionRow.childNodes.length > 0) {
-          article.appendChild(actionRow);
-        }
       } else {
         article.appendChild(createAskUserMessageBody(message));
       }
-      const utilityRow = createAskBubbleUtilityActionRow(session, message);
-      if (utilityRow) {
-        article.appendChild(utilityRow);
+      const lowerActionRow = createAskBubbleLowerActionRow(message);
+      if (lowerActionRow.childNodes.length > 0) {
+        article.appendChild(lowerActionRow);
+      }
+      const topActionRow = createAskBubbleTopActionRow(session, message, createAskTaskInfoBlock(message));
+      if (topActionRow) {
+        article.appendChild(topActionRow);
       }
       messageList.appendChild(article);
     });
@@ -3340,6 +3391,7 @@ function createDashboardAiActionHelpers(input) {
       const askModelUploads = sendInput.askModelUploads;
       const askFileUploads = sendInput.askFileUploads || [];
       const askAudioUploads = sendInput.askAudioUploads || [];
+      const deleteSentVoice = shouldDeleteSentAskVoice();
       const explicitSkillId = normalizeChatSkillIdClient(sendInput.skillId || "");
       let prompt = rawPrompt || (askImages.length > 0 ? "Describe this image in detail." : "");
       let audioTranscriptions = [];
@@ -3349,7 +3401,7 @@ function createDashboardAiActionHelpers(input) {
           const response = await input.request("/api/stt-transcribe", {
             audioDataUrl: audio.dataUrl,
             fileName: audio.fileName,
-            saveSource: true
+            saveSource: !deleteSentVoice
           });
           return {
             text: String(response?.transcript || response?.text || "").trim(),
@@ -3362,6 +3414,9 @@ function createDashboardAiActionHelpers(input) {
           return;
         }
         prompt = [prompt, transcript].filter(Boolean).join("\n\n");
+        if (deleteSentVoice) {
+          askAudioUploads.forEach(audio => { audio.dataUrl = ""; });
+        }
       }
       if (!prompt && askImages.length === 0 && askModelUploads.length === 0 && askFileUploads.length === 0) {
         input.setOutput("Prompt or uploaded files are required.");
@@ -3394,7 +3449,7 @@ function createDashboardAiActionHelpers(input) {
         files: askFileUploads.map(item => ({
           fileName: item && item.fileName ? item.fileName : "uploaded-file"
         })),
-        audios: askAudioUploads.map((item, index) => ({
+        audios: deleteSentVoice ? [] : askAudioUploads.map((item, index) => ({
           fileName: item && item.fileName ? item.fileName : "recorded-audio.webm",
           url: audioTranscriptions[index]?.audioUrl || "",
           dataUrl: audioTranscriptions[index]?.audioUrl ? "" : (item && item.dataUrl ? item.dataUrl : "")
@@ -3723,12 +3778,13 @@ function createDashboardAiActionHelpers(input) {
     setAskAutoEnterEnabled(readAskAutoEnterPreference(), true);
     setAskAutoRunSkillsEnabled(readAskAutoRunSkillsPreference(), false);
     setAskAutoTtsEnabled(readAskAutoTtsPreference(), false);
+    setAskDeleteSentVoiceEnabled(readAskDeleteSentVoicePreference(), false);
     setAskTtsVoicePreference(readAskTtsVoicePreference(), false);
     setAskTtsMode(readAskTtsModePreference(), false);
     replyStyleEditor?.bind();
     composerContextController?.bind();
     slashCommandController?.bind();
-    const { autoEnterToggle, autoRunSkillsToggle, autoTtsToggle, ttsVoiceSelect, ttsModeSelect } = getAskSendModeNodes();
+    const { autoEnterToggle, autoRunSkillsToggle, autoTtsToggle, deleteSentVoiceToggle, ttsVoiceSelect, ttsModeSelect } = getAskSendModeNodes();
     if (autoEnterToggle) {
       autoEnterToggle.addEventListener("change", () => {
         setAskAutoEnterEnabled(autoEnterToggle.checked, true);
@@ -3742,6 +3798,11 @@ function createDashboardAiActionHelpers(input) {
     if (autoTtsToggle) {
       autoTtsToggle.addEventListener("change", () => {
         setAskAutoTtsEnabled(autoTtsToggle.checked, true);
+      });
+    }
+    if (deleteSentVoiceToggle) {
+      deleteSentVoiceToggle.addEventListener("change", () => {
+        setAskDeleteSentVoiceEnabled(deleteSentVoiceToggle.checked, true);
       });
     }
     if (ttsVoiceSelect) {

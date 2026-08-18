@@ -21,7 +21,7 @@ not required to use Studio.
 ```powershell
 npm install
 copy .env.public.example .env.public.local
-npm run start:studio
+npm run start:dashboard
 ```
 
 Open `http://127.0.0.1:4782`. Most provider paths and credentials can then be
@@ -185,27 +185,26 @@ The TypeScript workspaces use scoped imports (`@urage/shared`, `@urage/server`, 
 
 ### Start the dashboard API and UI together
 
-The dashboard API and browser UI are one HTTP runtime, so the normal combined launcher uses one process:
+The dashboard API and browser UI are one HTTP runtime, so the normal launcher uses one process:
 
 ```powershell
-npm run start:studio
-```
-
-Use `npm run dev:studio` for watch mode. On Windows, the equivalent direct launcher is `scripts\run-studio.cmd`.
-
-### Start the runtime server and dashboard separately
-
-Use two terminals when you want an independently restartable headless runtime and dashboard:
-
-```powershell
-# Terminal 1: Discord/runtime host, with the dashboard disabled
-npm run start:server
-
-# Terminal 2: dashboard HTTP/API host, with messenger autostart disabled
 npm run start:dashboard
 ```
 
-Use `npm run dev:server` and `npm run dev:dashboard` for watch mode. The `server/` workspace is a shared service library rather than a standalone HTTP executable; `start:server` therefore starts the existing headless runtime host instead of creating a second dashboard API. A fully remote dashboard-to-runtime control plane remains a separate architectural step.
+Use `npm run dev:dashboard` for watch mode. On Windows, the direct launcher is `scripts\run-dashboard.cmd`.
+
+### Run the headless runtime only
+
+`run-server.cmd` is an isolated headless role. It does not bind the dashboard port and it does not auto-start Discord, Telegram, Matrix, WhatsApp, or ComfyUI:
+
+```powershell
+# Headless runtime only (no dashboard at http://localhost:4782)
+npm run start:server
+```
+
+Use this only for a purpose that specifically needs the headless role. It is not a companion process for `run-dashboard.cmd`: those processes do not share runtime ownership or a control plane. For normal local use, start only `run-dashboard.cmd`.
+
+Use `npm run dev:server` for headless watch mode. The `server/` workspace is a shared service library rather than a standalone HTTP executable; `start:server` therefore starts the headless composition without creating a second dashboard API.
 
 Normal launchers no longer run the full dashboard build on every start. They only rebuild `generated.css` when SCSS inputs or the dependency lockfile are newer. Explicit `npm run build:dashboard` and Tauri production builds still perform the complete CSS and TypeScript build. Remote-worker launch never builds dashboard assets.
 

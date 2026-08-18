@@ -159,7 +159,7 @@ URage Now runs on your Windows machine in a browser or Tauri desktop shell. You 
 ```powershell
 npm install
 copy .env.public.example .env.public.local
-npm run start:studio
+npm run start:dashboard
 ```
 
 Open `http://127.0.0.1:4782`, configure the provider and companion settings you need, and keep credentials out of committed environment files.

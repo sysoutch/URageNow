@@ -305,6 +305,7 @@ import {
   suggestModelMetadataViaRemoteWorker
 } from "@urage/server/services/remoteGenerationClient";
 import { createMessengerRuntimeManager } from "@urage/server/runtime/messengerRuntimeManager";
+import { installInteractiveShutdownPrompt } from "./runtime/interactiveShutdownPrompt.js";
 import {
   GIF_FRAME_DOWNLOAD_CUSTOM_ID_PREFIX,
   IMAGE_ADD_TO_POOL_BUTTON_CUSTOM_ID_PREFIX,
@@ -1432,7 +1433,7 @@ const messengerRuntimeManager = createMessengerRuntimeManager({
   }
 });
 
-startDashboardServer({
+const dashboardServer = startDashboardServer({
   enabled: appConfig.dashboardEnabled,
   port: appConfig.dashboardPort,
   host: appConfig.dashboardBindHost,
@@ -2645,6 +2646,49 @@ startDashboardServer({
   listJoinAutomations,
   saveJoinAutomation,
   deleteJoinAutomation
+});
+
+const isComfyUiReachable = async (): Promise<boolean> => {
+  const configuredBaseUrl = runtimeState.getGlobalDashboardSettings().comfyUiBaseUrl.trim();
+  if (!configuredBaseUrl) {
+    return false;
+  }
+  try {
+    const response = await fetch(`${configuredBaseUrl.replace(/\/+$/, "")}/system_stats`, {
+      signal: AbortSignal.timeout(1_500)
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+installInteractiveShutdownPrompt({
+  runtimeName: appConfig.dashboardEnabled ? "Dashboard" : "Headless server",
+  getDependencies: async () => {
+    const dependencies = messengerRuntimeManager.getSnapshot().runtimes
+      .filter(runtime => runtime.status === "running" || runtime.status === "starting")
+      .map(runtime => ({
+        label: runtime.label,
+        detail: runtime.messenger === "discord"
+          ? "embedded in this dashboard process and will stop with it."
+          : "runs in a separate process and can operate without the dashboard; this dashboard session will no longer manage it."
+      }));
+
+    if (await isComfyUiReachable()) {
+      dependencies.push({
+        label: "ComfyUI",
+        detail: "is reachable and runs independently; it will remain available after the dashboard stops."
+      });
+    }
+    return dependencies;
+  },
+  stop: async () => {
+    await dashboardServer.close();
+    if (client.isReady()) {
+      await stopDiscordRuntime();
+    }
+  }
 });
 
 client.once(Events.ClientReady, readyClient => {

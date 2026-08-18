@@ -32,9 +32,9 @@ The local path avoids the runas prompt and is what Tauri uses from `beforeDevCom
 - `npm run dev:dashboard:local`: direct local launcher for tools such as Tauri that should not open the runas prompt.
 - `npm run desktop:dev`: starts Tauri and lets Tauri run the local dashboard server through `beforeDevCommand`.
 - `npm run desktop:build`: builds the dashboard and Tauri shell.
-- `npm run start:studio`: starts the dashboard HTTP/API server and browser UI through one Windows launcher. They are two surfaces of the same process, not two servers.
+- `npm run start:dashboard`: starts the dashboard HTTP/API server and browser UI through one Windows launcher. They are two surfaces of the same process, not two servers.
 
-`runtime/dashboardRuntime.ts` is the neutral process entrypoint. It disables Discord/Telegram/Matrix/WhatsApp autostart so the dashboard can run without a messenger token. The existing Discord composition adapter still supplies several feature dependencies behind that entrypoint and is now explicit technical debt rather than launcher policy.
+`runtime/dashboardRuntime.ts` is the shared composition entrypoint and respects the caller's role. `run-dashboard.cmd` owns the dashboard HTTP/API server; `run-server.cmd` remains headless and suppresses messenger autostart. The existing Discord composition adapter still supplies several feature dependencies behind that entrypoint and is now explicit technical debt rather than launcher policy.
 
 Development Tauri builds can still start `npm run start:dashboard:local`. Production builds stage source, dependencies, and a target-specific Node executable through `scripts/prepare-tauri-runtime.mjs`; Tauri embeds them as a sidecar plus resources and redirects mutable data to the per-user application-data directory. Runtime readiness runs off the setup thread, and the window navigates after readiness. The Windows bundle uses the silent WebView2 download bootstrapper.
 

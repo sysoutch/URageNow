@@ -60,6 +60,26 @@ def triangulate_mesh_object(mesh_obj):
     bpy.ops.object.modifier_apply(modifier=triangulate_modifier.name, report=True)
 
 
+def ensure_mesh_has_uv(mesh_obj):
+    """Create UVs only for meshes that do not already have source UV data.
+
+    LowPolyUV samples every face's original texture coordinate before replacing
+    it with a palette coordinate. Re-unwrapping textured source meshes here
+    would make that sampling unrelated to the visible source texture.
+    """
+    if mesh_obj.data.uv_layers.active:
+        return
+    ensure_object_mode()
+    bpy.ops.object.select_all(action="DESELECT")
+    mesh_obj.select_set(True)
+    bpy.context.view_layer.objects.active = mesh_obj
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project()
+    bpy.ops.object.mode_set(mode="OBJECT")
+    print(f"Generated fallback UVs for mesh without source UVs: {mesh_obj.name}")
+
+
 def allocate_total_face_budget(mesh_objects, target_faces):
     """Distribute one model-wide face budget across its imported meshes."""
     face_counts = [len(mesh_obj.data.polygons) for mesh_obj in mesh_objects]
@@ -174,6 +194,9 @@ else:
         bpy.ops.preferences.addon_enable(module="io_scene_gltf2")
         bpy.ops.import_scene.gltf(filepath=filepath)
 
+# The FBX importer can finish linking mesh siblings on the next dependency-graph
+# update. Wait before collecting objects so decimation sees the complete asset.
+bpy.context.view_layer.update()
 # The scene was cleared before import, so every mesh now present belongs to
 # the source asset. Name-based filtering can miss FBX siblings with a reused
 # name, leaving part of the model untouched.
@@ -210,9 +233,6 @@ if merge_vertices:
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.mesh.remove_doubles()
     bpy.ops.object.mode_set(mode="OBJECT")
-# Use Blender's built-in UV projection after topology reduction. This keeps
-# UV generation independent from the decimation step and makes the exported
-# geometry predictable across headless Blender runs.
 if should_decimate:
     for mesh_obj in mesh_objects:
         triangulate_mesh_object(mesh_obj)
@@ -223,23 +243,19 @@ if should_decimate:
         decimate_mesh_object_to_target_faces(mesh_obj, mesh_face_budget)
     decimated_face_count = sum(len(mesh_obj.data.polygons) for mesh_obj in mesh_objects)
     print(f"Decimation completed with {decimated_face_count} faces.")
+    print("Low-poly mesh face counts: " + ", ".join(
+        f"{mesh_obj.name}={len(mesh_obj.data.polygons)}" for mesh_obj in mesh_objects
+    ))
 
-ensure_object_mode()
-bpy.ops.object.select_all(action="DESELECT")
 for mesh_obj in mesh_objects:
-    mesh_obj.select_set(True)
-bpy.context.view_layer.objects.active = active_mesh
-bpy.ops.object.mode_set(mode="EDIT")
-bpy.ops.mesh.select_all(action="SELECT")
-bpy.ops.uv.smart_project()
-bpy.ops.object.mode_set(mode="OBJECT")
+    ensure_mesh_has_uv(mesh_obj)
 for mesh_obj in mesh_objects:
     for polygon in mesh_obj.data.polygons:
         polygon.use_smooth = False
 
 # Prepare export paths
 if not output_path or output_path == "null":
-    output_path = f"{os.path.splitext(filepath)[0]}.fbx"
+    output_path = f"{os.path.splitext(filepath)[0]}_lowpoly.glb"
 output_folder = os.path.dirname(output_path)
 texture_dir = os.path.join(output_folder, "textures")
 os.makedirs(texture_dir, exist_ok=True)
@@ -261,23 +277,35 @@ for image in bpy.data.images:
 # Ensure textures are packed into the .blend file
 bpy.ops.file.pack_all()
 
-# Re-assert selection before export.
+# Re-assert selection before export. New low-poly artifacts use GLB: it keeps
+# geometry and the generated palette in one file, and avoids FBX round-trip
+# duplication/scaling defects seen in some generated source models. Keep FBX
+# export available for an explicitly requested legacy .fbx output path.
 ensure_object_mode()
 bpy.ops.object.select_all(action="DESELECT")
 for obj in mesh_objects:
     obj.select_set(True)
 bpy.context.view_layer.objects.active = active_mesh
-# Export the explicitly applied mesh without evaluating optional display
-# modifiers during FBX export.
-bpy.ops.export_scene.fbx(
-    filepath=output_path,
-    use_selection=True,
-    apply_scale_options="FBX_SCALE_ALL",
-    axis_forward="-Z",
-    axis_up="Y",
-    use_mesh_modifiers=False,
-    apply_unit_scale=True,
-    path_mode="COPY",
-    embed_textures=True,
-)
+print("Exporting processed low-poly meshes: " + ", ".join(obj.name for obj in mesh_objects))
+if output_path.lower().endswith(".fbx"):
+    bpy.ops.export_scene.fbx(
+        filepath=output_path,
+        use_selection=True,
+        apply_scale_options="FBX_SCALE_ALL",
+        axis_forward="-Z",
+        axis_up="Y",
+        use_mesh_modifiers=True,
+        apply_unit_scale=True,
+        path_mode="COPY",
+        embed_textures=True,
+    )
+elif output_path.lower().endswith(".glb"):
+    bpy.ops.export_scene.gltf(
+        filepath=output_path,
+        export_format="GLB",
+        use_selection=True,
+        export_apply=True,
+    )
+else:
+    raise RuntimeError("Low-poly output must use the .glb or .fbx extension.")
 print(f"Exported model to: {output_path}")

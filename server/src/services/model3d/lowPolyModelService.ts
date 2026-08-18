@@ -238,7 +238,7 @@ async function pickNewestLowPolyCandidate(directory: string, startedAtMs: number
   const entries = await readdir(directory, { withFileTypes: true });
   const candidates: Array<{ absolutePath: string; mtimeMs: number }> = [];
   for (const entry of entries) {
-    if (!entry.isFile() || !/\.fbx$/i.test(entry.name)) {
+    if (!entry.isFile() || !/\.(fbx|glb)$/i.test(entry.name)) {
       continue;
     }
     const absolutePath = path.join(directory, entry.name);

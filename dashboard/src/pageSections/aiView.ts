@@ -824,6 +824,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                         <span>Auto Text To Speech</span>
                         <input id="ask-auto-tts" type="checkbox">
                       </label>
+                      <label class="toggle compact-toggle ask-send-mode-toggle" for="ask-delete-sent-voice">
+                        <span>Delete Sent Voice Recordings</span>
+                        <input id="ask-delete-sent-voice" type="checkbox" checked>
+                      </label>
                       <label class="ask-tts-voice-picker" for="ask-tts-voice">
                         <span>TTS Voice</span>
                         <select id="ask-tts-voice">

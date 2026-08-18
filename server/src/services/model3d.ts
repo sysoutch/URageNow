@@ -1373,7 +1373,10 @@ export async function generateLowPolyModel(input: GenerateLowPolyModelInput): Pr
     const sourceModelPath = path.join(modelDirectory, record.modelFileName);
     await stat(sourceModelPath);
     const sourceStem = path.basename(record.modelFileName, path.extname(record.modelFileName)) || "model";
-    const desiredOutputName = sanitizeFileName(`${sourceStem}_lowpoly.fbx`, "model_lowpoly.fbx");
+    // Low-poly outputs are new web assets, not source-format copies. GLB keeps
+    // the mesh and palette together and avoids lossy FBX round trips. Existing
+    // imported and legacy FBX low-poly variants remain supported.
+    const desiredOutputName = sanitizeFileName(`${sourceStem}_lowpoly.glb`, "model_lowpoly.glb");
     const outputFileName = await ensureUniqueFileName(modelDirectory, desiredOutputName);
     const outputModelPath = path.join(modelDirectory, outputFileName);
     const resolvedOutputPath = await runLowPolyModelScript({
@@ -1391,7 +1394,7 @@ export async function generateLowPolyModel(input: GenerateLowPolyModelInput): Pr
     const outputFileNameForRecord = path.resolve(resolvedOutputDirectory) === path.resolve(modelDirectory)
       ? resolvedOutputFileName
       : await (async () => {
-        const copiedName = await ensureUniqueFileName(modelDirectory, sanitizeFileName(resolvedOutputFileName, "model_lowpoly.fbx"));
+        const copiedName = await ensureUniqueFileName(modelDirectory, sanitizeFileName(resolvedOutputFileName, "model_lowpoly.glb"));
         await copyFile(resolvedOutputPath, path.join(modelDirectory, copiedName));
         return copiedName;
       })();
@@ -2082,9 +2085,9 @@ export async function importGeneratedModelLowPolyArtifact(input: {
     const normalizedDimensions = normalizeRealWorldDimensions(input.lowPolyRealWorldDimensions);
     const modelDirectory = path.join(generatedModelsDirectory, safeModelId);
     await mkdir(modelDirectory, { recursive: true });
-    const defaultOutputName = `${path.basename(record.modelFileName, path.extname(record.modelFileName)) || "model"}_lowpoly.fbx`;
-    const extension = extensionFromFileName(normalizedInputName) || ".fbx";
-    const desiredName = sanitizeFileName(normalizedInputName, sanitizeFileName(defaultOutputName, "model_lowpoly.fbx"));
+    const defaultOutputName = `${path.basename(record.modelFileName, path.extname(record.modelFileName)) || "model"}_lowpoly.glb`;
+    const extension = extensionFromFileName(normalizedInputName) || ".glb";
+    const desiredName = sanitizeFileName(normalizedInputName, sanitizeFileName(defaultOutputName, "model_lowpoly.glb"));
     const stem = path.basename(desiredName, path.extname(desiredName)) || "model_lowpoly";
     const normalizedName = `${stem}${extension}`;
     const finalName = await ensureUniqueFileName(modelDirectory, normalizedName);
