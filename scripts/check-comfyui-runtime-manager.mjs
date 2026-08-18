@@ -10,6 +10,7 @@ assert.match(managerSource, /detached: true/);
 assert.doesNotMatch(managerSource, /runningProcess\.unref\(\)/);
 assert.match(managerSource, /windowsHide: false/);
 assert.match(managerSource, /const bundledLauncherPath = "scripts\/comfyui\/run-comfyui\.bat"/);
+assert.match(managerSource, /isComfyUiAlreadyRunning/);
 assert.match(managerSource, /stdio: \["ignore", "pipe", "pipe"\]/);
 assert.match(managerSource, /child\.stdout\?\.on\("data", appendRuntimeOutput\)/);
 assert.match(managerSource, /child\.stderr\?\.on\("data", appendRuntimeOutput\)/);

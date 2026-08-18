@@ -3,6 +3,7 @@ import {existsSync} from "node:fs";
 import {mkdir, readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
 import {resolveRepoPath} from "@urage/server/config/repositoryPaths";
+import {appConfig} from "@urage/server/config/appConfig";
 
 export type ComfyUiRuntimeConfiguration = {
   launcherPath: string;
@@ -24,6 +25,7 @@ const bundledLauncherPath = "scripts/comfyui/run-comfyui.bat";
 const processExitTimeoutMs = 10_000;
 const maxRuntimeOutputLines = 160;
 let runningProcess: ChildProcess | null = null;
+let externallyRunning = false;
 let stopPromise: Promise<void> | null = null;
 let runtimeStartedAt: string | null = null;
 let runtimeOutput: string[] = [];
@@ -52,6 +54,16 @@ function launcher(value: string): string {
 
 function isProcessRunning(child: ChildProcess | null): child is ChildProcess {
   return Boolean(child?.pid && child.exitCode === null);
+}
+
+async function isComfyUiAlreadyRunning(): Promise<boolean> {
+  try {
+    const baseUrl = appConfig.comfyUiBaseUrl.replace(/\/+$/, "");
+    const response = await fetch(`${baseUrl}/system_stats`, {signal: AbortSignal.timeout(1_500)});
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 async function readConfig(): Promise<ComfyUiRuntimeConfiguration> {
@@ -123,13 +135,17 @@ async function terminateRuntimeProcess(child: ChildProcess): Promise<void> {
 }
 
 export async function getComfyUiRuntimeStatus(): Promise<RuntimeStatus> {
+  if (externallyRunning && !isProcessRunning(runningProcess) && !(await isComfyUiAlreadyRunning())) {
+    externallyRunning = false;
+    runtimeOutput = ["The externally managed ComfyUI instance is no longer reachable."];
+  }
   const config = await readConfig();
   const child = runningProcess;
-  const active = isProcessRunning(child);
+  const active = isProcessRunning(child) || externallyRunning;
   return {
     status: active ? "running" : "stopped",
-    pid: active ? child.pid || null : null,
-    startedAt: active ? runtimeStartedAt : null,
+    pid: isProcessRunning(child) ? child.pid || null : null,
+    startedAt: isProcessRunning(child) ? runtimeStartedAt : null,
     output: runtimeOutput,
     ...config
   };
@@ -153,6 +169,13 @@ export async function startComfyUiRuntime(): Promise<RuntimeStatus> {
   if (isProcessRunning(runningProcess)) {
     return getComfyUiRuntimeStatus();
   }
+  if (await isComfyUiAlreadyRunning()) {
+    externallyRunning = true;
+    runtimeStartedAt = null;
+    runtimeOutput = ["ComfyUI is already reachable at the configured URL; skipped duplicate launch."];
+    const config = await readConfig();
+    return {status: "running", pid: null, startedAt: null, output: runtimeOutput, ...config};
+  }
   const config = await readConfig();
   const launcherPath = launcher(config.launcherPath);
   if (!config.workingDirectory) {
@@ -170,6 +193,7 @@ export async function startComfyUiRuntime(): Promise<RuntimeStatus> {
     windowsHide: false
   });
   runningProcess = child;
+  externallyRunning = false;
   runtimeStartedAt = new Date().toISOString();
   runtimeOutput = [`[${runtimeStartedAt}] Starting ${config.launcherPath} from ${workingDirectory}`];
   child.stdout?.on("data", appendRuntimeOutput);
@@ -190,6 +214,10 @@ export async function startComfyUiRuntimeWhenConfigured(): Promise<RuntimeStatus
 }
 
 export async function stopComfyUiRuntime(): Promise<RuntimeStatus> {
+  if (externallyRunning && !isProcessRunning(runningProcess)) {
+    runtimeOutput = ["ComfyUI was started outside this dashboard process and was left running."];
+    return getComfyUiRuntimeStatus();
+  }
   if (!isProcessRunning(runningProcess)) {
     return getComfyUiRuntimeStatus();
   }

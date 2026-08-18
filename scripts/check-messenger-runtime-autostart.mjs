@@ -19,6 +19,7 @@ for (const messenger of ["discord", "telegram", "matrix", "whatsapp"]) {
   assert.match(settingsRoute, new RegExp(setting));
 }
 assert.match(entrypoint, /URAGE_DISABLE_MESSENGER_AUTOSTART/);
+assert.match(entrypoint, /createLocalMessengerHealthCheck/);
 assert.match(entrypoint, /messengerRuntimeSettings\.discordRuntimeAutostart|runtimeState\.getGlobalDashboardSettings\(\)\.discordRuntimeAutostart/);
 assert.match(page, /messenger-runtime-autostart-checkbox/);
 assert.match(page, /settings-discord-runtime-autostart/);

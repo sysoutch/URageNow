@@ -40,6 +40,8 @@ export interface ExternalMessengerRuntimeConfig {
   entryPath: string;
   workingDirectory?: string;
   autoStart?: boolean;
+  /** Detect a compatible already-running runtime before launching a second process. */
+  healthCheck?: () => Promise<boolean>;
 }
 
 interface MessengerRuntimeManagerDependencies {
@@ -113,7 +115,7 @@ export class MessengerRuntimeManager {
   private readonly maxEvents: number;
   private readonly records = new Map<MessengerRuntimeKey, MessengerRuntimeRecord>();
   private readonly events: MessengerRuntimeEvent[] = [];
-  private readonly externalConfigs: Record<ExternalMessengerRuntimeKey, { entryPath: string; workingDirectory: string; autoStart: boolean }>;
+  private readonly externalConfigs: Record<ExternalMessengerRuntimeKey, { entryPath: string; workingDirectory: string; autoStart: boolean; healthCheck?: () => Promise<boolean> }>;
   private readonly externalStates: Record<ExternalMessengerRuntimeKey, ManagedExternalRuntime>;
 
   constructor(dependencies: MessengerRuntimeManagerDependencies) {
@@ -126,17 +128,20 @@ export class MessengerRuntimeManager {
       telegram: {
         entryPath: toAbsolutePath(dependencies.telegram.entryPath),
         workingDirectory: toAbsolutePath(dependencies.telegram.workingDirectory ?? ""),
-        autoStart: dependencies.telegram.autoStart === true
+        autoStart: dependencies.telegram.autoStart === true,
+        healthCheck: dependencies.telegram.healthCheck
       },
       matrix: {
         entryPath: toAbsolutePath(dependencies.matrix.entryPath),
         workingDirectory: toAbsolutePath(dependencies.matrix.workingDirectory ?? ""),
-        autoStart: dependencies.matrix.autoStart === true
+        autoStart: dependencies.matrix.autoStart === true,
+        healthCheck: dependencies.matrix.healthCheck
       },
       whatsapp: {
         entryPath: toAbsolutePath(dependencies.whatsapp.entryPath),
         workingDirectory: toAbsolutePath(dependencies.whatsapp.workingDirectory ?? ""),
-        autoStart: dependencies.whatsapp.autoStart === true
+        autoStart: dependencies.whatsapp.autoStart === true,
+        healthCheck: dependencies.whatsapp.healthCheck
       }
     };
     this.externalStates = {
@@ -398,7 +403,7 @@ export class MessengerRuntimeManager {
     }
   }
 
-  private getExternalRuntimeConfig(key: ExternalMessengerRuntimeKey): { entryPath: string; workingDirectory: string; autoStart: boolean } {
+  private getExternalRuntimeConfig(key: ExternalMessengerRuntimeKey): { entryPath: string; workingDirectory: string; autoStart: boolean; healthCheck?: () => Promise<boolean> } {
     return this.externalConfigs[key];
   }
 
@@ -443,6 +448,17 @@ export class MessengerRuntimeManager {
         startedAt: current.startedAt ?? new Date().toISOString(),
         stoppedAt: null
       });
+      return;
+    }
+    if (await config.healthCheck?.()) {
+      this.updateRecord(key, {
+        status: "running",
+        message: `${current.label} runtime is already running outside this dashboard process.`,
+        pid: null,
+        startedAt: current.startedAt ?? new Date().toISOString(),
+        stoppedAt: null
+      });
+      this.pushEvent(key, "info", `${current.label} runtime was already healthy; skipped duplicate launch.`);
       return;
     }
     const workingDirectory = config.workingDirectory || path.dirname(config.entryPath);

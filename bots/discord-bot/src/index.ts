@@ -1396,6 +1396,17 @@ const startDiscordRuntime = (tokenOverride?: string) => discordRuntimeControl.st
 const stopDiscordRuntime = () => discordRuntimeControl.stopDiscordRuntime();
 const resolveSharedMessengerEnvironment = () => discordRuntimeControl.resolveSharedMessengerEnvironment();
 const messengerRuntimeSettings = runtimeState.getGlobalDashboardSettings();
+const createLocalMessengerHealthCheck = (baseUrl: string) => async (): Promise<boolean> => {
+  try {
+    const response = await fetch(`${baseUrl.replace(/\/+$/, "")}/health`, {
+      headers: appConfig.messengerAdminSharedSecret ? {"x-messenger-admin-secret": appConfig.messengerAdminSharedSecret} : undefined,
+      signal: AbortSignal.timeout(1_500)
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
 const messengerRuntimeManager = createMessengerRuntimeManager({
   startDiscord: startDiscordRuntime,
   stopDiscord: stopDiscordRuntime,
@@ -1404,17 +1415,20 @@ const messengerRuntimeManager = createMessengerRuntimeManager({
   telegram: {
     entryPath: appConfig.telegramBotEntryPath,
     workingDirectory: appConfig.telegramBotWorkingDirectory,
-    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.telegramRuntimeAutostart
+    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.telegramRuntimeAutostart,
+    healthCheck: createLocalMessengerHealthCheck(appConfig.telegramAdminBaseUrl)
   },
   matrix: {
     entryPath: appConfig.matrixBotEntryPath,
     workingDirectory: appConfig.matrixBotWorkingDirectory,
-    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.matrixRuntimeAutostart
+    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.matrixRuntimeAutostart,
+    healthCheck: createLocalMessengerHealthCheck(appConfig.matrixAdminBaseUrl)
   },
   whatsapp: {
     entryPath: appConfig.whatsappBotEntryPath,
     workingDirectory: appConfig.whatsappBotWorkingDirectory,
-    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.whatsappRuntimeAutostart
+    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.whatsappRuntimeAutostart,
+    healthCheck: createLocalMessengerHealthCheck(appConfig.whatsappAdminBaseUrl)
   }
 });
 
