@@ -251,13 +251,13 @@ function createDashboardThreeDViewportControlHelpers(input) {
         + "#model3d-transform-pan-button,"
         + "#model3d-transform-front-button,"
         + "#model3d-transform-turntable-button,"
-        + "#model3d-transform-scale-button,"
+        + "[data-model3d-llm-real-height-action],"
         + "#model3d-transform-grid-button,"
         + "#model3d-export-gif-button"
       );
       if (viewportTarget && !event.defaultPrevented) {
         event.preventDefault();
-        if (viewportTarget.id === "model3d-transform-scale-button") {
+        if (viewportTarget.getAttribute("data-model3d-llm-real-height-action") !== null) {
           await runModel3dLlmScaleForSelectedModel();
           return;
         }

@@ -8,17 +8,3 @@
 @use "styles/studio";
 @use "styles/messenger";
 @use "styles/shared";
-
-// Final rail invariant: workflow entries are an AI-only branch. Older Studio
-// layers still assign the collapsed list a fixed grid track on Tools/Bots,
-// leaving a visible blank slab between LazyDev and Tools. Keep that branch out
-// of layout altogether outside AI, after every legacy layer has loaded.
-body:not(.view-ai-active):not([data-studio-rail-hover-group="workflow"]):not([data-studio-rail-hover-leaving-group="workflow"]) .server-rail .rail-home-wrap > .rail-studio-workflows {
-  display: none !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-}

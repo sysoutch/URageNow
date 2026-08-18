@@ -1072,7 +1072,8 @@ export async function deleteGeneratedModelVariant(modelId: string, variant: Gene
     ? (record.originalModelFileName || record.lowPolyModelFileName || record.albedoGeometryModelFileName)
     : record.modelFileName;
   if (variant === "merged" && (!remainingFileName || remainingFileName === expectedFileName)) {
-    throw new Error("The merged artifact is the model's only remaining variant. Delete the model entry explicitly instead.");
+    await deleteGeneratedModel(safeModelId);
+    return null;
   }
   const filesToDelete = [expectedFileName];
   const updated = await mutateGeneratedModelRecord(safeModelId, async current => {

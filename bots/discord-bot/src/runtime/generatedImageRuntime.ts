@@ -440,8 +440,21 @@ export function createGeneratedImageRuntime(input: GeneratedImageRuntimeInput) {
     return generated;
   };
 
-  const postGeneratedImagesToChannel = async (runtimeInput: PostGeneratedImagesInput): Promise<void> => {
-    let images = runtimeInput.images.filter(entry => entry && entry.record);
+  const postGeneratedImagesToChannel = async (runtimeInput: PostGeneratedImagesInput): Promise<Array<{ kind: "image"; fileName?: string; directUrl?: string; }>> => {
+    const publishedAssets: Array<{ kind: "image"; fileName?: string; directUrl?: string; }> = [];
+    let images: Array<{ label: string; record: GeneratedImagePublicRecord; }> = [];
+    const captureAttachments = (message: any): void => {
+      const attachments = message?.attachments;
+      const values = typeof attachments?.values === "function" ? Array.from(attachments.values()) : [];
+      for (const attachment of values as any[]) {
+        if (typeof attachment?.url === "string" && attachment.url) {
+          const fileName = typeof attachment?.name === "string" ? attachment.name : undefined;
+          const generated = images.find(entry => entry.record.imageFileName === fileName)?.record;
+          publishedAssets.push({ kind: "image", fileName, directUrl: generated?.imageUrl || attachment.url });
+        }
+      }
+    };
+    images = runtimeInput.images.filter(entry => entry && entry.record);
     if (images.length === 0) {
       throw new Error("No generated images are available to post.");
     }
@@ -459,7 +472,7 @@ export function createGeneratedImageRuntime(input: GeneratedImageRuntimeInput) {
         const routeImages = images.filter(entry => matchesGeneratedImageRouteLabel(wanted, entry.label));
         if (routeImages.length === 0) continue;
         routeImages.forEach(entry => routedLabels.add(entry.label.trim().toLowerCase()));
-        await postGeneratedImagesToChannel({
+        publishedAssets.push(...await postGeneratedImagesToChannel({
           channelId: String(route.channelId || runtimeInput.channelId).trim() || runtimeInput.channelId,
           images: routeImages,
           postMode: route.postMode === "separate" ? "separate" : route.postMode === "combined" ? "combined" : runtimeInput.postMode,
@@ -474,11 +487,11 @@ export function createGeneratedImageRuntime(input: GeneratedImageRuntimeInput) {
             sendInitialToSelectedChannel: false,
             variantTargets: []
           }
-        });
+        }));
       }
       images = images.filter(entry => !routedLabels.has(entry.label.trim().toLowerCase()));
       if (images.length === 0) {
-        return;
+        return publishedAssets;
       }
     }
     const targetMode = options.targetMode === "thread" || options.targetMode === "forum-post" || options.targetMode === "forum-create-and-post"
@@ -511,20 +524,20 @@ export function createGeneratedImageRuntime(input: GeneratedImageRuntimeInput) {
     const sendToChannel = async (channel: { send: (payload: any) => Promise<unknown>; }): Promise<void> => {
       if (runtimeInput.postMode === "separate") {
         for (const entry of images) {
-          await channel.send(await buildPayload([entry], buildContent(entry.label)));
+          captureAttachments(await channel.send(await buildPayload([entry], buildContent(entry.label))));
         }
         return;
       }
       const message = await channel.send({ content: "🖼️ Automated image versions are ready. Preparing Discord attachments..." });
       if (message && typeof message === "object" && "edit" in message && typeof (message as { edit?: unknown }).edit === "function") {
-        await (message as Message).edit(await buildPayload(images, buildContent()));
+        captureAttachments(await (message as Message).edit(await buildPayload(images, buildContent())));
         return;
       }
-      await channel.send(await buildPayload(images, buildContent()));
+      captureAttachments(await channel.send(await buildPayload(images, buildContent())));
     };
     if (targetMode === "channel") {
       await sendToChannel(selectedChannel);
-      return;
+      return publishedAssets;
     }
     const selectedFetched = await input.client.channels.fetch(runtimeInput.channelId);
     if (!selectedFetched || !("guildId" in selectedFetched) || typeof selectedFetched.guildId !== "string") {
@@ -547,7 +560,7 @@ export function createGeneratedImageRuntime(input: GeneratedImageRuntimeInput) {
         autoArchiveDuration: 1440
       });
       await sendToChannel(thread);
-      return;
+      return publishedAssets;
     }
     const forumChannel = options.forumChannelId
       ? await input.client.channels.fetch(options.forumChannelId)
@@ -566,20 +579,23 @@ export function createGeneratedImageRuntime(input: GeneratedImageRuntimeInput) {
     }
     if (runtimeInput.postMode === "separate") {
       const [first, ...rest] = images;
-      if (!first) return;
+      if (!first) return publishedAssets;
       const thread = await forumChannel.threads.create({
         name: resolveThreadName(),
         message: await buildPayload([first], buildContent(first.label))
       });
+      captureAttachments(await thread.fetchStarterMessage().catch(() => null));
       for (const entry of rest) {
-        await thread.send(await buildPayload([entry], buildContent(entry.label)));
+        captureAttachments(await thread.send(await buildPayload([entry], buildContent(entry.label))));
       }
-      return;
+      return publishedAssets;
     }
-    await forumChannel.threads.create({
+    const thread = await forumChannel.threads.create({
       name: resolveThreadName(),
       message: await buildPayload(images, buildContent())
     });
+    captureAttachments(await thread.fetchStarterMessage().catch(() => null));
+    return publishedAssets;
   };
 
   const convertGeneratedImageToPixelArt = async (record: GeneratedImagePublicRecord): Promise<GeneratedImagePublicRecord> => {

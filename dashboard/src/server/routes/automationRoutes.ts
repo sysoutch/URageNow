@@ -1,11 +1,29 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { DashboardDependencies } from "../runtime/botBridge.js";
 import { deleteDashboardResourcePool, saveDashboardResourcePool } from "@urage/server/services/resourcePools";
+import { getUrageNetMediaGallerySettings, saveUrageNetMediaGallerySettings } from "@urage/server/services/urageNetMediaGallerySettings";
 import { parseJsonBody, sendJson } from "../http.js";
 import { createDashboardRouteTable, dispatchDashboardRoute, getRoute, postRoute } from "../router.js";
 
 function isDashboardResourcePoolKind(value: string | null | undefined): value is "image" | "model3d" | "video" | "audio" | "music" {
   return value === "image" || value === "model3d" || value === "video" || value === "audio" || value === "music";
+}
+
+async function handleGetUrageNetMediaGallerySettings(request: IncomingMessage, response: ServerResponse): Promise<void> {
+  sendJson(response, 200, await getUrageNetMediaGallerySettings());
+}
+
+async function handlePostUrageNetMediaGallerySettings(request: IncomingMessage, response: ServerResponse): Promise<void> {
+  const body = await parseJsonBody(request) as { baseUrl?: unknown; username?: unknown; password?: unknown; };
+  try {
+    sendJson(response, 200, await saveUrageNetMediaGallerySettings({
+      baseUrl: typeof body.baseUrl === "string" ? body.baseUrl : undefined,
+      username: typeof body.username === "string" ? body.username : undefined,
+      password: typeof body.password === "string" ? body.password : undefined
+    }));
+  } catch (error) {
+    sendJson(response, 400, { error: error instanceof Error ? error.message : "Could not save URageNet Media Library settings." });
+  }
 }
 
 function parseImagePostProcessingOptions(value: unknown): {
@@ -378,6 +396,8 @@ async function handlePostApiScheduledAutomations(request: IncomingMessage, respo
       modelUnloadLlmBeforeGenerate: body.modelUnloadLlmBeforeGenerate !== false,
       modelRandomSource: body.modelRandomSource !== false,
       modelSendStartNotice: body.modelSendStartNotice !== false,
+      writePublishedMediaManifest: body.writePublishedMediaManifest === true,
+      publishToUrageNetMediaGallery: body.publishToUrageNetMediaGallery === true,
       modelPostOptions: parseModelPostOptions(body.modelPostOptions)
     },
     createdAt: typeof body.createdAt === "string" ? body.createdAt : undefined,
@@ -593,6 +613,8 @@ async function handlePostApiJoinAutomationsDelete(request: IncomingMessage, resp
 }
 
 const dashboardAutomationRouteTable = createDashboardRouteTable([
+  getRoute("/api/automation/uragenet-media-gallery-settings", handleGetUrageNetMediaGallerySettings),
+  postRoute("/api/automation/uragenet-media-gallery-settings", handlePostUrageNetMediaGallerySettings),
   postRoute("/api/scheduled-automations", handlePostApiScheduledAutomations),
   postRoute("/api/scheduled-automations/delete", handlePostApiScheduledAutomationsDelete),
   postRoute("/api/join-automations", handlePostApiJoinAutomations),

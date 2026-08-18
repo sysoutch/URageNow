@@ -9,6 +9,8 @@ const [repairPs1, repairCmd, showPs1, showCmd] = await Promise.all([
 ]);
 
 assert.match(repairPs1, /Read-Host \$Prompt -AsSecureString/);
+assert.match(repairPs1, /RandomNumberGenerator\]::Create\(\)/);
+assert.doesNotMatch(repairPs1, /RandomNumberGenerator\]::Fill/);
 assert.match(repairPs1, /reset_password/);
 assert.match(repairPs1, /logout_devices = \$true/);
 assert.match(repairPs1, /_matrix\/client\/v3\/login/);

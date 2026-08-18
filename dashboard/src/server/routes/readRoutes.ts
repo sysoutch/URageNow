@@ -31,6 +31,7 @@ import {
   saveDashboardNetworkConfiguration
 } from "../companion/dashboardNetworkConfiguration.js";
 import {getComfyUiRuntimeStatus, saveComfyUiRuntimeConfiguration} from "../comfyUi/comfyUiRuntimeManager.js";
+import { getPublishedMediaManifestPath } from "@urage/shared/automation/index";
 
 const uploadedModelImagesDirectory = path.resolve(appConfig.dataDirectory, "uploaded-model-images");
 const dashboardLogoRelativePaths = ["dashboard/logo.png"];
@@ -1207,6 +1208,15 @@ async function handleGetApiGeneratedVideoFile(request: IncomingMessage, response
   return;
 }
 
+async function handleGetApiAutomationPublishedMedia(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  try {
+    const raw = await readFile(getPublishedMediaManifestPath(appConfig.dataDirectory), "utf8");
+    sendJson(response, 200, JSON.parse(raw));
+  } catch (error) {
+    sendJson(response, 404, { error: error instanceof Error ? error.message : "Automation feed is unavailable." });
+  }
+}
+
 async function handleGetApiScheduledAutomations(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const guildId = url.searchParams.get("guildId")?.trim() ?? "";
   if (!guildId) {
@@ -1291,6 +1301,7 @@ const dashboardReadRouteTable = createDashboardRouteTable([
   getRoute("/api/uploaded-model-image-file", handleGetApiUploadedModelImageFile),
   getRoute("/api/generated-audio-file", handleGetApiGeneratedAudioFile),
   getRoute("/api/generated-video-file", handleGetApiGeneratedVideoFile),
+  getRoute("/api/automation-published-media", handleGetApiAutomationPublishedMedia),
   getRoute("/api/scheduled-automations", handleGetApiScheduledAutomations),
   getRoute("/api/join-automations", handleGetApiJoinAutomations),
   postRoute("/api/settings/urage-now/register-protocol", handlePostApiRegisterUriageNowProtocol),

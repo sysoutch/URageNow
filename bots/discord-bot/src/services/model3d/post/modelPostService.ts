@@ -499,7 +499,14 @@ export function createModelPostService(dependencies: ModelPostServiceDependencie
         highPolyModelUrl: finalModelMediaUrl || selectedResult.modelMediaUrl || input.generated.modelUrl,
         highPolyMessageUrl: destinationResult.messageUrl || selectedResult.messageUrl
       });
-      return postedModel;
+      return Object.assign(postedModel, {
+        messengerDelivery: {
+          messageUrl: destinationResult.messageUrl || selectedResult.messageUrl,
+          modelMediaUrl: finalModelMediaUrl,
+          previewMediaUrl: destinationResult.previewMediaUrl || selectedResult.previewMediaUrl,
+          sourceImageUrl: destinationSourceImageUrl
+        }
+      });
     }
     const directResult = await postGeneratedModelToChannel({
       channelId: input.channelId,
@@ -517,7 +524,14 @@ export function createModelPostService(dependencies: ModelPostServiceDependencie
       highPolyModelUrl: directResult.modelMediaUrl || input.generated.modelUrl,
       highPolyMessageUrl: directResult.messageUrl
     });
-    return postedModel;
+    return Object.assign(postedModel, {
+      messengerDelivery: {
+        messageUrl: directResult.messageUrl,
+        modelMediaUrl: directResult.modelMediaUrl,
+        previewMediaUrl: directResult.previewMediaUrl,
+        sourceImageUrl: directResult.sourceImageUrl
+      }
+    });
   }
 
   async function generateModelAndPostToChannel(input: { channelId: string; imageInput: string; prompt?: string; stripMetadata?: boolean; requestedBy?: string; messageMode?: ModelPostMessageMode; postOptions?: ModelPostOptions; extraContent?: string; }): Promise<GeneratedModelPublicRecord> {

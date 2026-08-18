@@ -90,6 +90,40 @@ def allocate_total_face_budget(mesh_objects, target_faces):
     return budgets
 
 
+def apply_installed_lowpolyuv_addon(mesh_objects, max_palette_colors, pixel_block_size):
+    """Apply the installed LowPolyUV addon to every imported mesh.
+
+    The addon owns palette clustering and UV snapping. Keeping that algorithm in
+    one place ensures headless exports match the interactive Blender workflow.
+    """
+    if not hasattr(bpy.ops.uv, "lowpolyuv"):
+        raise RuntimeError(
+            "The LowPolyUV Blender addon is not enabled. Enable the installed addon "
+            "before running a lowpoly export."
+        )
+    for mesh_obj in mesh_objects:
+        ensure_object_mode()
+        bpy.ops.object.select_all(action="DESELECT")
+        mesh_obj.select_set(True)
+        bpy.context.view_layer.objects.active = mesh_obj
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        result = bpy.ops.uv.lowpolyuv(
+            workflow_method="TEXTURE",
+            texture_method="NEW",
+            scale_factor=0.0,
+            max_colors=max(1, min(256, max_palette_colors)),
+            block_size=max(1, pixel_block_size),
+            use_downscale=True,
+            downscale_max=512,
+            use_metallic=False,
+            use_flat_shading=True
+        )
+        if "FINISHED" not in result:
+            raise RuntimeError(f"LowPolyUV addon did not finish for mesh: {mesh_obj.name}")
+    ensure_object_mode()
+
+
 # Get arguments after '--'
 args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 
@@ -210,27 +244,19 @@ output_folder = os.path.dirname(output_path)
 texture_dir = os.path.join(output_folder, "textures")
 os.makedirs(texture_dir, exist_ok=True)
 
-# Ensure packed textures are unpacked and saved to textures folder
-for mat in active_mesh.data.materials:
-    if not mat or not mat.use_nodes:
-        continue
-    bsdf = next((n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
-    if not bsdf:
-        continue
-    links = mat.node_tree.links
-    has_texture = False
-    for link in links:
-        if link.to_node == bsdf and link.to_socket.name == "Base Color" and link.from_node.type == "TEX_IMAGE":
-            has_texture = True
-            img = link.from_node.image
-            if img:
-                texture_path = os.path.join(texture_dir, f"{img.name}.png")
-                img.filepath_raw = texture_path
-                img.save(filepath=texture_path)
-                print(f"Saved texture manually to: {texture_path}")
-            break
-    if not has_texture:
-        print(f"Material '{mat.name}' has no Base Color texture connected.")
+# Delegate palette generation and UV snapping to the installed LowPolyUV
+# addon. This is intentionally the same implementation used interactively in
+# Blender, rather than a second approximation maintained by the dashboard.
+apply_installed_lowpolyuv_addon(mesh_objects, max_colors, block_size)
+
+# The addon creates in-memory palette images. Give them export paths before
+# packing so the FBX contains the same generated palette when opened elsewhere.
+for image in bpy.data.images:
+    if image.name.endswith("_PaletteTexture") and not image.filepath_raw:
+        image.filepath_raw = os.path.join(texture_dir, f"{image.name}.png")
+        image.file_format = "PNG"
+        image.save()
+        print(f"Saved LowPolyUV addon palette texture to: {image.filepath_raw}")
 
 # Ensure textures are packed into the .blend file
 bpy.ops.file.pack_all()

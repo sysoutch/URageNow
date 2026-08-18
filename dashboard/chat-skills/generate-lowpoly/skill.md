@@ -18,6 +18,7 @@ Create a low poly version from an uploaded 3D model file.
 - Process all uploaded model files as input, one by one.
 - If target faces are specified, use that value.
 - Otherwise, allow automatic target face selection.
+- Invoke Blender's installed LowPolyUV addon to generate the clustered palette and snap UV faces before export.
 
 ## Output
 - Return a short completion summary for each generated low poly model including source file name, output file name, target face count, and model id.

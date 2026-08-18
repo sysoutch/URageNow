@@ -24,7 +24,12 @@ function Read-PlainSecret([string]$Prompt) {
 
 function New-RandomPassword {
   $bytes = New-Object byte[] 36
-  [Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+  $randomNumberGenerator = [Security.Cryptography.RandomNumberGenerator]::Create()
+  try {
+    $randomNumberGenerator.GetBytes($bytes)
+  } finally {
+    $randomNumberGenerator.Dispose()
+  }
   return [Convert]::ToBase64String($bytes).TrimEnd("=").Replace("+", "-").Replace("/", "_")
 }
 

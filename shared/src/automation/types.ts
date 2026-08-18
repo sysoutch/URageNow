@@ -143,6 +143,10 @@ export interface AutomationAction {
   modelRandomSource?: boolean;
   modelSendStartNotice?: boolean;
   modelPostOptions?: ModelAutomationPostOptions;
+  /** Persist safe messenger delivery references for this job's website feed. */
+  writePublishedMediaManifest?: boolean;
+  /** Upload generated image/model assets to the configured URageNet Media Library. */
+  publishToUrageNetMediaGallery?: boolean;
 }
 
 export interface ScheduledAutomation {

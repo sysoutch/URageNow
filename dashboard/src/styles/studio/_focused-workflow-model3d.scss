@@ -313,6 +313,14 @@ body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-previe
   max-width: none !important;
 }
 
+body.view-ai-active.studio-workflow-focused #model3d-studio-card #model3d-llm-real-height-button {
+  grid-column: span 2 !important;
+}
+
+body.view-ai-active.studio-workflow-focused #model3d-studio-card #model3d-llm-real-height-button span:not(.button-icon) {
+  max-width: none !important;
+}
+
 body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions > .model3d-separate-loose-parts-field {
   display: grid !important;
   grid-template-columns: auto minmax(0, 1fr) !important;
@@ -476,5 +484,11 @@ body.view-ai-active.studio-workflow-focused #model3d-studio-card .studio-workflo
     overflow-y: auto !important;
     overflow-x: hidden !important;
     box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.view-ai-active.studio-workflow-focused #model3d-studio-card #model3d-llm-real-height-button {
+    grid-column: auto !important;
   }
 }

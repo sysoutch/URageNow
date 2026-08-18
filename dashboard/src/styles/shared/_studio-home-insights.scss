@@ -1,11 +1,22 @@
 body.view-ai-active .lazydev-home-usage-panel {
-  display: grid !important;
-  gap: 14px !important;
+  gap: 15px !important;
 }
 
 body.view-ai-active .lazydev-home-panel {
   position: relative !important;
-  padding-bottom: 58px !important;
+}
+
+body.view-ai-active .lazydev-home-usage-head {
+  align-items: flex-end !important;
+  margin-bottom: 0 !important;
+}
+
+body.view-ai-active .lazydev-home-usage-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
 }
 
 body.view-ai-active .lazydev-home-panel-filter-tabs {
@@ -19,12 +30,10 @@ body.view-ai-active .lazydev-home-panel-filter-tabs {
   width: auto !important;
   max-width: calc(100% - 24px) !important;
   padding: 3px !important;
-  border-radius: 999px !important;
-  border: 1px solid color-mix(in srgb, var(--studio-control-border) 82%, transparent) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
-    color-mix(in srgb, var(--studio-control-bg) 88%, black 12%) !important;
   overflow: auto hidden !important;
+  border: 1px solid color-mix(in srgb, var(--studio-control-border) 82%, transparent) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--studio-control-bg) 88%, black 12%) !important;
   scrollbar-width: none !important;
 }
 
@@ -36,24 +45,31 @@ body.view-ai-active .lazydev-home-panel-filter-tabs button {
   min-width: 0 !important;
   min-height: 26px !important;
   padding: 0 9px !important;
-  border-radius: 999px !important;
   border: 1px solid transparent !important;
+  border-radius: 999px !important;
   background: transparent !important;
   color: color-mix(in srgb, var(--muted) 82%, white 18%) !important;
   box-shadow: none !important;
-  font-size: 10px !important;
+  font-size: 9px !important;
   font-weight: 900 !important;
   line-height: 1 !important;
-  letter-spacing: 0.02em !important;
   white-space: nowrap !important;
 }
 
 body.view-ai-active .lazydev-home-panel-filter-tabs button:is(:hover, .active, [aria-selected="true"]) {
   border-color: color-mix(in srgb, var(--studio-control-accent) 54%, white 8%) !important;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--studio-control-accent) 38%, transparent), color-mix(in srgb, var(--studio-control-accent-strong) 24%, transparent)),
-    color-mix(in srgb, var(--studio-control-bg) 82%, black 18%) !important;
+  background: color-mix(in srgb, var(--studio-control-accent) 28%, var(--studio-control-bg)) !important;
   color: var(--ink) !important;
+}
+
+body.view-ai-active .lazydev-home-panel-filter-tabs.lazydev-home-usage-filters {
+  position: static !important;
+  max-width: min(100%, 470px) !important;
+}
+
+body.view-ai-active [role="tablist"].lazydev-home-usage-filters > button {
+  flex: 1 1 0 !important;
+  padding-inline: 7px !important;
 }
 
 body.view-ai-active .lazydev-home-range-label {
@@ -61,154 +77,284 @@ body.view-ai-active .lazydev-home-range-label {
   align-items: center !important;
   min-height: 30px !important;
   padding: 0 10px !important;
-  border-radius: 999px !important;
   border: 1px solid color-mix(in srgb, var(--line) 62%, transparent) !important;
+  border-radius: 999px !important;
   background: color-mix(in srgb, var(--studio-control-bg) 78%, black 22%) !important;
   color: var(--muted) !important;
-  font-size: 11px !important;
+  font-size: 10px !important;
   font-weight: 800 !important;
   white-space: nowrap !important;
+}
+
+body.view-ai-active .lazydev-home-usage-content {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(520px, 1.4fr) minmax(440px, 0.85fr);
+  gap: 14px;
+}
+
+body.view-ai-active .lazydev-home-activity-chart-card {
+  display: grid;
+  min-width: 0;
+  min-height: 310px;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: 15px 17px 11px;
+  border: 1px solid color-mix(in srgb, var(--line) 66%, transparent);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--rail-icon-image) 12%, transparent), transparent 40%),
+    color-mix(in srgb, var(--studio-control-bg) 84%, black 16%);
+}
+
+body.view-ai-active .lazydev-home-chart-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body.view-ai-active .lazydev-home-chart-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+body.view-ai-active .lazydev-home-chart-heading strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+body.view-ai-active .lazydev-home-chart-heading :is(small, span) {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+body.view-ai-active .lazydev-home-activity-chart {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 6px;
+}
+
+body.view-ai-active .lazydev-home-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  min-height: 18px;
+}
+
+body.view-ai-active .lazydev-home-chart-legend span {
+  --chart-color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+body.view-ai-active .lazydev-home-chart-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--chart-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--chart-color) 58%, transparent);
+}
+
+body.view-ai-active :is(.lazydev-home-chart-legend span, .lazydev-home-chart-series).is-image { --chart-color: var(--rail-icon-image); }
+body.view-ai-active :is(.lazydev-home-chart-legend span, .lazydev-home-chart-series).is-model3d { --chart-color: var(--rail-icon-model3d); }
+body.view-ai-active :is(.lazydev-home-chart-legend span, .lazydev-home-chart-series).is-audio { --chart-color: var(--rail-icon-audio); }
+body.view-ai-active :is(.lazydev-home-chart-legend span, .lazydev-home-chart-series).is-music { --chart-color: var(--rail-icon-music); }
+body.view-ai-active :is(.lazydev-home-chart-legend span, .lazydev-home-chart-series).is-video { --chart-color: var(--rail-icon-video); }
+
+body.view-ai-active .lazydev-home-activity-chart-svg {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  overflow: visible;
+}
+
+body.view-ai-active .lazydev-home-chart-grid line {
+  stroke: color-mix(in srgb, var(--line) 66%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+body.view-ai-active .lazydev-home-chart-grid text {
+  fill: var(--muted);
+  font-size: 9px;
+}
+
+body.view-ai-active .lazydev-home-chart-series path {
+  fill: none;
+  stroke: var(--chart-color);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+body.view-ai-active .lazydev-home-chart-series circle {
+  fill: var(--panel);
+  stroke: var(--chart-color);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+body.view-ai-active .lazydev-home-chart-empty {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -10%);
+  color: var(--muted);
+  font-size: 11px;
 }
 
 body.view-ai-active .lazydev-home-usage-grid {
   display: grid !important;
+  min-width: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 10px !important;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 9px !important;
 }
 
 body.view-ai-active .lazydev-home-usage-card {
+  --usage-accent: var(--studio-control-accent);
   position: relative !important;
   min-width: 0 !important;
-  min-height: 138px !important;
+  min-height: 0 !important;
   display: grid !important;
-  grid-template-rows: auto auto auto minmax(42px, 1fr) !important;
+  grid-template-rows: auto auto auto minmax(28px, 1fr) !important;
   align-content: stretch !important;
-  gap: 4px !important;
-  padding: 13px !important;
-  border-radius: 10px !important;
-  border: 1px solid color-mix(in srgb, var(--line) 64%, transparent) !important;
-  background:
-    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--usage-accent, var(--studio-control-accent)) 18%, transparent) 0%, transparent 48%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
-    color-mix(in srgb, var(--studio-control-bg) 84%, black 16%) !important;
+  gap: 3px !important;
+  padding: 11px !important;
   overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--line) 64%, transparent) !important;
+  border-radius: 11px !important;
+  background:
+    radial-gradient(circle at 90% 8%, color-mix(in srgb, var(--usage-accent) 17%, transparent), transparent 48%),
+    color-mix(in srgb, var(--studio-control-bg) 84%, black 16%) !important;
+  transition: border-color 160ms ease, transform 160ms ease !important;
 }
 
-body.view-ai-active .lazydev-home-usage-card.is-generations {
-  --usage-accent: var(--studio-accent-1, var(--accent));
+body.view-ai-active .lazydev-home-usage-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--usage-accent) 52%, var(--line)) !important;
 }
 
-body.view-ai-active .lazydev-home-usage-card.is-duration {
-  --usage-accent: var(--studio-accent-2, var(--accent-2));
-}
-
-body.view-ai-active .lazydev-home-usage-card.is-storage {
-  --usage-accent: var(--studio-accent-3, var(--accent-3));
-}
-
-body.view-ai-active .lazydev-home-usage-card.is-velocity {
-  --usage-accent: var(--warm);
-}
-
-body.view-ai-active .lazydev-home-usage-card.is-latest {
-  --usage-accent: var(--danger);
-}
-
-body.view-ai-active .lazydev-home-usage-card.is-mix {
-  --usage-accent: var(--green);
-}
+body.view-ai-active .lazydev-home-usage-card.is-generations { --usage-accent: var(--studio-accent-1, var(--accent)); }
+body.view-ai-active .lazydev-home-usage-card.is-duration { --usage-accent: var(--studio-accent-2, var(--accent-2)); }
+body.view-ai-active .lazydev-home-usage-card.is-storage { --usage-accent: var(--studio-accent-3, var(--accent-3)); }
+body.view-ai-active .lazydev-home-usage-card.is-velocity { --usage-accent: var(--warm); }
+body.view-ai-active .lazydev-home-usage-card.is-latest { --usage-accent: var(--danger); }
+body.view-ai-active .lazydev-home-usage-card.is-mix { --usage-accent: var(--green); }
 
 body.view-ai-active .lazydev-home-usage-label {
-  min-width: 0 !important;
   color: var(--muted) !important;
-  font-size: 11px !important;
+  font-size: 9px !important;
   font-weight: 800 !important;
-  line-height: 1.2 !important;
 }
 
-body.view-ai-active .lazydev-home-usage-card>strong {
-  min-width: 0 !important;
-  color: var(--ink) !important;
-  font-size: clamp(22px, 2.2vw, 30px) !important;
-  line-height: 1.05 !important;
-  letter-spacing: 0 !important;
+body.view-ai-active .lazydev-home-usage-card > strong {
   overflow: hidden !important;
+  color: var(--ink) !important;
+  font-size: clamp(17px, 1.55vw, 25px) !important;
+  line-height: 1.05 !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
 
-body.view-ai-active .lazydev-home-usage-card>small {
-  min-width: 0 !important;
-  color: color-mix(in srgb, var(--usage-accent, var(--studio-control-accent)) 78%, white 10%) !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  line-height: 1.25 !important;
+body.view-ai-active .lazydev-home-usage-card > small {
   overflow: hidden !important;
+  color: color-mix(in srgb, var(--usage-accent) 78%, white 10%) !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
 
 body.view-ai-active .lazydev-home-sparkline {
   width: 100% !important;
-  height: 42px !important;
+  height: 34px !important;
   align-self: end !important;
   overflow: visible !important;
 }
 
 body.view-ai-active .lazydev-home-sparkline-area {
-  fill: color-mix(in srgb, var(--usage-accent, var(--studio-control-accent)) 24%, transparent) !important;
+  fill: color-mix(in srgb, var(--usage-accent) 24%, transparent) !important;
 }
 
 body.view-ai-active .lazydev-home-sparkline-line {
   fill: none !important;
-  stroke: color-mix(in srgb, var(--usage-accent, var(--studio-control-accent)) 88%, white 10%) !important;
-  stroke-width: 2.3 !important;
+  stroke: color-mix(in srgb, var(--usage-accent) 88%, white 10%) !important;
+  stroke-width: 2.2 !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
 }
 
 body.view-ai-active .lazydev-home-mix-bars {
   display: flex !important;
-  align-items: stretch !important;
   width: 100% !important;
-  min-height: 34px !important;
-  margin-top: 5px !important;
-  border-radius: 999px !important;
-  border: 1px solid color-mix(in srgb, var(--line) 54%, transparent) !important;
-  background: color-mix(in srgb, var(--studio-control-bg) 78%, black 22%) !important;
+  min-height: 28px !important;
+  margin-top: 3px !important;
   overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--line) 54%, transparent) !important;
+  border-radius: 999px !important;
 }
 
-body.view-ai-active .lazydev-home-mix-bars>span {
+body.view-ai-active .lazydev-home-mix-bars > span {
   flex: 0 0 var(--mix-size, 0%) !important;
   min-width: 0 !important;
-  border-right: 1px solid color-mix(in srgb, var(--bg) 76%, transparent) !important;
 }
 
-body.view-ai-active .lazydev-home-mix-bars>span:last-child {
-  border-right: 0 !important;
+body.view-ai-active .lazydev-home-mix-bars > .is-image { background: var(--rail-icon-image) !important; }
+body.view-ai-active .lazydev-home-mix-bars > .is-model3d { background: var(--rail-icon-model3d) !important; }
+body.view-ai-active .lazydev-home-mix-bars > .is-audio { background: var(--rail-icon-audio) !important; }
+body.view-ai-active .lazydev-home-mix-bars > .is-music { background: var(--rail-icon-music) !important; }
+body.view-ai-active .lazydev-home-mix-bars > .is-video { background: var(--rail-icon-video) !important; }
+body.view-ai-active .lazydev-home-mix-bars > .is-empty { background: var(--line) !important; }
+
+@media (max-width: 1500px) {
+  body.view-ai-active .lazydev-home-usage-content {
+    grid-template-columns: 1fr;
+  }
+
+  body.view-ai-active .lazydev-home-usage-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(110px, 1fr));
+  }
 }
 
-body.view-ai-active .lazydev-home-mix-bars>.is-image {
-  background: var(--rail-icon-image) !important
+@media (max-width: 920px) {
+  body.view-ai-active .lazydev-home-usage-head,
+  body.view-ai-active .lazydev-home-usage-controls {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  body.view-ai-active .lazydev-home-usage-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-body.view-ai-active .lazydev-home-mix-bars>.is-model3d {
-  background: var(--rail-icon-model3d) !important
-}
+@media (max-width: 640px) {
+  body.view-ai-active .lazydev-home-panel-filter-tabs.lazydev-home-usage-filters {
+    max-width: 100% !important;
+  }
 
-body.view-ai-active .lazydev-home-mix-bars>.is-audio {
-  background: var(--rail-icon-audio) !important
-}
+  body.view-ai-active [role="tablist"].lazydev-home-usage-filters > button {
+    flex: 0 0 auto !important;
+    min-width: 68px !important;
+  }
 
-body.view-ai-active .lazydev-home-mix-bars>.is-music {
-  background: var(--rail-icon-music) !important;
-}
+  body.view-ai-active .lazydev-home-usage-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: none;
+  }
 
-body.view-ai-active .lazydev-home-mix-bars>.is-video {
-  background: var(--rail-icon-video) !important;
-}
-
-body.view-ai-active .lazydev-home-mix-bars>.is-empty {
-  background: color-mix(in srgb, var(--line) 70%, transparent) !important;
+  body.view-ai-active .lazydev-home-usage-card {
+    min-height: 132px !important;
+  }
 }

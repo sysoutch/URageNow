@@ -538,7 +538,12 @@ async function handlePostApiModel3dCapture(request: IncomingMessage, response: S
     imageFileName: captured.fileName,
     imageData: captured.data,
     prompt: action === "rotate" ? "3D model rotate capture" : "3D model delight capture",
-    model: action === "rotate" ? "Blender Rotate Capture" : "Blender Delight Capture"
+    model: action === "rotate" ? "Blender Rotate Capture" : "Blender Delight Capture",
+    metadata: {
+      sourceKind: "model3d-capture",
+      sourceModelId: modelId,
+      captureAction: action
+    }
   });
   dependencies.runtimeState.recordAction(
     "dashboard:model3d-capture",
@@ -1607,9 +1612,11 @@ async function handlePostApiModel3dVariantDelete(request: IncomingMessage, respo
   const model = await dependencies.deleteGeneratedModelVariant(modelId, variant, fileName);
   dependencies.runtimeState.recordAction(
     "dashboard:model3d-variant-delete",
-    `Deleted ${variant} variant from generated model ${modelId}.`
+    model
+      ? `Deleted ${variant} variant from generated model ${modelId}.`
+      : `Deleted generated model ${modelId}; its ${variant} artifact was the only remaining variant.`
   );
-  sendJson(response, 200, { ok: true, modelId, variant, model });
+  sendJson(response, 200, { ok: true, modelId, variant, model, deletedModelEntry: model === null });
   return;
 }
 async function handlePostApiAudioDelete(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {

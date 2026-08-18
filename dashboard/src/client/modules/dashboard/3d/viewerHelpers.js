@@ -751,8 +751,9 @@ function createDashboardThreeDViewerHelpers(input) {
         if (!await applyDeletedModel3dVariant(result?.model)) {
           await loadModel3dHistory(record.id);
         }
-        setModel3dStatus("Deleted " + variant.title + " variant.");
-        setOutput("Deleted only model variant " + variant.fileName + ".");
+        const deletedModelEntry = result?.deletedModelEntry === true;
+        setModel3dStatus(deletedModelEntry ? "Deleted model entry." : "Deleted " + variant.title + " variant.");
+        setOutput(deletedModelEntry ? "Deleted the model entry because " + variant.fileName + " was its only remaining variant." : "Deleted only model variant " + variant.fileName + ".");
       });
       actions.appendChild(remove);
       card.append(previewButton, body, actions);
@@ -2526,8 +2527,9 @@ function createDashboardThreeDViewerHelpers(input) {
           if (!await applyDeletedModel3dVariant(result?.model)) {
             await loadModel3dHistory(entry.id);
           }
-          setModel3dStatus("Deleted " + variant.title + " variant.");
-          setOutput("Deleted only model variant " + variant.fileName + ".");
+          const deletedModelEntry = result?.deletedModelEntry === true;
+          setModel3dStatus(deletedModelEntry ? "Deleted model entry." : "Deleted " + variant.title + " variant.");
+          setOutput(deletedModelEntry ? "Deleted the model entry because " + variant.fileName + " was its only remaining variant." : "Deleted only model variant " + variant.fileName + ".");
         } catch (error) {
           const detail = error && error.message ? error.message : "Unknown error";
           setModel3dStatus("Failed to delete " + variant.title + " variant.");

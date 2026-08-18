@@ -9,11 +9,14 @@ import {
   type ModelAutomationPostOptions,
   type JoinAutomation,
   type ScheduledAutomation,
+  appendPublishedMediaManifestEntry,
+  type PublishedMediaAsset,
   listAllScheduledAutomations,
   listJoinAutomations,
   markScheduledAutomationRun
 } from "@urage/shared/automation/index";
 import { appConfig } from "@urage/server/config/appConfig";
+import { publishAssetsToUrageNetMediaGallery } from "@urage/server/services/urageNetMediaGallery";
 import {
   readAutomationTextSourceLine,
   readAutomationTextSourceLineFromFiles
@@ -58,8 +61,9 @@ interface AutomationEngineDependencies {
     imageVideoWorkflowSettings?: any;
     imagePostProcessingOptions?: ImagePostProcessingOptions;
     imagePostOptions?: ImageAutomationPostOptions;
+    writePublishedMediaManifest?: boolean;
     source: "scheduled" | "join";
-  }) => Promise<void>;
+  }) => Promise<PublishedMediaAsset[]>;
   resolveImagePoolEntries: (poolId: string) => Promise<string[]>;
   sendModelToChannel: (input: {
     channelId: string;
@@ -78,7 +82,7 @@ interface AutomationEngineDependencies {
     sendStartNotice?: boolean;
     source: "scheduled" | "join";
     modelPostOptions?: ModelAutomationPostOptions;
-  }) => Promise<void>;
+  }) => Promise<PublishedMediaAsset[]>;
   runtimeState: RuntimeState;
   getGuildName: (guildId: string) => string | null;
 }
@@ -400,6 +404,30 @@ export function createAutomationEngine(dependencies: AutomationEngineDependencie
   let intervalHandle: NodeJS.Timeout | null = null;
   let lastMinuteKey = "";
 
+  async function publishMediaFeedIfEnabled(entry: ScheduledAutomation, channelId: string, assets: PublishedMediaAsset[]): Promise<void> {
+    if (!entry.action.writePublishedMediaManifest && !entry.action.publishToUrageNetMediaGallery) return;
+    const publicBaseUrl = appConfig.dashboardPublicBaseUrl.replace(/\/+$/, "");
+    const dashboardAssets = assets.map(asset => ({
+      ...asset,
+      directUrl: asset.directUrl?.startsWith("/") ? `${publicBaseUrl}${asset.directUrl}` : asset.directUrl
+    }));
+    await appendPublishedMediaManifestEntry(dataDirectory, {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`,
+      sentAt: new Date().toISOString(), automationId: entry.id, automationName: entry.name,
+      messenger: "discord", destinationId: channelId, assets: dashboardAssets
+    });
+  }
+
+  async function publishToWebsiteIfEnabled(entry: ScheduledAutomation, assets: PublishedMediaAsset[]): Promise<PublishedMediaAsset[]> {
+    if (!entry.action.publishToUrageNetMediaGallery) return assets;
+    const uploaded = await publishAssetsToUrageNetMediaGallery(assets);
+    const websiteUrls = new Map(uploaded.map(asset => [`${asset.kind}|${asset.fileName || ""}|${asset.directUrl || ""}`, asset.websiteUrl]));
+    return assets.map(asset => ({
+      ...asset,
+      directUrl: websiteUrls.get(`${asset.kind}|${asset.fileName || ""}|${asset.directUrl || ""}`) || asset.directUrl
+    }));
+  }
+
   async function runScheduledAutomation(entry: ScheduledAutomation): Promise<void> {
     const serverName = dependencies.getGuildName(entry.guildId) ?? "this server";
     const targetMessenger = entry.targetMessenger === "telegram" || entry.targetMessenger === "matrix"
@@ -509,7 +537,7 @@ export function createAutomationEngine(dependencies: AutomationEngineDependencie
         }
       } else if (entry.action.source === "model-3d") {
         const modelInput = await renderModelActionInput(entry.action, context, dependencies.resolveImagePoolEntries);
-        await dependencies.sendModelToChannel({
+        const assets = await dependencies.sendModelToChannel({
           channelId: targetId,
           imageInput: modelInput.imageInput,
           prompt: modelInput.prompt,
@@ -527,6 +555,7 @@ export function createAutomationEngine(dependencies: AutomationEngineDependencie
           source: "scheduled",
           modelPostOptions: modelInput.modelPostOptions
         });
+        await publishMediaFeedIfEnabled(entry, targetId, await publishToWebsiteIfEnabled(entry, assets));
       } else if (entry.action.source === "unity-publisher-gift") {
         if (!dependencies.buildGiftMessageIfAvailable) {
           throw new Error("Unity Publisher gift automation is not configured.");
@@ -539,7 +568,7 @@ export function createAutomationEngine(dependencies: AutomationEngineDependencie
         await dependencies.sendMessageToChannel(targetId, message);
       } else if (entry.action.source === "image") {
         const imageInput = await renderImageActionInput(entry.action, context);
-        await dependencies.sendImageToChannel({
+        const assets = await dependencies.sendImageToChannel({
           channelId: targetId,
           prompt: imageInput.prompt,
           autoPrompt: imageInput.autoPrompt,
@@ -556,8 +585,10 @@ export function createAutomationEngine(dependencies: AutomationEngineDependencie
           imageVideoWorkflowSettings: entry.action.imageVideoWorkflowSettings,
           imagePostProcessingOptions: entry.action.imagePostProcessingOptions,
           imagePostOptions: entry.action.imagePostOptions,
+          writePublishedMediaManifest: entry.action.writePublishedMediaManifest === true,
           source: "scheduled"
         });
+        await publishMediaFeedIfEnabled(entry, targetId, await publishToWebsiteIfEnabled(entry, assets));
       } else {
         const content = await renderActionContent(entry.action, context, dependencies.askModel);
         await dependencies.sendMessageToChannel(targetId, content);

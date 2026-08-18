@@ -58,6 +58,25 @@ function createDashboardAutomationStudioHelpers(input) {
     }
   }
 
+  async function loadUrageNetMediaGallerySettings() {
+    const settings = await request("/api/automation/uragenet-media-gallery-settings");
+    setElementValue("uragenet-media-gallery-url", settings.baseUrl || "");
+    setElementValue("uragenet-media-gallery-username", settings.username || "");
+    const status = document.getElementById("uragenet-media-gallery-settings-status");
+    if (status) status.textContent = settings.passwordConfigured ? "Application password saved securely." : "Application password not configured.";
+  }
+
+  async function saveUrageNetMediaGallerySettingsFromUi() {
+    const saved = await request("/api/automation/uragenet-media-gallery-settings", {
+      baseUrl: readTrimmedValue("uragenet-media-gallery-url"),
+      username: readTrimmedValue("uragenet-media-gallery-username"),
+      password: readValue("uragenet-media-gallery-password")
+    });
+    setElementValue("uragenet-media-gallery-password", "");
+    const status = document.getElementById("uragenet-media-gallery-settings-status");
+    if (status) status.textContent = saved.passwordConfigured ? "Saved. Application password is stored securely on this machine." : "Saved URL and username.";
+  }
+
   function bindChange(id, handler) {
     const node = document.getElementById(id);
     if (node) {
@@ -194,6 +213,8 @@ function createDashboardAutomationStudioHelpers(input) {
     setElementValue("scheduled-model-metadata-target", action.modelMetadataTarget === "remote" ? "remote" : "local");
     setElementChecked("scheduled-model-unload-llm-before-generate", action.modelUnloadLlmBeforeGenerate !== false);
     setElementChecked("scheduled-model-send-start-notice", action.modelSendStartNotice !== false);
+    setElementChecked("scheduled-write-published-media-manifest", action.writePublishedMediaManifest === true);
+    setElementChecked("scheduled-publish-to-uragenet-media-gallery", action.publishToUrageNetMediaGallery === true);
     setMultiSelectValues("scheduled-text-files", getAutomationTextFiles(action));
     const scheduledModelPostOptionsModule = getScheduledModelPostOptionsModule();
     if (scheduledModelPostOptionsModule?.apply) {
@@ -441,6 +462,8 @@ function createDashboardAutomationStudioHelpers(input) {
       modelMetadataTarget: readValue("scheduled-model-metadata-target") === "remote" ? "remote" : "local",
       modelUnloadLlmBeforeGenerate: readChecked("scheduled-model-unload-llm-before-generate"),
       modelSendStartNotice: readChecked("scheduled-model-send-start-notice"),
+      writePublishedMediaManifest: readChecked("scheduled-write-published-media-manifest"),
+      publishToUrageNetMediaGallery: readChecked("scheduled-publish-to-uragenet-media-gallery"),
       modelPostOptions: scheduledModelPostOptionsModule?.read ? scheduledModelPostOptionsModule.read() : getDefaultScheduledModelPostOptions()
     };
   }
@@ -698,6 +721,10 @@ function createDashboardAutomationStudioHelpers(input) {
     });
     bindClick("apply-schedule-preset-button", applySchedulePreset);
     bindClick("apply-join-preset-button", applyJoinPreset);
+    bindClick("save-uragenet-media-gallery-settings-button", () => {
+      void saveUrageNetMediaGallerySettingsFromUi().catch(error => setOutput(error.message || "Could not save Media Library connection."));
+    });
+    void loadUrageNetMediaGallerySettings().catch(error => setOutput(error.message || "Could not load Media Library connection."));
     bindClick("clear-schedule-form-button", () => {
       setScheduledForm(null);
       setOutput("Ready for a new scheduled job.");

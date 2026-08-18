@@ -96,9 +96,9 @@ type AutomationRuntimeServiceDependencies = {
       imageUrl: string;
       prompt: string;
     }>;
-    sendImageToChannel: (input: any) => Promise<void>;
+    sendImageToChannel: (input: any) => Promise<any[]>;
     resolveImagePoolEntries: (poolId: string) => Promise<any[]>;
-    sendModelToChannel: (input: any) => Promise<void>;
+    sendModelToChannel: (input: any) => Promise<any[]>;
     runtimeState: any;
     getGuildName: (guildId: string) => string | null;
   }) => any;
@@ -153,7 +153,7 @@ type AutomationRuntimeServiceDependencies = {
     postMode: "combined" | "separate";
     content: string;
     postOptions?: ImageAutomationPostOptions;
-  }) => Promise<void>;
+  }) => Promise<any[]>;
   convertGeneratedImageToPixelArt: (record: any) => Promise<any>;
   getImagePoolEntries: (poolId: string) => Promise<any[]>;
   runtimeState: any;
@@ -487,7 +487,7 @@ export function createAutomationRuntimeService(dependencies: AutomationRuntimeSe
         const postOptions = input.imagePostProcessingOptions as ImagePostProcessingOptions | undefined;
         const imagePostOptions = input.imagePostOptions as ImageAutomationPostOptions | undefined;
         const usesCandidateSelection = input.imageCandidateSelectionEnabled === true && normalizeImageCandidateCount(input.imageCandidateCount) > 1;
-        if (!usesCandidateSelection && !hasImagePostProcessingOptions(postOptions) && !hasImagePostRoutingOptions(imagePostOptions)) {
+        if (!usesCandidateSelection && !hasImagePostProcessingOptions(postOptions) && !hasImagePostRoutingOptions(imagePostOptions) && input.writePublishedMediaManifest !== true) {
           const generated = await dependencies.generateImageFromPrompt({
             prompt: input.prompt,
             autoPrompt: input.autoPrompt,
@@ -505,7 +505,7 @@ export function createAutomationRuntimeService(dependencies: AutomationRuntimeSe
           sourceImageUrl: buildGeneratedImageApiSource(generated) || dependencies.resolvePublicAssetUrl(String(generated.imageUrl || "")),
           imagePostOptions
         });
-          return;
+          return [];
         }
         const resolvedPrompt = await dependencies.resolveImagePrompt({
           prompt: input.prompt,
@@ -520,7 +520,7 @@ export function createAutomationRuntimeService(dependencies: AutomationRuntimeSe
         const candidates = await generateAutomationImageCandidates(input, resolvedPrompt);
         const original = await selectAutomationImageCandidate(input, candidates, resolvedPrompt);
         const images = await buildImagesForAutomationCandidates(input, candidates, original, postOptions);
-        await dependencies.postGeneratedImagesToChannel({
+        const publishedAssets = await dependencies.postGeneratedImagesToChannel({
           channelId: input.channelId,
           images,
           postMode: postOptions?.postMode === "separate" ? "separate" : "combined",
@@ -539,6 +539,7 @@ export function createAutomationRuntimeService(dependencies: AutomationRuntimeSe
           sourceImageUrl: buildGeneratedImageApiSource(original) || dependencies.resolvePublicAssetUrl(String(original.imageUrl || "")),
           imagePostOptions
         });
+        return publishedAssets;
       },
       resolveImagePoolEntries: dependencies.getImagePoolEntries,
       sendModelToChannel: async input => {
@@ -702,7 +703,7 @@ export function createAutomationRuntimeService(dependencies: AutomationRuntimeSe
           prompt: generated.prompt,
           extraContent
         });
-        await dependencies.postExistingGeneratedModelToChannel({
+        const posted = await dependencies.postExistingGeneratedModelToChannel({
           modelId,
           channelId: input.channelId,
           requestedBy: "automation",
@@ -741,6 +742,11 @@ export function createAutomationRuntimeService(dependencies: AutomationRuntimeSe
           extraContent,
           replyToMessageId: startNoticeMessageId || undefined
         });
+        return [
+          posted.modelUrl ? { kind: "model", fileName: posted.modelFileName, directUrl: posted.modelUrl } : null,
+          (posted.previewGifUrl || posted.previewImageUrl) ? { kind: "preview", directUrl: posted.previewGifUrl || posted.previewImageUrl } : null,
+          posted.sourceImageUrl ? { kind: "image", directUrl: posted.sourceImageUrl } : null
+        ].filter(Boolean);
       },
       runtimeState: dependencies.runtimeState,
       getGuildName: dependencies.getGuildName

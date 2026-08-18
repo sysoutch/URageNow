@@ -670,6 +670,30 @@ export function renderDashboardScheduledAutomationPanel(input: DashboardSchedule
                 </div>
               </details>
 
+              <details class="fold-card">
+                <summary>Website Feed</summary>
+                <div class="fold-content">
+                  <div class="toggle">
+                    <span>Write sent media links to the website feed</span>
+                    <input id="scheduled-write-published-media-manifest" type="checkbox">
+                  </div>
+                  <div class="toggle">
+                    <span>Upload generated media to the URageNet Media Library</span>
+                    <input id="scheduled-publish-to-uragenet-media-gallery" type="checkbox">
+                  </div>
+                  <div class="compact-grid two-col">
+                    <div class="field"><label for="uragenet-media-gallery-url">URageNet URL</label><input id="uragenet-media-gallery-url" placeholder="https://www.urage.net"></div>
+                    <div class="field"><label for="uragenet-media-gallery-username">URageNet username</label><input id="uragenet-media-gallery-username" autocomplete="username"></div>
+                  </div>
+                  <div class="field"><label for="uragenet-media-gallery-password">Application password</label><input id="uragenet-media-gallery-password" type="password" autocomplete="new-password" placeholder="Leave blank to keep the saved password"></div>
+                  <div class="row automation-toolbar"><button class="secondary" id="save-uragenet-media-gallery-settings-button" type="button">Save Media Library connection</button><span class="hint" id="uragenet-media-gallery-settings-status"></span></div>
+                  <div class="row automation-toolbar">
+                    <a class="secondary button-link" href="/api/automation-published-media" target="_blank" rel="noopener noreferrer">Open feed JSON</a>
+                  </div>
+                  <div class="hint">The feed writes <code>automation-published-media.json</code> after each delivery. Gallery publishing uploads the generated image, model, and available previews to URageNet using its configured API credentials and records the permanent website URLs in that feed.</div>
+                </div>
+              </details>
+
               <div class="row automation-toolbar automation-save-row">
                 <button id="save-scheduled-button">Save Scheduled Job</button>
                 <button class="secondary" id="delete-scheduled-button">Delete Selected</button>

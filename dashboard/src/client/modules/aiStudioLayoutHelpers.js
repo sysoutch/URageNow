@@ -195,6 +195,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
     svg.setAttribute("class", className || "lazydev-home-sparkline");
     svg.setAttribute("viewBox", "0 0 120 42");
     svg.setAttribute("preserveAspectRatio", "none");
+    svg.setAttribute("aria-hidden", "true");
     const safeValues = values.length > 0 ? values : [0];
     const maxValue = Math.max(1, ...safeValues);
     const points = safeValues.map((value, index) => {
@@ -214,11 +215,16 @@ function createDashboardAiStudioLayoutHelpers(input) {
     return svg;
   }
 
-  function getHomeUsageBuckets(records, metric) {
+  function getHomeUsageStartDate(records) {
     const latestMs = Math.max(...records.map(record => record.dateMs || 0), 0) || Date.now();
     const start = new Date(latestMs);
     start.setHours(0, 0, 0, 0);
     start.setDate(start.getDate() - 6);
+    return start;
+  }
+
+  function getHomeUsageBuckets(records, metric, startDate = getHomeUsageStartDate(records)) {
+    const start = new Date(startDate);
     return Array.from({ length: 7 }, (_, index) => {
       const dayStart = new Date(start);
       dayStart.setDate(start.getDate() + index);
@@ -226,7 +232,9 @@ function createDashboardAiStudioLayoutHelpers(input) {
       const maxMs = minMs + 24 * 60 * 60 * 1000;
       return records.reduce((sum, record) => {
         if (!record.dateMs || record.dateMs < minMs || record.dateMs >= maxMs) return sum;
-        return sum + (metric === "duration" ? getHomeRecordDurationMs(record) : 1);
+        if (metric === "duration") return sum + getHomeRecordDurationMs(record);
+        if (metric === "storage") return sum + getHomeRecordFileSizeBytes(record);
+        return sum + 1;
       }, 0);
     });
   }
@@ -257,7 +265,9 @@ function createDashboardAiStudioLayoutHelpers(input) {
       label: kind === "model3d" ? "3D" : kind.charAt(0).toUpperCase() + kind.slice(1),
       count: records.filter(record => record.kind === kind).length
     })).filter(entry => entry.count > 0);
-    value.textContent = counts.length > 0 ? counts.map(entry => entry.label + " " + entry.count).join(" / ") : "No media yet";
+    const mixSummary = counts.map(entry => entry.label + " " + entry.count).join(" / ");
+    value.textContent = counts.length > 0 ? counts[0].label + " leads · " + formatHomeCompactNumber(counts[0].count) : "No media yet";
+    value.title = mixSummary;
     const bars = document.createElement("div");
     bars.className = "lazydev-home-mix-bars";
     const total = Math.max(1, records.length);
@@ -280,12 +290,42 @@ function createDashboardAiStudioLayoutHelpers(input) {
     return card;
   }
 
-  function getHomePeakDay(series) {
+  function getHomePeakDay(series, records, startDate = getHomeUsageStartDate(records)) {
     const peak = Math.max(0, ...series);
     if (peak <= 0) return "No peak yet";
     const index = series.indexOf(peak);
-    const label = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index] || "Day";
+    const peakDate = new Date(startDate);
+    peakDate.setDate(peakDate.getDate() + index);
+    const label = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][peakDate.getDay()] || "Day";
     return label + " peaked at " + formatHomeCompactNumber(peak);
+  }
+
+  function renderHomeUsageActivityChart(records, filter, startDate) {
+    const container = document.getElementById("lazydev-home-activity-chart");
+    if (!container || typeof renderLazydevHomeUsageChart !== "function") {
+      return;
+    }
+    const mediaKinds = [
+      { key: "image", label: "Image" },
+      { key: "model3d", label: "3D Model" },
+      { key: "audio", label: "Audio" },
+      { key: "music", label: "Music" },
+      { key: "video", label: "Video" }
+    ];
+    const visibleKinds = filter === "all" ? mediaKinds : mediaKinds.filter(entry => entry.key === filter);
+    const labels = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + index);
+      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+    });
+    renderLazydevHomeUsageChart(container, {
+      labels,
+      series: visibleKinds.map(kind => ({
+        ...kind,
+        values: getHomeUsageBuckets(records.filter(record => record.kind === kind.key), "count", startDate)
+      })),
+      accessibleLabel: (filter === "all" ? "All media" : visibleKinds[0]?.label || "Media") + " generation activity for the recent seven days"
+    });
   }
 
   function renderHomeUsageOverview(records) {
@@ -300,8 +340,9 @@ function createDashboardAiStudioLayoutHelpers(input) {
     }
     const filteredRecords = getHomeFilteredRecords(records, "usage");
     const filter = normalizeHomeFilter(studioHomeFilters.usage);
-    const generationSeries = getHomeUsageBuckets(filteredRecords, "count");
-    const durationSeries = getHomeUsageBuckets(filteredRecords, "duration");
+    const usageStartDate = getHomeUsageStartDate(records);
+    const generationSeries = getHomeUsageBuckets(filteredRecords, "count", usageStartDate);
+    const durationSeries = getHomeUsageBuckets(filteredRecords, "duration", usageStartDate);
     const totalDurationMs = filteredRecords.reduce((sum, record) => sum + getHomeRecordDurationMs(record), 0);
     const timedRecords = filteredRecords.filter(record => getHomeRecordDurationMs(record) > 0);
     const totalStorageBytes = filteredRecords.reduce((sum, record) => sum + getHomeRecordFileSizeBytes(record), 0);
@@ -326,7 +367,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
       createHomeUsageMetric({
         label: "Avg / Active Day",
         value: averagePerActiveDay > 0 ? averagePerActiveDay.toFixed(averagePerActiveDay >= 10 ? 0 : 1).replace(/\.0$/, "") : "0",
-        detail: getHomePeakDay(generationSeries),
+        detail: getHomePeakDay(generationSeries, filteredRecords, usageStartDate),
         series: generationSeries,
         styleKey: "velocity"
       }),
@@ -335,7 +376,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
         label: "Known Storage",
         value: formatHomeStorage(totalStorageBytes),
         detail: totalStorageBytes > 0 ? "From records with file-size metadata" : "Waiting for size metadata",
-        series: filteredRecords.slice(0, 7).map(getHomeRecordFileSizeBytes).reverse(),
+        series: getHomeUsageBuckets(filteredRecords, "storage", usageStartDate),
         styleKey: "storage"
       }),
       createHomeUsageMetric({
@@ -346,6 +387,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
         styleKey: "latest"
       })
     );
+    renderHomeUsageActivityChart(records, filter, usageStartDate);
   }
 
   function selectHomeMediaRecord(record) {
@@ -573,6 +615,33 @@ function createDashboardAiStudioLayoutHelpers(input) {
     });
   }
 
+  function getStudioHomeSearchTargets(scope) {
+    const selector = scope === "workflow"
+      ? ".lazydev-home-card .lazydev-home-workflow-button, .lazydev-home-card .lazydev-home-current-project-card, .lazydev-home-card .studio-home-project-card, .lazydev-home-activity-list button"
+      : ".studio-home-overview-only .studio-workflow-quick-tile, .studio-home-feature-grid .studio-home-feature-card, .studio-home-workbench .studio-home-current-project-card, .studio-home-workbench .studio-home-project-card";
+    return document.querySelectorAll(selector);
+  }
+
+  function applyStudioHomeSearch(searchInput) {
+    const scope = String(searchInput?.getAttribute("data-studio-home-search") || "studio").trim();
+    const query = String(searchInput?.value || "").trim().toLocaleLowerCase();
+    getStudioHomeSearchTargets(scope).forEach(target => {
+      const searchableText = String(target.textContent || "").toLocaleLowerCase();
+      target.hidden = Boolean(query) && !searchableText.includes(query);
+    });
+  }
+
+  function bindStudioHomeSearch() {
+    document.querySelectorAll("[data-studio-home-search]").forEach(searchInput => {
+      searchInput.addEventListener("input", () => applyStudioHomeSearch(searchInput));
+      searchInput.addEventListener("keydown", event => {
+        if (event.key !== "Escape" || !searchInput.value) return;
+        searchInput.value = "";
+        applyStudioHomeSearch(searchInput);
+      });
+    });
+  }
+
   function renderStudioHome() {
     const records = buildHomeMediaRecords();
     const emptyText = "No generated projects yet. Open a workflow and create media to populate this list.";
@@ -583,6 +652,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
     renderHomeUsageOverview(records);
     renderHomePinnedItems();
     syncHomeFilterTabs();
+    document.querySelectorAll("[data-studio-home-search]").forEach(applyStudioHomeSearch);
   }
 
   function bindLazyDevHomeFilters() {
@@ -995,6 +1065,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
 
   function bindAllStudioTabs() {
     bindLazyDevHomeFilters();
+    bindStudioHomeSearch();
     bindModel3dStudioTabs();
     bindImageStudioTabs();
     bindAudioStudioTabs();

@@ -70,9 +70,6 @@ function createDashboardThreeDStudioEventBindingHelpers(input) {
   const setModel3dViewerAxisMode = typeof input?.setModel3dViewerAxisMode === "function"
     ? input.setModel3dViewerAxisMode
     : function setModel3dViewerAxisModeFallback() {};
-  const runModel3dLlmScaleForSelectedModel = typeof input?.runModel3dLlmScaleForSelectedModel === "function"
-    ? input.runModel3dLlmScaleForSelectedModel
-    : async function runModel3dLlmScaleForSelectedModelFallback() {};
   const dashboardModel3dStudioActionHelpers = input?.dashboardModel3dStudioActionHelpers || null;
   const dashboardModel3dQuickActionModalHelpers = input?.dashboardModel3dQuickActionModalHelpers || null;
   const dashboardModel3dInspectorHelpers = input?.dashboardModel3dInspectorHelpers || null;
@@ -452,10 +449,6 @@ function createDashboardThreeDStudioEventBindingHelpers(input) {
       event.preventDefault();
       setModel3dViewerAxisMode("gameengine");
       setModel3dThreeStatus("Preview axis set to game engine.");
-    });
-    document.getElementById("model3d-three-scale-llm-button")?.addEventListener("click", async event => {
-      event.preventDefault();
-      await runModel3dLlmScaleForSelectedModel();
     });
     dashboardModel3dViewportControlHelpers?.bindModel3dViewportEvents();
     dashboardModel3dSendDestinationHelpers?.bind();

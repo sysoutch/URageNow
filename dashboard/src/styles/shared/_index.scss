@@ -8,7 +8,6 @@
 @use "studio-home-insights";
 @use "lazydev-home-layout";
 @use "home-command-centers";
-@use "runtime-visibility";
 @use "production-foundation";
 @use "desktop-window-chrome";
 @use "brand";
@@ -16,3 +15,4 @@
 @use "compact-rail-navigation";
 @use "expanded-rail-navigation";
 @use "studio-home-navigation";
+@use "runtime-visibility";

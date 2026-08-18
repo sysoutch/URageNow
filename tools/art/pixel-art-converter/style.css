@@ -422,6 +422,8 @@ details.control-group[open] > summary ~ * {
 .preview-grid { 
     flex: 1 1 auto;
     min-height: 0;
+    min-width: 0;
+    min-width: 0;
     height: 0;
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 18px; width: 100%; max-width: none;
@@ -431,6 +433,10 @@ details.control-group[open] > summary ~ * {
     background: var(--surface); border-radius: 12px; border: 1px solid var(--border); 
     padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px;
     min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    min-width: 0;
+    overflow: hidden;
 }
 .compare-card {
     grid-column: 1 / -1;
@@ -542,6 +548,8 @@ body.dashboard-reveal-only .instructions {
     min-height: 0;
     height: 0;
     width: 100%;
+    min-width: 0;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -554,6 +562,8 @@ body.dashboard-reveal-only .instructions {
     justify-content: center;
     max-width: 100%;
     max-height: min(62vh, 680px);
+    min-width: 0;
+    min-width: 0;
     overflow: hidden;
 }
 #originalCanvas,
@@ -562,6 +572,10 @@ body.dashboard-reveal-only .instructions {
     height: auto;
     max-width: 100%;
     max-height: min(62vh, 680px);
+    min-width: 0;
+    object-fit: contain;
+    min-width: 0;
+    object-fit: contain;
 }
 #pixelCanvas { position: relative; }
 #overlayCanvas {
@@ -582,6 +596,10 @@ body.dashboard-reveal-only .instructions {
     max-height: min(62vh, 680px);
     cursor: col-resize;
     touch-action: none;
+    min-width: 0;
+    object-fit: contain;
+    min-width: 0;
+    object-fit: contain;
 }
 
 canvas { 

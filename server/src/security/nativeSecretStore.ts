@@ -11,6 +11,7 @@ export const messengerAdminSharedSecretName = "messenger-admin.default.shared-se
 export const telegramBotTokenSecretName = "telegram.default.bot-token";
 export const matrixAccessTokenSecretName = "matrix.default.access-token";
 export const whatsappAccessTokenSecretName = "whatsapp.default.access-token";
+export const urageNetMediaApiPasswordSecretName = "uragenet-media.default.application-password";
 
 export type NativeSecretStatus = "available" | "missing" | "unavailable";
 

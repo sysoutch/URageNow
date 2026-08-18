@@ -73,6 +73,8 @@ export const defaultAutomationAction: AutomationAction = {
   modelUnloadLlmBeforeGenerate: true,
   modelRandomSource: true,
   modelSendStartNotice: true,
+  writePublishedMediaManifest: false,
+  publishToUrageNetMediaGallery: false,
   modelPostOptions: {
     targetMode: "channel",
     threadNameMode: "fixed",
@@ -287,6 +289,8 @@ export function normalizeAction(action?: Partial<AutomationAction>): AutomationA
     modelUnloadLlmBeforeGenerate: action?.modelUnloadLlmBeforeGenerate !== false,
     modelRandomSource: action?.modelRandomSource !== false,
     modelSendStartNotice: action?.modelSendStartNotice !== false,
+    writePublishedMediaManifest: action?.writePublishedMediaManifest === true,
+    publishToUrageNetMediaGallery: action?.publishToUrageNetMediaGallery === true,
     modelPostOptions: normalizeModelPostOptions(action?.modelPostOptions)
   };
 }

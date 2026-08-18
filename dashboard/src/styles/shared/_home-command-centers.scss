@@ -1,122 +1,201 @@
-// The two home modes have different jobs: URage Now is an application launchpad,
-// while LazyDev is a working dashboard. Keep their final layout contract together
-// and scoped to home mode so focused workflow screens remain unaffected.
-
+// URage NOW is the application command center. The three primary surfaces own
+// the viewport; product navigation becomes a supporting strip instead of a
+// disconnected row of small cards.
 body.view-ai-active.studio-home-active .studio-view-shell {
-  width: min(1760px, 100%);
-  margin-inline: auto;
-  gap: 14px;
-  padding: clamp(14px, 1.8vw, 26px);
+  width: 100%;
+  min-height: calc(100dvh - 24px);
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto minmax(540px, 1fr) minmax(210px, 0.28fr);
+  align-content: stretch;
+  gap: clamp(12px, 1vw, 18px);
+  padding: clamp(14px, 1.5vw, 28px);
+}
+
+body.view-ai-active.studio-home-active .studio-view-shell > :is(.studio-home-topbar, .studio-home-command-grid, .studio-home-feature-grid) {
+  grid-column: 1 !important;
 }
 
 body.view-ai-active.studio-home-active .studio-home-topbar {
-  min-height: 70px;
-  padding: 0 2px 12px;
+  min-height: 78px;
+  padding: 0 4px 14px;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 68%, transparent);
 }
 
+body.view-ai-active.studio-home-active .studio-home-welcome-copy {
+  display: grid;
+  gap: 4px;
+}
+
 body.view-ai-active.studio-home-active .studio-home-topbar h2 {
-  font-size: clamp(26px, 2.5vw, 36px);
+  margin: 0;
+  font-size: clamp(27px, 2.3vw, 40px);
+  letter-spacing: -0.035em;
 }
 
 body.view-ai-active.studio-home-active .studio-home-topbar p {
-  max-width: 62ch;
-  font-size: 14px;
+  max-width: 68ch;
+  margin: 0;
+  font-size: 13px;
 }
 
-body.view-ai-active.studio-home-active .studio-home-overview-only#studio-home-card {
-  padding: clamp(16px, 1.8vw, 24px);
-  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
-  border-radius: 14px;
+body.view-ai-active.studio-home-active .studio-home-command-grid {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(340px, 1.08fr) minmax(500px, 1.38fr) minmax(320px, 0.92fr);
+  grid-template-areas: "current create recent";
+  gap: clamp(12px, 1vw, 18px);
+}
+
+body.view-ai-active.studio-home-active .studio-home-workbench {
+  display: contents;
+}
+
+body.view-ai-active.studio-home-active :is(.studio-home-current-panel, .studio-home-output-panel, #studio-home-card) {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 54px rgba(0, 0, 0, 0.12);
+}
+
+body.view-ai-active.studio-home-active #studio-home-card {
+  grid-area: create;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: clamp(16px, 1.5vw, 24px);
+  background:
+    radial-gradient(circle at 78% 0%, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 18%, transparent), transparent 44%),
+    color-mix(in srgb, var(--panel) 88%, black 12%);
+}
+
+body.view-ai-active.studio-home-active .studio-home-current-panel {
+  grid-area: current;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: clamp(16px, 1.5vw, 24px);
+  background:
+    radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--rail-icon-image) 13%, transparent), transparent 48%),
+    color-mix(in srgb, var(--panel-alt) 80%, black 20%);
+}
+
+body.view-ai-active.studio-home-active .studio-home-output-panel {
+  grid-area: recent;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: clamp(16px, 1.5vw, 24px);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--studio-accent-2, var(--accent-2)) 12%, transparent), transparent 42%),
+    color-mix(in srgb, var(--panel-alt) 80%, black 20%);
 }
 
 body.view-ai-active.studio-home-active .studio-workflow-quick-head {
-  align-items: center;
-  margin-bottom: 14px;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 body.view-ai-active.studio-home-active .studio-workflow-quick-head h3 {
-  font-size: clamp(20px, 1.8vw, 27px);
+  margin: 2px 0 0;
+  font-size: clamp(20px, 1.5vw, 28px);
+}
+
+body.view-ai-active.studio-home-active .studio-workflow-quick-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+body.view-ai-active.studio-home-active .studio-workflow-quick-open-all {
+  min-height: 38px;
+  padding-inline: 13px;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 body.view-ai-active.studio-home-active .studio-workflow-quick-grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile {
-  min-height: 168px;
-  padding: 16px 13px 13px;
-  border-radius: 10px;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto auto;
+  align-content: stretch;
+  align-items: start;
+  justify-items: start;
+  column-gap: 12px;
+  row-gap: 4px;
+  padding: clamp(11px, 1vw, 16px);
+  border-radius: 12px;
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile:hover {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, currentColor 8%, var(--panel));
 }
 
 body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 15px;
+  width: 50px;
+  height: 50px;
+  grid-row: auto;
+  border-radius: 14px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile-icon svg {
-  width: 31px;
-  height: 31px;
+  width: 29px;
+  height: 29px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile h4 {
-  font-size: 17px;
+  align-self: end;
+  justify-self: start;
+  font-size: 18px;
+  text-align: left;
 }
 
 body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile .panel-subtitle {
+  align-self: start;
   min-height: 0;
   font-size: 11px;
   line-height: 1.35;
+  text-align: left;
 }
 
-body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile-open {
-  width: 30px;
-  min-width: 30px;
-  height: 30px;
-  min-height: 30px;
-  border-radius: 8px;
+body.view-ai-active.studio-home-active .studio-home-section-head {
+  margin-bottom: 14px;
 }
 
-body.view-ai-active.studio-home-active .studio-home-feature-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 0;
+body.view-ai-active.studio-home-active .studio-home-section-head h3 {
+  font-size: 19px;
 }
 
-body.view-ai-active.studio-home-active .studio-home-workbench {
+body.view-ai-active.studio-home-active .studio-home-current-project,
+body.view-ai-active.studio-home-active .studio-home-project-grid-list,
+body.view-ai-active.studio-home-active .studio-home-project-grid-list .studio-home-project-list {
+  min-height: 0;
+  height: 100%;
+}
+
+body.view-ai-active.studio-home-active .studio-home-project-grid-list {
   display: grid;
-  grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
-  gap: 12px;
-}
-
-body.view-ai-active.studio-home-active .studio-home-workbench-panel {
-  min-width: 0;
-  padding: 16px;
-  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 86% 4%, color-mix(in srgb, var(--studio-accent-1, var(--accent)) 13%, transparent) 0%, transparent 40%),
-    color-mix(in srgb, var(--panel-alt) 78%, black 22%);
-}
-
-body.view-ai-active.studio-home-active .studio-home-workbench-panel .studio-home-section-head {
-  margin-bottom: 12px;
-}
-
-body.view-ai-active.studio-home-active .studio-home-workbench-panel h3 {
-  font-size: 18px;
+  grid-template-columns: minmax(0, 1fr) !important;
 }
 
 body.view-ai-active.studio-home-active .studio-home-current-project-card {
-  min-height: 170px;
+  min-height: 0;
+  height: 100%;
   display: grid;
-  grid-template-columns: minmax(128px, 0.72fr) minmax(0, 1fr);
+  grid-template-rows: minmax(200px, 1fr) auto;
   overflow: hidden;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 42%, var(--line));
-  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 44%, var(--line));
+  border-radius: 12px;
   background: color-mix(in srgb, var(--panel) 88%, black 12%);
   color: var(--ink);
   text-align: left;
@@ -125,251 +204,209 @@ body.view-ai-active.studio-home-active .studio-home-current-project-card {
 body.view-ai-active.studio-home-active .studio-home-current-project-thumb {
   display: grid;
   min-width: 0;
-  min-height: 100%;
+  min-height: 0;
   place-items: center;
   overflow: hidden;
   color: var(--studio-accent-1, var(--accent));
-  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 12%, var(--panel));
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 11%, var(--panel));
 }
 
 body.view-ai-active.studio-home-active .studio-home-current-project-thumb :is(img, video) {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 body.view-ai-active.studio-home-active .studio-home-current-project-copy {
   display: grid;
-  align-content: center;
-  gap: 8px;
-  padding: 16px;
+  gap: 7px;
+  padding: 18px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-current-project-copy small,
 body.view-ai-active.studio-home-active .studio-home-current-project-action {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-current-project-copy strong {
   overflow: hidden;
   color: var(--ink);
-  font-size: clamp(17px, 1.5vw, 23px);
+  font-size: clamp(17px, 1.4vw, 24px);
   line-height: 1.12;
   text-overflow: ellipsis;
 }
 
 body.view-ai-active.studio-home-active .studio-home-current-project-action {
   color: var(--studio-accent-1, var(--accent));
-  font-weight: 800;
-}
-
-body.view-ai-active.studio-home-active .studio-home-project-grid-list {
-  grid-template-columns: 1fr;
-  gap: 7px;
+  font-weight: 850;
 }
 
 body.view-ai-active.studio-home-active .studio-home-project-grid-list .studio-home-project-list {
   display: grid;
-  gap: 7px;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  justify-items: stretch;
+  gap: 8px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-project-grid-list .studio-home-project-card {
-  min-height: 42px;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
-  gap: 8px;
-  padding: 6px;
+  width: 100%;
+  min-height: 58px;
+  height: 100%;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 9px;
+  padding: 8px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-project-grid-list .studio-home-project-thumb {
-  width: 38px;
-  height: 38px;
+  width: 46px;
+  height: 46px;
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-grid {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(12px, 1vw, 18px);
+  margin: 0;
 }
 
 body.view-ai-active.studio-home-active .studio-home-feature-card {
-  min-height: 178px;
-  grid-template-columns: minmax(0, 1fr) 84px;
-  gap: 10px;
-  padding: 16px;
-  border-radius: 12px;
+  --home-feature-accent: var(--studio-accent-1, var(--accent));
+  min-height: 210px;
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr) clamp(78px, 7vw, 112px);
+  gap: 12px;
+  padding: clamp(16px, 1.3vw, 24px);
+  border-radius: 14px;
+  border-color: color-mix(in srgb, var(--home-feature-accent) 30%, var(--line));
+  background:
+    radial-gradient(circle at 92% 45%, color-mix(in srgb, var(--home-feature-accent) 20%, transparent), transparent 36%),
+    linear-gradient(145deg, color-mix(in srgb, var(--home-feature-accent) 6%, var(--panel)), color-mix(in srgb, var(--panel) 90%, black 10%));
+  transition: transform 160ms ease, border-color 160ms ease;
 }
 
+body.view-ai-active.studio-home-active .studio-home-feature-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--home-feature-accent) 62%, var(--line));
+}
+
+body.view-ai-active.studio-home-active .studio-home-feature-card.is-tools { --home-feature-accent: var(--rail-icon-tools); }
+body.view-ai-active.studio-home-active .studio-home-feature-card.is-addons { --home-feature-accent: var(--rail-icon-blender); }
+body.view-ai-active.studio-home-active .studio-home-feature-card.is-assets { --home-feature-accent: var(--rail-icon-assets); }
+body.view-ai-active.studio-home-active .studio-home-feature-card.is-bots { --home-feature-accent: var(--rail-icon-bots); }
+
 body.view-ai-active.studio-home-active .studio-home-feature-copy {
-  gap: 7px;
+  align-content: center;
+  gap: 8px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-feature-copy h3 {
-  font-size: 18px;
+  font-size: clamp(18px, 1.4vw, 24px);
 }
 
 body.view-ai-active.studio-home-active .studio-home-feature-copy > span {
   width: fit-content;
-  min-height: 24px;
+  min-height: 23px;
   padding-inline: 8px;
-  font-size: 11px;
+  background: color-mix(in srgb, var(--home-feature-accent) 16%, transparent);
+  color: color-mix(in srgb, var(--home-feature-accent) 78%, white 22%);
+  font-size: 10px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-feature-copy p {
+  max-width: 40ch;
   margin: 0;
   font-size: 11px;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 body.view-ai-active.studio-home-active .studio-home-feature-button {
   min-width: 0;
-  min-height: 32px;
-  margin-top: 2px;
-  padding-inline: 9px;
-  font-size: 11px;
+  min-height: 34px;
+  margin-top: 3px;
+  padding-inline: 10px;
+  font-size: 10px;
 }
 
 body.view-ai-active.studio-home-active .studio-home-feature-art {
-  width: 76px;
+  width: 100%;
+  max-width: 106px;
   aspect-ratio: 1;
 }
 
-body.view-ai-active.studio-home-active .studio-home-feature-art .button-icon,
-body.view-ai-active.studio-home-active .studio-home-feature-art svg {
-  width: 52px;
-  height: 52px;
+body.view-ai-active.studio-home-active .studio-home-feature-art :is(.button-icon, svg) {
+  width: 64px;
+  height: 64px;
 }
 
-body.view-ai-active.studio-home-active .studio-home-project-section {
-  margin-top: 4px;
-}
-
-body.view-ai-active.studio-home-active .studio-home-project-card {
-  min-height: 78px;
-  grid-template-columns: 54px minmax(0, 1fr) auto;
-  gap: 10px;
-  padding: 9px;
-}
-
-body.view-ai-active.studio-home-active .studio-home-project-thumb {
-  width: 54px;
-  height: 54px;
-}
-
-body.view-ai-active.studio-home-active .studio-home-project-copy strong {
-  font-size: 13px;
-}
-
-body.view-ai-active.studio-home-active .studio-home-project-copy span {
-  font-size: 11px;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-card {
-  width: min(1600px, 100%);
-  gap: 14px !important;
-  padding: clamp(14px, 1.6vw, 24px) !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-hero {
-  min-height: 64px;
-  padding-bottom: 10px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-hero h2 {
-  font-size: clamp(24px, 2.4vw, 33px);
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-create-panel {
-  grid-template-columns: minmax(250px, 0.3fr) minmax(0, 1fr) !important;
-  gap: 18px !important;
-  padding: 16px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-workflow-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-workflow-button {
-  min-height: 72px !important;
-  padding: 9px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-dashboard-grid {
-  grid-template-columns: minmax(0, 1.16fr) minmax(330px, 0.84fr) !important;
-  gap: 12px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-panel {
-  padding: 14px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-card {
-  min-height: 112px !important;
-  grid-template-rows: auto auto auto minmax(28px, 1fr) !important;
-  padding: 11px !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-card > strong {
-  font-size: clamp(19px, 1.7vw, 25px) !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-sparkline {
-  height: 30px !important;
-}
-
-// Do not let the activity column force the current-work card into a tall
-// poster. Each dashboard panel owns its natural content height instead.
-body.view-ai-active.studio-workflow-home-active .lazydev-home-dashboard-grid {
-  align-items: start !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-panel {
-  height: auto !important;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-current-project-card {
-  min-height: 174px;
-  height: 174px;
-}
-
-body.view-ai-active.studio-workflow-home-active .lazydev-home-current-project-thumb {
-  min-height: 0;
-}
-
-@media (max-width: 1280px) {
-  body.view-ai-active.studio-home-active .studio-workflow-quick-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (max-width: 1540px) {
+  body.view-ai-active.studio-home-active .studio-view-shell {
+    grid-template-rows: auto auto auto;
   }
 
+  body.view-ai-active.studio-home-active .studio-home-command-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: "current create" "recent recent";
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-output-panel {
+    min-height: 300px;
+  }
+
+  body.view-ai-active.studio-home-active .studio-workflow-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile {
+    grid-template-columns: 50px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    align-items: center;
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile-icon {
+    grid-row: 1 / -1;
+  }
+}
+
+@media (max-width: 1120px) {
   body.view-ai-active.studio-home-active .studio-home-feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 780px) {
   body.view-ai-active.studio-home-active .studio-home-topbar,
-  body.view-ai-active.studio-workflow-home-active .lazydev-home-hero,
-  body.view-ai-active.studio-workflow-home-active .lazydev-home-create-panel {
+  body.view-ai-active.studio-home-active .studio-home-command-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-command-grid {
+    grid-template-areas: "current" "create" "recent";
   }
 
   body.view-ai-active.studio-home-active .studio-home-profile-pill {
     display: none;
   }
 
-  body.view-ai-active.studio-home-active .studio-workflow-quick-grid,
-  body.view-ai-active.studio-home-active .studio-home-project-grid,
-  body.view-ai-active.studio-workflow-home-active .lazydev-home-usage-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  body.view-ai-active.studio-home-active .studio-home-current-project-card {
+    min-height: 420px;
   }
 
-  body.view-ai-active.studio-home-active .studio-home-feature-grid,
-  body.view-ai-active.studio-home-active .studio-home-workbench,
-  body.view-ai-active.studio-workflow-home-active .lazydev-home-dashboard-grid {
-    grid-template-columns: 1fr !important;
+  body.view-ai-active.studio-home-active .studio-home-feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  body.view-ai-active.studio-home-active .studio-workflow-quick-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+
+  body.view-ai-active.studio-home-active .studio-home-overview-only .studio-workflow-quick-tile {
+    min-height: 86px;
   }
 }

@@ -25,6 +25,7 @@ import {
 import { startLanDiscoveryService, type LanDiscoveryHandle } from "./server/companion/lanDiscoveryService.js";
 import {androidCompanionGithubReleasesUrl, readLatestAndroidCompanionRelease} from "./server/companion/androidReleaseDistribution.js";
 import {renderRemoteBrowserLoginPage} from "./server/remoteBrowserLoginPage.js";
+import {startComfyUiRuntimeWhenConfigured} from "./server/comfyUi/comfyUiRuntimeManager.js";
 
 function resolveSafeStaticPath(baseRoot: string, requestPath: string): string | null {
   const relativePath = requestPath.replace(/^\/+/, "");
@@ -650,6 +651,9 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
     server = initialServer;
     console.log(`Dashboard listening on ${getServerUrl(initialServer)}`);
     void startLanDiscovery();
+    void startComfyUiRuntimeWhenConfigured().catch(error => {
+      console.error(`Configured ComfyUI startup failed: ${error instanceof Error ? error.message : String(error)}`);
+    });
   });
   void ready.catch(error => {
     const detail = error instanceof Error ? error.message : "Unknown error";

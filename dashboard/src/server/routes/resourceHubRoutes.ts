@@ -97,7 +97,7 @@ function readImportedAssetPlatform(value: unknown): "unity" | "godot" | "unreal"
 
 async function handleGetComfyUiRuntime(_request: IncomingMessage, response: ServerResponse): Promise<void> { sendJson(response, 200, await getComfyUiRuntimeStatus()); }
 async function handlePostComfyUiRuntime(request: IncomingMessage, response: ServerResponse): Promise<void> {
-  try { const body = await parseJsonBody(request) as Record<string, unknown>; sendJson(response, 200, await saveComfyUiRuntimeConfiguration({launcherPath: readString(body.launcherPath), workingDirectory: readString(body.workingDirectory)})); }
+  try { const body = await parseJsonBody(request) as Record<string, unknown>; sendJson(response, 200, await saveComfyUiRuntimeConfiguration({launcherPath: readString(body.launcherPath), workingDirectory: readString(body.workingDirectory), autoStart: typeof body.autoStart === "boolean" ? body.autoStart : undefined})); }
   catch (error) { sendJson(response, 400, {error: error instanceof Error ? error.message : "Failed to save ComfyUI runtime settings."}); }
 }
 async function handlePostComfyUiRuntimeStart(_request: IncomingMessage, response: ServerResponse): Promise<void> { try { sendJson(response, 200, await startComfyUiRuntime()); } catch (error) { sendJson(response, 400, {error: error instanceof Error ? error.message : "Failed to start ComfyUI."}); } }

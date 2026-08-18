@@ -49,6 +49,7 @@ export const dashboardClientScriptParts: DashboardClientScriptPart[] = [
   { relativePath: "client/modules/finalBootstrapAssemblyHelpers.js", required: false },
   { relativePath: "client/modules/shellLayoutHelpers.js", required: false },
   { relativePath: "client/modules/workspacePanelHelpers.js", required: false },
+  { relativePath: "client/modules/lazydevHomeUsageChart.js", required: false },
   { relativePath: "client/modules/aiStudioLayoutHelpers.js", required: false },
   { relativePath: "client/modules/aiWorkflowDataHelpers.js", required: false },
   { relativePath: "client/modules/studioSidebarHelpers.js", required: false },

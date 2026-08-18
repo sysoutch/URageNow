@@ -37,7 +37,7 @@ type AutomationMediaRuntimeInput = {
     postMode: "combined" | "separate";
     content: string;
     postOptions?: ImageAutomationPostOptions;
-  }) => Promise<void>;
+  }) => Promise<Array<{ kind: "image"; fileName?: string; directUrl?: string; }>>;
   generateVideoFromPromptLocal: (input: any) => Promise<any>;
   toGeneratedVideoPublicRecord: (record: any) => any;
   gifFrameDownloadPrefix: string;

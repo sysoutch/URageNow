@@ -7,6 +7,7 @@ import {resolveRepoPath} from "@urage/server/config/repositoryPaths";
 export type ComfyUiRuntimeConfiguration = {
   launcherPath: string;
   workingDirectory: string;
+  autoStart: boolean;
 };
 
 type RuntimeStatus = {
@@ -56,9 +57,13 @@ function isProcessRunning(child: ChildProcess | null): child is ChildProcess {
 async function readConfig(): Promise<ComfyUiRuntimeConfiguration> {
   try {
     const parsed = JSON.parse(await readFile(configPath, "utf8")) as Partial<ComfyUiRuntimeConfiguration>;
-    return {launcherPath: clean(parsed.launcherPath) || bundledLauncherPath, workingDirectory: clean(parsed.workingDirectory)};
+    return {
+      launcherPath: clean(parsed.launcherPath) || bundledLauncherPath,
+      workingDirectory: clean(parsed.workingDirectory),
+      autoStart: parsed.autoStart === true
+    };
   } catch {
-    return {launcherPath: bundledLauncherPath, workingDirectory: ""};
+    return {launcherPath: bundledLauncherPath, workingDirectory: "", autoStart: false};
   }
 }
 
@@ -134,9 +139,11 @@ export async function saveComfyUiRuntimeConfiguration(input: Partial<ComfyUiRunt
   const previous = await readConfig();
   const launcherPath = input.launcherPath === undefined ? previous.launcherPath : clean(input.launcherPath) || bundledLauncherPath;
   const workingDirectory = input.workingDirectory === undefined ? previous.workingDirectory : clean(input.workingDirectory);
+  const autoStart = input.autoStart === undefined ? previous.autoStart : input.autoStart === true;
   const config = {
     launcherPath: launcherPath === bundledLauncherPath ? bundledLauncherPath : launcher(launcherPath),
-    workingDirectory: workingDirectory ? directory(workingDirectory) : ""
+    workingDirectory: workingDirectory ? directory(workingDirectory) : "",
+    autoStart
   };
   await writeConfig(config);
   return getComfyUiRuntimeStatus();
@@ -177,6 +184,11 @@ export async function startComfyUiRuntime(): Promise<RuntimeStatus> {
   return getComfyUiRuntimeStatus();
 }
 
+export async function startComfyUiRuntimeWhenConfigured(): Promise<RuntimeStatus> {
+  const config = await readConfig();
+  return config.autoStart ? startComfyUiRuntime() : getComfyUiRuntimeStatus();
+}
+
 export async function stopComfyUiRuntime(): Promise<RuntimeStatus> {
   if (!isProcessRunning(runningProcess)) {
     return getComfyUiRuntimeStatus();
@@ -211,7 +223,8 @@ export async function createComfyUiLauncherBatches(rootPath: string) {
     files.push(target);
   }
   const selectedLauncherPath = path.join(root, "run_urage_nvidia_fast_fp16_accumulation_listen.bat");
-  await writeConfig({launcherPath: selectedLauncherPath, workingDirectory: root});
+  const previous = await readConfig();
+  await writeConfig({launcherPath: selectedLauncherPath, workingDirectory: root, autoStart: previous.autoStart});
   return {directory: root, files, selectedLauncherPath};
 }
 

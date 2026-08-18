@@ -428,23 +428,26 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
       <section class="view active studio-view" data-view-panel="ai">
         <div class="studio-view-shell">
           <div class="studio-home-topbar studio-home-overview-only">
-            <div>
+            <div class="studio-home-welcome-copy">
+              <div class="panel-kicker">Command center</div>
               <h2>Welcome to URage NOW</h2>
-              <p>All-in-one platform for AI workflows, tools, and bots.</p>
+              <p>Create with AI, manage your tools, and keep every workflow moving.</p>
             </div>
             <label class="studio-home-search" aria-label="Search Studio">
               <span class="button-icon" aria-hidden="true">${renderToolsSearchIcon()}</span>
-              <input type="search" placeholder="Search anything..." autocomplete="off">
+              <input data-studio-home-search="studio" type="search" placeholder="Search workflows and recent work..." autocomplete="off">
             </label>
             <div class="studio-home-profile-pill"><span>LD</span></div>
           </div>
+          <section class="studio-home-command-grid studio-home-overview-only" aria-label="URage command center">
           <article class="panel-card studio-workflow-quick-card studio-home-overview-only" id="studio-home-card">
             <div class="studio-workflow-quick-head">
               <div class="panel-heading">
                 <div class="panel-kicker">Quick launch</div>
                 <h3>Start a new creation</h3>
+                <p>Choose a studio and jump straight into your next idea.</p>
               </div>
-              <button class="secondary studio-workflow-quick-open-all" data-view="ai" data-studio-home-view="workflow" type="button">${renderButtonIcon("folder")}<span>Open LazyDev</span></button>
+              <button class="studio-workflow-quick-open-all" data-view="ai" data-studio-home-view="workflow" type="button">${renderButtonIcon("folder")}<span>Go to LazyDev</span></button>
             </div>
             <div class="studio-workflow-quick-grid">
               ${renderWorkflowQuickTile({
@@ -498,18 +501,19 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
               <div class="studio-home-current-project" id="studio-home-current-project"></div>
             </article>
             <article class="studio-home-workbench-panel studio-home-output-panel">
-              <div class="studio-home-section-head"><div><div class="panel-kicker">Recent outputs</div><h3>Pick up where you left off</h3></div><button class="ghost compact" type="button">View all</button></div>
+              <div class="studio-home-section-head"><div><div class="panel-kicker">Recent outputs</div><h3>Pick up where you left off</h3></div><button class="ghost compact" data-view="ai" data-studio-home-view="workflow" type="button">View all</button></div>
               <div class="studio-home-project-grid studio-home-project-grid-list">
                 <div class="studio-home-empty" id="studio-home-recent-projects-empty">Loading recent projects...</div>
                 <div class="studio-home-project-list" id="studio-home-recent-projects"></div>
               </div>
             </article>
           </section>
+          </section>
           <div class="studio-home-feature-grid studio-home-overview-only">
             <article class="panel-card studio-home-feature-card is-tools">
               <div class="studio-home-feature-copy">
                 <h3>Tools</h3>
-                <span>Powerful utilities</span>
+                <span>Utilities</span>
                 <p>Enhance your workflow with powerful AI tools and utilities.</p>
                 <button class="secondary studio-home-feature-button" data-view="tools" type="button">${renderButtonIcon("wand")}<span>Open Tools</span></button>
               </div>
@@ -518,7 +522,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
             <article class="panel-card studio-home-feature-card is-addons">
               <div class="studio-home-feature-copy">
                 <h3>3D Suites</h3>
-                <span>Automate & Assist</span>
+                <span>Blender workflows</span>
                 <p>Extend Blender's functionality with powerful AI-driven addons.</p>
                 <div>
                   <button class="secondary studio-home-feature-button" data-view="blender-projects" type="button">${renderButtonIcon("box")}<span>Open Projects</span></button>
@@ -530,7 +534,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
             <article class="panel-card studio-home-feature-card is-assets">
               <div class="studio-home-feature-copy">
                 <h3>Game Engines</h3>
-                <span>Automate & Assist</span>
+                <span>Projects & assets</span>
                 <p>Launch projects and manage engine assets.</p>
                 <div>
                   <button class="secondary studio-home-feature-button" data-view="projects" type="button">${renderButtonIcon("box")}<span>Open Projects</span></button>
@@ -542,7 +546,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
             <article class="panel-card studio-home-feature-card is-bots">
               <div class="studio-home-feature-copy">
                 <h3>Bots</h3>
-                <span>Automate & Assist</span>
+                <span>Automation</span>
                 <p>Create and manage AI bots that work for you.</p>
                 <button class="secondary studio-home-feature-button" data-view="dashboard" type="button">${renderButtonIcon("box")}<span>Open Bots</span></button>
               </div>
@@ -558,19 +562,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
               </div>
               <label class="studio-home-search" aria-label="Search LazyDev">
                 <span class="button-icon" aria-hidden="true">${renderToolsSearchIcon()}</span>
-                <input type="search" placeholder="Search anything..." autocomplete="off">
+                <input data-studio-home-search="workflow" type="search" placeholder="Search workflows and recent work..." autocomplete="off">
               </label>
             </div>
             <div class="lazydev-home-create-panel">
-              <button class="lazydev-home-chat-card" data-ai-scroll-target="ask-rod-card" type="button">
-                <div class="lazydev-home-chat-icon" aria-hidden="true">${renderWorkflowIcon("chat")}</div>
-                <div>
-                  <div class="panel-kicker">Start creating</div>
-                  <h3>What would you like to make?</h3>
-                  <p>Plan an idea, generate media, or continue with a task in Chat Studio.</p>
-                </div>
-                <span class="lazydev-home-chat-open" aria-hidden="true">${renderButtonIcon("send")}</span>
-              </button>
               <div class="lazydev-home-workflow-area">
                 <div class="lazydev-home-workflow-heading"><span>Start a workflow</span><small>Choose the output you want to create.</small></div>
                 <div class="lazydev-home-workflow-grid">
@@ -585,16 +580,39 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
             </div>
             <div class="lazydev-home-dashboard-grid">
               <section class="lazydev-home-panel lazydev-home-usage-panel">
-                <div class="studio-home-section-head"><div><div class="panel-kicker">Insights</div><h3>Usage Overview</h3></div><small id="lazydev-home-usage-range">Loading activity...</small></div>
-                <div class="lazydev-home-usage-grid" id="lazydev-home-usage-overview"><div class="studio-home-empty">Loading usage statistics...</div></div>
+                <div class="studio-home-section-head lazydev-home-usage-head">
+                  <div><div class="panel-kicker">Insights</div><h3>Usage Overview</h3></div>
+                  <div class="lazydev-home-usage-controls">
+                    <small class="lazydev-home-range-label" id="lazydev-home-usage-range">Loading activity...</small>
+                    <div class="lazydev-home-panel-filter-tabs lazydev-home-usage-filters" data-lazydev-home-filter-tabs="usage" role="tablist" aria-label="Usage media filter">
+                      <button class="active" data-lazydev-home-filter-scope="usage" data-lazydev-home-filter="all" type="button">All</button>
+                      <button data-lazydev-home-filter-scope="usage" data-lazydev-home-filter="image" type="button">Images</button>
+                      <button data-lazydev-home-filter-scope="usage" data-lazydev-home-filter="model3d" type="button">3D</button>
+                      <button data-lazydev-home-filter-scope="usage" data-lazydev-home-filter="audio" type="button">Audio</button>
+                      <button data-lazydev-home-filter-scope="usage" data-lazydev-home-filter="music" type="button">Music</button>
+                      <button data-lazydev-home-filter-scope="usage" data-lazydev-home-filter="video" type="button">Video</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="lazydev-home-usage-content">
+                  <article class="lazydev-home-activity-chart-card">
+                    <div class="lazydev-home-chart-heading">
+                      <div><strong>Generation activity</strong><small>Daily output by media type</small></div>
+                      <span>7 day trend</span>
+                    </div>
+                    <div class="lazydev-home-activity-chart" id="lazydev-home-activity-chart"><div class="studio-home-empty">Loading activity graph...</div></div>
+                  </article>
+                  <div class="lazydev-home-usage-grid" id="lazydev-home-usage-overview"><div class="studio-home-empty">Loading usage statistics...</div></div>
+                </div>
               </section>
               <section class="lazydev-home-panel lazydev-home-recent-panel">
                 <div class="studio-home-section-head"><div><div class="panel-kicker">Workspace</div><h3>Continue working</h3></div></div>
-                <div class="lazydev-home-project-layout">
-                  <div class="studio-home-empty" id="lazydev-home-recent-projects-empty">Loading recent work...</div>
-                  <div class="lazydev-home-current-project" id="lazydev-home-current-project"></div>
-                  <div class="studio-home-project-list lazydev-home-recent-project-list" id="lazydev-home-recent-projects"></div>
-                </div>
+                <div class="studio-home-empty" id="lazydev-home-recent-projects-empty">Loading recent work...</div>
+                <div class="lazydev-home-current-project" id="lazydev-home-current-project"></div>
+              </section>
+              <section class="lazydev-home-panel lazydev-home-recent-work-panel">
+                <div class="studio-home-section-head"><div><div class="panel-kicker">Library</div><h3>Recent work</h3></div></div>
+                <div class="studio-home-project-list lazydev-home-recent-project-list" id="lazydev-home-recent-projects"></div>
               </section>
               <section class="lazydev-home-panel lazydev-home-activity-panel">
                 <div class="studio-home-section-head"><div><div class="panel-kicker">Timeline</div><h3>Recent activity</h3></div></div>
@@ -1496,7 +1514,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                       <button class="secondary mini-button" id="model3d-transform-pan-button" type="button" title="Pan" aria-label="Pan">${renderButtonIcon("hand")}</button>
                       <button class="secondary mini-button" id="model3d-transform-front-button" type="button" title="Front view" aria-label="Front view">${renderButtonIcon("expand")}</button>
                       <button class="secondary mini-button" id="model3d-transform-turntable-button" type="button" title="Turntable view" aria-label="Turntable view">${renderButtonIcon("refresh")}</button>
-                      <button class="secondary mini-button" id="model3d-transform-scale-button" type="button" title="Scale with LLM" aria-label="Scale with LLM">${renderButtonIcon("settings")}</button>
+                      <button class="secondary mini-button" id="model3d-transform-scale-button" data-model3d-llm-real-height-action type="button" title="Estimate real-life height and scale with LLM" aria-label="Estimate real-life height and scale selected model with LLM">${renderButtonIcon("settings")}</button>
                       <button class="secondary mini-button" id="model3d-transform-grid-button" type="button" title="Toggle grid" aria-label="Toggle grid">${renderButtonIcon("box")}</button>
                     </div>
                     <div class="model3d-viewer-flyout">
@@ -1573,7 +1591,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                       <div class="model3d-viewer-flyout-card">
                         <div class="model3d-viewer-flyout-label">Actions</div>
                         <div class="studio-chip-grid">
-                          <button class="secondary mini-button" id="model3d-three-scale-llm-button" type="button" title="Scale with LLM" aria-label="Scale selected model with LLM">${renderButtonIcon("settings")}<span>Scale</span></button>
+                          <button class="secondary mini-button" id="model3d-three-scale-llm-button" data-model3d-llm-real-height-action type="button" title="Estimate real-life height and scale with LLM" aria-label="Estimate real-life height and scale selected model with LLM">${renderButtonIcon("settings")}<span>Scale</span></button>
                         </div>
                       </div>
                     </div>
@@ -1581,6 +1599,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   </div>
                   <div class="model3d-preview-quick-actions">
                     <button class="secondary" id="model3d-open-in-blender-button" type="button">${renderButtonIcon("cube")}<span>Open In Blender</span></button>
+                    <button class="secondary" id="model3d-llm-real-height-button" data-model3d-llm-real-height-action type="button" title="Estimate real-life height and uniformly scale the selected model">${renderButtonIcon("sparkle")}<span>Ask LLM For Real-Life Height</span></button>
                     <button class="secondary" id="model3d-separate-by-loose-parts-button" type="button">${renderButtonIcon("settings")}<span>Separate By Loose Parts</span></button>
                     <button class="secondary" id="model3d-rotate-button" type="button">${renderButtonIcon("video")}<span>Rotate</span></button>
                     <button class="secondary" id="model3d-delight-button" type="button">${renderButtonIcon("sparkle")}<span>Delight</span></button>
