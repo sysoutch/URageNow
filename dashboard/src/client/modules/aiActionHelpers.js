@@ -2278,79 +2278,71 @@ function createDashboardAiActionHelpers(input) {
     details.appendChild(content);
     return details;
   }
-  function createAskBubbleTopActionRow(session, message, taskInfo) {
-    if (!session || !message) {
-      return null;
+  function appendAskMessageEditDeleteButtons(row, session, message) {
+    if (!row || !session || !message || message.pending) {
+      return;
     }
-    const row = document.createElement("div");
-    row.className = "ask-bubble-top-action-row";
-    if (taskInfo) {
-      row.appendChild(taskInfo);
-    }
-    if (!message.pending) {
-      const editButton = document.createElement("button");
-      editButton.className = "secondary mini-button";
-      editButton.type = "button";
-      setAskQuickActionButtonContent(editButton, "Edit", "edit");
-      editButton.addEventListener("click", event => {
-        event.preventDefault();
-        if (askRequestInFlight && message.id === askStreamingAssistantMessageId) {
-          input.setOutput("Wait for the current response to finish before editing this message.");
-          return;
-        }
-        const currentText = String(message.text || "");
-        const editedText = window.prompt("Edit message text", currentText);
-        if (editedText === null) {
-          return;
-        }
-        const nextText = String(editedText).trim();
-        if (!nextText) {
-          input.setOutput("Message text cannot be empty.");
-          return;
-        }
-        updateAskMessage(session.id, message.id, {
-          text: nextText,
-          error: false
+    const editButton = document.createElement("button");
+    editButton.className = "secondary mini-button";
+    editButton.type = "button";
+    setAskQuickActionButtonContent(editButton, "Edit", "edit");
+    editButton.addEventListener("click", event => {
+      event.preventDefault();
+      if (askRequestInFlight && message.id === askStreamingAssistantMessageId) {
+        input.setOutput("Wait for the current response to finish before editing this message.");
+        return;
+      }
+      const currentText = String(message.text || "");
+      const editedText = window.prompt("Edit message text", currentText);
+      if (editedText === null) {
+        return;
+      }
+      const nextText = String(editedText).trim();
+      if (!nextText) {
+        input.setOutput("Message text cannot be empty.");
+        return;
+      }
+      updateAskMessage(session.id, message.id, {
+        text: nextText,
+        error: false
+      });
+      renderAskChatTabs();
+      renderAskChatMessages();
+      scrollAskFeedToBottom();
+      input.setOutput("Message updated.");
+    });
+    row.appendChild(editButton);
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "secondary mini-button";
+    deleteButton.type = "button";
+    setAskQuickActionButtonContent(deleteButton, "Delete", "delete");
+    deleteButton.addEventListener("click", async event => {
+      event.preventDefault();
+      if (askRequestInFlight && message.id === askStreamingAssistantMessageId) {
+        input.setOutput("Wait for the current response to finish before deleting this message.");
+        return;
+      }
+      const messageLabel = message.role === "assistant" ? "assistant" : "user";
+      const confirmed = typeof window.dashboardConfirm === "function"
+        && await window.dashboardConfirm({
+          title: "Delete Message",
+          message: "Delete this " + messageLabel + " message?",
+          confirmLabel: "Delete",
+          variant: "warning"
         });
-        renderAskChatTabs();
-        renderAskChatMessages();
-        scrollAskFeedToBottom();
-        input.setOutput("Message updated.");
-      });
-      row.appendChild(editButton);
-      const deleteButton = document.createElement("button");
-      deleteButton.className = "secondary mini-button";
-      deleteButton.type = "button";
-      setAskQuickActionButtonContent(deleteButton, "Delete", "delete");
-      deleteButton.addEventListener("click", async event => {
-        event.preventDefault();
-        if (askRequestInFlight && message.id === askStreamingAssistantMessageId) {
-          input.setOutput("Wait for the current response to finish before deleting this message.");
-          return;
-        }
-        const messageLabel = message.role === "assistant" ? "assistant" : "user";
-        const confirmed = typeof window.dashboardConfirm === "function"
-          && await window.dashboardConfirm({
-            title: "Delete Message",
-            message: "Delete this " + messageLabel + " message?",
-            confirmLabel: "Delete",
-            variant: "warning"
-          });
-        if (!confirmed) {
-          return;
-        }
-        if (!deleteAskMessage(session.id, message.id)) {
-          input.setOutput("Message delete failed.");
-          return;
-        }
-        renderAskChatTabs();
-        renderAskChatMessages();
-        scrollAskFeedToBottom();
-        input.setOutput("Message deleted.");
-      });
-      row.appendChild(deleteButton);
-    }
-    return row.childNodes.length > 0 ? row : null;
+      if (!confirmed) {
+        return;
+      }
+      if (!deleteAskMessage(session.id, message.id)) {
+        input.setOutput("Message delete failed.");
+        return;
+      }
+      renderAskChatTabs();
+      renderAskChatMessages();
+      scrollAskFeedToBottom();
+      input.setOutput("Message deleted.");
+    });
+    row.appendChild(deleteButton);
   }
   async function runAskQuickActionWithBusyButton(button, pendingText, action) {
     if (!button || button.dataset.askBusy === "true") {
@@ -3009,11 +3001,12 @@ function createDashboardAiActionHelpers(input) {
       }
     );
   }
-  function createAskBubbleLowerActionRow(message) {
+  function createAskBubbleLowerActionRow(session, message) {
     const row = document.createElement("div");
     row.className = "row chat-bubble-action-row ask-bubble-lower-action-row";
     const text = String(message && message.text ? message.text : "").trim();
     const assistantMessage = message && message.role === "assistant";
+    appendAskMessageEditDeleteButtons(row, session, message);
     if (text && !(message && message.pending)) {
       if (assistantMessage) {
       const ttsButton = document.createElement("button");
@@ -3241,6 +3234,10 @@ function createDashboardAiActionHelpers(input) {
       const role = document.createElement("div");
       role.className = "chat-role";
       role.textContent = message.role === "assistant" ? "Assistant" : "You";
+      const taskInfo = createAskTaskInfoBlock(message);
+      if (taskInfo) {
+        role.appendChild(taskInfo);
+      }
       article.appendChild(role);
       if (message.role === "assistant") {
         if (message.usedSkill && message.usedSkill.id) {
@@ -3271,13 +3268,9 @@ function createDashboardAiActionHelpers(input) {
       } else {
         article.appendChild(createAskUserMessageBody(message));
       }
-      const lowerActionRow = createAskBubbleLowerActionRow(message);
+      const lowerActionRow = createAskBubbleLowerActionRow(session, message);
       if (lowerActionRow.childNodes.length > 0) {
         article.appendChild(lowerActionRow);
-      }
-      const topActionRow = createAskBubbleTopActionRow(session, message, createAskTaskInfoBlock(message));
-      if (topActionRow) {
-        article.appendChild(topActionRow);
       }
       messageList.appendChild(article);
     });

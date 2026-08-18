@@ -158,8 +158,9 @@ Dashboard navigation regressions fixed:
 - Low-poly conversion preserves source UVs before the installed LowPolyUV addon samples them, so palette colors match the visible source texture. New conversions export self-contained GLB artifacts rather than round-tripping through FBX; existing FBX low-poly variants remain readable.
 - An empty Chat Studio session uses a centered, theme-aware mascot badge and the concise “Wow, such empty!” state instead of an instructional placeholder.
 - Fresh Chat Studio messages use a short pop-in animation in the dashboard and Android companion; only newly appended messages animate, so transcript re-renders do not replay motion for history.
-- Chat Studio message controls are compact, tooltip-labelled icons: task details, edit, and delete sit at the upper right, while speech and copy actions sit at the lower right. Task metadata opens as an anchored floating panel instead of expanding the bubble.
+- Chat Studio message controls are compact, tooltip-labelled icons: task details follow the message role label without reserving empty bubble width, while edit, delete, speech, copy, and related actions share the lower-right action row. Task metadata opens as an anchored floating panel instead of expanding the bubble.
 - Chat Studio defaults to deleting successfully sent voice recordings: the dashboard does not persist an STT source artifact or retain its base64 data in chat history, and Android removes the local recording after a successful transcription. Each client exposes a preference to retain sent voice recordings instead.
+- Image Studio now constrains the primary image and GIF-canvas previews to their loaded intrinsic dimensions. Workflow layout may shrink an image to fit its panel, but cannot upscale uploads or variants that have missing or stale metadata.
 
 ## Phase 5: Consolidate CSS And SCSS Ownership
 

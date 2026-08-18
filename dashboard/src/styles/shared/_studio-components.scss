@@ -434,6 +434,15 @@ body.view-ai-active :is(.image-variant-preview, .model3d-variant-preview) img {
   object-fit: cover;
 }
 
+/* The Studio preview must never interpolate a source image above its native pixels. */
+body.view-ai-active #image-studio-card .image-studio-preview-panel.has-intrinsic-image-preview :is(#imagegen-preview, #imagegen-preview-canvas) {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(100%, calc(var(--image-preview-intrinsic-width) * 1px)) !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
 body.view-ai-active .model3d-variant-preview-fallback {
   width: 100%;
   min-height: 92px;

@@ -127,7 +127,7 @@
     gap: 8px;
     max-width: 100%;
     min-width: 0;
-    padding: max(14px, var(--dashboard-cards-padding, 0px)) max(112px, var(--dashboard-cards-padding, 0px)) max(12px, var(--dashboard-cards-padding, 0px)) max(14px, var(--dashboard-cards-padding, 0px));
+    padding: max(14px, var(--dashboard-cards-padding, 0px));
     border-radius: var(--dashboard-cards-radius, var(--dashboard-card-radius, 18px));
     border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
     background: linear-gradient(160deg, color-mix(in srgb, var(--panel) 88%, black 12%) 0%, color-mix(in srgb, var(--panel) 78%, black 22%) 100%);
@@ -176,6 +176,10 @@
   }
 
   .chat-role {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
     color: #9db4dc;
     font-size: 11px;
     text-transform: uppercase;
@@ -1046,9 +1050,13 @@
   }
 
   .ask-chat-empty-mascot {
+    display: grid;
+    place-items: center;
     width: 68%;
     height: 68%;
     color: color-mix(in srgb, var(--text, #f5f5f7) 95%, white);
+    font-size: clamp(96px, 11vw, 148px);
+    line-height: 1;
     filter: drop-shadow(0 2px 1px color-mix(in srgb, black 7%, transparent));
   }
 
@@ -1127,17 +1135,6 @@
     word-break: break-word;
   }
 
-  .ask-bubble-top-action-row {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .ask-bubble-top-action-row button,
   .ask-bubble-lower-action-row .ask-quick-action-button,
   .ask-artifact-action-row .ask-quick-action-button {
     width: 30px;
@@ -1147,7 +1144,6 @@
     padding: 0;
   }
 
-  .ask-bubble-top-action-row .ask-quick-action-label,
   .ask-bubble-lower-action-row .ask-quick-action-label,
   .ask-artifact-action-row .ask-quick-action-label {
     display: none;

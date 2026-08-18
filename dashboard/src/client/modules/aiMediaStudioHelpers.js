@@ -966,6 +966,20 @@ function createDashboardAiMediaStudioHelpers(input) {
     const nodes = getImagePreviewMediaNodes();
     const url = String(target?.imageUrl || "").trim();
     const panel = document.getElementById("image-studio-preview-panel");
+    const applyIntrinsicPreviewDimensions = (width, height) => {
+      const safeWidth = Number(width);
+      const safeHeight = Number(height);
+      if (!panel) return;
+      if (!Number.isFinite(safeWidth) || safeWidth <= 0 || !Number.isFinite(safeHeight) || safeHeight <= 0) {
+        panel.classList.remove("has-intrinsic-image-preview");
+        panel.style.removeProperty("--image-preview-intrinsic-width");
+        panel.style.removeProperty("--image-preview-intrinsic-height");
+        return;
+      }
+      panel.classList.add("has-intrinsic-image-preview");
+      panel.style.setProperty("--image-preview-intrinsic-width", String(safeWidth));
+      panel.style.setProperty("--image-preview-intrinsic-height", String(safeHeight));
+    };
     stopImagePreviewGifPlayback();
     imagePreviewMediaState.gifDecodeToken += 1;
     releaseImagePreviewGifFrames();
@@ -986,6 +1000,7 @@ function createDashboardAiMediaStudioHelpers(input) {
     nodes.image.classList.add("hidden");
     nodes.image.removeAttribute("src");
     if (!url) {
+      applyIntrinsicPreviewDimensions();
       imagePreviewMediaState.kind = "image";
       if (panel?.dataset) {
         delete panel.dataset.enginePreviewKind;
@@ -1014,9 +1029,15 @@ function createDashboardAiMediaStudioHelpers(input) {
       nodes.hint?.classList.remove("hidden");
       return;
     }
+    applyIntrinsicPreviewDimensions(target?.width, target?.height);
     imagePreviewMediaState.kind = isGifPreviewUrl(url) ? "gif" : "image";
     nodes.image.src = url;
     nodes.image.classList.remove("hidden");
+    nodes.image.addEventListener("load", () => {
+      if (imagePreviewMediaState.url === url) {
+        applyIntrinsicPreviewDimensions(nodes.image.naturalWidth, nodes.image.naturalHeight);
+      }
+    }, { once: true });
     if (panel?.dataset) {
       panel.dataset.enginePreviewKind = imagePreviewMediaState.kind;
       panel.dataset.enginePreviewUrl = url;
