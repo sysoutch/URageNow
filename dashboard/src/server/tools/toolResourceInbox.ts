@@ -150,12 +150,12 @@ export function buildToolApiSchema(): object {
     },
     functions: [
       {
-        name: "urage_generate_image", description: "Generate one or more images in URage NOW Studio.",
+        name: "urage_generate_image", description: "Generate one or more images in URage NOW Studio. This completes an image request; do not invoke model generation unless the user explicitly requests a 3D model.",
         http: { method: "POST", path: "/api/image-generate" },
         parameters: { type: "object", required: ["prompt"], properties: { prompt: { type: "string" }, width: { type: "number" }, height: { type: "number" }, count: { type: "number" } } }
       },
       {
-        name: "urage_generate_model3d", description: "Generate a 3D model from an image. For text-only requests, call urage_generate_image first and use its image URL or data URL as imageInput.",
+        name: "urage_generate_model3d", description: "Generate a 3D model only when the user explicitly requests one. It requires an image; for an explicit text-to-3D request, first call urage_generate_image and use its imageUrl or data URL as imageInput.",
         http: { method: "POST", path: "/api/model3d-generate" },
         parameters: { type: "object", required: ["imageInput"], properties: { imageInput: { type: "string" }, imageFileNameHint: { type: "string" }, prompt: { type: "string" }, autoPrompt: { type: "boolean" } } }
       },
@@ -180,6 +180,25 @@ export function buildToolApiSchema(): object {
         parameters: { type: "object", properties: { dashboardRequestId: { type: "string" }, jobId: { type: "string" }, kind: { type: "string", enum: ["image", "model3d", "audio", "music", "video"] }, limit: { type: "number" } } }
       },
       {
+        name: "urage_download_generated_image", description: "Download the binary image identified by the id and imageFileName returned from image generation. Do not use a job ID.",
+        http: { method: "GET", path: "/api/generated-image-file?imageId={id}&file={imageFileName}" },
+        parameters: { type: "object", required: ["id", "imageFileName"], properties: { id: { type: "string" }, imageFileName: { type: "string" } } }
+      },
+      {
+        name: "urage_download_generated_model3d", description: "Download the primary generated 3D model identified by the id and modelFileName returned from model generation. Do not use a job ID.",
+        http: { method: "GET", path: "/api/model3d-file?modelId={id}&file={modelFileName}" },
+        parameters: { type: "object", required: ["id", "modelFileName"], properties: { id: { type: "string" }, modelFileName: { type: "string" } } }
+      },
+      {
+        name: "urage_download_generated_audio", description: "Download the binary audio or music file identified by the id and audioFileName returned from generation. Do not use a job ID.",
+        http: { method: "GET", path: "/api/generated-audio-file?audioId={id}&file={audioFileName}" },
+        parameters: { type: "object", required: ["id", "audioFileName"], properties: { id: { type: "string" }, audioFileName: { type: "string" } } }
+      },
+      {
+        name: "urage_download_generated_video", description: "Download the binary video identified by the id and videoFileName returned from video generation. Do not use a job ID.",
+        http: { method: "GET", path: "/api/generated-video-file?videoId={id}&file={videoFileName}" },
+        parameters: { type: "object", required: ["id", "videoFileName"], properties: { id: { type: "string" }, videoFileName: { type: "string" } } }
+      },      {
         name: "urage_list_tool_resources", description: "List resources waiting for a URage tool.",
         http: { method: "GET", path: "/api/tool-resources?targetToolId={targetToolId}" },
         parameters: { type: "object", required: ["targetToolId"], properties: { targetToolId: { type: "string" } } }
