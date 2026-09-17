@@ -59,6 +59,7 @@ __pycache__/
 !/data/.gitkeep
 
 # Standalone repositories maintained independently from this workspace
+/.agents/
 /apps/*
 /tools/
 #tmp
