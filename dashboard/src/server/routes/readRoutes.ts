@@ -1086,6 +1086,27 @@ async function handleGetApiVideoHistory(request: IncomingMessage, response: Serv
   return;
 }
 
+
+async function handleGetApiGeneratedArtifact(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const kind = url.searchParams.get("kind")?.trim() || "";
+  const artifactId = url.searchParams.get("id")?.trim() || "";
+  if (!artifactId || !["image", "model3d", "audio", "music", "video"].includes(kind)) {
+    sendJson(response, 400, { error: "kind (image, model3d, audio, music, or video) and id are required." });
+    return;
+  }
+  const artifact = kind === "image"
+    ? (await dependencies.listGeneratedImages()).find(entry => entry.id === artifactId)
+    : kind === "model3d"
+      ? (await dependencies.listGeneratedModels()).find(entry => entry.id === artifactId)
+      : kind === "video"
+        ? (await dependencies.listGeneratedVideos()).find(entry => entry.id === artifactId)
+        : (await dependencies.listGeneratedAudios()).find(entry => entry.id === artifactId && entry.mode === kind);
+  if (!artifact) {
+    sendJson(response, 404, { error: "Generated artifact was not found." });
+    return;
+  }
+  sendJson(response, 200, artifact);
+}
 async function handleGetApiGenerationJobs(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const limit = Number.parseInt(url.searchParams.get("limit") || "", 10);
   const jobId = url.searchParams.get("jobId")?.trim() || "";
@@ -1299,6 +1320,7 @@ const dashboardReadRouteTable = createDashboardRouteTable([
   getRoute("/api/audio-history", handleGetApiAudioHistory),
   getRoute("/api/video-history", handleGetApiVideoHistory),
   getRoute("/api/generation-jobs", handleGetApiGenerationJobs),
+  getRoute("/api/generated-artifact", handleGetApiGeneratedArtifact),
   getRoute("/api/game-engine-exports", handleGetApiGameEngineExports),
   getRoute("/api/game-engine-exports/listen", handleGetApiGameEngineExportsListen),
   getRoute("/api/game-engine-export-file", handleGetApiGameEngineExportFile),

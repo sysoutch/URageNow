@@ -108,9 +108,9 @@ Studio provides a server-backed handoff API for Tools and LLM integrations. The 
 
 - `POST /api/tool-resources` sends an image, model, media file, or text resource to a target tool. Supply `targetToolId`, `resourceKind`, and one of `dataUrl`, `sourceUrl`, or `textContent`.
 - `GET /api/tool-resources?targetToolId=<id>` lists a tool inbox; `GET /api/tool-resources?resourceId=<id>` reads a queued resource.
-- `GET /api/llm-tools` returns the authenticated tool-calling manifest. It includes image, image-to-3D, audio, music, video, and tool-resource functions.
+- `GET /api/llm-tools` returns the authenticated tool-calling manifest. It includes image, image-to-3D, audio, music, video, tool-resource, and artifact-recovery functions.
 
-The Studio Chat already uses the same server workflows to generate images, 3D models, audio, music, and video. An external LLM can call the matching authenticated generation endpoints from the manifest. An image request is complete when its image artifact is returned or downloaded: never infer a 3D-model request from it. Only for an explicit text-to-3D request, first generate or supply an image. Generation calls wait for their completed artifact and return its artifact ID, file name, and relative download URL; do not resend one to poll. For timeout recovery, send a unique `dashboardRequestId` and inspect `GET /api/generation-jobs?requestId=...`.
+The Studio Chat already uses the same server workflows to generate images, 3D models, audio, music, and video. An external LLM can call the matching authenticated generation endpoints from the manifest. An image request is complete when its image artifact is returned or downloaded: never infer a 3D-model request from it. Only for an explicit text-to-3D request, first generate or supply an image. Generation calls can take minutes, normally wait for their completed artifact, and return its artifact ID, file name, and relative download URL; do not resend one to poll. For caller-timeout recovery, always send a unique `dashboardRequestId`, inspect `GET /api/generation-jobs?requestId=...`, then resolve its `artifactId` through `GET /api/generated-artifact?kind=<kind>&id=<artifactId>`.
 
 ### Connect From Another Project
 

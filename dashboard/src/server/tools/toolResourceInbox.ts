@@ -198,7 +198,8 @@ export function buildToolApiSchema(): object {
         name: "urage_download_generated_video", description: "Download the binary video identified by the id and videoFileName returned from video generation. Do not use a job ID.",
         http: { method: "GET", path: "/api/generated-video-file?videoId={id}&file={videoFileName}" },
         parameters: { type: "object", required: ["id", "videoFileName"], properties: { id: { type: "string" }, videoFileName: { type: "string" } } }
-      },      {
+      },
+      {
         name: "urage_list_tool_resources", description: "List resources waiting for a URage tool.",
         http: { method: "GET", path: "/api/tool-resources?targetToolId={targetToolId}" },
         parameters: { type: "object", required: ["targetToolId"], properties: { targetToolId: { type: "string" } } }
