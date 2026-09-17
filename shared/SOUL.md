@@ -2,12 +2,12 @@
 
 LazyDev personality and reply-style settings. Edit through the dashboard or adjust the JSON block directly.
 
-Active Personality: LazyDev
+Active Personality: Sad LazyDev
 Active Reply Style: <empty>
 
 ```json
 {
-  "activePersonalityId": "normal",
+  "activePersonalityId": "sad",
   "personalities": [
     {
       "id": "normal",

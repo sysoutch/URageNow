@@ -45,8 +45,28 @@ import {buildPromptWithSkillContext} from "../chatSkills/routing.js";
 import {generateTextToSpeechForClient, transcribeSpeechForClient} from "../routes/speechRoutes.js";
 import {launchModelInPrintApplication} from "../resourceHub/model3dPrintApplicationManager.js";
 import {listCompanionTools, readCompanionToolFile} from "./companionToolCatalog.js";
+import {getImageInterpretationFailure} from "../visionModelFailure.js";
 
 const maxUploadBytes = 100 * 1024 * 1024;
+const companionPermissionLabels: Record<CompanionPermissionKey, string> = {
+  "media.list": "browse the media gallery",
+  "media.download": "use media files",
+  "media.upload": "upload media",
+  "media.metadata.update": "change media details",
+  "media.delete": "delete media",
+  "tools.browse": "browse tools",
+  "workflow.chat": "use Chat Studio",
+  "workflow.image.generate": "use Image Studio",
+  "workflow.audio.generate": "use Audio Studio",
+  "workflow.music.generate": "use Music Studio",
+  "workflow.video.generate": "use Video Studio",
+  "workflow.model3d.generate": "use 3D Studio",
+  "application.3d-print.launch": "open a model in Bambu Studio"
+};
+
+function getCompanionPermissionDeniedMessage(permission: CompanionPermissionKey): string {
+  return `Access denied: this Android companion cannot ${companionPermissionLabels[permission]}. Ask the dashboard owner to enable this in Settings > Network > Paired devices.`;
+}
 
 async function buildCompanionChatStudioPrompt(body: Record<string, unknown>): Promise<string> {
   const prompt = String(body.prompt || "").trim();
@@ -130,12 +150,35 @@ function toGeneratedItem(kind: CompanionMediaKind, record: Record<string, unknow
 
 async function listGenerated(kind: CompanionMediaKind, dependencies: DashboardDependencies): Promise<Record<string, unknown>[]> {
   const records = kind === "image" ? await dependencies.listGeneratedImages()
+
     : kind === "audio" ? await dependencies.listGeneratedAudios()
     : kind === "video" ? await dependencies.listGeneratedVideos()
     : await dependencies.listGeneratedModels();
   return records.map(record => toGeneratedItem(kind, record as unknown as Record<string, unknown>));
 }
 
+type CompanionImageSource = { id: string; fileName: string; source: "generated" | "upload" };
+
+function parseImageSources(body: Record<string, unknown>): CompanionImageSource[] {
+  const rawSources = Array.isArray(body.images) ? body.images : [];
+  const sources = rawSources.map(value => {
+    const record = value && typeof value === "object" ? value as Record<string, unknown> : {};
+    const id = String(record.id || "").trim();
+    const fileName = String(record.fileName || "").trim();
+    const source = record.source === "upload" ? "upload" : "generated";
+    return id && fileName ? { id, fileName, source } : null;
+  }).filter((source): source is CompanionImageSource => source !== null);
+  if (sources.length > 0) return sources.slice(0, 8);
+  const imageId = String(body.imageId || "").trim();
+  const imageFileName = String(body.imageFileName || "").trim();
+  return imageId && imageFileName ? [{ id: imageId, fileName: imageFileName, source: "generated" }] : [];
+}
+
+async function readCompanionImageSource(source: CompanionImageSource, dependencies: DashboardDependencies): Promise<{ data: Buffer; contentType: string }> {
+  return source.source === "upload"
+    ? readCompanionUpload("image", source.id, source.fileName)
+    : dependencies.readGeneratedImageFile(source.id, source.fileName);
+}
 async function readGenerated(kind: CompanionMediaKind, id: string, fileName: string, dependencies: DashboardDependencies) {
   if (kind === "image") return dependencies.readGeneratedImageFile(id, fileName);
   if (kind === "audio") return dependencies.readGeneratedAudioFile(id, fileName);
@@ -287,7 +330,11 @@ export async function handleAuthenticatedCompanionRequest(request: IncomingMessa
       allowed
     });
     if (allowed) return true;
-    sendJson(response, 403, {error: `This paired device is not allowed to use ${permission}.`, permission});
+    sendJson(response, 403, {
+      error: getCompanionPermissionDeniedMessage(permission),
+      code: "companion_permission_denied",
+      permission
+    });
     return false;
   };
   if (url.pathname === "/api/companion/theme" && request.method === "GET") {
@@ -432,12 +479,15 @@ export async function handleAuthenticatedCompanionRequest(request: IncomingMessa
       }
       const currentPrompt = String(body.prompt || "").trim();
       const parts = body.mode === "parts";
+      const combineSources = body.combineSources === true;
       const instruction = [
-        "Write exactly one high-quality image-generation prompt from the attached reference image or images.",
-        "Return plain prompt text only, without markdown, labels, quotes, or explanations.",
-        parts
-          ? "Interpret the distinct useful subjects and visible parts in each image individually, then compose them into one coherent prompt. Preserve which details came from separate references."
-          : "Interpret the references as a unified visual direction, preserving the primary subject, composition, materials, lighting, colors, and style.",
+        combineSources ? "Write exactly one high-quality image-generation prompt that combines every attached reference image." : "Write one distinct high-quality image-generation prompt for each attached reference image.",
+        combineSources
+          ? "Return plain prompt text only, without markdown, labels, quotes, or explanations."
+          : "Return plain text only, one labeled Source line per input, without markdown, quotes, or explanations.",
+        combineSources && parts
+          ? "Interpret the distinct useful subjects and visible parts in each image, then compose them into one coherent prompt. Preserve which details came from separate references."
+          : combineSources ? "Interpret the references as one unified visual direction, preserving the primary subject, composition, materials, lighting, colors, and style." : "Keep each source independent. Return one line per source prefixed Source 1:, Source 2:, and so on; do not combine subjects or styles.",
         currentPrompt ? `Preserve and integrate this existing user direction: ${currentPrompt}` : ""
       ].filter(Boolean).join("\n");
       const interpreted = (await dependencies.askVisionModel(instruction, imageInputs))
@@ -445,11 +495,12 @@ export async function handleAuthenticatedCompanionRequest(request: IncomingMessa
       if (!interpreted) throw new Error("The vision model returned an empty prompt.");
       dependencies.runtimeState.recordAction(
         "companion:image-interpret",
-        `Android companion ${device.id} interpreted ${imageInputs.length} image source(s) in ${parts ? "parts" : "whole"} mode.`
+        `Android companion ${device.id} interpreted ${imageInputs.length} image source(s) as ${combineSources ? "one combined prompt" : "separate prompts"} in ${parts ? "parts" : "whole"} mode.`
       );
       sendJson(response, 200, {prompt: interpreted});
     } catch (error) {
-      sendJson(response, 502, {error: error instanceof Error ? error.message : "Image interpretation failed."});
+      const failure = getImageInterpretationFailure(error);
+      sendJson(response, failure.code === "vision_model_required" ? 422 : 502, {error: failure.message, code: failure.code});
     }
     return true;
   }
@@ -464,12 +515,12 @@ export async function handleAuthenticatedCompanionRequest(request: IncomingMessa
     const width = Math.max(256, Math.min(2048, Math.round(Number(body.width) || 1024)));
     const height = Math.max(256, Math.min(2048, Math.round(Number(body.height) || 1024)));
     try {
-      const imageId = String(body.imageId || "").trim();
-      const imageFileName = String(body.imageFileName || "").trim();
+      const sources = parseImageSources(body);
+      const primarySource = sources[0];
       let imageInput: string | undefined;
-      if (imageId && imageFileName) {
+      if (primarySource) {
         if (!await requirePermission("media.download")) return true;
-        const source = await dependencies.readGeneratedImageFile(imageId, imageFileName);
+        const source = await readCompanionImageSource(primarySource, dependencies);
         imageInput = `data:${String(source.contentType || "image/png")};base64,${source.data.toString("base64")}`;
       }
       const generated = await dependencies.generateImageFromPrompt({
@@ -481,12 +532,19 @@ export async function handleAuthenticatedCompanionRequest(request: IncomingMessa
         steps: Number.isFinite(Number(body.steps)) ? Math.max(1, Math.min(250, Math.round(Number(body.steps)))) : undefined,
         cfg: Number.isFinite(Number(body.cfg)) ? Math.max(0, Math.min(30, Number(body.cfg))) : undefined,
         imageInput,
-        imageFileNameHint: imageInput ? imageFileName : undefined,
+        imageFileNameHint: imageInput ? primarySource?.fileName : undefined,
+        metadata: body.retainSourceImages === true && sources.length > 0 ? {
+          sourceImages: JSON.stringify(sources),
+          sourceImageCount: sources.length,
+          sourceImageId: primarySource!.id,
+          sourceImageFileName: primarySource!.fileName,
+          sourceImageSource: primarySource!.source
+        } : undefined,
         autoPrompt: body.autoPrompt !== false,
         autoFileName: true,
         requestedBy: `android-companion:${device.id}`
       });
-      dependencies.runtimeState.recordAction("companion:image", `Android companion ${device.id} generated image ${generated.id}.`);
+      dependencies.runtimeState.recordAction("companion:image", `Android companion ${device.id} generated image ${generated.id}${sources.length ? ` from ${sources.length} selected source image(s)` : ""}.`);
       sendJson(response, 200, {item: toGeneratedItem("image", generated as unknown as Record<string, unknown>)});
     } catch (error) {
       sendJson(response, 502, {error: error instanceof Error ? error.message : "Image generation failed."});

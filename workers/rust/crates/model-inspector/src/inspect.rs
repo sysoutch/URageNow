@@ -11,6 +11,9 @@ fn resolve_kind(extension: Option<&str>) -> ModelKind {
         Some("gltf") => ModelKind::Gltf,
         Some("fbx") => ModelKind::Fbx,
         Some("obj") => ModelKind::Obj,
+        Some("stl") => ModelKind::Stl,
+        Some("ply") => ModelKind::Ply,
+        Some("3mf") => ModelKind::ThreeMf,
         Some("blend") => ModelKind::Blend,
         Some(_) | None => ModelKind::Unknown,
     }
@@ -89,8 +92,8 @@ pub fn inspect_model(input: &str) -> ModelInspectionResult {
                     Err(error) => warnings.push(error),
                 }
             }
-            ModelKind::Fbx => {
-                warnings.push("FBX deep inspection is not implemented yet.".to_owned())
+            ModelKind::Fbx | ModelKind::Stl | ModelKind::Ply | ModelKind::ThreeMf => {
+                warnings.push("Deep inspection is not implemented for this model format yet.".to_owned())
             }
             ModelKind::Blend => {
                 warnings.push("Blend deep inspection is not implemented yet.".to_owned())

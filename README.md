@@ -1,6 +1,6 @@
-# URage Now Studio
+# URage Now
 
-URage Now Studio is a free, local-first creative workspace for Chat, Image, 3D,
+URage Now is a free, local-first creative workspace for Chat, Image, 3D,
 Audio, Music, Video, tools, and optional messenger integrations. Run it in a
 browser or desktop shell; workers, bots, and remote-machine support stay
 optional.
@@ -102,6 +102,17 @@ for the dependency rules and the remaining Discord-composition migration.
 - Windows launcher scripts with password-gated `runas` support
 - Optional workers for isolated remote and native generation tasks
 
+## Tool And LLM API
+
+Studio provides a server-backed handoff API for Tools and LLM integrations. The dashboard keeps the immediate in-page handoff for responsiveness and also stores the resource so a receiving tool can restore it after a reload.
+
+- `POST /api/tool-resources` sends an image, model, media file, or text resource to a target tool. Supply `targetToolId`, `resourceKind`, and one of `dataUrl`, `sourceUrl`, or `textContent`.
+- `GET /api/tool-resources?targetToolId=<id>` lists a tool inbox; `GET /api/tool-resources?resourceId=<id>` reads a queued resource.
+- `GET /api/llm-tools` returns the authenticated tool-calling manifest. It includes image, image-to-3D, audio, music, video, and tool-resource functions.
+
+The Studio Chat already uses the same server workflows to generate images, 3D models, audio, music, and video. An external LLM can call the matching authenticated generation endpoints from the manifest. 3D generation requires an image input, so text-to-3D integrations should generate or supply an image first.
+
+Tool pages use a shared bridge contract. A tool with custom import behavior implements its own receiver; otherwise, the shared generic receiver sends a queued file or text payload through a compatible native input and normal `input`/`change` events. Resource delivery is not arbitrary code execution: target tools validate and decide how to process the received resource.
 ## When You Need An Execution Worker
 
 The dashboard and messenger runtimes coordinate workflows, manage state, and
@@ -356,6 +367,8 @@ The browser sends only the known application ID and selected model identity. Exe
 - Add Tool shows the complete generated HTML/CSS/JavaScript and a baseline diff before creation. Category management can transactionally move a tool directory while updating its manifest and tag identity, hide preset categories with assigned-tool confirmation, and delete only unused custom categories. Tags support colors, autocomplete, filter chips, and set/add/remove bulk operations.
 - Android Companion releases use `apps/android-companion/version.properties` plus a persistent ignored signing key. `npm run build:android-release` publishes a versioned signed APK and SHA-256 manifest for the dashboard download page at `/android-companion`.
 - Game Engines -> Assets now gives each `Unity`, `Godot`, and `Unreal` panel its own manual GitHub import flow, so you can clone a repo or download the latest release directly into that engine's local asset workspace.
+- Game Engines -> Projects cards show their own brand icon per engine instead of reusing one Unity glyph; the assets live in `dashboard/assets/game-engines/` and are served under `/assets/game-engines/<engine>.svg`.
+- Game Engines -> Projects routes Browse, Scan, and Fetch through the selected engine: Unity reads Unity Hub, Godot reads its Project Manager catalog, and Unreal reads recent-project settings. Scans recognize `Assets` + `ProjectSettings`, `project.godot`, and `.uproject` markers respectively.
 - Audio Studio TTS supports the standard Kokoro workflow plus the Qwen voice clone, custom voice, and design voice workflows in `comfyui-workflows/audio/tts`.
 - Audio Studio STT and STS now support live microphone recording with a dynamic microphone picker, and recorded clips are fed through the same existing speech APIs as uploaded files.
 - Chat Studio task cards now show queued follow-up skills from the skill router, and the Ask prompt presets are grouped into a compact foldout by category.

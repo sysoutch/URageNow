@@ -38,7 +38,7 @@ function renderLazydevHomeUsageChart(container, input = {}) {
     viewBox: `0 0 ${width} ${height}`,
     preserveAspectRatio: "none",
     role: "img",
-    "aria-label": input.accessibleLabel || "Generation activity for the recent seven days"
+    "aria-label": input.accessibleLabel || "Generation activity by media type for the selected range"
   });
   const grid = createSvgNode("g", { class: "lazydev-home-chart-grid" });
   for (let index = 0; index <= 4; index += 1) {
@@ -48,7 +48,9 @@ function renderLazydevHomeUsageChart(container, input = {}) {
     valueLabel.textContent = Math.round(maximum * (1 - index / 4)).toLocaleString();
     grid.appendChild(valueLabel);
   }
+  const labelStep = Math.max(1, Math.ceil(labels.length / 12));
   labels.forEach((label, index) => {
+    if (index % labelStep !== 0 && index + 1 < labels.length) return;
     const x = getX(index);
     const dayLabel = createSvgNode("text", { x, y: height - 9, "text-anchor": "middle" });
     dayLabel.textContent = label;

@@ -15,6 +15,19 @@
         return fallback || 'Tool bridge action failed.'
     }
 
+    function resolveQueuedToolResource(payload) {
+        const resourceId = payload && typeof payload.resourceId === 'string' ? payload.resourceId.trim() : ''
+        if (!resourceId || typeof fetch !== 'function') return Promise.resolve(payload || {})
+        return fetch('/api/tool-resources?resourceId=' + encodeURIComponent(resourceId), { headers: { accept: 'application/json' } })
+            .then(response => response.ok ? response.json() : Promise.reject(new Error('Queued tool resource is unavailable.')))
+            .then(resource => ({
+                ...(payload || {}), resourceId: resource.id, kind: resource.resourceKind || payload.kind,
+                dataUrl: resource.dataUrl || payload.dataUrl, sourceUrl: resource.sourceUrl || payload.sourceUrl,
+                url: resource.sourceUrl || payload.url, fileName: resource.fileName || payload.fileName,
+                imageFileName: resource.fileName || payload.imageFileName, textContent: resource.textContent || payload.textContent,
+                metadata: resource.metadata || payload.metadata
+            }))
+    }
     function registerDashboardToolBridge(options) {
         const config = options && typeof options === 'object' ? options : {}
         const onLoadAsset = typeof config.onLoadAsset === 'function' ? config.onLoadAsset : null
@@ -46,7 +59,7 @@
                 return
             }
             if (message.type === 'tool:load-asset' && onLoadAsset) {
-                Promise.resolve(onLoadAsset(message.payload || {})).catch(error => {
+                resolveQueuedToolResource(message.payload || {}).then(payload => onLoadAsset(payload)).catch(error => {
                     postToDashboard('tool:error', { error: normalizeErrorMessage(error, 'Failed to load dashboard asset.') }, message.requestId)
                 })
                 return

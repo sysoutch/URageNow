@@ -1,71 +1,60 @@
-function switchTab(tabName) {
-  var btn2d = document.getElementById('tab2d');
-  var btn3d = document.getElementById('tab3d');
-  var panel2d = document.getElementById('panel2d');
-  var panel3d = document.getElementById('panel3d');
-
-  if (tabName === '2D') {
-    btn2d.classList.add('active');
-    btn3d.classList.remove('active');
-    btn2d.setAttribute('aria-selected', 'true');
-    btn3d.setAttribute('aria-selected', 'false');
-    panel2d.classList.add('active');
-    panel3d.classList.remove('active');
-  } else {
-    btn3d.classList.add('active');
-    btn2d.classList.remove('active');
-    btn3d.setAttribute('aria-selected', 'true');
-    btn2d.setAttribute('aria-selected', 'false');
-    panel3d.classList.add('active');
-    panel2d.classList.remove('active');
+(function () {
+  var latestSnapshot = null;
+  var frames = { "2d": document.querySelector("#panel2d iframe"), "3d": document.querySelector("#panel3d iframe") };
+  var status = document.getElementById("mapSyncStatus");
+  function updateStatus(message) { if (status) status.textContent = message; }
+  function targetWindow(name) { return frames[name] && frames[name].contentWindow; }
+  function applySnapshot(name) {
+    var target = targetWindow(name);
+    if (latestSnapshot && target && typeof target.__urageApplySharedMap === "function") target.__urageApplySharedMap(latestSnapshot);
   }
-}
-
-function getActiveGeneratorFrame() {
-  var activePanel = document.querySelector('.tab-panel.active');
-  return activePanel ? activePanel.querySelector('iframe') : null;
-}
-
-function getActiveGeneratorWindow() {
-  var frame = getActiveGeneratorFrame();
-  try {
-    return frame && frame.contentWindow ? frame.contentWindow : null;
-  } catch (_) {
-    return null;
-  }
-}
-
-function callActiveGenerator(methodName) {
-  var generatorWindow = getActiveGeneratorWindow();
-  var method = generatorWindow && generatorWindow[methodName];
-  if (typeof method !== 'function') return Promise.resolve(null);
-  return Promise.resolve(method.call(generatorWindow));
-}
-
-function describeActiveGeneratorAssets() {
-  return callActiveGenerator('__urageToolDescribeCurrentAssets').then(function(payload) {
-    return Array.isArray(payload) ? payload : payload ? [payload] : [];
-  });
-}
-
-function exportActiveGeneratorImage() {
-  return callActiveGenerator('__urageToolRequestExportImage').then(function(payload) {
-    if (payload) return payload;
-    return describeActiveGeneratorAssets().then(function(descriptors) {
-      return descriptors.find(function(descriptor) { return descriptor && descriptor.kind === 'image'; }) || null;
+  window.switchTab = function (tabName) {
+    var active = tabName === "3D" ? "3d" : "2d";
+    ["2d", "3d"].forEach(function (name) {
+      var selected = name === active;
+      document.getElementById("tab" + name).classList.toggle("active", selected);
+      document.getElementById("tab" + name).setAttribute("aria-selected", String(selected));
+      document.getElementById("panel" + name).classList.toggle("active", selected);
     });
-  });
-}
-
-if (typeof window.registerDashboardToolBridge === 'function') {
-  window.registerDashboardToolBridge({
-    onDescribeCurrentAssets: describeActiveGeneratorAssets,
-    onExportImage: exportActiveGeneratorImage
-  });
-} else {
-  window.__urageToolDescribeCurrentAssets = describeActiveGeneratorAssets;
-  window.__urageToolDescribeCurrentAsset = function() {
-    return describeActiveGeneratorAssets().then(function(descriptors) { return descriptors[0] || null; });
+    window.location.hash = active;
+    // No snapshot re-apply here: switching tabs must never reset the view being shown. The frame keeps its own map/state and only redraws at its new size.
+    var target = targetWindow(active);
+    if (target && typeof target.__urageMapGeneratorBecameVisible === "function") target.__urageMapGeneratorBecameVisible();
   };
-  window.__urageToolRequestExportImage = exportActiveGeneratorImage;
-}
+  window.addEventListener("message", function (event) {
+    if (!event.data || event.data.type !== "urage-map-generator-snapshot") return;
+    latestSnapshot = event.data.snapshot;
+    var source = event.data.source;
+    applySnapshot(source === "2d" ? "3d" : "2d");
+    updateStatus("Map synced from " + source.toUpperCase() + " · " + new Date().toLocaleTimeString());
+  });
+  Object.keys(frames).forEach(function (name) { frames[name].addEventListener("load", function () { applySnapshot(name); }); });
+  document.getElementById("syncMapButton").addEventListener("click", function () {
+    var active = document.querySelector(".tab-panel.active").id === "panel3d" ? "3d" : "2d";
+    var source = targetWindow(active);
+    if (source && typeof source.__urageGetSharedMap === "function") { latestSnapshot = source.__urageGetSharedMap(); applySnapshot(active === "2d" ? "3d" : "2d"); updateStatus("Map synced from " + active.toUpperCase() + " · " + new Date().toLocaleTimeString()); }
+  });
+  // WAI-ARIA tab keyboard support: arrows / Home / End move between the two views.
+  var tabNames = ["2d", "3d"];
+  document.querySelector(".tab-bar").addEventListener("keydown", function (event) {
+    var current = event.target.id === "tab2d" ? 0 : event.target.id === "tab3d" ? 1 : -1;
+    if (current < 0 || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    var next = current;
+    if (event.key === "ArrowLeft") next = tabNames.length - 1;
+    else if (event.key === "ArrowRight") next = 0;
+    else if (event.key === "Home") next = 0;
+    else next = tabNames.length - 1;
+    event.preventDefault();
+    var button = document.getElementById("tab" + tabNames[next]);
+    button.focus();
+    window.switchTab(tabNames[next] === "3d" ? "3D" : "2D");
+  });
+
+  if (window.location.hash.toLowerCase() === "#3d") window.switchTab("3D");
+}());
+function getActiveGeneratorFrame() { var panel = document.querySelector(".tab-panel.active"); return panel && panel.querySelector("iframe"); }
+function callActiveGenerator(methodName) { var frame = getActiveGeneratorFrame(); var target = frame && frame.contentWindow; var method = target && target[methodName]; return typeof method === "function" ? Promise.resolve(method.call(target)) : Promise.resolve(null); }
+function describeActiveGeneratorAssets() { return callActiveGenerator("__urageToolDescribeCurrentAssets").then(function (payload) { return Array.isArray(payload) ? payload : payload ? [payload] : []; }); }
+function exportActiveGeneratorImage() { return callActiveGenerator("__urageToolRequestExportImage").then(function (payload) { return payload || describeActiveGeneratorAssets().then(function (assets) { return assets.find(function (asset) { return asset && asset.kind === "image"; }) || null; }); }); }
+if (typeof window.registerDashboardToolBridge === "function") window.registerDashboardToolBridge({ onDescribeCurrentAssets: describeActiveGeneratorAssets, onExportImage: exportActiveGeneratorImage });
+else { window.__urageToolDescribeCurrentAssets = describeActiveGeneratorAssets; window.__urageToolDescribeCurrentAsset = function () { return describeActiveGeneratorAssets().then(function (assets) { return assets[0] || null; }); }; window.__urageToolRequestExportImage = exportActiveGeneratorImage; }

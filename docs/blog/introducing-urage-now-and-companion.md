@@ -28,7 +28,7 @@ Most creative-AI tools stop at a result. URage Now is built around the *next ste
 | 🧊 A 3D asset | Preview, inspect, validate, rig, or simplify it | Send it to Blender, a game engine, or print tooling |
 | 📱 A mobile moment | Start work, monitor jobs, review media | Continue with the paired desktop studio |
 
-![URage Now studio overview](/blog/images/1786879970713-grafik.webp)
+![URage Now overview](/blog/images/1786879970713-grafik.webp)
 
 ## ⚡ Quick actions: the workflow does not end at “Generate”
 

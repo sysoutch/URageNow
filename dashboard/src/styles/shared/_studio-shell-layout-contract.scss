@@ -132,6 +132,21 @@ body.view-dashboard-active .rail-resource-sections[data-resource-rail-group="bot
     margin: 0 !important;
     overflow: visible !important;
   }
+
+  // The focused card is viewport-height, so at phone/tablet widths tabs + feed
+  // + composer + inspector cannot all fit at natural size. A plain minmax(0,1fr)
+  // slice for .ask-rod-main squeezed the composer track below its content and
+  // spilled the send controls onto the stacked inspector below it; an auto
+  // row for the inspector collapsed to zero height under that overflow because
+  // the panel carries min-height:0. Floor both rows at their content so each
+  // keeps its natural size (the middle row still stretches when everything
+  // fits) and make the workspace the single vertical scroller for the stack
+  // instead of clipping or overlapping.
+  body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-workspace {
+    grid-template-rows: auto minmax(min-content, 1fr) max-content !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
 }
 
 // Chat used to retain its older card-grid gap while the other Studios had

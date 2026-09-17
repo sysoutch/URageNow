@@ -342,10 +342,11 @@ function serveStaticFile(url: URL, response: any): boolean {
   const pathname = String(url.pathname || "");
   const servesToolFile = pathname.startsWith("/tools/");
   const servesMessengerAsset = pathname.startsWith("/assets/messengers/");
+  const servesGameEngineAsset = pathname.startsWith("/assets/game-engines/");
   const servesDashboardVendorAsset = pathname.startsWith("/assets/vendor/");
   const servesThreeModule = pathname.startsWith("/vendor/three/");
   const servesBootstrapIcons = pathname.startsWith("/vendor/bootstrap-icons/");
-  if (!servesToolFile && !servesMessengerAsset && !servesDashboardVendorAsset && !servesThreeModule && !servesBootstrapIcons) {
+  if (!servesToolFile && !servesMessengerAsset && !servesGameEngineAsset && !servesDashboardVendorAsset && !servesThreeModule && !servesBootstrapIcons) {
     return false;
   }
   let decodedPathname = pathname;
@@ -358,14 +359,14 @@ function serveStaticFile(url: URL, response: any): boolean {
     return false;
   }
   for (const workspaceRoot of repositoryRootCandidates) {
-    const staticRoot = servesMessengerAsset || servesDashboardVendorAsset
+    const staticRoot = servesMessengerAsset || servesGameEngineAsset || servesDashboardVendorAsset
       ? resolve(workspaceRoot, "dashboard", "assets")
       : servesThreeModule
         ? resolve(workspaceRoot, "node_modules", "three")
         : servesBootstrapIcons
           ? resolve(workspaceRoot, "node_modules", "bootstrap-icons")
         : workspaceRoot;
-    const staticPath = servesMessengerAsset || servesDashboardVendorAsset
+    const staticPath = servesMessengerAsset || servesGameEngineAsset || servesDashboardVendorAsset
       ? decodedPathname.slice("/assets".length)
       : servesThreeModule
         ? decodedPathname.slice("/vendor/three".length)

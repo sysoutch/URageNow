@@ -1,6 +1,6 @@
 use model_inspector::inspect_model;
 use worker_contracts::{
-    AssetValidationResult, ModelInspectionResult, ValidationIssue, ValidationSeverity,
+    AssetValidationResult, ModelInspectionResult, ModelKind, ValidationIssue, ValidationSeverity,
 };
 
 fn push_issue(
@@ -30,6 +30,10 @@ fn forward_inspection_warnings(
     }
 }
 
+fn requires_deep_inspection(inspection: &ModelInspectionResult) -> bool {
+    matches!(inspection.kind, ModelKind::Glb | ModelKind::Gltf | ModelKind::Obj | ModelKind::Unknown)
+}
+
 pub fn validate_asset(input: &str) -> AssetValidationResult {
     let inspection = inspect_model(input);
     let mut issues = Vec::new();
@@ -42,7 +46,7 @@ pub fn validate_asset(input: &str) -> AssetValidationResult {
             "Input file does not exist.",
         );
     }
-    if !inspection.inspected {
+    if !inspection.inspected && requires_deep_inspection(&inspection) {
         push_issue(
             &mut issues,
             ValidationSeverity::Error,

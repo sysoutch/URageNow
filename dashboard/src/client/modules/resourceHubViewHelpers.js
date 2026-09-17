@@ -827,6 +827,24 @@ function cloneGameEngineProjectIcon(sourceId) {
   return document.querySelector("#" + sourceId + " svg")?.cloneNode(true) || document.createTextNode("");
 }
 
+const GAME_ENGINE_DISPLAY_NAMES = { unity: "Unity", godot: "Godot", unreal: "Unreal" };
+
+const GAME_ENGINE_LOGO_PATHS = {
+  unity: "/assets/game-engines/unity.svg",
+  godot: "/assets/game-engines/godot.svg",
+  unreal: "/assets/game-engines/unreal.svg"
+};
+
+function createGameEngineProjectLogo(engine) {
+  const logoName = GAME_ENGINE_DISPLAY_NAMES[engine] || engine;
+  const image = document.createElement("img");
+  image.src = GAME_ENGINE_LOGO_PATHS[engine] || "";
+  image.alt = `${logoName} logo`;
+  image.width = 24;
+  image.height = 24;
+  return image;
+}
+
 function createGameEngineProjectAction(label, iconSourceId, attributes, secondary) {
   const button = document.createElement("button");
   button.type = "button";
@@ -839,6 +857,8 @@ function createGameEngineProjectAction(label, iconSourceId, attributes, secondar
 }
 
 function renderGameEngineProjects(projects) {
+  const overviewCount = document.getElementById("game-engine-overview-project-count");
+  if (overviewCount) overviewCount.textContent = String(Array.isArray(projects) ? projects.length : 0);
   ["unity", "godot", "unreal"].forEach(engine => {
     const list = document.querySelector(`[data-game-engine-project-list="${engine}"]`);
     const count = document.querySelector(`[data-game-engine-project-count="${engine}"]`);
@@ -858,7 +878,7 @@ function renderGameEngineProjects(projects) {
     if (matching.length === 0) {
       const empty = document.createElement("div");
       empty.className = "tools-workspace-empty";
-      empty.textContent = `No ${engine === "unity" ? "Unity" : engine === "godot" ? "Godot" : "Unreal"} projects are cached yet.`;
+      empty.textContent = `No ${GAME_ENGINE_DISPLAY_NAMES[engine] || engine} projects are cached yet.`;
       list.appendChild(empty);
       return;
     }
@@ -867,23 +887,25 @@ function renderGameEngineProjects(projects) {
       card.className = "game-engine-project-card";
       card.dataset.gameEngineProject = project.id || "";
       card.dataset.available = project.available ? "true" : "false";
+      const engineName = GAME_ENGINE_DISPLAY_NAMES[engine] || engine;
       const icon = document.createElement("div");
       icon.className = "game-engine-project-icon";
-      icon.append(cloneGameEngineProjectIcon("game-engine-project-fetch-unity-hub-button"));
+      icon.dataset.engine = engine;
+      icon.append(createGameEngineProjectLogo(engine));
       const copy = document.createElement("div");
       copy.className = "game-engine-project-copy";
       const kicker = document.createElement("span");
       kicker.className = "panel-kicker";
       kicker.textContent = [project.engine, project.version, project.source].filter(Boolean).join(" · ");
       const title = document.createElement("h4");
-      title.textContent = project.title || "Unity Project";
+      title.textContent = project.title || `${engineName} Project`;
       const projectPath = document.createElement("code");
       projectPath.textContent = project.projectPath || "";
       projectPath.title = project.projectPath || "";
       const editor = document.createElement("small");
       editor.textContent = project.available
-        ? `Unity ${project.version || "version unknown"} · Editor and project found`
-        : `Unity ${project.version || "version unknown"} · Editor or project unavailable`;
+        ? `${engineName} ${project.version || "version unknown"} · Editor and project found`
+        : `${engineName} ${project.version || "version unknown"} · Editor or project unavailable`;
       copy.append(kicker, title, projectPath, editor);
       const actions = document.createElement("div");
       actions.className = "game-engine-project-actions";
@@ -897,6 +919,14 @@ function renderGameEngineProjects(projects) {
   });
 }
 
+function getSelectedGameEngineProject() {
+  const selected = document.querySelector("[data-game-engine-select].active")?.getAttribute("data-game-engine-select");
+  return selected === "godot" || selected === "unreal" ? selected : "unity";
+}
+
+function getGameEngineFetchLabel(engine) {
+  return engine === "unity" ? "Unity Hub" : engine === "godot" ? "Godot Project Manager" : "Unreal recent projects";
+}
 async function loadGameEngineProjects(refreshUnityHub) {
   setGameEngineProjectStatus(refreshUnityHub ? "Reading Unity Hub projects..." : "Loading cached projects...", "busy");
   const suffix = refreshUnityHub ? "?refreshUnityHub=true" : "";
@@ -907,15 +937,18 @@ async function loadGameEngineProjects(refreshUnityHub) {
 }
 
 async function fetchUnityHubProjects() {
-  setGameEngineProjectStatus("Fetching Unity Hub projects...", "busy");
-  const payload = await fetch("/api/game-engine-projects/fetch-unity-hub", createResourceHubJsonRequestOptions({})).then(readResourceHubJson);
+  const engine = getSelectedGameEngineProject();
+  const source = getGameEngineFetchLabel(engine);
+  setGameEngineProjectStatus(`Fetching ${source} projects...`, "busy");
+  const payload = await fetch("/api/game-engine-projects/fetch-unity-hub", createResourceHubJsonRequestOptions({ engine })).then(readResourceHubJson);
   renderGameEngineProjects(payload.projects || []);
-  setGameEngineProjectStatus(`Fetched ${Array.isArray(payload.projects) ? payload.projects.length : 0} cached projects from Unity Hub.`, "ok");
+  setGameEngineProjectStatus(`Fetched ${Array.isArray(payload.projects) ? payload.projects.length : 0} cached projects from ${source}.`, "ok");
 }
 
 async function browseForGameEngineProject() {
   setGameEngineProjectStatus("Waiting for project folder selection...", "busy");
-  const payload = await fetch("/api/game-engine-projects/browse", createResourceHubJsonRequestOptions({})).then(readResourceHubJson);
+  const engine = getSelectedGameEngineProject();
+  const payload = await fetch("/api/game-engine-projects/browse", createResourceHubJsonRequestOptions({ engine })).then(readResourceHubJson);
   if (payload.canceled) {
     setGameEngineProjectStatus("Project browse canceled.", "");
     return;
@@ -930,7 +963,7 @@ async function scanForGameEngineProjects() {
   const rootPath = rootNode ? String(rootNode.value || "").trim() : "";
   if (!rootPath) throw new Error("Choose a project scan folder first.");
   setGameEngineProjectStatus(recursiveNode?.checked ? "Scanning folder and subfolders..." : "Checking selected folder...", "busy");
-  const payload = await fetch("/api/game-engine-projects/scan", createResourceHubJsonRequestOptions({ rootPath, recursive: recursiveNode?.checked === true })).then(readResourceHubJson);
+  const payload = await fetch("/api/game-engine-projects/scan", createResourceHubJsonRequestOptions({ rootPath, engine: getSelectedGameEngineProject(), recursive: recursiveNode?.checked === true })).then(readResourceHubJson);
   renderGameEngineProjects(payload.projects || []);
   setGameEngineProjectStatus(`${Array.isArray(payload.projects) ? payload.projects.length : 0} projects cached after scan.`, "ok");
 }
@@ -991,6 +1024,12 @@ function bindAssetRepoImporters() {
   });
 }
 
+function setSelectedGameEngineProject(engine) {
+  const selected = engine === "godot" || engine === "unreal" ? engine : "unity";
+  document.querySelectorAll("[data-game-engine-select]").forEach(button => button.classList.toggle("active", button.getAttribute("data-game-engine-select") === selected));
+  setActiveAssetPlatformNav(selected);
+}
+
 function bindGameEngineWorkspaceControls() {
   document.querySelectorAll("[data-game-engine-workspace-tab]").forEach(button => {
     button.addEventListener("click", () => {
@@ -998,6 +1037,15 @@ function bindGameEngineWorkspaceControls() {
       setActiveGameEngineWorkspace(workspace);
       if (workspace === "projects") void loadGameEngineProjects(true).catch(error => setGameEngineProjectStatus(error.message, "error"));
       if (workspace === "assets") void loadRemoteAssetCatalog(false).catch(function () {});
+    });
+  });
+  document.querySelectorAll("[data-game-engine-select]").forEach(button => {
+    button.addEventListener("click", () => {
+      const activeWorkspace = document.querySelector("[data-game-engine-workspace-tab].active")?.getAttribute("data-game-engine-workspace-tab");
+      setSelectedGameEngineProject(button.getAttribute("data-game-engine-select"));
+      const fetchLabel = document.querySelector("#game-engine-project-fetch-unity-hub-button span:last-child");
+      if (fetchLabel) fetchLabel.textContent = `Fetch ${getGameEngineFetchLabel(getSelectedGameEngineProject())} Projects`;
+      if (activeWorkspace === "assets") void loadRemoteAssetCatalog(false).catch(function () {});
     });
   });
   document.getElementById("game-engine-project-browse-button")?.addEventListener("click", () => void browseForGameEngineProject().catch(error => setGameEngineProjectStatus(error.message, "error")));
@@ -1016,7 +1064,7 @@ function bindGameEngineWorkspaceControls() {
     }
   });
   setActiveGameEngineWorkspace("projects");
-  setActiveAssetPlatformNav("unity");
+  setSelectedGameEngineProject("unity");
   void loadGameEngineProjects(true).catch(error => setGameEngineProjectStatus(error.message, "error"));
 }
 
@@ -1079,7 +1127,7 @@ function bindDashboardResourceHubViews() {
   bindGameEngineWorkspaceControls();
   document.querySelector(".rail-assets-button")?.addEventListener("click", () => {
     setActiveGameEngineWorkspace("projects");
-    setActiveAssetPlatformNav("unity");
+    setSelectedGameEngineProject("unity");
     void loadGameEngineProjects(true).catch(error => setGameEngineProjectStatus(error.message, "error"));
   });
   document.querySelector(".rail-3d-suites-button")?.addEventListener("click", () => {

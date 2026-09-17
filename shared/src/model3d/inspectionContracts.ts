@@ -1,4 +1,4 @@
-export type RustModelKind = "glb" | "gltf" | "fbx" | "obj" | "blend" | "unknown";
+export type RustModelKind = "glb" | "gltf" | "fbx" | "obj" | "stl" | "ply" | "3mf" | "blend" | "unknown";
 
 export interface RustModelFileFact {
   exists: boolean;

@@ -44,6 +44,8 @@ export interface GenerateImageInput {
   batchSize?: number;
   stripMetadata?: boolean;
   onPromptQueued?: (promptId: string) => void | Promise<void>;
+  /** Provenance intentionally retained with the generated artifact. */
+  metadata?: Record<string, string | number | boolean>;
   signal?: AbortSignal;
 }
 
@@ -934,6 +936,7 @@ async function saveGeneratedImageAssets(input: {
   height: number | null;
   stripMetadata?: boolean;
   signal?: AbortSignal;
+  metadata?: Record<string, string | number | boolean>;
 }): Promise<GeneratedImageRecord[]> {
   const records: GeneratedImageRecord[] = [];
   for (const asset of input.assets) {
@@ -957,7 +960,8 @@ async function saveGeneratedImageAssets(input: {
         height: input.height,
         model: appConfig.comfyUiImageModelName,
         modelGeneratedAt: null,
-        modelGeneratedModelId: null
+        modelGeneratedModelId: null,
+        ...(input.metadata ? { metadata: input.metadata } : {})
       },
       imageData,
       desiredFileName: sanitizeFileName(desiredAssetName, `generated${imageExtension}`)
@@ -1168,6 +1172,7 @@ export async function generateImageFromPrompt(input: GenerateImageInput): Promis
     width,
     height,
     stripMetadata: input.stripMetadata,
+    metadata: input.metadata,
     signal: input.signal
   });
   const primaryRecord = records[0];

@@ -593,7 +593,36 @@ function createDashboardShellRuntimeThemeHelpers(input) {
             : "The selected messenger token is read from the OS credential store, with environment values as service overrides.";
     }
 
+    syncMessengerRuntimeIndicators() {
+      const runtimesByMessenger = new Map((this.state.messengerRuntimes || []).map(runtime => [
+        this.normalizeMessenger(runtime?.messenger),
+        runtime
+      ]));
+      document.querySelectorAll(".sidebar-messenger-button[data-messenger], .rail-resource-section-button[data-messenger]").forEach(button => {
+        const messenger = this.normalizeMessenger(button.getAttribute("data-messenger"));
+        const runtime = runtimesByMessenger.get(messenger);
+        const isRunning = runtime?.status === "running";
+        button.classList.toggle("is-runtime-running", isRunning);
+        button.dataset.runtimeStatus = runtime?.status || "stopped";
+        const existingIndicator = button.querySelector(":scope > .messenger-runtime-running-indicator");
+        if (!isRunning) {
+          existingIndicator?.remove();
+          return;
+        }
+        const indicator = existingIndicator || document.createElement("span");
+        if (!existingIndicator) {
+          indicator.className = "messenger-runtime-running-indicator";
+          indicator.setAttribute("role", "img");
+          indicator.innerHTML = "<i class=\"bi bi-play-circle-fill\" aria-hidden=\"true\"></i>";
+          button.appendChild(indicator);
+        }
+        indicator.setAttribute("aria-label", this.getMessengerDisplayName(messenger) + " runtime is running");
+        indicator.title = "Runtime running";
+      });
+    }
+
     renderMessengerRuntimePanel() {
+      this.syncMessengerRuntimeIndicators();
       const runtime = this.getSelectedMessengerRuntime();
       const messengerLabel = this.getMessengerDisplayName(this.state.selectedMessenger);
       const nextStatus = runtime ? runtime.status : "stopped";

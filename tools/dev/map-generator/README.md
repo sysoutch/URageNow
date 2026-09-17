@@ -37,6 +37,10 @@ Open `index.html` in a browser. Use the **2D** tab for tile-based map generation
 - Mirror options (horizontal, vertical, diagonal)
 - Map export as JSON, image, or ZIP archive
 
+### Shared 2D/3D map state
+
+Generating a map in either tab now transfers the generated grid to the other tab. The shell retains both iframe instances while switching tabs, so controls, camera position, and the latest preview are not recreated. Use **Sync view** to resend the active view without generating a new seed. 2D sprite placements are transferred with the grid and render as upright billboards in the 3D view by default.
+
 ### 3D Tab Features
 - Three.js-based 3D map/blockout generator and model viewer
 - Model rotation, zoom, pan controls

@@ -598,7 +598,12 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <article class="lazydev-home-activity-chart-card">
                     <div class="lazydev-home-chart-heading">
                       <div><strong>Generation activity</strong><small>Daily output by media type</small></div>
-                      <span>7 day trend</span>
+                      <select id="lazydev-home-chart-range" class="lazydev-home-chart-range-select" aria-label="Usage chart range">
+                        <option value="7d" selected>Last 7 days</option>
+                        <option value="month">Monthly</option>
+                        <option value="year">Yearly</option>
+                        <option value="all">All time</option>
+                      </select>
                     </div>
                     <div class="lazydev-home-activity-chart" id="lazydev-home-activity-chart"><div class="studio-home-empty">Loading activity graph...</div></div>
                   </article>
@@ -1820,14 +1825,6 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                       <div class="list medium-list" id="model3d-history-list"></div>
                     </div>
                   </section>
-                <section class="model3d-dock-panel model3d-queue-panel studio-component-queue">
-                    <div class="studio-tabs">
-                      <button class="active" type="button">Generation Queue</button>
-                      <button type="button">Console</button>
-                      <button class="model3d-dock-close" type="button" aria-label="Close queue">x</button>
-                    </div>
-                    <div class="model3d-queue-list" id="model3d-bottom-queue-list"></div>
-                  </section>
                 </div>
               </div>
               <div class="studio-workflow-side-resizer" data-workflow-sidebar-resizer="model3d" aria-hidden="true"></div>
@@ -2400,9 +2397,9 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                     <div class="image-prompt-interpret-head">
                       <div>
                         <strong>Source Image Prompt Builder</strong>
-                        <div class="hint">Upload one image, then let the image vision model turn it into a reusable generation prompt.</div>
+                        <div class="hint">Add one or more images, then let the vision model create separate prompts by default or one combined prompt.</div>
                       </div>
-                      <input id="image-interpret-source-file" type="file" accept="image/*" hidden>
+                      <input id="image-interpret-source-file" type="file" accept="image/*" multiple hidden>
                       <div class="row compact-row image-prompt-interpret-actions">
                         <button class="secondary mini-button" id="image-interpret-source-browse-button" type="button">${renderButtonIcon("upload")}<span>Upload Image</span></button>
                         <button class="secondary mini-button" id="image-interpret-source-paste-button" type="button">${renderButtonIcon("copy")}<span>Paste Image</span></button>
@@ -2414,6 +2411,13 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <button class="active" data-image-interpret-detail="normal" type="button">Normal</button>
                           <button data-image-interpret-detail="precise" type="button">Precise</button>
                         </div>
+                        <label class="image-prompt-interpret-mode" for="image-interpret-source-mode">
+                          <span>Multiple images</span>
+                          <select id="image-interpret-source-mode">
+                            <option value="separate" selected>Separate prompts (default)</option>
+                            <option value="combine">Combine into one prompt</option>
+                          </select>
+                        </label>
                         <label class="image-prompt-interpret-direction">
                           <span>Direction keywords or phrases</span>
                           <input id="image-interpret-direction-input" type="text" autocomplete="off" placeholder="logo, app icon, sticker, product render">
@@ -2802,13 +2806,6 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <div class="recent-media-controls" id="image-recent-media-controls"></div>
                   <div class="image-filmstrip" id="image-bottom-filmstrip"></div>
                 </section>
-                <section class="image-dock-panel image-queue-panel studio-component-queue">
-                  <div class="studio-tabs">
-                    <button class="active" type="button">Generation Queue</button>
-                    <button type="button">Console</button>
-                  </div>
-                  <div class="image-queue-list" id="image-bottom-queue-list"></div>
-                </section>
               </div>
             </div>
             ${renderWorkflowSettingsFooter([
@@ -3046,10 +3043,6 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <div class="recent-media-controls" id="audio-recent-media-controls"></div>
                   <div class="audio-filmstrip" id="audio-bottom-filmstrip"></div>
                 </section>
-                <section class="audio-dock-panel audio-queue-panel studio-component-queue">
-                  <div class="studio-tabs"><button class="active" type="button">Generation Queue</button><button type="button">Console</button></div>
-                  <div class="audio-queue-list" id="audio-bottom-queue-list"></div>
-                </section>
               </div>
             </div>
             ${renderWorkflowSettingsFooter([
@@ -3177,10 +3170,6 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <div class="studio-tabs"><button class="active" type="button">Recent Music</button><button type="button">Favorites</button></div>
                   <div class="recent-media-controls" id="music-recent-media-controls"></div>
                   <div class="music-filmstrip" id="music-bottom-filmstrip"></div>
-                </section>
-                <section class="music-dock-panel music-queue-panel studio-component-queue">
-                  <div class="studio-tabs"><button class="active" type="button">Generation Queue</button><button type="button">Console</button></div>
-                  <div class="music-queue-list" id="music-bottom-queue-list"></div>
                 </section>
               </div>
             </div>
@@ -3471,10 +3460,6 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                 <div class="video-info-panel studio-component-metadata" id="videogen-meta-output">
                   <span>No video selected.</span>
                 </div>
-                <section class="video-dock-panel video-queue-panel studio-component-queue">
-                  <div class="studio-tabs"><button class="active" type="button">Generation Queue</button><button type="button">Console</button></div>
-                  <div class="video-queue-list" id="video-bottom-queue-list"></div>
-                </section>
               </aside>
             </div>
             ${renderWorkflowSettingsFooter([

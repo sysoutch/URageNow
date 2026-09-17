@@ -1,0 +1,39 @@
+body.view-tools-active .tools-workspace-card .workspace-tabs-new {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center;
+  width: fit-content !important;
+  max-width: 100%;
+  gap: 2px !important;
+  padding: 3px !important;
+  border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 82%, transparent);
+  border-radius: var(--dashboard-tabs-radius, 10px);
+  background: color-mix(in srgb, var(--studio-panel-bg-soft, var(--panel-alt)) 88%, black 12%);
+}
+
+body.view-tools-active .tools-workspace-card .workspace-tabs-new > .dashboard-tab {
+  min-width: 66px !important;
+  min-height: 30px !important;
+  padding: 0 9px !important;
+  border: 0 !important;
+  border-radius: calc(var(--dashboard-tabs-radius, 10px) - 3px) !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.view-tools-active .tools-workspace-card .workspace-tabs-new > .dashboard-tab:is(:hover, :focus-visible, .active) {
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 20%, var(--studio-panel-bg, var(--panel))) !important;
+  box-shadow: inset 0 -2px 0 var(--studio-accent-1, var(--accent));
+  color: var(--ink) !important;
+}
+
+@media (max-width: 560px) {
+  body.view-tools-active .tools-workspace-card .workspace-tabs-new > .dashboard-tab {
+    min-width: 58px !important;
+    padding: 0 7px !important;
+  }
+}
+

@@ -2378,6 +2378,26 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
+  .image-prompt-interpret-mode {
+    min-width: min(100%, 240px);
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .image-prompt-interpret-mode select {
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 74%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--panel) 82%, black 18%);
+    color: var(--ink);
+    padding: 0 30px 0 10px;
+  }
 
   .image-prompt-interpret-direction input {
     width: 100%;

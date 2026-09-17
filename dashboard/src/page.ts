@@ -12,6 +12,7 @@ import {
   renderBlenderIconSvg,
   renderAssetsIcon,
   renderToolsIcon,
+  renderGameEngineLogo,
   type DashboardWorkflowIconKey
 } from "./shared/dashboardIcons.js";
 import {
@@ -177,7 +178,7 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
   <header class="desktop-window-titlebar" id="desktop-window-titlebar" hidden>
     <div class="desktop-window-drag-region" data-tauri-drag-region>
       <i class="bi bi-stars desktop-window-mark" aria-hidden="true"></i>
-      <span class="desktop-window-title dashboard-wordmark" data-tauri-drag-region aria-label="URage Now Studio"><span class="dashboard-wordmark-u">U</span><span class="dashboard-wordmark-rage">RAGE</span><span class="dashboard-wordmark-now">Now</span><span class="dashboard-wordmark-descriptor">Studio</span></span>
+      <span class="desktop-window-title dashboard-wordmark" data-tauri-drag-region aria-label="URage Now"><span class="dashboard-wordmark-u">U</span><span class="dashboard-wordmark-rage">RAGE</span><span class="dashboard-wordmark-now">Now</span><span class="dashboard-wordmark-descriptor">Studio</span></span>
     </div>
     <div class="desktop-window-controls" aria-label="Window controls">
       <button class="desktop-window-control" id="desktop-window-minimize" type="button" title="Minimize" aria-label="Minimize window"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
@@ -195,11 +196,11 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
         <span aria-hidden="true">&#8646;</span>
       </button>
       <div class="rail-home-wrap">
-        <button class="nav-link rail-nav-button rail-app-button active" data-rail-category="studio" data-view="ai" data-studio-home-view="studio" title="URage Now Studio Home" aria-label="Open URage Now Studio Home">
+        <button class="nav-link rail-nav-button rail-app-button active" data-rail-category="studio" data-view="ai" data-studio-home-view="studio" title="URage Now Home" aria-label="Open URage Now Home">
           <span class="rail-home-mark">
             <img class="rail-home-mark-logo" data-dashboard-theme-logo="studio" src="/assets/dashboard-theme-logo.png?theme=${defaultDashboardTheme}" alt="URage Now">
           </span>
-          <span class="rail-home-label dashboard-wordmark" aria-label="URage Now Studio"><span class="dashboard-wordmark-u">U</span><span class="dashboard-wordmark-rage">RAGE</span><span class="dashboard-wordmark-now">Now</span><span class="dashboard-wordmark-descriptor">Studio</span></span>
+          <span class="rail-home-label dashboard-wordmark" aria-label="URage Now"><span class="dashboard-wordmark-u">U</span><span class="dashboard-wordmark-rage">RAGE</span><span class="dashboard-wordmark-now">Now</span><span class="dashboard-wordmark-descriptor">Studio</span></span>
         </button>
         <button class="nav-link rail-nav-button rail-home" data-rail-category="workflow" data-view="ai" data-studio-home-view="workflow" type="button" title="LazyDev Home" aria-label="Open LazyDev Home">
           <span class="rail-home-mark rail-lazydev-mark" aria-hidden="true">
@@ -241,9 +242,9 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
           <span class="rail-home-label rail-assets-label">Game Engines</span>
         </button>
         <div class="rail-resource-sections rail-asset-sections" data-resource-rail-group="assets">
-          ${renderRailSectionButton("data-asset-platform", "unity", "Unity", renderBootstrapIcon("box-seam"))}
-          ${renderRailSectionButton("data-asset-platform", "godot", "Godot", renderBootstrapIcon("boxes"))}
-          ${renderRailSectionButton("data-asset-platform", "unreal", "Unreal", renderBootstrapIcon("layers"))}
+          ${renderRailSectionButton("data-asset-platform", "unity", "Unity", renderGameEngineLogo("unity"))}
+          ${renderRailSectionButton("data-asset-platform", "godot", "Godot", renderGameEngineLogo("godot"))}
+          ${renderRailSectionButton("data-asset-platform", "unreal", "Unreal", renderGameEngineLogo("unreal"))}
         </div>
         <button class="nav-link rail-nav-button rail-profile-button" id="rail-profile-button" data-rail-category="bots" data-view="dashboard" title="Bots" aria-label="Open bots">
           <span class="rail-home-mark rail-profile-mark" aria-hidden="true">
@@ -1489,6 +1490,7 @@ ${renderDashboardMobileNav()}
               <button class="secondary" id="messenger-runtime-save-shared-path-button" type="button">Save Runtime Settings</button>
             </div>
             <div class="messenger-runtime-launch-note" id="messenger-runtime-launch-note">Current User Credentials uses the OS credential store, with environment variables as service overrides. Safe Env File reads a shared .env-style file with messenger credentials.</div>
+            <div class="hint" id="messenger-runtime-save-status" role="status" aria-live="polite"></div>
             <div class="messenger-runtime-launch-source" id="messenger-runtime-launch-source">Selected source: Current User Credentials</div>
             <label class="check-row" for="messenger-runtime-autostart-checkbox">
               <input id="messenger-runtime-autostart-checkbox" type="checkbox">

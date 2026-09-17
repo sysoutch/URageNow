@@ -58,6 +58,8 @@ body[data-dashboard-sidebar-externalized="true"] .tab-bar {
   border-color: rgba(143,211,106,0.3);
 }
 
+.tab-btn:focus-visible { outline: 2px solid rgba(143, 211, 106, 0.65); outline-offset: -2px; }
+
 .tab-btn i {
   margin-right: 6px;
 }
@@ -86,3 +88,8 @@ body[data-dashboard-sidebar-externalized="true"] .tab-bar {
   height: 100%;
   border: none;
 }
+
+.tab-bar-status { display: inline-flex; align-items: center; margin-left: auto; color: var(--tab-text); font-size: 12px; font-weight: 700; }
+#syncMapButton { min-height: 32px; margin: 4px 0 4px 8px; padding: 0 12px; border: 1px solid rgba(143, 211, 106, 0.28); border-radius: 8px; background: rgba(143, 211, 106, 0.1); color: var(--tab-active-text); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+#syncMapButton:hover, #syncMapButton:focus-visible { background: rgba(143, 211, 106, 0.2); outline: 2px solid rgba(143, 211, 106, 0.65); outline-offset: 2px; }
+@media (max-width: 620px) { .tab-bar { flex-wrap: wrap; padding: 6px 8px; } .tab-btn { flex: 1 1 0; padding: 0 10px; } .tab-bar-status { order: 3; width: 100%; margin: 0 4px 2px; } #syncMapButton { margin-left: 0; } }

@@ -482,6 +482,8 @@ export interface DashboardDependencies {
   }) => Promise<string>;
   resolveImagePromptFromBaseImage: (input: {
     imageInput: string;
+    imageInputs?: string[];
+    combineSources?: boolean;
     prompt?: string;
     detailMode?: "precise" | "normal" | "vague";
     direction?: string;
@@ -814,6 +816,7 @@ export interface DashboardDependencies {
     seed?: number;
     steps?: number;
     cfg?: number;
+    metadata?: Record<string, string | number | boolean>;
     channelId?: string | null;
     requestedBy?: string;
     stripMetadata?: boolean;

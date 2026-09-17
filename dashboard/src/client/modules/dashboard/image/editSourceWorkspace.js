@@ -328,14 +328,27 @@ function createDashboardImageEditSourceWorkspace(input) {
     }]);
   }
 
+  async function commitPastedImageFiles(files) {
+    const images = Array.from(files || []).filter(file => file && String(file.type || "").startsWith("image/"));
+    if (!images.length) return false;
+    if (typeof input.onPastedImages === "function") {
+      await input.onPastedImages(images);
+      return true;
+    }
+    await addFiles(images);
+    return true;
+  }
+
   async function handlePaste(event) {
     const clipboardItems = Array.from(event.clipboardData?.items || []);
     for (const item of clipboardItems) {
       const file = item.kind === "file" ? item.getAsFile() : null;
       if (!file || !String(file.type || "").startsWith("image/")) continue;
       event.preventDefault();
-      await addFiles([file]);
-      input.setOutput("Loaded edit source image from clipboard.");
+      await commitPastedImageFiles([file]);
+      if (typeof input.onPastedImages !== "function") {
+        input.setOutput("Loaded edit source image from clipboard.");
+      }
       return true;
     }
     const text = String(event.clipboardData?.getData("text/plain") || "").trim();
@@ -355,8 +368,10 @@ function createDashboardImageEditSourceWorkspace(input) {
     if (input.appState.aiFocusedSectionId !== "image-studio-card" && !imageStudio?.contains(eventTarget)) return;
     event.preventDefault();
     try {
-      await addFiles(files);
-      input.setOutput(`Loaded ${files.length} Image Studio source image${files.length === 1 ? "" : "s"} from clipboard.`);
+      await commitPastedImageFiles(files);
+      if (typeof input.onPastedImages !== "function") {
+        input.setOutput(`Loaded ${files.length} Image Studio source image${files.length === 1 ? "" : "s"} from clipboard.`);
+      }
     } catch (error) {
       input.setOutput("Image Studio paste failed: " + (error?.message || "Unknown error"));
     }

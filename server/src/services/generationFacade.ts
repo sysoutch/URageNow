@@ -141,9 +141,20 @@ function getImagePromptInterpretDetailInstruction(mode: ImagePromptInterpretDeta
   return "Describe this image.";
 }
 
-export async function resolveImagePromptFromBaseImage(input: { imageInput: string; prompt?: string; detailMode?: ImagePromptInterpretDetailMode; direction?: string; llmConnectionSettings?: LlmConnectionSettings; }): Promise<string> {
-  const imageInput = input.imageInput.trim();
-  if (!imageInput) throw new Error("A base image is required.");
+export async function resolveImagePromptFromBaseImage(input: {
+  imageInput: string;
+  imageInputs?: string[];
+  combineSources?: boolean;
+  prompt?: string;
+  detailMode?: ImagePromptInterpretDetailMode;
+  direction?: string;
+  llmConnectionSettings?: LlmConnectionSettings;
+}): Promise<string> {
+  const imageInputs = (input.imageInputs || [input.imageInput])
+    .map(value => value.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  if (!imageInputs.length) throw new Error("At least one base image is required.");
   const promptText = input.prompt?.trim() ?? "";
   const directionText = input.direction?.trim() ?? "";
   const detailMode = normalizeImagePromptInterpretDetailMode(input.detailMode);
@@ -154,22 +165,40 @@ export async function resolveImagePromptFromBaseImage(input: { imageInput: strin
       `Direction keywords or phrases: ${directionText}`
     ].join(" ")
     : "";
-  const instruction = promptText
+  const promptInstruction = promptText
     ? [
-      imagePromptFromBaseImageInstruction,
-      detailInstruction,
-      directionInstruction,
       "User requested visual changes are mandatory. Do not preserve source-image traits that conflict with them.",
       "Understand the user direction in its original language. Do not translate it through local parsing rules.",
       "The final image prompt must contain the requested change as visual content, not as an instruction to the next system.",
       `User direction: ${promptText}`
-    ].filter(Boolean).join(" ")
-    : [imagePromptFromBaseImageInstruction, detailInstruction, directionInstruction].filter(Boolean).join(" ");
-  const resolvedPrompt = normalizeGeneratedPromptText(await askVisionOllama(instruction, [imageInput], input.llmConnectionSettings));
-  if (!resolvedPrompt) throw new Error("The vision model returned an empty image prompt.");
-  return resolvedPrompt;
+    ]
+    : [];
+  const buildInstruction = (combineSources: boolean) => [
+    imagePromptFromBaseImageInstruction,
+    detailInstruction,
+    directionInstruction,
+    ...promptInstruction,
+    combineSources && imageInputs.length > 1
+      ? "Use every attached reference image to produce one coherent generation prompt. Combine their compatible subjects, composition, materials, lighting, colors, and style; do not omit an input."
+      : "Produce one standalone generation prompt for this source image only."
+  ].filter(Boolean).join(" ");
+  if (input.combineSources && imageInputs.length > 1) {
+    const combined = normalizeGeneratedPromptText(await askVisionOllama(
+      buildInstruction(true), imageInputs, input.llmConnectionSettings
+    ));
+    if (!combined) throw new Error("The vision model returned an empty image prompt.");
+    return combined;
+  }
+  const prompts: string[] = [];
+  for (const imageInput of imageInputs) {
+    const resolved = normalizeGeneratedPromptText(await askVisionOllama(
+      buildInstruction(false), [imageInput], input.llmConnectionSettings
+    ));
+    if (!resolved) throw new Error("The vision model returned an empty image prompt.");
+    prompts.push(resolved);
+  }
+  return prompts.length === 1 ? (prompts[0] || "") : prompts.map((prompt, index) => `Source ${index + 1}: ${prompt}`).join("\n");
 }
-
 export async function suggestImageFileName(input: { prompt: string; llmConnectionSettings?: LlmConnectionSettings; }): Promise<string> {
   const prompt = input.prompt.trim();
   if (!prompt) return "generated-image";

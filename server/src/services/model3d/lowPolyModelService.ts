@@ -537,6 +537,10 @@ export async function runModelPreviewFrameRender(input: ModelPreviewFrameRenderI
     const detail = trimProcessOutput(result.output);
     throw new Error(`Blender lowpoly frame render failed (code=${result.exitCode}, signal=${result.signal ?? "none"}).\n${detail}`);
   }
+  if (!(await fileExists(outputDirectoryPath))) {
+    const detail = trimProcessOutput(result.output);
+    throw new Error(`Low poly preview frame directory was not found at "${outputDirectoryPath}".\n${detail}`);
+  }
   const entries = await readdir(outputDirectoryPath, { withFileTypes: true });
   const files = entries
     .filter(entry => entry.isFile() && /^frame_\d+\.png$/i.test(entry.name))

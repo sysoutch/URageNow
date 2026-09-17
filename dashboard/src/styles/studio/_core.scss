@@ -61,19 +61,6 @@
     background: linear-gradient(180deg, var(--dashboard-scroll-thumb-hover, color-mix(in srgb, var(--accent) 94%, white 6%)), var(--dashboard-scroll-thumb-hover-2, color-mix(in srgb, var(--accent-2) 90%, black 10%)));
   }
 
-  .content-shell,
-  .view,
-  .details-pane,
-  .rail-guilds,
-  .list,
-  .chat-feed,
-  .runtime-overlay-panel,
-  .messenger-runtime-history,
-  .studio-status-history,
-  textarea {
-    scrollbar-gutter: stable both-edges;
-  }
-
   .app-shell {
     width: 100vw;
     height: 100vh;

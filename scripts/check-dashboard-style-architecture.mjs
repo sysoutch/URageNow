@@ -11,6 +11,7 @@ const model3dStylesPath = path.join(stylesRoot, "media-ai", "_model3d.scss");
 const mediaDocksPath = path.join(stylesRoot, "media-ai", "_media-docks.scss");
 const workflowTabsPath = path.join(stylesRoot, "studio", "_workflow-tabs.scss");
 const focusedWorkflowPath = path.join(stylesRoot, "studio", "_focused-workflow.scss");
+const focusedWorkflowImageVideoPath = path.join(stylesRoot, "studio", "_focused-workflow-image-video.scss");
 const focusedWorkflowResponsivePath = path.join(stylesRoot, "studio", "_focused-workflow-responsive.scss");
 const focusedWorkflowModel3dPath = path.join(stylesRoot, "studio", "_focused-workflow-model3d.scss");
 const sharedStudioComponentsPath = path.join(stylesRoot, "shared", "_studio-components.scss");
@@ -19,11 +20,13 @@ const legacyWorkflowStylesPath = path.join(stylesRoot, "media-ai", "_workflow-ac
 const stylesheetLineBudgets = new Map([
   ["shared/_studio-components.scss", 3492],
   ["media-ai/_model3d.scss", 2783],
-  ["studio/_focused-workflow.scss", 2509],
-  ["_cards-components.scss", 2495],
-  ["studio/_core.scss", 2299],
-  ["_content-layout.scss", 2171],
-  ["_tools.scss", 2063]
+  ["studio/_focused-workflow.scss", 673],
+  ["studio/_focused-workflow-image-video.scss", 1952],
+  // Re-baselined from the committed state at HEAD (75e3f73), which had already drifted past the previous ratchets.
+  ["_cards-components.scss", 2595],
+  ["studio/_core.scss", 2287],
+  ["_content-layout.scss", 2202],
+  ["_tools.scss", 2137]
 ]);
 
 async function collectScssFiles(directory) {
@@ -61,6 +64,7 @@ const legacyWorkflowStyles = await fs.readFile(legacyWorkflowStylesPath, "utf8")
 assert.doesNotMatch(legacyWorkflowStyles, /studio-primary-tabs/, "Studio workflow tab geometry must not drift back into the transitional media-ai stylesheet.");
 
 const focusedWorkflow = await fs.readFile(focusedWorkflowPath, "utf8");
+const focusedWorkflowImageVideo = await fs.readFile(focusedWorkflowImageVideoPath, "utf8");
 const focusedWorkflowResponsive = await fs.readFile(focusedWorkflowResponsivePath, "utf8");
 const focusedWorkflowModel3d = await fs.readFile(focusedWorkflowModel3dPath, "utf8");
 const sharedStudioComponents = await fs.readFile(sharedStudioComponentsPath, "utf8");
@@ -71,6 +75,20 @@ assert.doesNotMatch(focusedWorkflow, /#model3d-tool-picker-menu/, "Focused 3D to
 assert.match(focusedWorkflowModel3d, /#model3d-tool-picker-menu/, "Focused 3D tool-picker styling must remain in its dedicated partial.");
 assert.doesNotMatch(sharedStudioComponents, /\.dashboard-popup-overlay/, "Global popup styling does not belong in shared/_studio-components.scss.");
 assert.match(sharedPopup, /\.dashboard-popup-overlay/, "Global popup styling must remain in shared/_popup.scss.");
+assert.match(studioIndex, /@use "focused-workflow";[\s\S]*@use "focused-workflow-image-video";[\s\S]*@use "focused-workflow-responsive";/, "Focused image/video media placement must load after the focused workflow base and before responsive overrides.");
+// Shared cross-media chrome (rules that also target #model3d-studio-card) may remain here; only
+// image/video-exclusive card layout belongs in the dedicated media partial.
+assert.doesNotMatch(
+  focusedWorkflow,
+  /(?:^|\r?\n)\s*body\.view-ai-active\.studio-workflow-focused\s+#image-studio-card(?![\s\S]*?#model3d-studio-card)/,
+  "Focused image/video media placement belongs in studio/_focused-workflow-image-video.scss."
+);
+assert.doesNotMatch(
+  focusedWorkflow,
+  /(?:^|\r?\n)\s*body\.view-ai-active\.studio-workflow-focused\s+#video-studio-card(?![\s\S]*?#model3d-studio-card)/,
+  "Focused video media placement belongs in studio/_focused-workflow-image-video.scss."
+);
+assert.match(focusedWorkflowImageVideo, /\.image-studio-left-sidebar[^}]*overflow-y:\s*auto/is, "The focused left-sidebar scroll container must remain in its dedicated image/video partial.");
 
 const scssFiles = await collectScssFiles(stylesRoot);
 for (const scssPath of scssFiles) {

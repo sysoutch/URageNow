@@ -60,7 +60,7 @@ __pycache__/
 
 # Standalone repositories maintained independently from this workspace
 /apps/*
-
+/tools/*
 #tmp
 /tmp/*
 /integrations/

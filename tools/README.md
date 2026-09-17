@@ -1,5 +1,22 @@
 User can put more categories for tools here.
 
+## Deploying tools.your-page.com
+
+This repository is the document root for the tools site. Before deployment, regenerate the static catalog:
+
+```bash
+node scripts/build-catalog.js
+```
+
+Serve this directory at `tools.your-page.com` with normal static-file hosting. The root `index.html` provides the searchable catalog; every tool remains available at `/<category>/<tool>/`. The catalog has Web, Desktop, and Mobile tabs; the Desktop tab links to VoiceInputter, ScreenGify, and MatrixClient on GitHub, while Mobile includes the [URage Now Android Companion](https://github.com/sysoutch/urage-now-android-companion).
+
+The landing page also links back to the public repository: `https://github.com/sysoutch/URageTools`.
+
+Its `URage Tools` wordmark uses a CSS metallic-silver `T` and amber-to-ember gradient `ools` treatment, matching the current tools mark without requiring another image asset.
+The matching flame logo is bundled as `urage-logo.png` and displayed to the left of the wordmark.
+The colored letters derive from `--accent`; local `/tools/` also reads the saved main-site theme so the wordmark follows the active theme's accent.
+The local starter and catalog pages reuse the URage main-site navigation, ticker, theme selector, and footer so `/tools/` remains visually connected to the main site.
+
 ## Categories
 
 - **art** - Image editing, color tools, SVG, pixel art

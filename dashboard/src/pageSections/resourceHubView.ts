@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from "node:fs";
+﻿import { existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { repoRoot } from "@urage/server/config/repositoryPaths";
 import { renderBlenderIconSvg, renderButtonIcon, renderBootstrapIcon } from "../shared/dashboardIcons.js";
@@ -289,7 +289,7 @@ function renderBlenderAddonCard(entry: ResourceHubEntry): string {
                   <h4>${escapeHtml(entry.title)}</h4>
                   <p>${escapeHtml(entry.description)}</p>
                   <code title="${escapeHtml(entry.absolutePath)}">${escapeHtml(entry.relativePath)}</code>
-                  <small>${entry.fileCount} files · ${entry.directoryCount} folders</small>
+                  <small>${entry.fileCount} files Â· ${entry.directoryCount} folders</small>
                 </div>
                 <button class="secondary resource-hub-card-action" data-blender-install-local="${escapeHtml(entry.absolutePath)}" type="button">${renderButtonIcon("download")}<span>Install</span></button>
               </article>`;
@@ -439,10 +439,16 @@ function render3DSuiteHome(): string {
                 <div class="resource-hub-home-copy">
                   <span class="panel-kicker">3D Suites</span>
                   <h3>Choose Your 3D Suite</h3>
-                  <p>Select a suite from the sidebar to view its projects, assets, and download options.</p>
+                  <p>Manage applications, addons, scripts, and projects from one focused workspace.</p>
+                  <div class="resource-hub-home-stats resource-hub-suite-stats">
+                    <article class="resource-hub-home-stat"><strong>4</strong><span>supported suites</span></article>
+                    <article class="resource-hub-home-stat"><strong>Projects</strong><span>open a suite to browse</span></article>
+                    <article class="resource-hub-home-stat"><strong>Addons</strong><span>managed in one workspace</span></article>
+                    <article class="resource-hub-home-stat"><strong>Scripts</strong><span>curated automation</span></article>
+                  </div>
                 </div>
               </div>
-              <div class="resource-hub-grid">
+              <div class="resource-hub-grid resource-hub-suite-grid">
 ${suiteTiles}
               </div>
             </section>`;
@@ -517,7 +523,12 @@ ${otherSuiteSections}
 <!-- Global Addons Panel (always visible when Addons tab is selected) -->
 <div class="resource-hub-content-wrap global-addons-panel hidden" data-dashboard-layout-panel="3d-suites-addons">
 ${renderDashboardLayoutSwitcher("3d-suites-addons")}
-            <!-- The selected suite owns its executable choice; Blender reuses it for addon actions. -->
+            ${renderDashboardLayoutSwitcher("3d-suites-addons")}
+            <section class="resource-hub-command-center resource-hub-3d-command-center" aria-labelledby="three-d-command-center-title">
+              <header><div><span class="panel-kicker">3D Suites</span><h3 id="three-d-command-center-title">Create across your suites</h3><p>Choose a suite, manage its executable, then work with addons and automation.</p></div></header>
+              <div class="resource-hub-command-metrics"><article><div class="resource-hub-command-icon">${renderButtonIcon("cube")}</div><span>Supported suites</span><strong>4</strong><small>Blender, 3ds Max, Houdini, Cinema 4D</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("wand")}</div><span>Workspace</span><strong>Addons</strong><small>Install, inspect, and update</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("sparkle")}</div><span>Automation</span><strong>Scripts</strong><small>Curated runnable tools</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("folder")}</div><span>Projects</span><strong>Browse</strong><small>Switch to project workspace</small></article></div>
+              <div class="resource-hub-suite-quick-grid"><button type="button" data-3d-suite="blender">${renderBlenderIconSvg()}<span>Blender</span><small>Addons and scripts</small></button><button type="button" data-3d-suite="3ds-max">${renderButtonIcon("cube")}<span>3ds Max</span><small>Projects and setup</small></button><button type="button" data-3d-suite="houdini">${renderButtonIcon("sparkle")}<span>Houdini</span><small>Projects and setup</small></button><button type="button" data-3d-suite="cinema-4d">${renderButtonIcon("cube")}<span>Cinema 4D</span><small>Projects and setup</small></button></div>
+            </section><!-- The selected suite owns its executable choice; Blender reuses it for addon actions. -->
             <section class="resource-manager-toolbar" id="blender-toolbar">
               <label class="resource-manager-field">
                 <span id="suite-executable-label">Blender executable</span>
@@ -586,7 +597,7 @@ ${recommendedBlenderAddons.map(renderRecommendedBlenderAddonCard).join("\n")}
                     <h4>Your Addon Repositories</h4>
                   </div>
                 </div>
-                <div class="resource-hub-grid">
+                <div class="resource-hub-grid resource-hub-suite-grid">
 ${entries.map(renderBlenderAddonCard).join("\n") || `                  <div class="tools-workspace-empty">No Blender addon repositories were found.</div>`}
                 </div>
               </section>
@@ -617,7 +628,12 @@ function renderAssetsMain(): string {
             </div>
             <div class="resource-hub-content-wrap game-engine-workspace-panel" data-game-engine-workspace-panel="projects" data-dashboard-layout-panel="game-engines-projects">
 ${renderDashboardLayoutSwitcher("game-engines-projects")}
-              <section class="game-engine-project-toolbar">
+              <section class="resource-hub-command-center resource-hub-engine-command-center" aria-labelledby="engine-command-center-title"><header><div><span class="panel-kicker">Game Engines</span><h3 id="engine-command-center-title">Build and launch your projects</h3><p>Discover projects locally, open them in the matching editor, and keep asset work in one place.</p></div></header><div class="resource-hub-command-metrics"><article><div class="resource-hub-command-icon">${renderButtonIcon("cube")}</div><span>Detected engines</span><strong>3</strong><small>Unity, Godot, Unreal</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("folder")}</div><span>Projects</span><strong id="game-engine-overview-project-count">0</strong><small>cached locally</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("sparkle")}</div><span>Project workspace</span><strong>Ready</strong><small>Scan or browse a folder</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("box")}</div><span>Assets</span><strong>Catalog</strong><small>Switch to asset workflows</small></article></div></section><section class="game-engine-project-toolbar">
+                <div class="game-engine-select-tabs" role="tablist" aria-label="Selected game engine">
+                  <button type="button" data-game-engine-select="unity" class="active" title="Unity projects"><img src="/assets/game-engines/unity.svg" alt="" width="16" height="16" loading="lazy" decoding="async" /><span>Unity</span></button>
+                  <button type="button" data-game-engine-select="godot" title="Godot projects"><img src="/assets/game-engines/godot.png" alt="" width="16" height="16" loading="lazy" decoding="async" /><span>Godot</span></button>
+                  <button type="button" data-game-engine-select="unreal" title="Unreal Engine projects"><img src="/assets/game-engines/unreal.svg" alt="" width="16" height="16" loading="lazy" decoding="async" /><span>Unreal</span></button>
+                </div>
                 <div class="field game-engine-scan-path-field">
                   <label for="game-engine-project-scan-root">Project scan folder</label>
                   <input id="game-engine-project-scan-root" value="C:\\Files\\git" placeholder="C:\\Projects">

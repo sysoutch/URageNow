@@ -124,10 +124,16 @@
           <span>Zoom</span>
           <input id="zoomInput" type="range" min="45" max="130" value="82">
         </label>
+        <button id="resetViewButton" type="button">Reset View</button>
       </section>
 
       <section class="panel">
         <h2>Models</h2>
+        <p class="field-help">2D map sprites appear here as upright game-space sprites by default.</p>
+        <label class="field-check">
+          <input id="spriteToggleInput" type="checkbox" checked>
+          <span>Show 2D sprites</span>
+        </label>
         <label class="field">
           <span>Import OBJ / GLB / FBX</span>
           <input id="modelFileInput" type="file" accept=".obj,.glb,.gltf,.fbx,model/obj,model/gltf-binary,model/gltf+json" multiple>

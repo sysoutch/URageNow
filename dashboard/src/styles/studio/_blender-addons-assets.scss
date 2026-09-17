@@ -442,12 +442,62 @@ body:is(.view-blender-addons-active, .view-assets-active) {
 
 .game-engine-project-toolbar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
+  grid-template-columns: auto minmax(220px, 1fr) auto auto auto auto;
   align-items: end;
   gap: 8px;
   padding: 12px 14px;
   border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
   background: color-mix(in srgb, var(--panel-alt) 84%, black 16%);
+}
+
+.game-engine-select-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 56%, black 44%);
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .16s ease, background-color .16s ease, border-color .16s ease;
+
+    img {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+    }
+
+    &:hover {
+      color: var(--ink);
+      background: color-mix(in srgb, var(--panel-alt) 68%, transparent);
+    }
+
+    &.active {
+      border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 62%, transparent);
+      background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 14%, var(--panel-alt));
+      color: var(--ink);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--studio-accent-1, var(--accent)) 20%, transparent);
+    }
+  }
 }
 
 .game-engine-project-toolbar .toggle {
@@ -517,6 +567,29 @@ body:is(.view-blender-addons-active, .view-assets-active) {
   height: 22px;
 }
 
+.game-engine-project-icon img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+body[data-dashboard-theme="light"] .game-engine-project-icon {
+  background: color-mix(in srgb, var(--panel-alt) 70%, black 45%);
+}
+
+.rail-resource-section-button[data-asset-platform] .rail-resource-section-icon img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+body[data-dashboard-theme="light"] .studio-rail-expanded .rail-resource-section-button[data-asset-platform] .rail-resource-section-icon {
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel-alt) 70%, black 45%) !important;
+}
+
 .game-engine-project-copy {
   min-width: 0;
   display: grid;
@@ -546,7 +619,11 @@ body:is(.view-blender-addons-active, .view-assets-active) {
 
 @media (max-width: 1180px) {
   .game-engine-project-toolbar {
-    grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+  }
+
+  .game-engine-select-tabs {
+    grid-column: 1 / -1;
   }
 
   .game-engine-scan-path-field {

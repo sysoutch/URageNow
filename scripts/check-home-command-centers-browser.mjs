@@ -5,6 +5,13 @@ import {chromium} from "playwright";
 
 const dashboardUrl = process.argv[2] || "http://127.0.0.1:4782";
 const outputDirectory = path.resolve(process.argv[3] || "artifacts/home-command-center-audit");
+const requiredViewports = [
+  {name: "phone-320", width: 320, height: 800},
+  {name: "phone-375", width: 375, height: 812},
+  {name: "tablet-768", width: 768, height: 1024},
+  {name: "laptop-1024", width: 1024, height: 900},
+  {name: "desktop-1440", width: 1440, height: 1000}
+];
 const browser = await chromium.launch({headless: true});
 
 async function captureHome(page, mode, viewportName) {
@@ -15,6 +22,7 @@ async function captureHome(page, mode, viewportName) {
   const metrics = await page.evaluate(selectedMode => {
     const root = selectedMode === "studio" ? document.querySelector(".studio-view-shell") : document.querySelector(".lazydev-home-card");
     const finalRow = selectedMode === "studio" ? document.querySelector(".studio-home-feature-grid") : document.querySelector(".lazydev-home-activity-panel");
+    const activeView = document.querySelector('.view[data-view-panel="ai"].active');
     const commandGrid = document.querySelector(".studio-home-command-grid");
     const topbar = document.querySelector(".studio-home-topbar");
     const chart = document.querySelector("#lazydev-home-activity-chart");
@@ -40,13 +48,18 @@ async function captureHome(page, mode, viewportName) {
       rootWidth: Math.round(root?.getBoundingClientRect().width || 0),
       rootRight: Math.round(root?.getBoundingClientRect().right || 0),
       finalRowBottom: Math.round(finalRow?.getBoundingClientRect().bottom || 0),
+      rootHeight: Math.round(root?.getBoundingClientRect().height || 0),
+      rootScrollHeight: root?.scrollHeight || 0,
+      activeViewHeight: activeView?.clientHeight || 0,
+      activeViewScrollHeight: activeView?.scrollHeight || 0,
+      activeViewOverflowY: activeView ? getComputedStyle(activeView).overflowY : "",
       viewportWidth: window.innerWidth,
       viewportHeight: window.innerHeight,
       chartWidth: Math.round(chart?.getBoundingClientRect().width || 0),
       chartSeries: chart?.querySelectorAll(".lazydev-home-chart-series").length || 0
     };
   }, mode);
-  await page.screenshot({path: path.join(outputDirectory, `${viewportName}-${mode}.png`), fullPage: false});
+  await page.screenshot({path: path.join(outputDirectory, `${viewportName}-${mode}.png`), fullPage: true});
   assert.ok(metrics.documentOverflow <= 1, `${viewportName} ${mode} overflows horizontally by ${metrics.documentOverflow}px`);
   assert.ok(metrics.rootRight <= metrics.viewportWidth + 1, `${viewportName} ${mode} extends beyond the viewport`);
   if (metrics.viewportWidth >= 2000) {
@@ -62,10 +75,7 @@ async function captureHome(page, mode, viewportName) {
 
 try {
   await fs.mkdir(outputDirectory, {recursive: true});
-  for (const viewport of [
-    {name: "ultrawide", width: 2560, height: 1440},
-    {name: "phone", width: 390, height: 844}
-  ]) {
+  for (const viewport of requiredViewports) {
     const page = await browser.newPage({viewport});
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
@@ -84,7 +94,7 @@ try {
   await page.locator('.lazydev-home-workflow-button[data-ai-scroll-target="model3d-studio-card"]').click();
   await page.locator("#model3d-llm-real-height-button").waitFor({state: "visible"});
   assert.equal((await page.locator("#model3d-llm-real-height-button").textContent())?.trim(), "Ask LLM For Real-Life Height");
-  await page.screenshot({path: path.join(outputDirectory, "desktop-model3d-llm-real-height-action.png"), fullPage: false});
+  await page.screenshot({path: path.join(outputDirectory, "desktop-model3d-llm-real-height-action.png"), fullPage: true});
   await page.close();
 } finally {
   await browser.close();

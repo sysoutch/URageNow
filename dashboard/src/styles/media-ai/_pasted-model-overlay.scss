@@ -1,0 +1,112 @@
+.pasted-model-overlay .pasted-model-panel {
+  width: min(500px, 100%);
+}
+
+.pasted-model-overlay .pasted-image-head {
+  padding: 14px 16px;
+}
+
+.pasted-model-overlay .pasted-image-head h4 {
+  margin-top: 2px;
+}
+
+.pasted-model-kicker {
+  display: block;
+  color: var(--studio-accent-2, var(--accent));
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pasted-model-overlay .pasted-image-close {
+  border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+  border-radius: 8px;
+  background: transparent;
+}
+
+.pasted-model-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--studio-accent-2, var(--accent)) 42%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--studio-accent-2, var(--accent)) 10%, transparent);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pasted-model-preview .bi {
+  color: var(--studio-accent-2, var(--accent));
+  font-size: 15px;
+}
+
+.pasted-model-overlay .pasted-image-hint {
+  max-width: 380px;
+  justify-self: center;
+}
+
+.pasted-model-options {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 460px);
+  margin: 2px auto 0;
+}
+
+.pasted-model-option {
+  display: grid;
+  grid-template-columns: 18px 34px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel-alt, var(--panel)) 82%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.pasted-model-option:hover {
+  border-color: color-mix(in srgb, var(--studio-accent-2, var(--accent)) 48%, var(--line));
+  transform: translateY(-1px);
+}
+
+.pasted-model-option.is-selected {
+  border-color: color-mix(in srgb, var(--studio-accent-2, var(--accent)) 78%, white 8%);
+  background: color-mix(in srgb, var(--studio-accent-2, var(--accent)) 13%, var(--panel-alt, var(--panel)));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--studio-accent-2, var(--accent)) 22%, transparent);
+}
+
+.pasted-model-option input[type="radio"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--studio-accent-2, var(--accent));
+  cursor: pointer;
+}
+
+.pasted-model-option-icon,
+.pasted-model-option-check {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--panel) 76%, black 24%);
+  color: var(--studio-accent-2, var(--accent));
+}
+
+.pasted-model-option-check {
+  width: 18px;
+  height: 18px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: transparent;
+}
+

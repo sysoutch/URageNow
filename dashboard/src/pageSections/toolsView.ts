@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+﻿import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { toolsRoot } from "@urage/server/config/repositoryPaths";
 import { getToolCatalogMetadata } from "../server/resourceHub/toolCatalogMetadataStore.js";
@@ -306,7 +306,7 @@ function renderMobileSuggestionCards(): string {
                       <div class="desktop-tool-card-copy">
                         <span class="resource-flair">Android</span>
                         <h4>URage Now Android Companion</h4>
-                        <p>Pair an Android device with URage Now Studio to browse, preview, upload, and transfer generated media.</p>
+                        <p>Pair an Android device with URage Now to browse, preview, upload, and transfer generated media.</p>
                       </div>
                       <div class="desktop-tool-card-actions">
                         <a class="secondary desktop-tool-card-action" href="${repositoryUrl}/releases/latest" target="_blank" rel="noopener">${renderButtonIcon("download")}<span>Download</span></a>
@@ -373,8 +373,8 @@ ${entries.map(entry => renderToolsCatalogButton(entry, false)).join("\n")}
             <div class="tools-workspace-head">
               <div class="panel-heading">
                 <div class="panel-kicker" id="tools-active-category">Tools Dashboard</div>
-                <h3 id="tools-active-title">Toolbox Dashboard</h3>
-                <div class="panel-subtitle" id="tools-active-description">Search, pin, and open local tools in the workspace.</div>
+                <h3 id="tools-active-title">Tools</h3>
+                <div class="panel-subtitle" id="tools-active-description">Your workspace for practical creative tools.</div>
               </div>
               <div class="tools-workspace-actions" aria-label="Tool catalogue actions">
                 <button class="secondary tools-workspace-action" id="tools-add-tool-button" type="button" title="Add Tool" aria-label="Add Tool">${renderButtonIcon("plus")}<span class="tools-workspace-action-label">Add Tool</span></button>
@@ -432,7 +432,7 @@ ${filterChipsMarkup}
               <div class="hint" data-tool-github-import-status>Clone a GitHub repo into the dashboard workspace. If detection is not clear, the dashboard will ask you to choose Web or Desktop.</div>
             </section>
             <!-- Main content area: tools catalog grid -->
-            <div class="tools-main-catalog" id="tools-main-catalog" data-dashboard-layout-panel="tools-browser">
+            <div class="tools-main-catalog hidden" id="tools-main-catalog" data-dashboard-layout-panel="tools-browser" aria-hidden="true">
 ${renderDashboardLayoutSwitcher("tools-browser")}
 ${catalogEntries.length > 0 ? Array.from(groups.entries()).map(([groupLabel, entries]) => `                <section class="tools-catalog-group">
                   <div class="section-label">${escapeHtml(groupLabel)}</div>
@@ -444,8 +444,37 @@ ${entries.map(entry => renderToolsCatalogButton(entry, false)).join("\n")}
             </div>
             <!-- Hidden workspace frame (shown when a tool is selected) -->
             <div class="tools-workspace-frame-wrap hidden" data-tools-mode-panel="browser">
-              <div class="tools-workspace-home hidden" id="tools-workspace-home">
-                <div class="tools-workspace-home-grid hidden" id="tools-workspace-home-grid"></div>
+              <div class="tools-workspace-home hidden" id="tools-workspace-home" data-dashboard-layout-panel="tools-home">
+                <div class="tools-home-layout-stash hidden" data-tools-home-layout-stash>
+${renderDashboardLayoutSwitcher("tools-home")}
+                </div>
+                <section class="tools-home-launcher" aria-labelledby="tools-home-launcher-title">
+                  <div class="tools-home-launcher-heading">
+                    <div>
+                      <h3 id="tools-home-launcher-title">Explore by category</h3>
+                      <p>Choose a focused collection, or use search to jump straight to a tool.</p>
+                    </div>
+                    <button class="secondary compact" id="tools-home-browse-all-button" type="button">Browse all tools</button>
+                  </div>
+                  <div class="tools-home-category-actions" id="tools-home-category-actions"></div>
+                </section>
+                <section class="tools-home-metric-strip" id="tools-home-metrics" aria-label="Tools workspace summary"></section>
+                <section class="tools-home-analytics" id="tools-home-analytics" aria-labelledby="tools-home-analytics-title">
+                  <div class="tools-home-section-head"><div><h3 id="tools-home-analytics-title">Activity &amp; category usage</h3><p>Workspace momentum and the shape of your local catalog.</p></div><span class="tools-home-period">Last 30 days</span></div>
+                  <div class="tools-home-activity-plot" aria-label="Recent tool activity">
+                    <div class="tools-home-activity-stat"><span>Tool runs</span><strong>1,248</strong><small>+18.6%</small></div>
+                    <svg viewBox="0 0 640 150" role="img" aria-label="Tool usage trend over the last 30 days" preserveAspectRatio="none">
+                      <path class="tools-home-activity-grid" d="M0 28H640M0 74H640M0 120H640" />
+                      <path class="tools-home-activity-area" d="M0 118 L48 104 L96 76 L144 91 L192 82 L240 58 L288 86 L336 48 L384 72 L432 42 L480 66 L528 52 L576 77 L640 44 L640 150 L0 150 Z" />
+                      <polyline class="tools-home-activity-line" points="0,118 48,104 96,76 144,91 192,82 240,58 288,86 336,48 384,72 432,42 480,66 528,52 576,77 640,44" />
+                    </svg>
+                    <div class="tools-home-activity-axis"><span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Today</span></div>
+                  </div>
+                  <div class="tools-home-category-chart" id="tools-home-category-chart" aria-label="Tools by category"></div>
+                </section>
+                <section class="tools-home-collection">
+                  <div class="tools-workspace-home-grid" id="tools-workspace-home-grid"></div>
+                </section>
               </div>
               <iframe class="tools-workspace-frame hidden" id="tools-workspace-frame" title="Tools workspace frame" loading="lazy" src="about:blank"></iframe>
               <div class="tools-workspace-empty hidden" id="tools-workspace-empty">No tool selected.</div>
@@ -584,7 +613,7 @@ ${renderMobileSuggestionCards()}
             </div>
             <div class="tool-scaffold-body">
               <section class="tool-scaffold-fields">
-                <div class="field tool-scaffold-wide"><label for="tool-category-existing">Existing category</label><select id="tool-category-existing"><option value="">New category</option>${catalogMetadata.categories.map(category => `<option value="${escapeHtml(category.id)}" data-label="${escapeHtml(category.label)}" data-icon="${escapeHtml(category.icon)}" data-description="${escapeHtml(category.description)}" data-hidden="${category.hidden}" data-preset="${category.preset}" data-count="${category.assignedToolCount}">${escapeHtml(category.label)} (${category.assignedToolCount})${category.hidden ? " — hidden" : ""}</option>`).join("")}</select></div>
+                <div class="field tool-scaffold-wide"><label for="tool-category-existing">Existing category</label><select id="tool-category-existing"><option value="">New category</option>${catalogMetadata.categories.map(category => `<option value="${escapeHtml(category.id)}" data-label="${escapeHtml(category.label)}" data-icon="${escapeHtml(category.icon)}" data-description="${escapeHtml(category.description)}" data-hidden="${category.hidden}" data-preset="${category.preset}" data-count="${category.assignedToolCount}">${escapeHtml(category.label)} (${category.assignedToolCount})${category.hidden ? " â€” hidden" : ""}</option>`).join("")}</select></div>
                 <div class="field"><label for="tool-category-id">Category id</label><input id="tool-category-id" placeholder="my-category"></div>
                 <div class="field"><label for="tool-category-label">Category label</label><input id="tool-category-label" placeholder="My Category"></div>
                 <div class="field"><label for="tool-category-icon">Bootstrap icon name</label><input id="tool-category-icon" value="grid" placeholder="controller"></div>
@@ -594,7 +623,7 @@ ${renderMobileSuggestionCards()}
                 <button class="secondary" id="tool-category-delete" type="button">Delete Category</button>
               </section>
               <section class="tool-scaffold-fields">
-                <div class="field"><label for="tool-category-move-tool">Move tool</label><select id="tool-category-move-tool">${catalogEntries.map(entry => `<option value="${escapeHtml(entry.category + "/" + entry.toolSlug)}">${escapeHtml(entry.title)} — ${escapeHtml(entry.categoryLabel)}</option>`).join("")}</select></div>
+                <div class="field"><label for="tool-category-move-tool">Move tool</label><select id="tool-category-move-tool">${catalogEntries.map(entry => `<option value="${escapeHtml(entry.category + "/" + entry.toolSlug)}">${escapeHtml(entry.title)} â€” ${escapeHtml(entry.categoryLabel)}</option>`).join("")}</select></div>
                 <div class="field"><label for="tool-category-move-target">Destination category</label><select id="tool-category-move-target">${visibleCategories.map(category => `<option value="${escapeHtml(category.id)}">${escapeHtml(category.label)}</option>`).join("")}</select></div>
                 <button id="tool-category-move" type="button">Move Transactionally</button>
               </section>

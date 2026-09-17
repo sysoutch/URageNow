@@ -256,10 +256,10 @@ export class RuntimeState implements DashboardRuntimeState {
       stripMetadataWebUiImages: true,
       stripMetadataDiscordImages: true,
       messengerSharedSecretsPath: "",
-      discordRuntimeAutostart: appConfig.discordRuntimeAutostart,
-      telegramRuntimeAutostart: appConfig.telegramBotAutostart,
-      matrixRuntimeAutostart: appConfig.matrixBotAutostart,
-      whatsappRuntimeAutostart: appConfig.whatsappBotAutostart,
+      discordRuntimeAutostart: false,
+      telegramRuntimeAutostart: false,
+      matrixRuntimeAutostart: false,
+      whatsappRuntimeAutostart: false,
       ...initialGlobalSettings
     };
     this.defaultGuildSettings = sanitizeGuildSettings({

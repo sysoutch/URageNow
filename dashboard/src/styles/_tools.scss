@@ -281,7 +281,7 @@
   }
 
   .dashboard-layout-toolbar {
-    position: sticky;
+    position: static;
     top: 0;
     z-index: 5;
     min-width: 0;
@@ -685,7 +685,8 @@
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0.008) 100%),
       var(--studio-panel-bg-soft, var(--panel-alt));
-    overflow: hidden;
+    min-block-size: 84px;
+    overflow: visible;
   }
 
   .resource-manager-field {

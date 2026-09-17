@@ -28,6 +28,10 @@ const focusedStyles = await readFile(
   path.join(repoRoot, "dashboard", "src", "styles", "studio", "_focused-workflow.scss"),
   "utf8"
 );
+const focusedImageVideoStyles = await readFile(
+  path.join(repoRoot, "dashboard", "src", "styles", "studio", "_focused-workflow-image-video.scss"),
+  "utf8"
+);
 const focusedResponsiveStyles = await readFile(
   path.join(repoRoot, "dashboard", "src", "styles", "studio", "_focused-workflow-responsive.scss"),
   "utf8"
@@ -47,7 +51,7 @@ const workspaceAssembly = mediaSource.slice(
   mediaSource.indexOf("const imageObjectPrompts")
 );
 assert.doesNotMatch(workspaceAssembly, /\n\s+(?:bind|bindDropzone|clickInput),/);
-for (const styles of [focusedStyles, focusedResponsiveStyles]) {
+for (const styles of [focusedStyles, focusedImageVideoStyles, focusedResponsiveStyles]) {
   assert.doesNotMatch(
     styles,
     /image-studio-edit-mode #image-studio-panel-edit\.active\s*\{[^}]*overflow-y:\s*auto/is,
@@ -60,7 +64,7 @@ for (const styles of [focusedStyles, focusedResponsiveStyles]) {
   );
 }
 assert.match(
-  focusedStyles,
+  focusedImageVideoStyles,
   /\.image-studio-left-sidebar\s*\{[^}]*grid-row:\s*1\s*\/\s*-1[^}]*overflow-y:\s*auto/is,
   "The shared focused left-sidebar wrapper should own the only vertical scrollbar."
 );

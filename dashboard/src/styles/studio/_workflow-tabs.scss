@@ -30,6 +30,22 @@ body.view-ai-active .workspace-tabs-new.studio-primary-tabs > .dashboard-tab:las
 body.view-ai-active .workspace-tabs-new.studio-primary-tabs > .dashboard-tab.active {
   background: color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 48%, var(--studio-panel-bg, var(--panel)) 52%) !important;
 }
+
+// At narrow widths the max-content tab row outgrows its card and clips controls past the edge.
+// Letting it wrap keeps every action visible inside the card instead of forcing horizontal overflow.
+@media (max-width: 560px) {
+  body.view-ai-active .workspace-tabs-new.studio-primary-tabs {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+
+  body.view-ai-active .workspace-tabs-new.studio-primary-tabs > .dashboard-tab {
+    min-width: 96px !important;
+    flex-grow: 1 !important;
+  }
+}
 .studio-workflow-tabs {
   margin-bottom: 14px;
 }

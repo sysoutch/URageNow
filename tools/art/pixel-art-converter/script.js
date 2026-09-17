@@ -140,6 +140,13 @@
         overlayModeSelect: $('overlayModeSelect'),
         overlayOpacitySlider: $('overlayOpacitySlider'),
         overlayOpacityValue: $('overlayOpacityValue'),
+        partialModeCheckbox: $('partialModeCheckbox'),
+        partialDirectionSelect: $('partialDirectionSelect'),
+        partialPositionSlider: $('partialPositionSlider'),
+        partialPositionValue: $('partialPositionValue'),
+        partialFeatherSlider: $('partialFeatherSlider'),
+        partialFeatherValue: $('partialFeatherValue'),
+        partialGlowCheckbox: $('partialGlowCheckbox'),
         revealSlider: $('revealSlider'),
         revealValue: $('revealValue'),
         gifFrameStripCard: $('gifFrameStripCard'),
@@ -882,6 +889,7 @@
 
         if (meta && meta.palette && meta.palette.length) renderPaletteSwatches(meta.palette);
         if (meta) {
+            applyPartialConversion(workCanvas, els.pixelCanvas);
             PAS.render.renderOverlay(
                 els.overlayCanvas,
                 meta,
@@ -896,6 +904,38 @@
         if (els.downloadBtn) els.downloadBtn.style.display = meta ? 'flex' : 'none';
         if (els.downloadAllBtn) els.downloadAllBtn.style.display = meta && state.batchImages.length > 1 ? 'flex' : 'none';
         if (els.downloadScaledBtn) els.downloadScaledBtn.style.display = meta ? 'flex' : 'none';
+    }
+
+    function applyPartialConversion(source, output) {
+        if (!els.partialModeCheckbox || !els.partialModeCheckbox.checked || !source || !output) return;
+        const combined = document.createElement('canvas');
+        combined.width = output.width; combined.height = output.height;
+        const ctx = combined.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(output, 0, 0, combined.width, combined.height);
+        const direction = els.partialDirectionSelect.value;
+        const position = Number(els.partialPositionSlider.value) / 100;
+        const feather = Number(els.partialFeatherSlider.value) / 100;
+        const mask = document.createElement('canvas'); mask.width = combined.width; mask.height = combined.height;
+        const m = mask.getContext('2d');
+        let gradient;
+        if (direction === 'horizontal') gradient = m.createLinearGradient(0, combined.height * (position - feather), 0, combined.height * (position + feather));
+        else if (direction === 'diagonal') gradient = m.createLinearGradient(combined.width * (position - feather) - combined.height / 2, combined.height, combined.width * (position + feather) + combined.height / 2, 0);
+        else gradient = m.createLinearGradient(combined.width * (position - feather), 0, combined.width * (position + feather), 0);
+        gradient.addColorStop(0, 'rgba(0,0,0,0)'); gradient.addColorStop(0.5, 'rgba(0,0,0,1)'); gradient.addColorStop(1, 'rgba(0,0,0,1)');
+        m.fillStyle = gradient; m.fillRect(0, 0, mask.width, mask.height);
+        ctx.save(); ctx.globalCompositeOperation = 'destination-in'; ctx.drawImage(mask, 0, 0); ctx.restore();
+        const base = document.createElement('canvas'); base.width = combined.width; base.height = combined.height;
+        const b = base.getContext('2d'); b.drawImage(source, 0, 0, base.width, base.height); b.drawImage(combined, 0, 0);
+        if (els.partialGlowCheckbox.checked) {
+            b.save(); b.globalCompositeOperation = 'screen'; b.strokeStyle = 'rgba(44,222,255,.9)'; b.shadowColor = '#23d9ff'; b.shadowBlur = 16; b.lineWidth = Math.max(2, combined.width / 360);
+            b.beginPath();
+            if (direction === 'horizontal') { const y=combined.height*position; b.moveTo(0,y); b.lineTo(combined.width,y); }
+            else if (direction === 'diagonal') { const x=combined.width*position; b.moveTo(x-combined.height/2,combined.height); b.lineTo(x+combined.height/2,0); }
+            else { const x=combined.width*position; b.moveTo(x,0); b.lineTo(x,combined.height); }
+            b.stroke(); b.restore();
+        }
+        output.width = base.width; output.height = base.height; output.getContext('2d').drawImage(base,0,0);
     }
 
     function scheduleConvert() {
@@ -1605,6 +1645,8 @@
 
         if (!meta) return null;
 
+        applyPartialConversion(work, out);
+
         // Optionally upscale back to original dimensions (only when we intentionally normalized to target res,
         // and only when exporting from the original image at original quality).
         const canUpscaleBack = (outputRes === 'original')
@@ -1849,6 +1891,13 @@
         // Overlay is a visualization control: update even when Auto-convert is off.
         renderOnInput(els.overlayModeSelect);
         renderOnInput(els.overlayOpacitySlider);
+        renderOnInput(els.partialModeCheckbox);
+        renderOnInput(els.partialDirectionSelect);
+        renderOnInput(els.partialPositionSlider);
+        renderOnInput(els.partialFeatherSlider);
+        renderOnInput(els.partialGlowCheckbox);
+        if (els.partialPositionSlider) els.partialPositionSlider.addEventListener('input', () => setText(els.partialPositionValue, `${els.partialPositionSlider.value}%`));
+        if (els.partialFeatherSlider) els.partialFeatherSlider.addEventListener('input', () => setText(els.partialFeatherValue, `${els.partialFeatherSlider.value}%`));
         bind(els.revealSlider, 'input', () => {
             updateReadouts();
             setRevealPercent(els.revealSlider ? els.revealSlider.value : state.revealPercent);

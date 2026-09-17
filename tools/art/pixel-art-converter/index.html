@@ -564,6 +564,15 @@
             </div>
         </details>
 
+        <details class="control-group sidebar-panel control-group-emphasis" id="splitDetails" open>
+            <summary><span class="summary-title">Partial conversion</span><span class="summary-meta">Original + pixels</span></summary>
+            <div style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="partialModeCheckbox"><label style="text-transform:none;font-weight:400;">Convert only one side</label></div>
+            <div style="margin-top:8px;"><div style="font-size:.75rem;color:var(--text-dim);">Split direction</div><select id="partialDirectionSelect"><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option><option value="diagonal">Diagonal</option></select></div>
+            <div style="margin-top:8px;"><div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-dim);"><span>Divider</span><span id="partialPositionValue">50%</span></div><input type="range" id="partialPositionSlider" min="0" max="100" value="50"></div>
+            <div style="margin-top:8px;"><div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-dim);"><span>Transition width</span><span id="partialFeatherValue">6%</span></div><input type="range" id="partialFeatherSlider" min="0" max="30" value="6"></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="partialGlowCheckbox" checked><label style="text-transform:none;font-weight:400;">Neon pixel transition</label></div>
+        </details>
+
         <button class="btn btn-primary" id="convertBtn">Process Pixels</button>
 
         <div class="control-group sidebar-panel action-panel" style="margin-top:auto; gap:10px;">

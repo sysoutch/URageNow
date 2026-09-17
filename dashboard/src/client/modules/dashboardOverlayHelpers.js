@@ -1555,12 +1555,39 @@ function createDashboardOverlayHelpers(input) {
       void input.loadRuntimeReadiness?.();
     });
     bindClick("messenger-runtime-save-shared-path-button", async () => {
+      const saveButton = document.getElementById("messenger-runtime-save-shared-path-button");
+      const saveStatus = document.getElementById("messenger-runtime-save-status");
+      if (saveButton?.disabled) {
+        return;
+      }
+      if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving Runtime Settings...";
+      }
+      if (saveStatus) {
+        saveStatus.textContent = "Saving autorun preference...";
+      }
       try {
-        await saveMessengerRuntimeSettingsFromUi();
+        const savedSettings = await saveMessengerRuntimeSettingsFromUi();
         updateMessengerRuntimeLaunchUi();
-        setOutput("Saved messenger runtime settings. Autostart changes apply on the next dashboard launch.");
+        const selectedMessenger = state.selectedMessenger || "discord";
+        const autostartEnabled = savedSettings?.[selectedMessenger + "RuntimeAutostart"] === true;
+        const message = "Saved. " + selectedMessenger.charAt(0).toUpperCase() + selectedMessenger.slice(1) + " autorun is " + (autostartEnabled ? "on" : "off") + ". It applies on the next dashboard launch.";
+        if (saveStatus) {
+          saveStatus.textContent = message;
+        }
+        setOutput(message);
       } catch (error) {
-        setOutput(describeClientError(error, "Failed to save messenger safe env file path."));
+        const message = describeClientError(error, "Failed to save messenger runtime settings.");
+        if (saveStatus) {
+          saveStatus.textContent = message;
+        }
+        setOutput(message);
+      } finally {
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.textContent = "Save Runtime Settings";
+        }
       }
     });
     bindClick("settings-save-discord-runtime-autostart", async () => {

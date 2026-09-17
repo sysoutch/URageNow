@@ -277,33 +277,42 @@
     // Preserve every workflow's local inspector; the global Messenger pane is
     // not a Studio-sidebar host. Compact the local columns instead of removing
     // them at ordinary desktop widths.
-    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-workspace {
-      grid-template-columns: 48px minmax(0, 1fr) minmax(280px, 320px) !important;
-      grid-template-rows: minmax(0, 1fr) !important;
-    }
+    // The compact three-column geometry is desktop-only. Below the 981px stack
+    // breakpoint the workspace must reflow into a single column, and these
+    // tracks (especially minmax(280px, 320px)) were crushing .ask-rod-main to
+    // zero width at phone sizes while the side panel's stacked-flow rule
+    // overflowed its track on top of the composer. The final shell contract
+    // restates these same values for 981px-1520px, so keep both in sync if
+    // the tracks change.
+    @media (min-width: 981px) {
+      body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-workspace {
+        grid-template-columns: 48px minmax(0, 1fr) minmax(280px, 320px) !important;
+        grid-template-rows: minmax(0, 1fr) !important;
+      }
 
-    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-chat-tabs {
-      grid-column: 1 !important;
-      grid-row: 1 !important;
-      display: grid !important;
-      min-width: 48px !important;
-      width: 48px !important;
-    }
+      body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-chat-tabs {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        display: grid !important;
+        min-width: 48px !important;
+        width: 48px !important;
+      }
 
-    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-main {
-      grid-column: 2 !important;
-      grid-row: 1 !important;
-    }
+      body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-main {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+      }
 
-    body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-side {
-      display: grid !important;
-      grid-column: 3 !important;
-      grid-row: 1 !important;
-      min-width: 0 !important;
-    }
+      body.view-ai-active.studio-workflow-focused #ask-rod-card .ask-rod-side {
+        display: grid !important;
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        min-width: 0 !important;
+      }
 
-    body.view-ai-active.studio-workflow-focused #ask-rod-card .studio-workflow-side-resizer {
-      display: none !important;
+      body.view-ai-active.studio-workflow-focused #ask-rod-card .studio-workflow-side-resizer {
+        display: none !important;
+      }
     }
 
     body.view-ai-active.studio-workflow-focused :is(#model3d-studio-card .model3d-studio-workspace, #image-studio-card .image-studio-workspace, #audio-studio-card .audio-studio-workspace, #music-studio-card .music-studio-workspace, #video-studio-card .video-studio-workspace) {
@@ -894,6 +903,12 @@
       height: auto;
       min-height: 0;
       overflow: visible;
+    }
+
+    // The desktop three-column grid is gone at this width, so the drag handle
+    // has nothing to resize; keep it out of the stacked flow.
+    body.view-ai-active.studio-workflow-focused #ask-rod-card .studio-workflow-side-resizer {
+      display: none !important;
     }
 
     body.view-ai-active .studio-workflow-main,

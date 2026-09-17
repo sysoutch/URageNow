@@ -443,6 +443,21 @@ body.view-ai-active #image-studio-card .image-studio-preview-panel.has-intrinsic
   height: auto !important;
 }
 
+body.view-ai-active #image-studio-card .image-studio-preview-panel.has-intrinsic-image-preview #image-preview-reveal {
+  width: min(100%, calc(var(--image-preview-intrinsic-width) * 1px)) !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  max-height: min(680px, calc(var(--image-preview-intrinsic-height) * 1px)) !important;
+  padding: 0 !important;
+  aspect-ratio: auto !important;
+}
+
+body.view-ai-active #image-studio-card .image-studio-preview-panel.has-intrinsic-image-preview .image-preview-reveal-stage {
+  min-height: 0 !important;
+  max-height: min(680px, calc(var(--image-preview-intrinsic-height) * 1px)) !important;
+  aspect-ratio: var(--image-preview-intrinsic-width) / var(--image-preview-intrinsic-height) !important;
+}
+
 body.view-ai-active .model3d-variant-preview-fallback {
   width: 100%;
   min-height: 92px;

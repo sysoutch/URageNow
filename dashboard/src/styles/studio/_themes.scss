@@ -323,6 +323,39 @@ body[data-dashboard-theme="rock"] {
   --studio-button-shadow: rgba(64, 56, 42, 0.32);
 }
 
+
+// Structural surfaces deliberately remain neutral. Theme hue belongs to focal,
+// selected, and interactive elements through the accent variables above.
+body[data-dashboard-theme] {
+  --studio-panel-bg: #111214;
+  --studio-panel-bg-soft: #0c0d0f;
+  --studio-shell-bg-start: #101114;
+  --studio-shell-bg-mid: #090a0c;
+  --studio-shell-bg-end: #050608;
+  --studio-rail-bg: #0a0b0d;
+  --studio-surface-bg: #0c0d10;
+}
+
+// ULight keeps its blue accent, but uses the same dark structural hierarchy.
+body[data-dashboard-theme="light"] {
+  --ink: #edf3fb;
+  --muted: #9facbf;
+  --line: rgba(143, 166, 202, 0.28);
+  --panel: #111317;
+  --panel-alt: #0c0e12;
+}
+
+body[data-dashboard-theme] {
+  background: linear-gradient(180deg, var(--studio-shell-bg-start) 0%, var(--studio-shell-bg-end) 100%);
+}
+
+body[data-dashboard-theme] :is(.server-rail, .side-nav) {
+  background: var(--studio-rail-bg) !important;
+}
+
+body[data-dashboard-theme] .content-shell {
+  background: var(--studio-surface-bg) !important;
+}
 @keyframes studio-border-glow {
   0%, 100% {
     border-color: var(--studio-panel-border, var(--line));

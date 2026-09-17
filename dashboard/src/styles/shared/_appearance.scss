@@ -105,7 +105,6 @@ body :is([role="tablist"],
   [class$="-tabs"]:not(.ask-chat-tabs),
   [class*="-tabs "]:not(.ask-chat-tabs))> :is(button, .ghost, .nav-link, .messenger-tab) {
   min-height: 32px !important;
-  min-width: 92px !important;
   padding: 0 max(12px, var(--dashboard-tabs-padding, 0px)) !important;
   border: 1px solid transparent !important;
   color: color-mix(in srgb, var(--muted) 78%, white 22%) !important;

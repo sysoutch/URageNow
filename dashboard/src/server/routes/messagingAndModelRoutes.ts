@@ -4,7 +4,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { readAutomationTextSourceLine, type DashboardDependencies } from "../runtime/botBridge.js";
 import { toolsRoot } from "@urage/server/config/repositoryPaths";
 import { stripImageMetadataToPng } from "@urage/server/services/imageSanitizer";
-import { generateGeneratedModelLods } from "@urage/server/services/model3d";
+import { generateGeneratedModelLods, importUploadedSourceModel, toGeneratedModelPublicRecord } from "@urage/server/services/model3d";
 import { createGenerationJob, updateGenerationJob } from "@urage/server/services/generationJobStore";
 import { appConfig } from "@urage/server/config/appConfig";
 import { preflightComfyImageWorkflowNodeTypes } from "@urage/server/services/comfyWorkflowPreflight";
@@ -33,8 +33,10 @@ import {
   sanitizeImportedImageFileName
 } from "../messagingAndModel/helpers.js";
 import { parseBase64DataUrl } from "../chatSkills/executionHelpers.js";
+import { buildToolApiSchema, createToolResource, getToolResource, listToolResources, readToolResourceFile, type ToolResourceKind } from "../tools/toolResourceInbox.js";
 import { parseIdentifiedImageObjects, type IdentifiedImageObjectPrompt } from "../messagingAndModel/imageObjectIdentification.js";
 import { importWebsiteModelArchive } from "../model3d/websiteArchiveImport.js";
+import {getImageInterpretationFailure} from "../visionModelFailure.js";
 
 function parseTextSourceSelectionMode(value: unknown): "random" | "no-repeat" {
   return value === "no-repeat" ? "no-repeat" : "random";
@@ -167,6 +169,9 @@ function parseGameEngineResourceKind(value: unknown): GameEngineResourceKind | n
     : null;
 }
 
+function parseToolResourceKind(value: unknown): ToolResourceKind | null {
+  return parseGameEngineResourceKind(value) as ToolResourceKind | null;
+}
 function normalizeToolSourcePath(value: string): string {
   const trimmed = value.trim().replace(/\\/g, "/");
   try {
@@ -1091,6 +1096,26 @@ async function handlePostApiModel3dWebsiteImport(request: IncomingMessage, respo
   }
   sendJson(response, 200, { imported: await importWebsiteModelArchive({ downloadUrl, modelName }) });
 }
+async function handlePostApiModel3dImport(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const body = await parseJsonBody(request);
+  const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
+  const fileName = typeof body.fileName === "string" ? body.fileName.trim() : "pasted-model.glb";
+  const parsedDataUrl = parseBase64DataUrl(dataUrl);
+  if (!parsedDataUrl) {
+    sendJson(response, 400, { error: "A valid base64 3D model data URL is required." });
+    return;
+  }
+  const imported = await importUploadedSourceModel({
+    fileName,
+    fileData: Buffer.from(parsedDataUrl.base64Data, "base64"),
+    contentType: parsedDataUrl.mimeType,
+    prompt: "Pasted from clipboard",
+    useSourceAsCurrent: true
+  });
+  dependencies.runtimeState.recordAction("dashboard:model3d-import", `Imported 3D model ${imported.id} from clipboard.`);
+  sendJson(response, 200, { imported: toGeneratedModelPublicRecord(imported) });
+}
+
 async function handlePostApiModel3dSuggestLowPoly(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
@@ -1333,23 +1358,47 @@ async function handlePostApiImageRemoveBackground(request: IncomingMessage, resp
 async function handlePostApiImageInterpretPrompt(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
   const imageInput = typeof body.imageInput === "string" ? body.imageInput.trim() : "";
-  const imageFileNameHint = typeof body.imageFileNameHint === "string" ? body.imageFileNameHint.trim() : "";
+  const imageInputs = (Array.isArray(body.imageInputs) ? body.imageInputs : [imageInput])
+    .filter((value): value is string => typeof value === "string")
+    .map(value => value.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  const imageFileNameHints = (Array.isArray(body.imageFileNameHints) ? body.imageFileNameHints : [])
+    .filter((value): value is string => typeof value === "string")
+    .map(value => value.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  const imageFileNameHint = imageFileNameHints[0]
+    || (typeof body.imageFileNameHint === "string" ? body.imageFileNameHint.trim() : "");
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
   const detailMode = body.detailMode === "precise" || body.detailMode === "vague" ? body.detailMode : "normal";
   const direction = typeof body.direction === "string" ? body.direction.trim() : "";
-  if (!imageInput) {
-    sendJson(response, 400, { error: "imageInput is required." });
+  const combineSources = body.combineSources === true;
+  if (!imageInputs.length) {
+    sendJson(response, 400, { error: "At least one imageInput is required." });
     return;
   }
-  const resolvedPrompt = await dependencies.resolveImagePromptFromBaseImage({
-    imageInput,
-    prompt: prompt || undefined,
-    detailMode,
-    direction: direction || undefined
-  });
+  let resolvedPrompt = "";
+  try {
+    resolvedPrompt = await dependencies.resolveImagePromptFromBaseImage({
+      imageInput: imageInputs[0] || "",
+      imageInputs,
+      combineSources,
+      prompt: prompt || undefined,
+      detailMode,
+      direction: direction || undefined
+    });
+  } catch (error) {
+    const failure = getImageInterpretationFailure(error);
+    sendJson(response, failure.code === "vision_model_required" ? 422 : 502, failure);
+    return;
+  }
+  const sourceDescription = imageInputs.length === 1
+    ? (imageFileNameHint || "source image")
+    : `${imageInputs.length} source images as ${combineSources ? "one combined prompt" : "separate prompts"}`;
   dependencies.runtimeState.recordAction(
     "dashboard:image-interpret-prompt",
-    `Interpreted ${imageFileNameHint || "source image"} into an image prompt.`
+    `Interpreted ${sourceDescription} into image prompt${imageInputs.length === 1 ? "" : "s"}.`
   );
   sendJson(response, 200, { prompt: resolvedPrompt });
   return;
@@ -2028,6 +2077,76 @@ async function handlePostApiGameEngineExport(request: IncomingMessage, response:
   return;
 }
 
+async function handleGetApiLlmTools(_request: IncomingMessage, response: ServerResponse): Promise<void> {
+  sendJson(response, 200, buildToolApiSchema());
+}
+async function handleGetApiToolResourceFile(_request: IncomingMessage, response: ServerResponse, url: URL): Promise<void> {
+  const resourceId = String(url.searchParams.get("resourceId") || "").trim();
+  const file = String(url.searchParams.get("file") || "").trim();
+  if (!resourceId || !file) {
+    sendJson(response, 400, { error: "resourceId and file are required." });
+    return;
+  }
+  try {
+    const stored = await readToolResourceFile(resourceId, file);
+    response.writeHead(200, { "content-type": stored.contentType, "cache-control": "private, max-age=3600" });
+    response.end(stored.data);
+  } catch (error) {
+    sendJson(response, 404, { error: error instanceof Error ? error.message : "Tool resource file was not found." });
+  }
+}
+async function handleGetApiToolResources(_request: IncomingMessage, response: ServerResponse, url: URL): Promise<void> {
+  if (url.searchParams.get("schema") === "1") {
+    sendJson(response, 200, buildToolApiSchema());
+    return;
+  }
+  const resourceId = String(url.searchParams.get("resourceId") || "").trim();
+  if (resourceId) {
+    const resource = await getToolResource(resourceId);
+    if (!resource) {
+      sendJson(response, 404, { error: "Tool resource was not found." });
+      return;
+    }
+    if (resource.textContent || !resource.sourceUrl.includes("/api/tool-resource-file?")) {
+      sendJson(response, 200, resource);
+      return;
+    }
+    const stored = await readToolResourceFile(resource.id, resource.fileName);
+    sendJson(response, 200, { ...resource, dataUrl: `data:${stored.contentType};base64,${stored.data.toString("base64")}` });
+    return;
+  }
+  const targetToolId = String(url.searchParams.get("targetToolId") || "").trim();
+  if (!targetToolId) {
+    sendJson(response, 400, { error: "targetToolId is required. Use schema=1 for the LLM tool API contract." });
+    return;
+  }
+  sendJson(response, 200, { resources: await listToolResources(targetToolId) });
+}
+async function handlePostApiToolResource(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const body = await parseJsonBody(request);
+  const resourceKind = parseToolResourceKind(body.resourceKind);
+  const targetToolId = typeof body.targetToolId === "string" ? body.targetToolId.trim() : "";
+  if (!resourceKind || !targetToolId) {
+    sendJson(response, 400, { error: "targetToolId and a supported resourceKind are required." });
+    return;
+  }
+  const created = await createToolResource({
+    targetToolId,
+    sourceToolId: typeof body.sourceToolId === "string" ? body.sourceToolId : "",
+    resourceKind,
+    title: typeof body.title === "string" ? body.title : "",
+    fileName: typeof body.fileName === "string" ? body.fileName : "",
+    mimeType: typeof body.mimeType === "string" ? body.mimeType : "",
+    sourceUrl: typeof body.sourceUrl === "string" ? body.sourceUrl : "",
+    dataUrl: typeof body.dataUrl === "string" ? body.dataUrl : "",
+    textContent: typeof body.textContent === "string" ? body.textContent : "",
+    metadata: body.metadata && typeof body.metadata === "object" && !Array.isArray(body.metadata) ? body.metadata as Record<string, string | number | boolean> : undefined,
+    publicBaseUrl: `${url.protocol}//${url.host}`
+  });
+  dependencies.runtimeState.recordAction("dashboard:tool-resource", `Queued ${created.resourceKind} from ${created.sourceToolId || "dashboard"} to ${created.targetToolId}.`);
+  sendJson(response, 201, created);
+  return;
+}
 async function handlePostApiGameEngineExportStatus(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
   const exportId = typeof body.exportId === "string" ? body.exportId.trim() : "";
@@ -2063,6 +2182,7 @@ const dashboardMessagingAndModelRouteTable = createDashboardRouteTable([
   postRoute("/api/model3d-texture", handlePostApiModel3dTexture),
   postRoute("/api/model3d-website-import", handlePostApiModel3dWebsiteImport),
   postRoute("/api/model3d-inspect", handlePostApiModel3dInspect),
+  postRoute("/api/model3d-import", handlePostApiModel3dImport),
   postRoute("/api/model3d-validate", handlePostApiModel3dValidate),
   postRoute("/api/model3d-index", handlePostApiModel3dIndex),
   postRoute("/api/model3d-capture", handlePostApiModel3dCapture),
@@ -2103,6 +2223,10 @@ const dashboardMessagingAndModelRouteTable = createDashboardRouteTable([
   postRoute("/api/music-generate", handlePostApiMusicGenerate),
   postRoute("/api/music-think", handlePostApiMusicThink),
   postRoute("/api/video-generate", handlePostApiVideoGenerate),
+  getRoute("/api/llm-tools", handleGetApiLlmTools),
+  getRoute("/api/tool-resource-file", handleGetApiToolResourceFile),
+  getRoute("/api/tool-resources", handleGetApiToolResources),
+  postRoute("/api/tool-resources", handlePostApiToolResource),
   postRoute("/api/game-engine-export", handlePostApiGameEngineExport),
   postRoute("/api/game-engine-export-status", handlePostApiGameEngineExportStatus),
   ...channelMessagingRouteDefinitions

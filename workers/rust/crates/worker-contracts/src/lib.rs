@@ -104,6 +104,10 @@ pub enum ModelKind {
     Gltf,
     Fbx,
     Obj,
+    Stl,
+    Ply,
+    #[serde(rename = "3mf")]
+    ThreeMf,
     Blend,
     Unknown,
 }

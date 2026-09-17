@@ -5,14 +5,17 @@ import os from "node:os";
 import path from "node:path";
 import { dataRoot } from "@urage/server/config/repositoryPaths";
 
+export type GameEngineId = "unity" | "godot" | "unreal";
+type GameEngineProjectSource = "configured" | "manual" | "scan" | "unity-hub" | "godot-project-manager" | "unreal-recent";
+
 export type GameEngineProject = {
   id: string;
   title: string;
-  engine: "unity";
+  engine: GameEngineId;
   executablePath: string;
   projectPath: string;
   version: string;
-  source: "configured" | "manual" | "scan" | "unity-hub";
+  source: GameEngineProjectSource;
   lastModified: number | null;
   available: boolean;
 };
@@ -78,11 +81,11 @@ function normalizeProjectPath(value: string): string {
 }
 
 // Create a stable project ID that preserves case to avoid collisions on case-insensitive filesystems.
-function createProjectId(projectPath: string): string {
+function createProjectId(projectPath: string, engine: GameEngineId = "unity"): string {
   const normalized = normalizeProjectPath(projectPath);
   // Include both the resolved path hash and an uppercase variant so IDs are unique even when paths differ only in case.
   const hashInput = normalized + "|" + normalized.toUpperCase();
-  return "unity-" + Buffer.from(hashInput).toString("base64url").slice(0, 48);
+  return engine + "-" + Buffer.from(hashInput).toString("base64url").slice(0, 48);
 }
 
 function resolveUnityExecutable(version: string): string {
@@ -110,6 +113,23 @@ async function isUnityProject(projectPath: string): Promise<boolean> {
   return await isDirectory(path.join(projectPath, "Assets")) && await isDirectory(path.join(projectPath, "ProjectSettings"));
 }
 
+async function isGodotProject(projectPath: string): Promise<boolean> {
+  return await isFile(path.join(projectPath, "project.godot"));
+}
+
+async function isUnrealProject(projectPath: string): Promise<boolean> {
+  try {
+    return (await readdir(projectPath, { withFileTypes: true })).some(entry => entry.isFile() && entry.name.toLowerCase().endsWith(".uproject"));
+  } catch {
+    return false;
+  }
+}
+
+const projectValidators: Record<GameEngineId, (projectPath: string) => Promise<boolean>> = {
+  unity: isUnityProject,
+  godot: isGodotProject,
+  unreal: isUnrealProject
+};
 async function readUnityProjectVersion(projectPath: string): Promise<string> {
   try {
     const content = await readFile(path.join(projectPath, "ProjectSettings", "ProjectVersion.txt"), "utf8");
@@ -126,12 +146,12 @@ async function normalizeProject(project: GameEngineProject): Promise<GameEngineP
   const executablePath = project.executablePath || resolveUnityExecutable(version);
   return {
     ...project,
-    id: project.id || createProjectId(projectPath),
+    id: project.id || createProjectId(projectPath, project.engine),
     title: project.title || path.basename(projectPath),
     executablePath,
     projectPath,
     version,
-    available: await isUnityProject(projectPath) && await isFile(executablePath)
+    available: await projectValidators[project.engine](projectPath) && await isFile(executablePath)
   };
 }
 
@@ -211,6 +231,44 @@ async function readUnityHubProjects(): Promise<GameEngineProject[]> {
   });
 }
 
+
+function extractCatalogPaths(content: string, engine: Exclude<GameEngineId, "unity">): string[] {
+  const matches = content.match(/[A-Za-z]:[\\/][^"'\r\n]+/g) || [];
+  return matches.map(value => value.trim().replace(/["',;]+$/, "")).map(value => engine === "unreal" && value.toLowerCase().endsWith(".uproject") ? path.dirname(value) : value);
+}
+
+async function fetchGodotProjectManagerProjects(): Promise<GameEngineProject[]> {
+  const catalogPaths = [
+    path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "Godot", "editor_data", "projects.cfg"),
+    path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "Godot", "projects.cfg")
+  ];
+  const projects: GameEngineProject[] = [];
+  for (const catalogPath of catalogPaths) {
+    try {
+      for (const projectPath of extractCatalogPaths(await readFile(catalogPath, "utf8"), "godot")) projects.push({ id: createProjectId(projectPath, "godot"), title: path.basename(projectPath), engine: "godot", executablePath: "", projectPath, version: "", source: "godot-project-manager", lastModified: null, available: false });
+    } catch {}
+  }
+  return projects;
+}
+
+async function fetchUnrealRecentProjects(): Promise<GameEngineProject[]> {
+  const root = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"), "UnrealEngine");
+  const projects: GameEngineProject[] = [];
+  let versions: string[] = [];
+  try { versions = (await readdir(root, { withFileTypes: true })).filter(entry => entry.isDirectory()).map(entry => entry.name); } catch {}
+  for (const version of versions) {
+    const settingsPath = path.join(root, version, "Saved", "Config", "WindowsEditor", "EditorSettings.ini");
+    try {
+      for (const projectPath of extractCatalogPaths(await readFile(settingsPath, "utf8"), "unreal")) projects.push({ id: createProjectId(projectPath, "unreal"), title: path.basename(projectPath), engine: "unreal", executablePath: "", projectPath, version, source: "unreal-recent", lastModified: null, available: false });
+    } catch {}
+  }
+  return projects;
+}
+
+export async function fetchGameEngineProjects(engine: GameEngineId): Promise<GameEngineProjectCache> {
+  if (engine === "unity") return await fetchUnityHubProjects();
+  return await mergeProjects(engine === "godot" ? await fetchGodotProjectManagerProjects() : await fetchUnrealRecentProjects());
+}
 export async function listGameEngineProjects(options?: { refreshUnityHub?: boolean; }): Promise<GameEngineProjectCache> {
   const cache = await readCache();
   if (options?.refreshUnityHub === true || cache.projects.length === 0) {
@@ -227,15 +285,15 @@ export async function fetchUnityHubProjects(): Promise<GameEngineProjectCache> {
   return await mergeProjects(await readUnityHubProjects());
 }
 
-export async function addGameEngineProject(projectPath: string, source: "manual" | "scan"): Promise<GameEngineProjectCache> {
+export async function addGameEngineProject(projectPath: string, engine: GameEngineId, source: "manual" | "scan"): Promise<GameEngineProjectCache> {
   const resolvedPath = path.resolve(projectPath);
   if (!path.isAbsolute(projectPath)) throw new Error("Project path must be absolute.");
-  if (!await isUnityProject(resolvedPath)) throw new Error("The selected directory is not a valid Unity project.");
+  if (!await projectValidators[engine](resolvedPath)) throw new Error(`The selected directory is not a valid ${engine} project.`);
   const version = await readUnityProjectVersion(resolvedPath);
   return await mergeProjects([{
-    id: createProjectId(resolvedPath),
+    id: createProjectId(resolvedPath, engine),
     title: path.basename(resolvedPath),
-    engine: "unity",
+    engine,
     executablePath: resolveUnityExecutable(version),
     projectPath: resolvedPath,
     version,
@@ -245,7 +303,7 @@ export async function addGameEngineProject(projectPath: string, source: "manual"
   }]);
 }
 
-async function collectUnityProjects(rootPath: string, recursive: boolean): Promise<string[]> {
+async function collectEngineProjects(rootPath: string, engine: GameEngineId, recursive: boolean): Promise<string[]> {
   const root = path.resolve(rootPath);
   if (!path.isAbsolute(rootPath) || !await isDirectory(root)) throw new Error("Scan folder does not exist.");
   const found: string[] = [];
@@ -253,7 +311,7 @@ async function collectUnityProjects(rootPath: string, recursive: boolean): Promi
   while (queue.length > 0 && found.length < 500) {
     const current = queue.shift();
     if (!current) break;
-    if (await isUnityProject(current.directory)) {
+    if (await projectValidators[engine](current.directory)) {
       found.push(current.directory);
       continue;
     }
@@ -273,10 +331,10 @@ async function collectUnityProjects(rootPath: string, recursive: boolean): Promi
   return found;
 }
 
-export async function scanGameEngineProjects(rootPath: string, recursive: boolean): Promise<GameEngineProjectCache> {
-  const projects = await collectUnityProjects(rootPath, recursive);
+export async function scanGameEngineProjects(rootPath: string, engine: GameEngineId, recursive: boolean): Promise<GameEngineProjectCache> {
+  const projects = await collectEngineProjects(rootPath, engine, recursive);
   // Use Promise.allSettled to ensure all projects are attempted even if some fail.
-  const results = await Promise.allSettled(projects.map(p => addGameEngineProject(p, "scan")));
+  const results = await Promise.allSettled(projects.map(p => addGameEngineProject(p, engine, "scan")));
   const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
   if (failures.length > 0) {
     console.warn(`Scan completed with ${failures.length} failure(s):`, failures.map(r => (r.reason as Error)?.message));
@@ -284,12 +342,12 @@ export async function scanGameEngineProjects(rootPath: string, recursive: boolea
   return await listGameEngineProjects();
 }
 
-export async function browseForProjectFolder(): Promise<string> {
+export async function browseForProjectFolder(engine: GameEngineId): Promise<string> {
   if (process.platform !== "win32") throw new Error("The native folder browser is currently available on Windows only.");
   const script = [
     "Add-Type -AssemblyName System.Windows.Forms",
     "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog",
-    "$dialog.Description = 'Select a Unity project folder'",
+    `$dialog.Description = 'Select a ${engine === "unreal" ? "Unreal Engine" : engine.charAt(0).toUpperCase() + engine.slice(1)} project folder'`,
     "$dialog.ShowNewFolderButton = $false",
     "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($dialog.SelectedPath) }"
   ].join("; ");

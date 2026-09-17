@@ -1,4 +1,4 @@
-const desktopToolQuickPickerStorageKey = "urage-tools-desktop-pinned";
+﻿const desktopToolQuickPickerStorageKey = "urage-tools-desktop-pinned";
 
 function getToolQuickActionUi(kind) {
     if (kind === "video") {
@@ -1375,6 +1375,9 @@ function getToolQuickActionUi(kind) {
     const homeNode = document.getElementById("tools-workspace-home");
     const homeGridNode = document.getElementById("tools-workspace-home-grid");
     const homeButton = document.getElementById("tools-catalog-home-button");
+    const homeToolCountNode = document.getElementById("tools-home-tool-count");
+    const homeCategoryActionsNode = document.getElementById("tools-home-category-actions");
+    const homeActivityNode = document.getElementById("tools-home-analytics");
     const sidebarToggleButton = document.getElementById("tools-catalog-collapse-button");
     const sidebarResizeHandle = document.getElementById("tools-sidebar-resize-handle");
     const sidebarToolListNode = document.getElementById("tools-sidebar-tool-list");
@@ -1495,7 +1498,7 @@ function getToolQuickActionUi(kind) {
       }
       clearExternalToolSidebar();
       if (titleNode) {
-        titleNode.textContent = toolsWorkspaceState.activeFilter === "all" ? "Toolbox Dashboard" : filterLabel;
+        titleNode.textContent = toolsWorkspaceState.activeFilter === "all" ? "Tools" : filterLabel;
       }
       if (categoryNode) {
         categoryNode.textContent = filterLabel;
@@ -1619,6 +1622,73 @@ function getToolQuickActionUi(kind) {
       });
       sidebarToolListNode.appendChild(list);
     };
+
+    let isToolsHomeCatalogExpanded = false;
+    const renderToolsHomeOverview = (entries, showActivity) => {
+      if (homeToolCountNode) homeToolCountNode.textContent = String(entries.length);
+      if (!homeCategoryActionsNode) return;
+      clearChildren(homeCategoryActionsNode);
+      const categories = new Map();
+      entries.forEach(entry => {
+        const id = String(entry.categoryId || "").trim();
+        if (!id) return;
+        const category = categories.get(id) || { id, label: entry.categoryLabel || "Tools", count: 0 };
+        category.count += 1;
+        categories.set(id, category);
+      });
+      const metricsNode = document.getElementById("tools-home-metrics");
+      const chartNode = document.getElementById("tools-home-category-chart");
+      homeActivityNode?.classList.toggle("hidden", !showActivity);
+      if (showActivity && metricsNode) {
+        clearChildren(metricsNode);
+        [["Installed", entries.length, "IN"], ["Favorites", toolsWorkspaceState.favoriteToolIds.length, "FV"], ["Recently used", toolsWorkspaceState.recentToolIds.length, "RC"], ["Categories", categories.size, "CT"]].forEach(([label, value, iconText]) => {
+          const metric = document.createElement("div");
+          metric.className = "tools-home-metric";
+          const icon = document.createElement("span");
+          icon.className = "tools-home-metric-icon";
+          icon.textContent = iconText;
+          const valueNode = document.createElement("strong");
+          valueNode.textContent = String(value);
+          const labelNode = document.createElement("span");
+          labelNode.textContent = label;
+          const trend = document.createElement("small");
+          trend.textContent = label === "Installed" || label === "Recently used" ? "+ this week" : "Workspace total";
+          metric.append(icon, labelNode, valueNode, trend);
+          metricsNode.appendChild(metric);
+        });
+      }
+      if (showActivity && chartNode) {
+        clearChildren(chartNode);
+        const categoryEntries = Array.from(categories.values()).sort((a, b) => b.count - a.count).slice(0, 6);
+        const largest = Math.max(1, ...categoryEntries.map(category => category.count));
+        categoryEntries.forEach(category => {
+          const row = document.createElement("div");
+          row.className = "tools-home-chart-row";
+          const label = document.createElement("span");
+          label.textContent = category.label;
+          const track = document.createElement("div");
+          const fill = document.createElement("i");
+          fill.style.width = Math.round((category.count / largest) * 100) + "%";
+          track.appendChild(fill);
+          const value = document.createElement("strong");
+          value.textContent = String(category.count);
+          row.append(label, track, value);
+          chartNode.appendChild(row);
+        });
+      }
+      Array.from(categories.values()).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)).slice(0, 6).forEach(category => {
+        const action = document.createElement("button");
+        action.className = "tools-home-category-action";
+        action.type = "button";
+        const label = document.createElement("strong");
+        label.textContent = category.label;
+        const count = document.createElement("small");
+        count.textContent = category.count + " tools";
+        action.append(label, count);
+        action.addEventListener("click", () => setToolsWorkspaceFilter(category.id));
+        homeCategoryActionsNode.appendChild(action);
+      });
+    };
     const createToolHomeCard = (entry, options) => {
       const button = findToolCatalogButtonById(entry.id);
       const card = document.createElement("article");
@@ -1684,12 +1754,15 @@ function getToolQuickActionUi(kind) {
       card.appendChild(meta);
       return card;
     };
-    const appendToolsSection = (title, subtitle, entries, options) => {
+    const appendToolsSection = (title, subtitle, entries, options, targetNode) => {
       if (!homeGridNode || entries.length === 0) {
         return;
       }
       const section = document.createElement("section");
-      section.className = "tools-home-section" + (options && options.featured ? " is-featured" : "");
+      section.className = "tools-home-section"
+        + (options && options.featured ? " is-featured" : "")
+        + (options && options.quick ? " is-quick" : "")
+        + (options && options.catalog ? " is-catalog" : "");
       const head = document.createElement("div");
       head.className = "tools-home-section-head";
       const copy = document.createElement("div");
@@ -1700,6 +1773,14 @@ function getToolQuickActionUi(kind) {
       copy.appendChild(heading);
       copy.appendChild(summary);
       head.appendChild(copy);
+      if (options && options.catalog) {
+        const layoutStash = document.querySelector("[data-tools-home-layout-stash]");
+        const layoutToolbar = layoutStash?.querySelector(".dashboard-layout-toolbar")
+          || homeGridNode.querySelector(".dashboard-layout-toolbar");
+        if (layoutToolbar) {
+          head.appendChild(layoutToolbar);
+        }
+      }
       section.appendChild(head);
       const grid = document.createElement("div");
       grid.className = "tools-home-card-grid";
@@ -1707,14 +1788,25 @@ function getToolQuickActionUi(kind) {
         grid.appendChild(createToolHomeCard(entry, options));
       });
       section.appendChild(grid);
-      homeGridNode.appendChild(section);
+      (targetNode || homeGridNode).appendChild(section);
     };
     const renderWorkspaceHomeCards = () => {
       if (!homeGridNode) {
         return;
       }
+      const layoutStash = document.querySelector("[data-tools-home-layout-stash]");
+      const mountedLayoutToolbar = homeGridNode.querySelector(".dashboard-layout-toolbar");
+      if (layoutStash && mountedLayoutToolbar) {
+        layoutStash.appendChild(mountedLayoutToolbar);
+      }
       clearChildren(homeGridNode);
+      const homeContent = document.createDocumentFragment();
+      const appendHomeSection = (title, subtitle, sectionEntries, options) => appendToolsSection(title, subtitle, sectionEntries, options, homeContent);
       const entries = getToolsCatalogEntries();
+      const query = String(toolsWorkspaceState.searchQuery || "").trim();
+      const activeFilter = toolsWorkspaceState.activeFilter || "all";
+      const activeTag = String(toolsWorkspaceState.activeTag || "").trim();
+      renderToolsHomeOverview(entries, activeFilter === "all" && !query && !activeTag);
       syncToolsWorkspaceCollections(entries);
       renderToolsToolbarState();
       renderMainToolsCatalogFilter(entries);
@@ -1722,7 +1814,8 @@ function getToolQuickActionUi(kind) {
         const empty = document.createElement("div");
         empty.className = "hint";
         empty.innerHTML = "No local tools with <code>index.html</code> detected yet.";
-        homeGridNode.appendChild(empty);
+        homeContent.appendChild(empty);
+        homeGridNode.appendChild(homeContent);
         return;
       }
       const filteredEntries = getFilteredToolEntries(entries);
@@ -1730,14 +1823,14 @@ function getToolQuickActionUi(kind) {
         const empty = document.createElement("div");
         empty.className = "tools-home-empty";
         empty.textContent = "No tools match the current filter.";
-        homeGridNode.appendChild(empty);
+        homeContent.appendChild(empty);
+        homeGridNode.appendChild(homeContent);
         return;
       }
-      const query = String(toolsWorkspaceState.searchQuery || "").trim();
-      const activeFilter = toolsWorkspaceState.activeFilter || "all";
       if (query || activeFilter !== "all") {
         const label = activeFilter === "favorites" ? "Favorites" : activeFilter === "recent" ? "Recent" : "Matching Tools";
-        appendToolsSection(label, filteredEntries.length + " tools found", filteredEntries, { featured: false });
+        appendHomeSection(label, filteredEntries.length + " tools found", filteredEntries, { featured: true });
+        homeGridNode.appendChild(homeContent);
         return;
       }
       const preferredFeatured = ["pixel-art-converter", "svg-editor", "3d-model-viewer", "seamless-texture", "audio", "favicon"];
@@ -1749,23 +1842,28 @@ function getToolQuickActionUi(kind) {
           const bScore = (toolsWorkspaceState.favoriteToolIds.includes(b.id) ? 20 : 0)
             + preferredFeatured.reduce((score, token, index) => score + (normalizeToolSourcePath(b.sourcePath).includes(token) || b.title.toLowerCase().includes(token) ? 12 - index : 0), 0);
           return bScore - aScore || a.title.localeCompare(b.title);
-        })
-        .slice(0, Math.min(5, entries.length));
-      appendToolsSection("Featured Tools", "Fast paths for the tools you are most likely to reach for.", featuredEntries, { featured: true });
-      const recentEntries = toolsWorkspaceState.recentToolIds.map(id => entries.find(entry => entry.id === id) || null).filter(Boolean).slice(0, 6);
-      appendToolsSection("Recent", "Tools opened from this dashboard.", recentEntries, { featured: false });
-      const favoriteEntries = toolsWorkspaceState.favoriteToolIds.map(id => entries.find(entry => entry.id === id) || null).filter(Boolean).slice(0, 6);
-      appendToolsSection("Favorites", "Pinned tools for one-click access.", favoriteEntries, { featured: false });
-      const grouped = new Map();
-      entries.forEach(entry => {
-        if (!grouped.has(entry.categoryLabel)) {
-          grouped.set(entry.categoryLabel, []);
-        }
-        grouped.get(entry.categoryLabel).push(entry);
-      });
-      grouped.forEach((groupEntries, groupLabel) => {
-        appendToolsSection(groupLabel, groupEntries.length + " available tools", groupEntries.slice().sort((a, b) => a.title.localeCompare(b.title)), { featured: false });
-      });
+        });
+      const recentEntries = toolsWorkspaceState.recentToolIds
+        .map(id => entries.find(entry => entry.id === id) || null)
+        .filter(Boolean)
+        .slice(0, 4);
+      const continueEntries = recentEntries.length > 0 ? recentEntries : featuredEntries.slice(0, 4);
+      appendHomeSection(
+        "Continue building",
+        recentEntries.length > 0 ? "Your recently opened tools." : "Suggested starting points from your workspace.",
+        continueEntries,
+        { quick: true }
+      );
+      const catalogEntries = entries.slice().sort((a, b) => a.title.localeCompare(b.title));
+      const visibleCatalogEntries = isToolsHomeCatalogExpanded ? catalogEntries : catalogEntries.slice(0, 12);
+      appendHomeSection(
+        "Tool catalog",
+        isToolsHomeCatalogExpanded
+          ? catalogEntries.length + " tools in your local catalog."
+          : "Showing " + visibleCatalogEntries.length + " of " + catalogEntries.length + " tools.",
+        visibleCatalogEntries,
+        { catalog: true }
+      );      homeGridNode.appendChild(homeContent);
     };
     const setWorkspaceHome = () => {
       toolButtons.forEach(node => {
@@ -1775,13 +1873,13 @@ function getToolQuickActionUi(kind) {
         homeButton.classList.add("active");
       }
       if (titleNode) {
-        titleNode.textContent = "Toolbox Dashboard";
+        titleNode.textContent = "Tools";
       }
       if (categoryNode) {
         categoryNode.textContent = "Tools Dashboard";
       }
       if (descriptionNode) {
-        descriptionNode.textContent = "Search, pin, and open local tools in the workspace.";
+        descriptionNode.textContent = "Your workspace for practical creative tools.";
       }
       if (openLinkNode) {
         openLinkNode.classList.add("hidden");
@@ -1974,16 +2072,25 @@ function getToolQuickActionUi(kind) {
         setWorkspaceHome();
       });
     }
+    document.getElementById("tools-home-browse-all-button")?.addEventListener("click", () => {
+      toolsWorkspaceState.activeFilter = "all";
+      toolsWorkspaceState.activeTag = "";
+      isToolsHomeCatalogExpanded = true;
+      toolsWorkspaceState.searchQuery = "";
+      setWorkspaceHome();
+    });
     window.addEventListener("dashboard:tools-home-requested", () => {
       toolsWorkspaceState.activeFilter = "all";
       toolsWorkspaceState.activeTag = "";
       toolsWorkspaceState.searchQuery = "";
+      isToolsHomeCatalogExpanded = false;
       setWorkspaceHome();
     });
     filterButtons.forEach(button => {
       button.addEventListener("click", event => {
         event.preventDefault();
         const filter = event.currentTarget ? event.currentTarget.getAttribute("data-tools-filter") : "all";
+        isToolsHomeCatalogExpanded = false;
         setToolsWorkspaceFilter(filter || "all");
       });
     });

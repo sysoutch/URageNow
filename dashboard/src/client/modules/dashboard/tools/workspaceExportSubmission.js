@@ -23,7 +23,17 @@ function createDashboardToolExportSubmission(input) {
     }
     setOverlayStatus("Opening " + targetEntry.title + "...");
     const asset = context.exportedAsset;
+    const queued = await input.request("/api/tool-resources", {
+      targetToolId: targetEntry.id,
+      sourceToolId: String(context.entry?.id || "").trim(),
+      resourceKind: asset.kind || context.resourceKind,
+      title: context.sourceName || asset.fileName || "Tool resource",
+      fileName: String(asset.fileName || "tool-output").trim() || "tool-output",
+      sourceUrl: String(asset.sourceUrl || "").trim() || undefined,
+      dataUrl: String(asset.dataUrl || "").trim() || undefined
+    });
     await input.sendAssetToTool(targetEntry, {
+      resourceId: queued.id,
       kind: asset.kind || context.resourceKind,
       dataUrl: String(asset.dataUrl || "").trim() || undefined,
       sourceUrl: String(asset.sourceUrl || "").trim() || undefined,

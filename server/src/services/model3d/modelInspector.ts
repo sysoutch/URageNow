@@ -41,6 +41,9 @@ function normalizeModelKind(value: unknown): RustModelKind {
     || normalized === "gltf"
     || normalized === "fbx"
     || normalized === "obj"
+    || normalized === "stl"
+    || normalized === "ply"
+    || normalized === "3mf"
     || normalized === "blend"
     ? normalized
     : "unknown";

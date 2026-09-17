@@ -16,6 +16,8 @@ assert.match(appConfig, /DISCORD_RUNTIME_AUTOSTART", false/);
 for (const messenger of ["discord", "telegram", "matrix", "whatsapp"]) {
   const setting = `${messenger}RuntimeAutostart`;
   assert.match(runtimeState, new RegExp(setting));
+  assert.match(runtimeState, new RegExp(`${setting}: false`));
+  assert.match(runtimeState, new RegExp(`typeof input\\.${setting} === "boolean"`));
   assert.match(settingsRoute, new RegExp(setting));
 }
 assert.match(entrypoint, /URAGE_DISABLE_MESSENGER_AUTOSTART/);
@@ -25,7 +27,13 @@ assert.match(page, /messenger-runtime-autostart-checkbox/);
 assert.match(page, /settings-discord-runtime-autostart/);
 assert.match(page, /data-settings-subtab="messengers"/);
 assert.match(page, /headless server batch never autostarts messenger bots/);
-assert.match(settingsClient, /\[messenger \+ "RuntimeAutostart"\]/);
+assert.match(settingsClient, /const autostartSetting = messenger \+ "RuntimeAutostart"/);
+assert.match(settingsClient, /const autostartEnabled = readCheckedValue\("messenger-runtime-autostart-checkbox"\)/);
+assert.match(settingsClient, /\[autostartSetting\]: autostartEnabled/);
+assert.doesNotMatch(settingsClient, /discordRuntimeAutostart: messenger === "discord"/);
+assert.match(settingsClient, /const currentState = await request\("\/api\/state"\)/);
+assert.match(settingsClient, /autostart preference was not persisted/);
+assert.match(settingsClient, /did not confirm the " \+ messenger \+ " autostart preference/);
 assert.match(settingsClient, /saveDiscordRuntimeAutostartFromSettings/);
 
 console.log("Messenger runtime autostart policy validation passed.");

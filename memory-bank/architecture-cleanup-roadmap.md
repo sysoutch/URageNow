@@ -160,7 +160,7 @@ Dashboard navigation regressions fixed:
 - Fresh Chat Studio messages use a short pop-in animation in the dashboard and Android companion; only newly appended messages animate, so transcript re-renders do not replay motion for history.
 - Chat Studio message controls are compact, tooltip-labelled icons: task details follow the message role label without reserving empty bubble width, while edit, delete, speech, copy, and related actions share the lower-right action row. Task metadata opens as an anchored floating panel instead of expanding the bubble.
 - Chat Studio defaults to deleting successfully sent voice recordings: the dashboard does not persist an STT source artifact or retain its base64 data in chat history, and Android removes the local recording after a successful transcription. Each client exposes a preference to retain sent voice recordings instead.
-- Image Studio now constrains the primary image and GIF-canvas previews to their loaded intrinsic dimensions. Workflow layout may shrink an image to fit its panel, but cannot upscale uploads or variants that have missing or stale metadata.
+- Image Studio now constrains the primary image, GIF-canvas, and reveal-slider previews to their loaded intrinsic dimensions. Workflow layout may shrink an image to fit its panel, but cannot upscale uploads or variants that have missing or stale metadata; the reveal stage retains the normal preview height cap.
 
 ## Phase 5: Consolidate CSS And SCSS Ownership
 
@@ -248,3 +248,20 @@ Completed:
 8. Expand automated tests around each extracted boundary.
 
 Avoid a big-bang folder rename before dependency direction is enforced. Renaming tangled modules changes addresses without improving ownership.
+
+## Session Note: 2026-08-23 (code rescue kickoff)
+
+Behavioral validation added (Phase 7, first server-service behavior tests):
+
+- `scripts/check-moderation-rules.ts` exercises real behavior of `server/src/services/moderationRules.ts` (entry normalization/dedupe order, bare patterns compile case-insensitive, `/pattern/flags` keeps explicit flags, wildcard special-character escaping with zero-run `*`, empty-pattern rejection). Wired into `check:runtime`.
+
+Check infrastructure repaired:
+
+- `scripts/check-model3d-viewer-camera-geometry.mjs` had stale three.js stubs (missing `Box3.isEmpty`, partial vector API) and expectations from the pre-FOV camera-fit formula, which made committed HEAD fail `npm run check`. Stubs completed and expectations now mirror the current fit-distance operations; app code unchanged.
+
+Known red gates at this commit (pre-existing, not caused by the session above):
+
+1. `check-dashboard-style-architecture.mjs` — `_focused-workflow.scss` grew to ~2620 lines against its no-growth budget of 2509; needs extraction work, not a budget increase.
+2. `check-studio-workflows-browser.ts` — Playwright narrow-width overflow on `.model3d control button.dashboard-tab`; found uncommitted WIP in `_studio-components.scss`/generated CSS at session start, likely the interrupted work behind both red gates.
+
+Both belong to Phase 4/5 territory (oversized stylesheet extraction). Do not raise line budgets or loosen layout assertions to force green; finish the extraction and re-run `npm run check`.

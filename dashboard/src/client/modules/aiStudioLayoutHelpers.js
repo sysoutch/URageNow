@@ -13,6 +13,15 @@ function createDashboardAiStudioLayoutHelpers(input) {
     activity: "all",
     actions: "all"
   };
+  const homeChartRangeStorageKey = "urage-lazydev-home-chart-range";
+  const homeChartRanges = {
+    "7d": { rangeLabel: "Last 7 days", accessibleRange: "the last seven days" },
+    month: { rangeLabel: "This month", accessibleRange: "this month" },
+    year: { rangeLabel: "Last 12 months", accessibleRange: "the last twelve months" },
+    all: { rangeLabel: "All time", accessibleRange: "all tracked time" }
+  };
+  let studioHomeChartRange = readStoredHomeChartRange();
+
   const homeMediaFallbackIcons = {
     image: "bi-image",
     model3d: "bi-box",
@@ -215,28 +224,120 @@ function createDashboardAiStudioLayoutHelpers(input) {
     return svg;
   }
 
-  function getHomeUsageStartDate(records) {
-    const latestMs = Math.max(...records.map(record => record.dateMs || 0), 0) || Date.now();
-    const start = new Date(latestMs);
-    start.setHours(0, 0, 0, 0);
-    start.setDate(start.getDate() - 6);
-    return start;
+  function normalizeHomeChartRange(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    return Object.prototype.hasOwnProperty.call(homeChartRanges, normalized) ? normalized : "7d";
   }
 
-  function getHomeUsageBuckets(records, metric, startDate = getHomeUsageStartDate(records)) {
-    const start = new Date(startDate);
-    return Array.from({ length: 7 }, (_, index) => {
-      const dayStart = new Date(start);
-      dayStart.setDate(start.getDate() + index);
-      const minMs = dayStart.getTime();
-      const maxMs = minMs + 24 * 60 * 60 * 1000;
-      return records.reduce((sum, record) => {
-        if (!record.dateMs || record.dateMs < minMs || record.dateMs >= maxMs) return sum;
-        if (metric === "duration") return sum + getHomeRecordDurationMs(record);
-        if (metric === "storage") return sum + getHomeRecordFileSizeBytes(record);
-        return sum + 1;
-      }, 0);
-    });
+  function readStoredHomeChartRange() {
+    try {
+      return normalizeHomeChartRange(window.localStorage.getItem(homeChartRangeStorageKey));
+    } catch {
+      return "7d";
+    }
+  }
+
+  function createHomeDayUsageBounds(startDate, count) {
+    const bounds = [];
+    for (let index = 0; index < count; index += 1) {
+      const start = new Date(startDate);
+      start.setDate(start.getDate() + index);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+      bounds.push({ minMs: start.getTime(), maxMs: end.getTime() });
+    }
+    return bounds;
+  }
+
+  function createHomeMonthUsageBounds(startDate, count) {
+    const bounds = [];
+    for (let index = 0; index < count; index += 1) {
+      const start = new Date(startDate.getFullYear(), startDate.getMonth() + index, 1);
+      const end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+      bounds.push({ minMs: start.getTime(), maxMs: end.getTime() });
+    }
+    return bounds;
+  }
+
+  function buildHomeUsagePlan(range, records) {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (range === "month") {
+      const start = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
+      const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+      const bounds = createHomeDayUsageBounds(start, daysInMonth);
+      return {
+        range: "month",
+        unitNoun: "day",
+        bounds,
+        labels: bounds.map(boundsItem => new Date(boundsItem.minMs).toLocaleDateString(undefined, { month: "short", day: "numeric" }))
+      };
+    }
+    if (range === "year") {
+      const start = new Date(todayStart.getFullYear(), todayStart.getMonth() - 11, 1);
+      const bounds = createHomeMonthUsageBounds(start, 12);
+      return {
+        range: "year",
+        unitNoun: "month",
+        bounds,
+        labels: bounds.map(boundsItem => new Date(boundsItem.minMs).toLocaleDateString(undefined, { month: "short" }))
+      };
+    }
+    if (range === "all") {
+      const datedRecords = records.filter(record => record.dateMs > 0);
+      const oldestMs = datedRecords.length ? Math.min(...datedRecords.map(record => record.dateMs)) : todayStart.getTime();
+      const oldest = new Date(oldestMs);
+      const spanMonths = (todayStart.getFullYear() - oldest.getFullYear()) * 12 + (todayStart.getMonth() - oldest.getMonth());
+      if (spanMonths > 15) {
+        const years = Math.max(1, todayStart.getFullYear() - oldest.getFullYear() + 1);
+        const bounds = Array.from({ length: years }, (_, index) => {
+          const startYear = oldest.getFullYear() + index;
+          return { minMs: new Date(startYear, 0, 1).getTime(), maxMs: new Date(startYear + 1, 0, 1).getTime() };
+        });
+        return {
+          range: "all",
+          unitNoun: "year",
+          bounds,
+          labels: bounds.map(boundsItem => String(new Date(boundsItem.minMs).getFullYear()))
+        };
+      }
+      const months = Math.max(1, spanMonths + 1);
+      const bounds = createHomeMonthUsageBounds(new Date(oldest.getFullYear(), oldest.getMonth(), 1), months);
+      return {
+        range: "all",
+        unitNoun: "month",
+        bounds,
+        labels: bounds.map(boundsItem => new Date(boundsItem.minMs).toLocaleDateString(undefined, { month: "short" }))
+      };
+    }
+    const latestMs = Math.max(...records.map(record => record.dateMs || 0), 0) || Date.now();
+    const anchorStart = new Date(latestMs);
+    anchorStart.setHours(0, 0, 0, 0);
+    const windowStart = new Date(anchorStart);
+    windowStart.setDate(windowStart.getDate() - 6);
+    const bounds = createHomeDayUsageBounds(windowStart, 7);
+    return {
+      range: "7d",
+      unitNoun: "day",
+      bounds,
+      labels: bounds.map(boundsItem => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date(boundsItem.minMs).getDay()])
+    };
+  }
+
+  function getHomeUsageBuckets(plan, records, metric) {
+    return plan.bounds.map(bounds => records.reduce((sum, record) => {
+      if (!record.dateMs || record.dateMs < bounds.minMs || record.dateMs >= bounds.maxMs) return sum;
+      if (metric === "duration") return sum + getHomeRecordDurationMs(record);
+      if (metric === "storage") return sum + getHomeRecordFileSizeBytes(record);
+      return sum + 1;
+    }, 0));
+  }
+
+  function getHomeUsagePeakDetail(series, plan) {
+    const peak = Math.max(0, ...series);
+    if (peak <= 0) return "No peak yet";
+    const index = series.indexOf(peak);
+    return `${plan.labels[index] || `Bucket ${index + 1}`} peaked at ${formatHomeCompactNumber(peak)}`;
   }
 
   function createHomeUsageMetric(input) {
@@ -290,17 +391,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
     return card;
   }
 
-  function getHomePeakDay(series, records, startDate = getHomeUsageStartDate(records)) {
-    const peak = Math.max(0, ...series);
-    if (peak <= 0) return "No peak yet";
-    const index = series.indexOf(peak);
-    const peakDate = new Date(startDate);
-    peakDate.setDate(peakDate.getDate() + index);
-    const label = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][peakDate.getDay()] || "Day";
-    return label + " peaked at " + formatHomeCompactNumber(peak);
-  }
-
-  function renderHomeUsageActivityChart(records, filter, startDate) {
+  function renderHomeUsageActivityChart(records, filter, plan) {
     const container = document.getElementById("lazydev-home-activity-chart");
     if (!container || typeof renderLazydevHomeUsageChart !== "function") {
       return;
@@ -313,18 +404,13 @@ function createDashboardAiStudioLayoutHelpers(input) {
       { key: "video", label: "Video" }
     ];
     const visibleKinds = filter === "all" ? mediaKinds : mediaKinds.filter(entry => entry.key === filter);
-    const labels = Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + index);
-      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
-    });
     renderLazydevHomeUsageChart(container, {
-      labels,
+      labels: plan.labels,
       series: visibleKinds.map(kind => ({
         ...kind,
-        values: getHomeUsageBuckets(records.filter(record => record.kind === kind.key), "count", startDate)
+        values: getHomeUsageBuckets(plan, records.filter(record => record.kind === kind.key), "count")
       })),
-      accessibleLabel: (filter === "all" ? "All media" : visibleKinds[0]?.label || "Media") + " generation activity for the recent seven days"
+      accessibleLabel: (filter === "all" ? "All media" : visibleKinds[0]?.label || "Media") + " generation activity for " + homeChartRanges[plan.range].accessibleRange
     });
   }
 
@@ -334,26 +420,33 @@ function createDashboardAiStudioLayoutHelpers(input) {
       return;
     }
     clearChildren(container);
+    const plan = buildHomeUsagePlan(normalizeHomeChartRange(studioHomeChartRange), records);
     const rangeLabel = document.getElementById("lazydev-home-usage-range");
     if (rangeLabel) {
-      rangeLabel.textContent = records.length > 0 ? "Recent 7 days" : "No activity yet";
+      rangeLabel.textContent = records.length > 0 ? homeChartRanges[plan.range].rangeLabel : "No activity yet";
     }
-    const filteredRecords = getHomeFilteredRecords(records, "usage");
+    const rangeSelect = document.getElementById("lazydev-home-chart-range");
+    if (rangeSelect && rangeSelect.value !== plan.range) {
+      rangeSelect.value = plan.range;
+    }
+    const windowStartMs = plan.bounds[0].minMs;
+    const windowEndMs = plan.bounds[plan.bounds.length - 1].maxMs;
+    const filteredRecords = getHomeFilteredRecords(records, "usage").filter(record => record.dateMs >= windowStartMs && record.dateMs < windowEndMs);
     const filter = normalizeHomeFilter(studioHomeFilters.usage);
-    const usageStartDate = getHomeUsageStartDate(records);
-    const generationSeries = getHomeUsageBuckets(filteredRecords, "count", usageStartDate);
-    const durationSeries = getHomeUsageBuckets(filteredRecords, "duration", usageStartDate);
+    const generationSeries = getHomeUsageBuckets(plan, filteredRecords, "count");
+    const durationSeries = getHomeUsageBuckets(plan, filteredRecords, "duration");
     const totalDurationMs = filteredRecords.reduce((sum, record) => sum + getHomeRecordDurationMs(record), 0);
     const timedRecords = filteredRecords.filter(record => getHomeRecordDurationMs(record) > 0);
     const totalStorageBytes = filteredRecords.reduce((sum, record) => sum + getHomeRecordFileSizeBytes(record), 0);
-    const activeDays = generationSeries.filter(value => value > 0).length;
-    const averagePerActiveDay = activeDays > 0 ? filteredRecords.length / activeDays : 0;
+    const activeBuckets = generationSeries.filter(value => value > 0).length;
+    const unitNoun = plan.unitNoun === "day" ? "Day" : plan.unitNoun.charAt(0).toUpperCase() + plan.unitNoun.slice(1);
+    const averagePerActiveBucket = activeBuckets > 0 ? filteredRecords.length / activeBuckets : 0;
     const latestRecord = filteredRecords[0] || null;
     container.append(
       createHomeUsageMetric({
         label: "Generations",
         value: formatHomeCompactNumber(filteredRecords.length),
-        detail: activeDays > 0 ? activeDays + " active day" + (activeDays === 1 ? "" : "s") + " in range" : "No recent generations",
+        detail: activeBuckets > 0 ? activeBuckets + " active " + unitNoun.toLowerCase() + (activeBuckets === 1 ? "" : "s") + " in range" : "No recent generations",
         series: generationSeries,
         styleKey: "generations"
       }),
@@ -365,9 +458,9 @@ function createDashboardAiStudioLayoutHelpers(input) {
         styleKey: "duration"
       }),
       createHomeUsageMetric({
-        label: "Avg / Active Day",
-        value: averagePerActiveDay > 0 ? averagePerActiveDay.toFixed(averagePerActiveDay >= 10 ? 0 : 1).replace(/\.0$/, "") : "0",
-        detail: getHomePeakDay(generationSeries, filteredRecords, usageStartDate),
+        label: "Avg / Active " + unitNoun,
+        value: averagePerActiveBucket > 0 ? averagePerActiveBucket.toFixed(averagePerActiveBucket >= 10 ? 0 : 1).replace(/\.0$/, "") : "0",
+        detail: getHomeUsagePeakDetail(generationSeries, plan),
         series: generationSeries,
         styleKey: "velocity"
       }),
@@ -376,7 +469,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
         label: "Known Storage",
         value: formatHomeStorage(totalStorageBytes),
         detail: totalStorageBytes > 0 ? "From records with file-size metadata" : "Waiting for size metadata",
-        series: getHomeUsageBuckets(filteredRecords, "storage", usageStartDate),
+        series: getHomeUsageBuckets(plan, filteredRecords, "storage"),
         styleKey: "storage"
       }),
       createHomeUsageMetric({
@@ -387,7 +480,7 @@ function createDashboardAiStudioLayoutHelpers(input) {
         styleKey: "latest"
       })
     );
-    renderHomeUsageActivityChart(records, filter, usageStartDate);
+    renderHomeUsageActivityChart(records, filter, plan);
   }
 
   function selectHomeMediaRecord(record) {
@@ -656,6 +749,20 @@ function createDashboardAiStudioLayoutHelpers(input) {
   }
 
   function bindLazyDevHomeFilters() {
+    const chartRangeSelect = document.getElementById("lazydev-home-chart-range");
+    if (chartRangeSelect && !chartRangeSelect.hasAttribute("data-lazydev-bound")) {
+      chartRangeSelect.setAttribute("data-lazydev-bound", "true");
+      chartRangeSelect.value = studioHomeChartRange;
+      chartRangeSelect.addEventListener("change", () => {
+        studioHomeChartRange = normalizeHomeChartRange(chartRangeSelect.value);
+        try {
+          window.localStorage.setItem(homeChartRangeStorageKey, studioHomeChartRange);
+        } catch {
+          /* Ignore storage failures and keep the in-memory selection. */
+        }
+        renderStudioHome();
+      });
+    }
     document.addEventListener("click", event => {
       const button = event.target instanceof Element ? event.target.closest("[data-lazydev-home-filter-scope][data-lazydev-home-filter]") : null;
       if (!button) return;

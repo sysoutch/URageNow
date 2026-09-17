@@ -330,3 +330,11 @@ body[data-dashboard-sidebar-externalized="true"] .side-panel {
     min-height: 720px;
   }
 }
+
+.field-help { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+.field-check { display: flex; align-items: center; gap: 8px; min-height: 30px; color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; }
+.field-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: #8fd36a; cursor: pointer; }
+
+#resetViewButton { margin-top: 2px; min-height: 30px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: var(--muted); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+#resetViewButton:hover { border-color: rgba(143, 211, 106, 0.45); color: #fff; background: rgba(143, 211, 106, 0.12); }

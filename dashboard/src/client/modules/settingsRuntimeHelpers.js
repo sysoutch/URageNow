@@ -392,12 +392,22 @@ function createDashboardSettingsRuntimeHelpers(input) {
   }
   async function saveMessengerRuntimeSettingsFromUi() {
     const messenger = normalizeMessenger(state.selectedMessenger);
+    const autostartSetting = messenger + "RuntimeAutostart";
+    const autostartEnabled = readCheckedValue("messenger-runtime-autostart-checkbox");
     const saved = await request("/api/settings", {
       messengerSharedSecretsPath: readTextInputValue("messenger-runtime-shared-path-input"),
-      [messenger + "RuntimeAutostart"]: readCheckedValue("messenger-runtime-autostart-checkbox")
+      [autostartSetting]: autostartEnabled
     });
-    applyGlobalSettingsToUi(saved);
-    return saved;
+    if (saved?.[autostartSetting] !== autostartEnabled) {
+      throw new Error("The dashboard did not confirm the " + messenger + " autostart preference. It was not saved.");
+    }
+    const currentState = await request("/api/state");
+    const persistedSettings = currentState?.settings;
+    if (persistedSettings?.[autostartSetting] !== autostartEnabled) {
+      throw new Error("The " + messenger + " autostart preference was not persisted. It remains " + (persistedSettings?.[autostartSetting] === true ? "enabled" : "disabled") + ".");
+    }
+    applyGlobalSettingsToUi(persistedSettings);
+    return persistedSettings;
   }
   async function saveDiscordRuntimeAutostartFromSettings() {
     const enabled = readCheckedValue("settings-discord-runtime-autostart");

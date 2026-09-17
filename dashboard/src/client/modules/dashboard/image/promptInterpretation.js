@@ -3,6 +3,7 @@ function createDashboardImagePromptInterpretation(input) {
     value: "",
     previewUrl: "",
     fileName: "",
+    sources: [],
     detailMode: "normal"
   };
 
@@ -11,7 +12,8 @@ function createDashboardImagePromptInterpretation(input) {
   }
 
   function renderSource() {
-    const hasSource = Boolean(sourceState.value);
+    const sourceCount = sourceState.sources.length;
+    const hasSource = sourceCount > 0;
     const preview = document.getElementById("image-prompt-interpret-preview-image");
     const empty = document.getElementById("image-prompt-interpret-preview-empty");
     const name = document.getElementById("image-prompt-interpret-preview-name");
@@ -24,11 +26,15 @@ function createDashboardImagePromptInterpretation(input) {
       preview.src = hasSource ? sourceState.previewUrl : "";
     }
     empty?.classList.toggle("hidden", hasSource);
-    if (name) name.textContent = hasSource ? (sourceState.fileName || "Uploaded source image") : "Waiting for uploaded image.";
+    if (name) name.textContent = hasSource
+      ? (sourceCount === 1 ? (sourceState.fileName || "Uploaded source image") : (sourceCount + " source images selected"))
+      : "Waiting for uploaded image.";
     if (detail) {
       detail.textContent = hasSource
-        ? "Ready to replace the prompt field with a vision-generated prompt."
-        : "Choose an image from disk, then replace the prompt box with a vision-generated prompt.";
+        ? (sourceCount === 1
+          ? "Ready to replace the prompt field with a vision-generated prompt."
+          : "Ready to create separate prompts by default, or one combined prompt when selected.")
+        : "Choose one or more images from disk, then replace the prompt box with vision-generated prompts.";
     }
     input.setElementVisible(clearButton, hasSource);
     input.setElementVisible(aspectButton, hasSource);
@@ -40,20 +46,30 @@ function createDashboardImagePromptInterpretation(input) {
     sourceState.value = "";
     sourceState.previewUrl = "";
     sourceState.fileName = "";
+    sourceState.sources = [];
     const fileInput = document.getElementById("image-interpret-source-file");
     if (fileInput) fileInput.value = "";
     renderSource();
   }
 
-  async function setSourceFromFile(file) {
-    if (!file || !(file.type || "").startsWith("image/")) throw new Error("Please choose an image file.");
-    const dataUrl = await input.readFileAsDataUrl(file);
-    sourceState.value = dataUrl;
-    sourceState.previewUrl = dataUrl;
-    sourceState.fileName = file.name || "source-image.png";
+  async function setSourcesFromFiles(files) {
+    const imageFiles = Array.from(files || []).filter(file => file && (file.type || "").startsWith("image/"));
+    if (!imageFiles.length) throw new Error("Please choose at least one image file.");
+    const sources = await Promise.all(imageFiles.slice(0, 8).map(async file => ({
+      value: await input.readFileAsDataUrl(file),
+      fileName: file.name || "source-image.png"
+    })));
+    const primary = sources[0];
+    sourceState.sources = sources;
+    sourceState.value = primary.value;
+    sourceState.previewUrl = primary.value;
+    sourceState.fileName = primary.fileName;
     renderSource();
   }
 
+  async function setSourceFromFile(file) {
+    await setSourcesFromFiles([file]);
+  }
   function loadSourceDimensions() {
     const source = String(sourceState.previewUrl || sourceState.value || "").trim();
     if (!source) return Promise.reject(new Error("Upload a source image first."));
@@ -153,15 +169,19 @@ function createDashboardImagePromptInterpretation(input) {
   }
 
   async function interpretSource() {
-    const imageInput = String(sourceState.value || "").trim();
-    if (!imageInput) throw new Error("Upload a source image first.");
+    const imageInputs = sourceState.sources.map(source => String(source.value || "").trim()).filter(Boolean);
+    const imageInput = imageInputs[0] || "";
+    if (!imageInput) throw new Error("Upload at least one source image first.");
     if (document.getElementById("image-identify-objects-toggle")?.checked === true) {
       return input.interpretObjects();
     }
     input.setGenerationStatus("Interpreting source image with LLM...");
     const payload = await input.request("/api/image-interpret-prompt", {
       imageInput,
+      imageInputs,
       imageFileNameHint: sourceState.fileName || undefined,
+      imageFileNameHints: sourceState.sources.map(source => source.fileName),
+      combineSources: document.getElementById("image-interpret-source-mode")?.value === "combine",
       detailMode: sourceState.detailMode || "normal",
       direction: String(document.getElementById("image-interpret-direction-input")?.value || "").trim() || undefined
     });
@@ -180,7 +200,7 @@ function createDashboardImagePromptInterpretation(input) {
       autoPromptToggle.dispatchEvent(new Event("change", { bubbles: true }));
     }
     input.setGenerationStatus("Prompt updated from source image.");
-    input.setOutput("Image prompt replaced from " + (sourceState.fileName || "source image") + ".");
+    input.setOutput("Image prompt replaced from " + (sourceState.sources.length > 1 ? sourceState.sources.length + " source images" : (sourceState.fileName || "source image")) + ".");
     return prompt;
   }
 
@@ -195,6 +215,7 @@ function createDashboardImagePromptInterpretation(input) {
     renderSource,
     setDetailMode,
     setSourceFromClipboardEvent,
-    setSourceFromFile
+    setSourceFromFile,
+    setSourcesFromFiles
   };
 }

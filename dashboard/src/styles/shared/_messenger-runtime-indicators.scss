@@ -1,0 +1,45 @@
+// Runtime state belongs to the messenger navigation, not the selected view.
+// The marker is absolutely positioned so it never changes the compact rail grid.
+.sidebar-messenger-button,
+.rail-resource-section-button[data-messenger] {
+  position: relative;
+}
+
+.messenger-runtime-running-indicator {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 10px;
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid color-mix(in srgb, #57e39b 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, #57e39b 18%, var(--panel, #101622));
+  color: #75f0ae;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #57e39b 10%, transparent), 0 0 12px color-mix(in srgb, #57e39b 36%, transparent);
+  font-size: 10px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.messenger-runtime-running-indicator .bi {
+  display: block;
+  line-height: 1;
+}
+
+.sidebar-messenger-button.is-runtime-running .sidebar-messenger-copy strong {
+  padding-right: 24px;
+}
+
+body:not(.studio-rail-expanded) .rail-resource-section-button[data-messenger] .messenger-runtime-running-indicator {
+  top: 9px;
+  right: 8px;
+  width: 14px;
+  height: 14px;
+  transform: none;
+  font-size: 8px;
+}
+

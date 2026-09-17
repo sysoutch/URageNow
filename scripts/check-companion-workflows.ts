@@ -84,7 +84,7 @@ try {
     }
   } as unknown as DashboardDependencies;
 
-  async function call(pathname: string, body: Record<string, unknown> = {}, method = "POST"): Promise<CapturedResponse> {
+  async function call(pathname: string, body: Record<string, unknown> = {}, method = "POST", routeDependencies = dependencies): Promise<CapturedResponse> {
     const bytes = Buffer.from(JSON.stringify(body));
     const request = {
       method,
@@ -106,7 +106,7 @@ try {
       },
       setHeader() {}
     } as unknown as ServerResponse;
-    assert.equal(await routes.handleAuthenticatedCompanionRequest(request, response, new URL(`http://localhost${pathname}`), dependencies), true);
+    assert.equal(await routes.handleAuthenticatedCompanionRequest(request, response, new URL(`http://localhost${pathname}`), routeDependencies), true);
     return {status, payload: responseBody ? JSON.parse(responseBody) : {}};
   }
 
@@ -129,7 +129,10 @@ try {
     return {status, body: responseBody};
   }
 
-  assert.equal((await call("/api/companion/workflows/chat", {prompt: "Hello"})).status, 403);
+  const deniedChat = await call("/api/companion/workflows/chat", {prompt: "Hello"});
+  assert.equal(deniedChat.status, 403);
+  assert.equal(deniedChat.payload.code, "companion_permission_denied");
+  assert.match(String(deniedChat.payload.error || ""), /Chat Studio/);
   assert.equal((await call("/api/companion/tools", {}, "GET")).status, 403);
   const initial = await access.getCompanionAccessPolicy();
   await access.updateCompanionDefaultPermissions({
@@ -176,6 +179,18 @@ try {
   });
   assert.equal(interpreted.status, 200);
   assert.match(String(interpreted.payload.prompt || ""), /2 reference images as parts/);
+  const unsupportedVisionDependencies = {
+    ...dependencies,
+    askVisionModel: async () => {
+      throw new Error('LM Studio request for model "llama-3.2-3b-instruct" failed: the model does not support image inputs.');
+    }
+  } as DashboardDependencies;
+  const unsupportedVision = await call("/api/companion/workflows/image/interpret", {
+    images: [{id: "image-1", fileName: "image-1.png"}]
+  }, "POST", unsupportedVisionDependencies);
+  assert.equal(unsupportedVision.status, 422);
+  assert.equal(unsupportedVision.payload.code, "vision_model_required");
+  assert.match(String(unsupportedVision.payload.error || ""), /vision-capable model/);
   const improved = await call("/api/companion/workflows/image/improve-prompt", {
     prompt: "small robot", instructions: "make the lighting cinematic"
   });

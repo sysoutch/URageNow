@@ -120,3 +120,15 @@ export function renderToolsCategoryIcon(categoryId: string): string {
 export function renderToolsSearchIcon(): string {
   return renderBootstrapIcon(toolsBootstrapIconNames.search);
 }
+
+export type GameEngineKey = "unity" | "godot" | "unreal";
+
+const gameEngineLogoPaths: Record<GameEngineKey, string> = {
+  unity: "/assets/game-engines/unity.svg",
+  godot: "/assets/game-engines/godot.svg",
+  unreal: "/assets/game-engines/unreal.svg"
+};
+
+export function renderGameEngineLogo(engine: GameEngineKey): string {
+  return `<img class="game-engine-logo" src="${gameEngineLogoPaths[engine]}" alt="" width="18" height="18">`;
+}

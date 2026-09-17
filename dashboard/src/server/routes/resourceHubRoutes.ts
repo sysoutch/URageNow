@@ -66,6 +66,7 @@ import {
 import {
   addGameEngineProject,
   browseForProjectFolder,
+  fetchGameEngineProjects,
   fetchUnityHubProjects,
   launchGameEngineProject,
   listGameEngineProjects,
@@ -90,6 +91,8 @@ function readBoolean(value: unknown, fallback: boolean): boolean {
 function readImportedToolType(value: unknown): ImportedToolType | null {
   return value === "web" || value === "desktop" ? value : null;
 }
+
+function readGameEngineId(value: unknown): "unity" | "godot" | "unreal" | null { return value === "unity" || value === "godot" || value === "unreal" ? value : null; }
 
 function readImportedAssetPlatform(value: unknown): "unity" | "godot" | "unreal" | null {
   return isImportedAssetPlatform(value) ? value : null;
@@ -647,22 +650,27 @@ async function handleGetApiGameEngineProjects(_request: IncomingMessage, respons
   sendJson(response, 200, await listGameEngineProjects({ refreshUnityHub: url.searchParams.get("refreshUnityHub") === "true" }));
 }
 
-async function handlePostApiGameEngineProjectsFetchUnityHub(_request: IncomingMessage, response: ServerResponse): Promise<void> {
+async function handlePostApiGameEngineProjectsFetchUnityHub(request: IncomingMessage, response: ServerResponse): Promise<void> {
+  const body = await parseJsonBody(request) as Record<string, unknown>;
+  const engine = readGameEngineId(body.engine) || "unity";
   try {
-    sendJson(response, 200, await fetchUnityHubProjects());
+    sendJson(response, 200, await fetchGameEngineProjects(engine));
   } catch (error) {
-    sendJson(response, 400, { error: error instanceof Error ? error.message : "Failed to read Unity Hub projects." });
+    sendJson(response, 400, { error: error instanceof Error ? error.message : "Failed to fetch game engine projects." });
   }
 }
 
-async function handlePostApiGameEngineProjectsBrowse(_request: IncomingMessage, response: ServerResponse): Promise<void> {
+async function handlePostApiGameEngineProjectsBrowse(request: IncomingMessage, response: ServerResponse): Promise<void> {
   try {
-    const projectPath = await browseForProjectFolder();
+    const body = await parseJsonBody(request) as Record<string, unknown>;
+    const engine = readGameEngineId(body.engine);
+    if (!engine) throw new Error("A supported game engine is required.");
+    const projectPath = await browseForProjectFolder(engine);
     if (!projectPath) {
       sendJson(response, 200, { canceled: true });
       return;
     }
-    sendJson(response, 200, { projectPath, ...(await addGameEngineProject(projectPath, "manual")) });
+    sendJson(response, 200, { projectPath, ...(await addGameEngineProject(projectPath, engine, "manual")) });
   } catch (error) {
     sendJson(response, 400, { error: error instanceof Error ? error.message : "Failed to browse for a project." });
   }
@@ -676,7 +684,9 @@ async function handlePostApiGameEngineProjectsScan(request: IncomingMessage, res
     return;
   }
   try {
-    sendJson(response, 200, await scanGameEngineProjects(rootPath, readBoolean(body.recursive, false)));
+    const engine = readGameEngineId(body.engine);
+    if (!engine) throw new Error("A supported game engine is required.");
+    sendJson(response, 200, await scanGameEngineProjects(rootPath, engine, readBoolean(body.recursive, false)));
   } catch (error) {
     sendJson(response, 400, { error: error instanceof Error ? error.message : "Failed to scan for projects." });
   }

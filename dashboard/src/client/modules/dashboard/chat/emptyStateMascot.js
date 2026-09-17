@@ -4,7 +4,7 @@ function createDashboardChatEmptyState() {
   empty.setAttribute("aria-label", "Empty conversation");
   empty.innerHTML = `
     <div class="ask-chat-empty-badge" aria-hidden="true">
-      <i class="bi bi-emoji-smile-fill ask-chat-empty-mascot"></i>
+      <i class="bi bi-emoji-sad-fill ask-chat-empty-mascot"></i>
     </div>
     <p>Wow, such empty!</p>
   `;

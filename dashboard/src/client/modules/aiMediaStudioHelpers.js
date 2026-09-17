@@ -127,6 +127,44 @@ function createDashboardAiMediaStudioHelpers(input) {
     setupSplitPanes: setupStudioSidebarSplitPanes
   });
   const startStudioSidebarFoldoutRefreshes = studioSidebarFoldouts.start;
+  const pastedModelOverlay = typeof createDashboardPastedModelOverlay === "function"
+    ? createDashboardPastedModelOverlay({
+        request: (route, body) => input.request(route, body),
+        readFileAsDataUrl: input.readFileAsDataUrl,
+        setOutput: input.setOutput,
+        onUseAsSource: files => {
+          document.querySelector("[data-model3d-edit-target='upload']")?.click();
+          addModel3dEditUploadFiles(files);
+        },
+        onImported: async () => {
+          await input.loadModel3dHistory?.();
+          if (typeof input.refreshState === "function") await input.refreshState();
+        }
+      })
+    : null;
+  const pastedImageOverlay = typeof createDashboardPastedImageOverlay === "function"
+    ? createDashboardPastedImageOverlay({
+        state: input.state,
+        request: (route, body) => input.request(route, body),
+        setOutput: input.setOutput,
+        buildAbsoluteDashboardUrl: input.buildAbsoluteDashboardUrl,
+        getGeneratedImageFileUrl: input.getGeneratedImageFileUrl,
+        readFileAsDataUrl: input.readFileAsDataUrl,
+        onUseAsSource: async files => {
+          const fileList = Array.from(files || []);
+          if (!fileList.length) return;
+          await imageEditSourceWorkspace.addFiles(fileList);
+          // Mirror the image-interpret-source-paste-button path so the pasted image also appears in the prompt interpretation preview.
+          await setImagePromptInterpretSourceFromFiles(fileList);
+        },
+        onImportedToHistory: async importedRecord => {
+          await loadImageHistory(importedRecord?.id);
+          if (typeof input.refreshState === "function") await input.refreshState();
+        },
+        refreshEditSourcePoolOptions: () => imageEditSourceWorkspace.refreshOptions()
+      })
+    : null;
+
   const imageEditSourceWorkspace = createDashboardImageEditSourceWorkspace({
     appState: input.state,
     bindSortableItem,
@@ -138,6 +176,7 @@ function createDashboardAiMediaStudioHelpers(input) {
     getClipboardImageFiles,
     getImagePoolById: poolId => input.getImagePoolById?.(poolId) || null,
     moveListEntryById,
+    ...(typeof createDashboardPastedImageOverlay === "function" ? {onPastedImages: files => pastedImageOverlay.show(files)} : {}),
     readFileAsDataUrl: input.readFileAsDataUrl,
     resolveImagePoolPreviewUrl: input.resolveImagePoolPreviewUrl,
     setOutput: input.setOutput,
@@ -296,7 +335,8 @@ function createDashboardAiMediaStudioHelpers(input) {
     renderSource: renderImagePromptInterpretSource,
     setDetailMode: setImagePromptInterpretDetailMode,
     setSourceFromClipboardEvent: setImagePromptInterpretSourceFromClipboardEvent,
-    setSourceFromFile: setImagePromptInterpretSourceFromFile
+    setSourceFromFile: setImagePromptInterpretSourceFromFile,
+    setSourcesFromFiles: setImagePromptInterpretSourceFromFiles
   } = imagePromptInterpretation;
   const imageHistoryInitialRenderLimit = 80;
   const videoHistoryInitialRenderLimit = 48;
@@ -1151,7 +1191,10 @@ function createDashboardAiMediaStudioHelpers(input) {
       ? Math.round(width) + " x " + Math.round(height)
       : "Size: unknown";
     const formatValue = value => value === null || value === undefined || value === "" ? "unknown" : String(value);
-    setText("image-preview-metadata-size", size);
+    const sourceCount = Number(getImageRecordMetadata(record).sourceImageCount || 0);
+    setText("image-preview-metadata-size", sourceCount > 0
+      ? size + " ? " + sourceCount + " source image" + (sourceCount === 1 ? "" : "s")
+      : size);
     setText("image-preview-metadata-steps", "Steps: " + formatValue(record?.steps));
     setText("image-preview-metadata-cfg", "CFG: " + formatValue(record?.cfg));
     setText("image-preview-metadata-seed", "Seed: " + formatValue(record?.seed));
@@ -3732,7 +3775,7 @@ function createDashboardAiMediaStudioHelpers(input) {
         return;
       }
       try {
-        await setImagePromptInterpretSourceFromFile(file);
+        await setImagePromptInterpretSourceFromFiles(Array.from(event.target?.files || []));
         input.setOutput("Loaded " + (file.name || "source image") + " for prompt interpretation.");
       } catch (error) {
         input.setOutput("Prompt source upload failed: " + ((error && error.message) || "Unknown error"));
@@ -3825,6 +3868,20 @@ function createDashboardAiMediaStudioHelpers(input) {
     });
     bind("model3d-edit-batch-enabled", "change", () => {
       renderModel3dEditUploadSourceList();
+    });
+    const showPastedModels = event => {
+      const clipboard = event.clipboardData;
+      const files = [...Array.from(clipboard?.files || []), ...Array.from(clipboard?.items || []).filter(item => item?.kind === "file").map(item => item.getAsFile?.())]
+        .filter(file => file && /\.(glb|gltf|fbx|obj|stl|3mf|ply)$/i.test(String(file.name || "")));
+      if (!files.length || !pastedModelOverlay) return false;
+      event.preventDefault();
+      pastedModelOverlay.show(files);
+      return true;
+    };
+    bind("model3d-studio-card", "paste", showPastedModels);
+    document.addEventListener("paste", event => {
+      if (event.defaultPrevented || input.state.aiFocusedSectionId !== "model3d-studio-card") return;
+      showPastedModels(event);
     });
     bind("model3d-edit-select-all-button", "click", () => {
       setAllModel3dEditUploadSelections(true);
