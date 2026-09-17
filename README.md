@@ -112,6 +112,12 @@ Studio provides a server-backed handoff API for Tools and LLM integrations. The 
 
 The Studio Chat already uses the same server workflows to generate images, 3D models, audio, music, and video. An external LLM can call the matching authenticated generation endpoints from the manifest. 3D generation requires an image input, so text-to-3D integrations should generate or supply an image first.
 
+### Connect From Another Project
+
+A game, app, or LLM integration needs only a running URageNow release server; it does not need this repository. Configure that project's URageNow API base URL and authorization, then request `GET {baseUrl}/api/llm-tools` to discover the functions and their current schemas. The `.agents/skills/URageNow` folder can be copied into a project whose agent/IDE supports project-local skills.
+
+`http://127.0.0.1:<port>` works when the consuming project and URageNow run on the same computer. For another device, use a reachable server address and configure firewall, authorization, and browser CORS access as needed. Keep credentials in local environment/configuration files, not in the copied skill or application source.
+
 Tool pages use a shared bridge contract. A tool with custom import behavior implements its own receiver; otherwise, the shared generic receiver sends a queued file or text payload through a compatible native input and normal `input`/`change` events. Resource delivery is not arbitrary code execution: target tools validate and decide how to process the received resource.
 ## When You Need An Execution Worker
 

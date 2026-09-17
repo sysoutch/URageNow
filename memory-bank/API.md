@@ -190,6 +190,12 @@ _(Additional endpoints in messagingAndModelRoutes.ts handle workflow execution, 
 
 ---
 
+## Release-client and LLM integration
+
+External apps, games, and LLM adapters consume a running URageNow release; they do not require this source checkout. Each client configures a base URL and authorization, then reads `GET {baseUrl}/api/llm-tools` as the source of truth for available generation and tool-resource functions plus their current schemas. The portable agent instructions live at `.agents/skills/URageNow` and may be copied into a project that supports project-local skills.
+
+Use `POST /api/tool-resources` for persistent tool-to-tool handoffs and `GET /api/tool-resources?targetToolId=...` to read the target inbox. A resource is delivered only after the receiving tool imports it through its own normal input flow. `localhost` is same-machine only; remote consumers require a reachable server, firewall configuration, authorization, and, for browser clients, appropriate CORS policy. Never commit credentials into the copied skill or consuming project source.
+
 ## Authentication
 
 <!-- Document auth requirements if any routes require it -->
