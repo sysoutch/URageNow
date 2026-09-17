@@ -43,6 +43,8 @@
     "runtime:dev": "tsx watch runtime/dashboardRuntime.ts",
     "start:server": "scripts\\run-server.cmd start",
     "dev:server": "scripts\\run-server.cmd dev",
+    "start:api": "scripts\\run-api.cmd start",
+    "dev:api": "scripts\\run-api.cmd dev",
     "worker:start": "tsx workers/remote-worker/src/remoteWorker.ts",
     "worker:dev": "tsx watch workers/remote-worker/src/remoteWorker.ts",
     "start:dashboard": "scripts\\run-dashboard.cmd start",

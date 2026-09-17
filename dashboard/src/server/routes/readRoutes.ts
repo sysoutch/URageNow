@@ -1088,7 +1088,13 @@ async function handleGetApiVideoHistory(request: IncomingMessage, response: Serv
 
 async function handleGetApiGenerationJobs(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const limit = Number.parseInt(url.searchParams.get("limit") || "", 10);
-  sendJson(response, 200, await listGenerationJobs(Number.isFinite(limit) ? limit : undefined));
+  const jobId = url.searchParams.get("jobId")?.trim() || "";
+  const requestId = url.searchParams.get("requestId")?.trim() || "";
+  const kind = url.searchParams.get("kind")?.trim() || "";
+  const jobs = await listGenerationJobs(Number.isFinite(limit) ? limit : undefined);
+  sendJson(response, 200, jobs.filter(job => (!jobId || job.id === jobId)
+    && (!requestId || job.requestId === requestId)
+    && (!kind || job.kind === kind)));
   return;
 }
 

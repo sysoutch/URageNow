@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("main", "worker", "dashboard")]
+    [ValidateSet("main", "worker", "dashboard", "api")]
     [string]$Role = "main",
     [ValidateSet("store-token", "register", "start", "dev", "build", "check", "start-headless", "dev-headless")]
     [string]$Mode = "start",
@@ -153,6 +153,13 @@ function Apply-RoleRuntimeOverrides {
     )
     if ($ResolvedRole -eq "dashboard") {
         $env:DASHBOARD_ENABLED = "true"
+        $env:DASHBOARD_UI_ENABLED = "true"
+        return
+    }
+    if ($ResolvedRole -eq "api") {
+        $env:DASHBOARD_ENABLED = "true"
+        $env:DASHBOARD_UI_ENABLED = "false"
+        $env:URAGE_DISABLE_MESSENGER_AUTOSTART = "true"
         return
     }
     if ($ResolvedRole -eq "main" -and ($ResolvedMode -eq "start-headless" -or $ResolvedMode -eq "dev-headless")) {
@@ -172,7 +179,7 @@ Set-Location $repoRoot
 if ($Role -eq "worker" -and ($Mode -eq "store-token" -or $Mode -eq "register" -or $Mode -eq "start-headless" -or $Mode -eq "dev-headless")) {
     throw "Mode '$Mode' is only supported for the main bot role."
 }
-if ($Role -eq "dashboard" -and ($Mode -eq "store-token" -or $Mode -eq "register" -or $Mode -eq "start-headless" -or $Mode -eq "dev-headless")) {
+if (($Role -eq "dashboard" -or $Role -eq "api") -and ($Mode -eq "store-token" -or $Mode -eq "register" -or $Mode -eq "start-headless" -or $Mode -eq "dev-headless")) {
     throw "Mode '$Mode' is only supported for the main bot role."
 }
 if ($Role -eq "dashboard") {
@@ -233,6 +240,12 @@ switch ("$($Role):$($Mode)") {
     }
     "dashboard:dev" {
         Ensure-DashboardCss
+        Invoke-NpmScript -ScriptName "runtime:dev"
+    }
+    "api:start" {
+        Invoke-NpmScript -ScriptName "runtime:start"
+    }
+    "api:dev" {
         Invoke-NpmScript -ScriptName "runtime:dev"
     }
     "dashboard:build" {

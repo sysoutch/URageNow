@@ -175,6 +175,11 @@ export function buildToolApiSchema(): object {
         parameters: { type: "object", required: ["prompt"], properties: { prompt: { type: "string" }, imageDataUrl: { type: "string" }, imageFileName: { type: "string" }, seconds: { type: "number" }, width: { type: "number" }, height: { type: "number" } } }
       },
       {
+        name: "urage_list_generation_jobs", description: "Inspect existing generation jobs by request ID, job ID, or media kind. Generation POST endpoints wait for completion; do not resend a generation request to poll it.",
+        http: { method: "GET", path: "/api/generation-jobs?requestId={dashboardRequestId}" },
+        parameters: { type: "object", properties: { dashboardRequestId: { type: "string" }, jobId: { type: "string" }, kind: { type: "string", enum: ["image", "model3d", "audio", "music", "video"] }, limit: { type: "number" } } }
+      },
+      {
         name: "urage_list_tool_resources", description: "List resources waiting for a URage tool.",
         http: { method: "GET", path: "/api/tool-resources?targetToolId={targetToolId}" },
         parameters: { type: "object", required: ["targetToolId"], properties: { targetToolId: { type: "string" } } }

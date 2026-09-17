@@ -427,8 +427,13 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
         return;
       }
       const url = new URL(request.url, `http://${runtimeDependencies.host}:${runtimeDependencies.port}`);
+      const apiOnlyHost = !appConfig.dashboardUiEnabled;
+      if (apiOnlyHost && url.pathname !== "/health" && url.pathname !== "/ready" && !url.pathname.startsWith("/api/")) {
+        sendJson(response, 404, { error: "Not found" });
+        return;
+      }
       if (url.pathname === "/health") {
-        sendJson(response, 200, { ok: true, service: "dashboard" });
+        sendJson(response, 200, { ok: true, service: apiOnlyHost ? "api" : "dashboard" });
         return;
       }
       const companionClientAllowed = appConfig.dashboardExposeApi && isAllowedDashboardClient(request);
@@ -506,7 +511,7 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
         // can answer; capability outages remain visible without making /ready lie.
         sendJson(response, 200, {
           ok: true,
-          service: "dashboard",
+          service: apiOnlyHost ? "api" : "dashboard",
           degraded: unavailableCapabilities.length > 0,
           unavailableCapabilities,
           checks,
@@ -650,7 +655,7 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
   });
   const ready = listenServer(initialServer).then(() => {
     server = initialServer;
-    console.log(`Dashboard listening on ${getServerUrl(initialServer)}`);
+    console.log(`${appConfig.dashboardUiEnabled ? "Dashboard" : "API"} listening on ${getServerUrl(initialServer)}`);
     void startLanDiscovery();
     void startComfyUiRuntimeWhenConfigured().catch(error => {
       console.error(`Configured ComfyUI startup failed: ${error instanceof Error ? error.message : String(error)}`);

@@ -192,9 +192,13 @@ _(Additional endpoints in messagingAndModelRoutes.ts handle workflow execution, 
 
 ## Release-client and LLM integration
 
-External apps, games, and LLM adapters consume a running URageNow release; they do not require this source checkout. Each client configures a base URL and authorization, then reads `GET {baseUrl}/api/llm-tools` as the source of truth for available generation and tool-resource functions plus their current schemas. The portable agent instructions live at `.agents/skills/URageNow` and may be copied into a project that supports project-local skills.
+External apps, games, and LLM adapters consume a running URageNow release; they do not require this source checkout. The local default base URL is `http://127.0.0.1:4782`, but releases may override it with `DASHBOARD_PORT`; consumers use project/user configuration first, then directly confirm the selected URL with `/health` or `/api/llm-tools` and never scan ports. Each client configures a base URL and authorization, then reads `GET {baseUrl}/api/llm-tools` as the source of truth for available generation and tool-resource functions plus their current schemas. It invokes the release with direct HTTP requests, never Dashboard-page browser automation unless UI testing is explicitly requested. The portable skill provides a dependency-free Node 18+ helper for Windows, macOS, and Linux and retains PowerShell as a Windows alternative. The portable agent instructions live at `.agents/skills/URageNow` and may be copied into a project that supports project-local skills.
+
+Generation POST routes are synchronous and return their artifact on success; never replay one as polling. Callers that need recovery after a timeout send a unique `dashboardRequestId` and inspect `GET /api/generation-jobs?requestId=...`, which also supports `jobId`, `kind`, and `limit` filters.
 
 Use `POST /api/tool-resources` for persistent tool-to-tool handoffs and `GET /api/tool-resources?targetToolId=...` to read the target inbox. A resource is delivered only after the receiving tool imports it through its own normal input flow. `localhost` is same-machine only; remote consumers require a reachable server, firewall configuration, authorization, and, for browser clients, appropriate CORS policy. Never commit credentials into the copied skill or consuming project source.
+
+`npm run start:api` is the API-only profile. It reuses the Dashboard HTTP listener, route groups, authentication, and persistence while setting `DASHBOARD_UI_ENABLED=false`, disabling Dashboard/static-tool routes, and suppressing messenger autostart. It still exposes all existing `/api/*` capabilities, including the LLM manifest and persistent tool-resource handoff. `npm run start:server` is intentionally not an API host.
 
 ## Authentication
 

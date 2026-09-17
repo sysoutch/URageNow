@@ -186,6 +186,7 @@ export const appConfig = {
   whatsappAdminHost: optionalString("WHATSAPP_ADMIN_HOST", "127.0.0.1"),
   whatsappAdminPort: optionalNumber("WHATSAPP_ADMIN_PORT", 4793),
   dashboardEnabled: optionalBoolean("DASHBOARD_ENABLED", true),
+  dashboardUiEnabled: optionalBoolean("DASHBOARD_UI_ENABLED", true),
   dashboardPort: optionalNumber("DASHBOARD_PORT", 4782),
   dashboardBindHost: optionalString("DASHBOARD_BIND_HOST", "127.0.0.1"),
   dashboardPublicBaseUrl: optionalString("DASHBOARD_PUBLIC_BASE_URL", "http://127.0.0.1:4782"),

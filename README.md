@@ -110,13 +110,17 @@ Studio provides a server-backed handoff API for Tools and LLM integrations. The 
 - `GET /api/tool-resources?targetToolId=<id>` lists a tool inbox; `GET /api/tool-resources?resourceId=<id>` reads a queued resource.
 - `GET /api/llm-tools` returns the authenticated tool-calling manifest. It includes image, image-to-3D, audio, music, video, and tool-resource functions.
 
-The Studio Chat already uses the same server workflows to generate images, 3D models, audio, music, and video. An external LLM can call the matching authenticated generation endpoints from the manifest. 3D generation requires an image input, so text-to-3D integrations should generate or supply an image first.
+The Studio Chat already uses the same server workflows to generate images, 3D models, audio, music, and video. An external LLM can call the matching authenticated generation endpoints from the manifest. 3D generation requires an image input, so text-to-3D integrations should generate or supply an image first. Generation calls wait for their completed artifact; do not resend one to poll. For timeout recovery, send a unique `dashboardRequestId` and inspect `GET /api/generation-jobs?requestId=...`.
 
 ### Connect From Another Project
 
-A game, app, or LLM integration needs only a running URageNow release server; it does not need this repository. Configure that project's URageNow API base URL and authorization, then request `GET {baseUrl}/api/llm-tools` to discover the functions and their current schemas. The `.agents/skills/URageNow` folder can be copied into a project whose agent/IDE supports project-local skills.
+A game, app, or LLM integration needs only a running URageNow release server; it does not need this repository. Configure that project's URageNow API base URL and authorization, then request `GET {baseUrl}/api/llm-tools` to discover the functions and their current schemas. Call those endpoints with a normal HTTP client — do not launch a browser or use Playwright unless you are explicitly testing the Dashboard UI. The portable skill includes a dependency-free Node 18+ client for Windows, macOS, and Linux, plus a Windows PowerShell alternative. The `.agents/skills/URageNow` folder can be copied into a project whose agent/IDE supports project-local skills.
 
-`http://127.0.0.1:<port>` works when the consuming project and URageNow run on the same computer. For another device, use a reachable server address and configure firewall, authorization, and browser CORS access as needed. Keep credentials in local environment/configuration files, not in the copied skill or application source.
+`http://127.0.0.1:4782` is the default local API base URL; a release owner may change it with `DASHBOARD_PORT`. A consuming project should use its configured base URL when provided, otherwise confirm the default directly through `/health` or `/api/llm-tools` rather than scanning ports or opening the Dashboard page. `http://127.0.0.1:<port>` works when the consuming project and URageNow run on the same computer. For another device, use a reachable server address and configure firewall, authorization, and browser CORS access as needed. Keep credentials in local environment/configuration files, not in the copied skill or application source.
+
+### API-only host
+
+Use `npm run start:api` when another program needs the HTTP API but no Dashboard browser UI. It starts the same authenticated API routes, including `/api/llm-tools` and `/api/tool-resources`, without serving the Dashboard page, static tools, or auto-starting messengers. `npm run start:server` remains a separate headless runtime role and intentionally does not listen on the API port.
 
 Tool pages use a shared bridge contract. A tool with custom import behavior implements its own receiver; otherwise, the shared generic receiver sends a queued file or text payload through a compatible native input and normal `input`/`change` events. Resource delivery is not arbitrary code execution: target tools validate and decide how to process the received resource.
 ## When You Need An Execution Worker
