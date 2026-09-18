@@ -2270,6 +2270,8 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <div class="studio-toggle-grid image-quick-model-field image-quick-action-toggles">
                             <label class="toggle"><span>Use LLM for filename</span><input id="image-quick-action-model-filename" type="checkbox" checked></label>
                             <label class="toggle"><span>Use LLM for description</span><input id="image-quick-action-model-description" type="checkbox" checked></label>
+                            <label class="toggle"><span>Wait for LLM metadata before 3D generation</span><input id="image-quick-action-model-wait-metadata" type="checkbox" checked></label>
+                            <label class="toggle" id="image-quick-action-model-unload-field"><span>Unload LLM before 3D generation</span><input id="image-quick-action-model-unload-llm" type="checkbox" checked></label>
                             <label class="toggle"><span>Ask LLM for real height</span><input id="image-quick-action-model-scale" type="checkbox" checked></label>
                             <label class="toggle"><span>Create low-poly copy after</span><input id="image-quick-action-model-lowpoly" type="checkbox"></label>
                           </div>

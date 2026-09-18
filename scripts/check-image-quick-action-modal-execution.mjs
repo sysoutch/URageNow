@@ -25,6 +25,8 @@ const executionDelegate = mediaSource.slice(
 );
 assert.doesNotMatch(executionDelegate, /actionKey === "model3d"/);
 assert.match(executionDelegate, /imageQuickActionModalExecution\.execute\(\)/);
+assert.match(mediaSource, /metadataTiming\.value = waitForLlmMetadata \? "before" : "after"/);
+assert.match(mediaSource, /model3d-unload-llm-before-generate", waitForLlmMetadata/);
 
 let actionKey = "model3d";
 const calls = [];
@@ -43,6 +45,8 @@ const execution = runtime.createExecution({
 await execution.execute();
 assert.equal(calls[0][0], "model3d");
 assert.equal(calls[0][1].useLlmModelFileName, true);
+assert.equal(calls[0][1].waitForLlmMetadata, true);
+assert.equal(calls[0][1].unloadLlmBeforeGenerate, true);
 assert.equal(calls.at(-1)[0], "close");
 
 calls.length = 0;

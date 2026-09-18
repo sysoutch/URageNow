@@ -40,6 +40,8 @@ function createDashboardImageQuickActionModalExecution(dependencies) {
     return {
       useLlmModelFileName: document.getElementById("image-quick-action-model-filename")?.checked === true,
       useLlmModelDescription: document.getElementById("image-quick-action-model-description")?.checked === true,
+      waitForLlmMetadata: document.getElementById("image-quick-action-model-wait-metadata")?.checked !== false,
+      unloadLlmBeforeGenerate: document.getElementById("image-quick-action-model-unload-llm")?.checked !== false,
       askLlmForRealWorldHeightAndScale: document.getElementById("image-quick-action-model-scale")?.checked === true,
       createLowPolyAfterGeneration: document.getElementById("image-quick-action-model-lowpoly")?.checked === true,
       focusStudio: false

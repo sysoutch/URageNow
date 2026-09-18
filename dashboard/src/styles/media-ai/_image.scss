@@ -1055,6 +1055,9 @@
     border-radius: 10px;
     background: color-mix(in srgb, var(--panel) 76%, black 24%);
   }
+  .image-quick-action-toggles .toggle.is-disabled {
+    opacity: .55;
+  }
 
   .image-quick-action-preflight {
     padding: 10px 12px;

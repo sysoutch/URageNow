@@ -2541,6 +2541,13 @@ function createDashboardAiMediaStudioHelpers(input) {
     }
     setCheckboxValue("model3d-llm-filename", options?.useLlmModelFileName !== false);
     setCheckboxValue("model3d-llm-description", options?.useLlmModelDescription !== false);
+    const waitForLlmMetadata = options?.waitForLlmMetadata !== false;
+    const metadataTiming = document.getElementById("model3d-llm-metadata-timing");
+    if (metadataTiming) {
+      metadataTiming.value = waitForLlmMetadata ? "before" : "after";
+      metadataTiming.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    setCheckboxValue("model3d-unload-llm-before-generate", waitForLlmMetadata && options?.unloadLlmBeforeGenerate !== false);
     setCheckboxValue("model3d-auto-scale-real-height", options?.askLlmForRealWorldHeightAndScale === true);
     setCheckboxValue("model3d-create-lowpoly-after-generation", options?.createLowPolyAfterGeneration === true);
     if (options?.focusStudio !== false && typeof input.openAiSection === "function") {
@@ -2597,6 +2604,9 @@ function createDashboardAiMediaStudioHelpers(input) {
   }
   function syncImageQuickActionModeUi() {
     imageQuickActionModalPresentation.syncModeUi();
+  }
+  function syncImageQuickActionModelMetadataWaitUi() {
+    imageQuickActionModalPresentation.syncModelMetadataWaitUi();
   }
   function setImageQuickActionRunState(running) {
     imageQuickActionModalPresentation.setRunState(running);
@@ -4257,6 +4267,9 @@ function createDashboardAiMediaStudioHelpers(input) {
     }
     document.getElementById("image-quick-action-mode")?.addEventListener("change", () => {
       syncImageQuickActionModeUi();
+    });
+    document.getElementById("image-quick-action-model-wait-metadata")?.addEventListener("change", () => {
+      syncImageQuickActionModelMetadataWaitUi();
     });
     const imageRegenerateFromPromptButton = document.getElementById("image-regenerate-from-prompt-button");
     if (imageRegenerateFromPromptButton) {

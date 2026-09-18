@@ -47,6 +47,14 @@ function createDashboardImageQuickActionModalPresentation(dependencies) {
     document.getElementById(fieldId)?.classList.toggle("hidden", visible !== true);
   }
 
+  function syncModelMetadataWaitUi() {
+    const waitInput = document.getElementById("image-quick-action-model-wait-metadata");
+    const unloadField = document.getElementById("image-quick-action-model-unload-field");
+    const unloadInput = document.getElementById("image-quick-action-model-unload-llm");
+    const waiting = waitInput?.checked !== false;
+    if (unloadInput) unloadInput.disabled = !waiting;
+    unloadField?.classList.toggle("is-disabled", !waiting);
+  }
   function setModeOptions(options) {
     const selectNode = document.getElementById("image-quick-action-mode");
     if (!selectNode) {
@@ -221,6 +229,9 @@ function createDashboardImageQuickActionModalPresentation(dependencies) {
     setInputValue("image-quick-action-seed", "");
     setCheckboxValue("image-quick-action-model-filename", true);
     setCheckboxValue("image-quick-action-model-description", true);
+    setCheckboxValue("image-quick-action-model-wait-metadata", true);
+    setCheckboxValue("image-quick-action-model-unload-llm", true);
+    syncModelMetadataWaitUi();
     setCheckboxValue("image-quick-action-model-scale", true);
     setCheckboxValue("image-quick-action-model-lowpoly", false);
     modal.classList.remove("hidden");
@@ -252,6 +263,7 @@ function createDashboardImageQuickActionModalPresentation(dependencies) {
     getActionKey: () => state.actionKey,
     open,
     setRunState,
-    syncModeUi
+    syncModeUi,
+    syncModelMetadataWaitUi
   };
 }
