@@ -34,6 +34,8 @@ import {
 } from "../messagingAndModel/helpers.js";
 import { parseBase64DataUrl } from "../chatSkills/executionHelpers.js";
 import { buildToolApiSchema, createToolResource, getToolResource, listToolResources, readToolResourceFile, type ToolResourceKind } from "../tools/toolResourceInbox.js";
+import { invokeServerTool, ToolInvocationError } from "../tools/toolCapabilityRegistry.js";
+import { convertImageToPixelArt } from "../tools/pixelArtConverter.js";
 import { parseIdentifiedImageObjects, type IdentifiedImageObjectPrompt } from "../messagingAndModel/imageObjectIdentification.js";
 import { importWebsiteModelArchive } from "../model3d/websiteArchiveImport.js";
 import {getImageInterpretationFailure} from "../visionModelFailure.js";
@@ -1499,6 +1501,23 @@ async function handlePostApiImageIdentifyObjects(request: IncomingMessage, respo
   sendJson(response, 200, { objects, raw: objects.length > 0 ? undefined : raw });
   return;
 }
+async function handlePostApiToolInvoke(request: IncomingMessage, response: ServerResponse, _url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const body = await parseJsonBody(request);
+  const toolId = typeof body.toolId === "string" ? body.toolId.trim() : "";
+  const input = body.input && typeof body.input === "object" && !Array.isArray(body.input)
+    ? body.input as Record<string, unknown>
+    : null;
+  if (!toolId || !input) {
+    sendJson(response, 400, { error: "toolId and an object input are required." });
+    return;
+  }
+  try {
+    sendJson(response, 200, await invokeServerTool(toolId, input, dependencies));
+  } catch (error) {
+    const statusCode = error instanceof ToolInvocationError ? error.statusCode : 400;
+    sendJson(response, statusCode, { error: error instanceof Error ? error.message : "Tool invocation failed." });
+  }
+}
 async function handlePostApiImageImport(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
   const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
@@ -2227,6 +2246,7 @@ const dashboardMessagingAndModelRouteTable = createDashboardRouteTable([
   getRoute("/api/tool-resource-file", handleGetApiToolResourceFile),
   getRoute("/api/tool-resources", handleGetApiToolResources),
   postRoute("/api/tool-resources", handlePostApiToolResource),
+  postRoute("/api/tools/invoke", handlePostApiToolInvoke),
   postRoute("/api/game-engine-export", handlePostApiGameEngineExport),
   postRoute("/api/game-engine-export-status", handlePostApiGameEngineExportStatus),
   ...channelMessagingRouteDefinitions
