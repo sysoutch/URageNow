@@ -3,6 +3,7 @@ import path from "node:path";
 import { toolsRoot } from "@urage/server/config/repositoryPaths";
 import type { DashboardDependencies } from "../runtime/botBridge.js";
 import { convertImageToPixelArt } from "./pixelArtConverter.js";
+import { createAsciiArt, createNormalMap } from "./imageToolTransforms.js";
 
 export interface ServerToolDefinition {
   id: string;
@@ -71,7 +72,30 @@ const serverToolAdapters: ServerToolAdapter[] = [
       dependencies.runtimeState.recordAction("dashboard:pixel-art-converter", `Converted image ${imageId} to pixel art ${imported.id}.`);
       return imported;
     }
-  }
+  },
+  {
+    id: "art__normalmap-maker", title: "Normalmap Maker", description: "Create a tangent-space normal map from an existing URage image.",
+    inputSchema: { type: "object", required: ["imageId", "imageFileName"], properties: { imageId: { type: "string" }, imageFileName: { type: "string" }, strength: { type: "number", minimum: .1, maximum: 10 } } },
+    async invoke(input, dependencies) {
+      const imageId = requiredText(input, "imageId"); const imageFileName = requiredText(input, "imageFileName"); const strength = input.strength === undefined ? 2 : Number(input.strength);
+      if (!Number.isFinite(strength)) throw new ToolInvocationError(400, "strength must be a finite number.");
+      const converted = await createNormalMap((await dependencies.readGeneratedImageFile(imageId, imageFileName)).data, strength);
+      const sourceName = path.basename(imageFileName, path.extname(imageFileName)) || "image";
+      const imported = await dependencies.importGeneratedImage({ imageFileName: `${sourceName}-normal-map.png`, imageData: converted.data, prompt: `Normal map conversion of ${imageFileName}`, width: converted.width, height: converted.height, model: "Normalmap Maker", metadata: { sourceTool: "art__normalmap-maker", sourceImageId: imageId, sourceImageFileName: imageFileName, strength } });
+      dependencies.runtimeState.recordAction("dashboard:normalmap-maker", `Converted image ${imageId} to normal map ${imported.id}.`); return imported;
+    }
+  },
+  {
+    id: "art__image-to-ascii", title: "Image To Ascii", description: "Convert an existing URage image to ASCII text and a downloadable ASCII preview image.",
+    inputSchema: { type: "object", required: ["imageId", "imageFileName"], properties: { imageId: { type: "string" }, imageFileName: { type: "string" }, columns: { type: "number", minimum: 16, maximum: 160 } } },
+    async invoke(input, dependencies) {
+      const imageId = requiredText(input, "imageId"); const imageFileName = requiredText(input, "imageFileName"); const columns = input.columns === undefined ? 96 : Number(input.columns);
+      if (!Number.isFinite(columns)) throw new ToolInvocationError(400, "columns must be a finite number.");
+      const converted = await createAsciiArt((await dependencies.readGeneratedImageFile(imageId, imageFileName)).data, columns);
+      const sourceName = path.basename(imageFileName, path.extname(imageFileName)) || "image";
+      const imported = await dependencies.importGeneratedImage({ imageFileName: `${sourceName}-ascii.png`, imageData: converted.data, prompt: `ASCII conversion of ${imageFileName}`, width: converted.width, height: converted.height, model: "Image To Ascii", metadata: { sourceTool: "art__image-to-ascii", sourceImageId: imageId, sourceImageFileName: imageFileName, columns: converted.columns, rows: converted.rows } });
+      dependencies.runtimeState.recordAction("dashboard:image-to-ascii", `Converted image ${imageId} to ASCII ${imported.id}.`); return { ...imported, asciiText: converted.text, columns: converted.columns, rows: converted.rows };
+    }  }
 ];
 
 const serverToolById = new Map(serverToolAdapters.map(adapter => [adapter.id, adapter]));
