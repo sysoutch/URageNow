@@ -34,6 +34,17 @@ function optionalPixelSize(input: Record<string, unknown>): number | undefined {
   if (!Number.isFinite(value)) throw new ToolInvocationError(400, "pixelSize must be a finite number.");
   return Math.max(2, Math.min(256, Math.round(value)));
 }
+function asciiCharacterSet(input: Record<string, unknown>): "dense" | "blocks" | "detailed" | "classic" {
+  const value = input.characterSet === undefined ? "detailed" : requiredText(input, "characterSet");
+  if (!["dense", "blocks", "detailed", "classic"].includes(value)) throw new ToolInvocationError(400, "characterSet must be dense, blocks, detailed, or classic.");
+  return value as "dense" | "blocks" | "detailed" | "classic";
+}
+
+function asciiColorMode(input: Record<string, unknown>): "mono" | "color" | "green" {
+  const value = input.colorMode === undefined ? "color" : requiredText(input, "colorMode");
+  if (!["mono", "color", "green"].includes(value)) throw new ToolInvocationError(400, "colorMode must be mono, color, or green.");
+  return value as "mono" | "color" | "green";
+}
 
 const serverToolAdapters: ServerToolAdapter[] = [
   {
@@ -86,16 +97,52 @@ const serverToolAdapters: ServerToolAdapter[] = [
     }
   },
   {
-    id: "art__image-to-ascii", title: "Image To Ascii", description: "Convert an existing URage image to ASCII text and a downloadable ASCII preview image.",
-    inputSchema: { type: "object", required: ["imageId", "imageFileName"], properties: { imageId: { type: "string" }, imageFileName: { type: "string" }, columns: { type: "number", minimum: 16, maximum: 160 } } },
+    id: "art__image-to-ascii",
+    title: "Image To Ascii",
+    description: "Convert an existing URage image to detailed, color ASCII text and a downloadable PNG or animated GIF preview.",
+    inputSchema: {
+      type: "object",
+      required: ["imageId", "imageFileName"],
+      properties: {
+        imageId: { type: "string" },
+        imageFileName: { type: "string" },
+        columns: { type: "number", minimum: 16, maximum: 160, default: 100 },
+        characterSet: { type: "string", enum: ["dense", "blocks", "detailed", "classic"], default: "detailed" },
+        colorMode: { type: "string", enum: ["mono", "color", "green"], default: "color" }
+      }
+    },
     async invoke(input, dependencies) {
-      const imageId = requiredText(input, "imageId"); const imageFileName = requiredText(input, "imageFileName"); const columns = input.columns === undefined ? 96 : Number(input.columns);
+      const imageId = requiredText(input, "imageId");
+      const imageFileName = requiredText(input, "imageFileName");
+      const columns = input.columns === undefined ? 100 : Number(input.columns);
       if (!Number.isFinite(columns)) throw new ToolInvocationError(400, "columns must be a finite number.");
-      const converted = await createAsciiArt((await dependencies.readGeneratedImageFile(imageId, imageFileName)).data, columns);
+      const characterSet = asciiCharacterSet(input);
+      const colorMode = asciiColorMode(input);
+      const converted = await createAsciiArt((await dependencies.readGeneratedImageFile(imageId, imageFileName)).data, { columns, characterSet, colorMode });
       const sourceName = path.basename(imageFileName, path.extname(imageFileName)) || "image";
-      const imported = await dependencies.importGeneratedImage({ imageFileName: `${sourceName}-ascii.png`, imageData: converted.data, prompt: `ASCII conversion of ${imageFileName}`, width: converted.width, height: converted.height, model: "Image To Ascii", metadata: { sourceTool: "art__image-to-ascii", sourceImageId: imageId, sourceImageFileName: imageFileName, columns: converted.columns, rows: converted.rows } });
-      dependencies.runtimeState.recordAction("dashboard:image-to-ascii", `Converted image ${imageId} to ASCII ${imported.id}.`); return { ...imported, asciiText: converted.text, columns: converted.columns, rows: converted.rows };
-    }  }
+      const imported = await dependencies.importGeneratedImage({
+        imageFileName: `${sourceName}-ascii.${converted.extension}`,
+        imageData: converted.data,
+        prompt: `ASCII conversion of ${imageFileName}`,
+        width: converted.width,
+        height: converted.height,
+        model: "Image To Ascii",
+        metadata: {
+          sourceTool: "art__image-to-ascii",
+          sourceImageId: imageId,
+          sourceImageFileName: imageFileName,
+          columns: converted.columns,
+          rows: converted.rows,
+          characterSet,
+          colorMode,
+          frames: converted.frames,
+          format: converted.extension
+        }
+      });
+      dependencies.runtimeState.recordAction("dashboard:image-to-ascii", `Converted image ${imageId} to ASCII ${imported.id}.`);
+      return { ...imported, asciiText: converted.text, columns: converted.columns, rows: converted.rows, frames: converted.frames, format: converted.extension };
+    }
+  }
 ];
 
 const serverToolById = new Map(serverToolAdapters.map(adapter => [adapter.id, adapter]));

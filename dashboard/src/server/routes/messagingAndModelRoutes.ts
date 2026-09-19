@@ -3,7 +3,7 @@ import path from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { readAutomationTextSourceLine, type DashboardDependencies } from "../runtime/botBridge.js";
 import { toolsRoot } from "@urage/server/config/repositoryPaths";
-import { stripImageMetadataToPng } from "@urage/server/services/imageSanitizer";
+import { stripImageMetadataPreservingAnimation, stripImageMetadataToPng } from "@urage/server/services/imageSanitizer";
 import { generateGeneratedModelLods, importUploadedSourceModel, toGeneratedModelPublicRecord } from "@urage/server/services/model3d";
 import { createGenerationJob, updateGenerationJob } from "@urage/server/services/generationJobStore";
 import { appConfig } from "@urage/server/config/appConfig";
@@ -1546,8 +1546,9 @@ async function handlePostApiImageImport(request: IncomingMessage, response: Serv
   }
   if (stripMetadata) {
     try {
-      imageData = Buffer.from(await stripImageMetadataToPng(imageData));
-      effectiveFileName = `${path.basename(fileName, path.extname(fileName)) || "imported-image"}.png`;
+      const sanitized = await stripImageMetadataPreservingAnimation(imageData);
+      imageData = Buffer.from(sanitized.data);
+      effectiveFileName = `${path.basename(fileName, path.extname(fileName)) || "imported-image"}.${sanitized.extension}`;
     } catch (error) {
       console.warn("Image import metadata stripping failed; storing original image bytes.", error);
     }
