@@ -203,6 +203,32 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
     dependencies.runtimeState.recordAction("dashboard:qr-code-creator", `Generated QR code ${imported.id}.`);
     return imported;
   },
+  async csharpExtract({ input, dependencies }) {
+    const code = boundedText(input, "code");
+    const usings = (code.match(/using\s+[\w.]+;/g) ?? []).join("\n");
+    const namespaceName = code.match(/namespace\s+([\w.]+)/)?.[1];
+    const files: Array<{ fileName: string; content: string; type: string }> = [];
+    const pattern = /(?:(?:public|internal|private|protected|static|partial|abstract)\s+)*(class|struct|enum)\s+(\w+)/g;
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(code)) !== null) {
+      const brace = code.indexOf("{", match.index);
+      if (brace < 0) continue;
+      let depth = 1;
+      let cursor = brace + 1;
+      while (depth > 0 && cursor < code.length) {
+        if (code[cursor] === "{") depth += 1;
+        else if (code[cursor] === "}") depth -= 1;
+        cursor += 1;
+      }
+      if (depth !== 0) continue;
+      const name = match[2] ?? "Extracted";
+      const body = code.slice(match.index, cursor);
+      const content = `${usings}${usings ? "\n\n" : ""}${namespaceName ? `namespace ${namespaceName}\n{\n` : ""}${body}${namespaceName ? "\n}" : ""}`;
+      files.push({ fileName: `${name}.cs`, content, type: match[1] ?? "class" });
+    }
+    dependencies.runtimeState.recordAction("dashboard:csharp-class-extractor", `Extracted ${files.length} C# declarations.`);
+    return { files };
+  },
   async htmlSeparateCombine({ input, dependencies }) {
     const mode = input.mode === undefined ? "separate" : requiredText(input, "mode");
     const html = boundedText(input, "html");
