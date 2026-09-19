@@ -214,7 +214,7 @@ node .agents/skills/URageNow/scripts/uragenow-api.mjs --action health
 node .agents/skills/URageNow/scripts/uragenow-api.mjs --action manifest
 ```
 
-The helper supports `post-json` for a manifest-advertised endpoint, `import-image-file`, `jobs`, `artifact`, and `download`. Windows users without Node can use the matching PowerShell helper. Do not replace a named server tool with `/api/image-generate`; use `POST /api/tools/invoke` with the manifest's exact `toolId` and input schema. For MCP 3D generation from a prior URageNow image, call `urage_generate_model3d_from_image` with that image record's `id` and `imageFileName`; the bridge retrieves the binary and sends the required data URL to the model endpoint. A relative generated-image URL is not valid `imageInput`.
+The helper supports `post-json` for a manifest-advertised endpoint, `import-image-file`, `jobs`, `artifact`, and `download`. Windows users without Node can use the matching PowerShell helper. Do not replace a named server tool with `/api/image-generate`; use `POST /api/tools/invoke` with the manifest's exact `toolId` and input schema. For MCP 3D generation from a prior URageNow image, call `urage_generate_model3d_from_image` with only that image record's `id` and `imageFileName`; the bridge retrieves the binary and sends the required data URL to the model endpoint. The source image is authoritative, so do not send a text prompt. A relative generated-image URL is not valid `imageInput`.
 
 ## Authentication
 
