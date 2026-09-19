@@ -155,7 +155,13 @@ export function buildToolApiSchema(): object {
         name: "urage_invoke_tool", description: "Invoke a server-capable URage tool by exact toolId. Consult the manifest tools list first. A client-only tool has no server endpoint and must not be replaced with media generation.",
         http: { method: "POST", path: "/api/tools/invoke" },
         parameters: { type: "object", required: ["toolId", "input"], properties: { toolId: { type: "string" }, input: { type: "object" } } }
-      },      {
+      },
+      {
+        name: "urage_import_image", description: "Import an externally supplied image data URL into URage image history. Use the returned id and imageFileName as the source for a named server-capable image tool; do not generate a replacement image.",
+        http: { method: "POST", path: "/api/image-import" },
+        parameters: { type: "object", required: ["dataUrl"], properties: { dataUrl: { type: "string" }, fileName: { type: "string" }, prompt: { type: "string" }, width: { type: "number" }, height: { type: "number" } } }
+      },
+      {
         name: "urage_generate_image", description: "Generate one or more images in URage NOW Studio. This completes an image request; do not invoke model generation unless the user explicitly requests a 3D model.",
         http: { method: "POST", path: "/api/image-generate" },
         parameters: { type: "object", required: ["prompt"], properties: { prompt: { type: "string" }, width: { type: "number" }, height: { type: "number" }, count: { type: "number" } } }
