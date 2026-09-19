@@ -24,8 +24,13 @@ export async function convertImageToPixelArt(input: Buffer, pixelSize?: number):
   }
   const reducedWidth = Math.max(1, Math.round(width / normalizedPixelSize));
   const reducedHeight = Math.max(1, Math.round(height / normalizedPixelSize));
-  const data = await source
+  // Sharp applies only one resize per pipeline. Materialize the reduced image first,
+  // then use a second pipeline for nearest-neighbor enlargement.
+  const reduced = await source
     .resize(reducedWidth, reducedHeight, { fit: "fill", kernel: "nearest" })
+    .png()
+    .toBuffer();
+  const data = await sharp(reduced)
     .resize(width, height, { fit: "fill", kernel: "nearest" })
     .png()
     .toBuffer();
