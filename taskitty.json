@@ -1,0 +1,11 @@
+{
+  "apiBaseUrl": "http://127.0.0.1:38473",
+  "authorId": 1,
+  "authorName": "rainer",
+  "boardId": 1,
+  "boardName": "General",
+  "databasePath": "C:\\Users\\rainer\\AppData\\Roaming\\taskitty\\URageNow.sqlite",
+  "description": "Taskitty database for this project. Generated from the Taskitty Workspaces view.",
+  "tokenFile": "%APPDATA%\\taskitty\\api-token",
+  "workspaceRegistry": "%APPDATA%\\taskitty\\workspaces.json"
+}

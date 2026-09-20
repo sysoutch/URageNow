@@ -10,6 +10,8 @@ import { createGameJuicePresets } from "./serverGameJuiceAction.js";
 import { createSvgFromImage } from "./serverImageToSvgAction.js";
 import { saveToolArtifact } from "./toolArtifactStore.js";
 import { sliceSpritesheetGrid } from "./serverSpritesheetAction.js";
+import { exportDialogueTree } from "./serverDialogueTreeAction.js";
+import { exportRoadmap } from "./serverRoadmapAction.js";
 import type { ManifestActionContext } from "./serverToolActionDispatcher.js";
 
 type ManifestAction = (context: ManifestActionContext) => Promise<unknown>;
@@ -284,29 +286,52 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
     const mode = input.mode === undefined ? "separate" : requiredText(input, "mode");
     const html = boundedText(input, "html");
     if (mode === "separate") {
-      const css = (html.match(/<style[^>]*>([\s\S]*?)<\/style>/i)?.[1] ?? "").trim();
+      const cssBlocks: string[] = [];
+      let emittedStyleLink = false;
+      let separatedHtml = html.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_match, cssBlock: string) => {
+        cssBlocks.push(cssBlock.trim());
+        if (emittedStyleLink) return "";
+        emittedStyleLink = true;
+        return '<link rel="stylesheet" href="style.css">';
+      });
       const scripts: string[] = [];
-      const pattern = /<script(?![^>]*src)([^>]*)>([\s\S]*?)<\/script>/gi;
-      let match: RegExpExecArray | null;
-      while ((match = pattern.exec(html)) !== null) if ((match[2] ?? "").trim()) scripts.push((match[2] ?? "").trim());
-      const separatedHtml = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '<link rel="stylesheet" href="style.css">').replace(pattern, '<script src="script.js"><\/script>').trim();
-      const files = { "index.html": separatedHtml, "style.css": css, "script.js": scripts.join("\n\n") };
+      const scriptKinds = new Set<"classic" | "module">();
+      let emittedScriptLink = false;
+      separatedHtml = separatedHtml.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (full, attributes: string, scriptBody: string) => {
+        if (/\bsrc\s*=/i.test(attributes)) return full;
+        const type = attributes.match(/\btype\s*=\s*["']?([^\s"'>]+)/i)?.[1]?.toLowerCase() ?? "";
+        if (type === "importmap" || (type && !["module", "text/javascript", "application/javascript", "text/ecmascript", "application/ecmascript"].includes(type))) return full;
+        const content = scriptBody.trim();
+        if (!content) return full;
+        const kind = type === "module" ? "module" : "classic";
+        scriptKinds.add(kind);
+        scripts.push(content);
+        if (emittedScriptLink) return "";
+        emittedScriptLink = true;
+        return kind === "module" ? '<script type="module" src="script.js"><\/script>' : '<script src="script.js"><\/script>';
+      });
+      if (scriptKinds.size > 1) throw new ToolInvocationError(400, "Cannot safely separate a document with mixed classic and module inline scripts.");
+      const css = cssBlocks.filter(Boolean).join("\n\n");
+      const js = scripts.join("\n\n");
+      const files = { "index.html": separatedHtml.trim(), "style.css": css, "script.js": js };
       const artifacts = await Promise.all(Object.entries(files).map(async ([fileName, content]) => saveToolArtifact({
         sourceToolId: manifest.id,
         fileName,
         mimeType: fileName.endsWith(".html") ? "text/html; charset=utf-8" : fileName.endsWith(".css") ? "text/css; charset=utf-8" : "text/javascript; charset=utf-8",
         data: content,
-        metadata: { mode }
+        metadata: { mode, scriptKind: scriptKinds.values().next().value ?? "none" }
       })));
       dependencies.runtimeState.recordAction("dashboard:html-separator-and-combiner", "Separated HTML document.");
-      return { html: separatedHtml, css, js: scripts.join("\n\n"), artifacts };
+      return { html: files["index.html"], css, js, artifacts };
     }
     if (mode === "combine") {
       const css = typeof input.css === "string" ? input.css.trim() : "";
       const js = typeof input.js === "string" ? input.js.trim() : "";
+      const moduleScript = /<script\b[^>]*\btype\s*=\s*["']module["'][^>]*\bsrc\s*=\s*["'][^"']*script\.js["'][^>]*><\/script>/i.test(html);
       let combined = html.replace(/<link[^>]*href=["'][^"']*style\.css["'][^>]*>/gi, "").replace(/<script[^>]*src=["'][^"']*script\.js["'][^>]*><\/script>/gi, "");
       if (css) combined = combined.includes("</head>") ? combined.replace("</head>", `\n<style>\n${css}\n</style>\n</head>`) : `<style>\n${css}\n</style>\n${combined}`;
-      if (js) combined = combined.includes("</body>") ? combined.replace("</body>", `\n<script>\n${js}\n</script>\n</body>`) : `${combined}\n<script>\n${js}\n</script>`;
+      const scriptTag = moduleScript ? `<script type="module">\n${js}\n</script>` : `<script>\n${js}\n</script>`;
+      if (js) combined = combined.includes("</body>") ? combined.replace("</body>", `\n${scriptTag}\n</body>`) : `${combined}\n${scriptTag}`;
       const outputHtml = combined.trim();
       const artifact = await saveToolArtifact({ sourceToolId: manifest.id, fileName: "index.html", mimeType: "text/html; charset=utf-8", data: outputHtml, metadata: { mode } });
       dependencies.runtimeState.recordAction("dashboard:html-separator-and-combiner", "Combined HTML document.");
@@ -324,6 +349,8 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
   gameJuice: createGameJuicePresets,
   imageToSvg: createSvgFromImage,
   spritesheetGrid: sliceSpritesheetGrid,
+  dialogueTree: exportDialogueTree,
+  roadmap: exportRoadmap,
   async cssToScss({ manifest, input, dependencies }) {
     const files = cssToScssModules(input);
     const artifacts = await Promise.all(Object.entries(files).map(async ([fileName, content]) => saveToolArtifact({

@@ -47,3 +47,7 @@ The NSIS installer is self-contained and does not require a repository, Node, or
 3. Add signed installer publishing and clean-machine installation coverage.
 4. Keep browser dashboard access independent of Tauri.
 5. Keep Tauri IPC limited to desktop-only OS integration.
+
+## Native shell module boundaries (2026-09-20)
+
+`src-tauri/src/lib.rs` is now the small composition root. Runtime lifecycle belongs in `runtime.rs`, repository/packaged-sidecar discovery in `paths.rs`, tray setup in `tray.rs`, and Tauri navigation/window commands in `window.rs`. `cargo check --manifest-path src-tauri/Cargo.toml` verifies this boundary after changes.

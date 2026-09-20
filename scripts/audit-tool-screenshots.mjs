@@ -5,8 +5,11 @@ import {chromium} from "playwright";
 const baseUrl = String(process.argv[2] || "http://127.0.0.1:4782").replace(/\/+$/, "");
 const reportRoot = path.resolve(process.argv[3] || "artifacts/tool-visual-qa", new Date().toISOString().replace(/[:.]/g, "-"));
 const toolsRoot = path.resolve("tools");
+const categoryFilter = String(process.argv[4] || "").trim();
+const toolFilters = new Set(String(process.argv[5] || "").split(",").map(value => value.trim()).filter(Boolean));
 const viewports = [
   {name: "phone", width: 390, height: 844, mobile: true},
+  {name: "tablet", width: 900, height: 960, mobile: false},
   {name: "desktop", width: 1440, height: 960, mobile: false}
 ];
 
@@ -25,7 +28,9 @@ async function findTools() {
       } catch {}
     }
   }
-  return tools.sort((left, right) => `${left.category}/${left.slug}`.localeCompare(`${right.category}/${right.slug}`));
+  return tools
+    .filter(tool => (!categoryFilter || tool.category === categoryFilter) && (!toolFilters.size || toolFilters.has(tool.slug)))
+    .sort((left, right) => `${left.category}/${left.slug}`.localeCompare(`${right.category}/${right.slug}`));
 }
 
 const browser = await chromium.launch({headless: true});
@@ -60,7 +65,7 @@ try {
         await page.waitForTimeout(450);
         result.overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
         await mkdir(path.dirname(screenshotPath), {recursive: true});
-        await page.screenshot({path: screenshotPath, fullPage: true});
+        await page.screenshot({path: screenshotPath, timeout: 10_000});
       } catch (error) {
         result.error = error instanceof Error ? error.message : String(error);
       } finally {
