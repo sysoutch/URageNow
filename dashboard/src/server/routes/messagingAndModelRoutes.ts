@@ -35,7 +35,8 @@ import {
 import { parseBase64DataUrl } from "../chatSkills/executionHelpers.js";
 import { buildToolApiSchema, createToolResource, getToolResource, listToolResources, readToolResourceFile, type ToolResourceKind } from "../tools/toolResourceInbox.js";
 import { invokeServerTool, ToolInvocationError } from "../tools/toolCapabilityRegistry.js";
-import { convertImageToPixelArt } from "../tools/pixelArtConverter.js";
+import { readToolArtifact } from "@urage/server/tool-actions/toolArtifactStore";
+import { convertImageToPixelArt } from "@urage/server/tool-actions/pixelArtConverter";
 import { parseIdentifiedImageObjects, type IdentifiedImageObjectPrompt } from "../messagingAndModel/imageObjectIdentification.js";
 import { importWebsiteModelArchive } from "../model3d/websiteArchiveImport.js";
 import {getImageInterpretationFailure} from "../visionModelFailure.js";
@@ -2100,7 +2101,21 @@ async function handlePostApiGameEngineExport(request: IncomingMessage, response:
 async function handleGetApiLlmTools(_request: IncomingMessage, response: ServerResponse): Promise<void> {
   sendJson(response, 200, buildToolApiSchema());
 }
-async function handleGetApiToolResourceFile(_request: IncomingMessage, response: ServerResponse, url: URL): Promise<void> {
+async function handleGetApiToolArtifact(_request: IncomingMessage, response: ServerResponse, url: URL): Promise<void> {
+  const artifactId = String(url.searchParams.get("artifactId") || "").trim();
+  const file = String(url.searchParams.get("file") || "").trim();
+  if (!artifactId || !file) {
+    sendJson(response, 400, { error: "artifactId and file are required." });
+    return;
+  }
+  try {
+    const stored = await readToolArtifact(artifactId, file);
+    response.writeHead(200, { "content-type": stored.artifact.mimeType, "cache-control": "private, max-age=3600" });
+    response.end(stored.data);
+  } catch (error) {
+    sendJson(response, 404, { error: error instanceof Error ? error.message : "Tool artifact was not found." });
+  }
+}async function handleGetApiToolResourceFile(_request: IncomingMessage, response: ServerResponse, url: URL): Promise<void> {
   const resourceId = String(url.searchParams.get("resourceId") || "").trim();
   const file = String(url.searchParams.get("file") || "").trim();
   if (!resourceId || !file) {
@@ -2244,6 +2259,7 @@ const dashboardMessagingAndModelRouteTable = createDashboardRouteTable([
   postRoute("/api/music-think", handlePostApiMusicThink),
   postRoute("/api/video-generate", handlePostApiVideoGenerate),
   getRoute("/api/llm-tools", handleGetApiLlmTools),
+  getRoute("/api/tool-artifact", handleGetApiToolArtifact),
   getRoute("/api/tool-resource-file", handleGetApiToolResourceFile),
   getRoute("/api/tool-resources", handleGetApiToolResources),
   postRoute("/api/tool-resources", handlePostApiToolResource),

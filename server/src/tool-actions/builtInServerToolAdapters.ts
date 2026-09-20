@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { DashboardDependencies } from "../runtime/botBridge.js";
+import type { ToolActionDependencies } from "./serverToolContracts.js";
 import { serverImageToolActions } from "./serverImageToolActions.js";
 import type { ServerToolAdapter } from "./serverToolContracts.js";
 import { ToolInvocationError } from "./toolInvocationError.js";

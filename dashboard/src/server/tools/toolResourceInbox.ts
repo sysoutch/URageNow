@@ -212,6 +212,10 @@ export function buildToolApiSchema(): object {
         parameters: { type: "object", required: ["id", "videoFileName"], properties: { id: { type: "string" }, videoFileName: { type: "string" } } }
       },
       {
+        name: "urage_download_tool_artifact", description: "Download a persistent file returned by a server-capable tool. Use artifact.id and artifact.fileName from the tool result.",
+        http: { method: "GET", path: "/api/tool-artifact?artifactId={id}&file={fileName}" },
+        parameters: { type: "object", required: ["id", "fileName"], properties: { id: { type: "string" }, fileName: { type: "string" } } }
+      },      {
         name: "urage_list_tool_resources", description: "List resources waiting for a URage tool.",
         http: { method: "GET", path: "/api/tool-resources?targetToolId={targetToolId}" },
         parameters: { type: "object", required: ["targetToolId"], properties: { targetToolId: { type: "string" } } }

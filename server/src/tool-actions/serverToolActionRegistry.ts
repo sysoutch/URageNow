@@ -1,10 +1,15 @@
 import path from "node:path";
 import QRCode from "qrcode";
 import { getSharpRuntime } from "@urage/server/services/sharpRuntime";
-import type { DashboardDependencies } from "../runtime/botBridge.js";
+import type { ToolActionDependencies } from "./serverToolContracts.js";
 import type { ServerToolManifest } from "./serverToolManifest.js";
 import { ToolInvocationError } from "./toolInvocationError.js";
 import { serverImageToolActions } from "./serverImageToolActions.js";
+import { createMirroredSeamlessTexture } from "./serverSeamlessTextureAction.js";
+import { createGameJuicePresets } from "./serverGameJuiceAction.js";
+import { createSvgFromImage } from "./serverImageToSvgAction.js";
+import { saveToolArtifact } from "./toolArtifactStore.js";
+import { sliceSpritesheetGrid } from "./serverSpritesheetAction.js";
 import type { ManifestActionContext } from "./serverToolActionDispatcher.js";
 
 type ManifestAction = (context: ManifestActionContext) => Promise<unknown>;
@@ -181,6 +186,45 @@ function generatedBackgroundCss(input: Record<string, unknown>): string {
   const gradient = type === "linear" ? `linear-gradient(${Math.round(angle)}deg, ${first}, ${second})` : type === "radial" ? `radial-gradient(${position}, ${first}, ${second})` : `conic-gradient(${first}, ${second})`;
   return `background: ${gradient};`;
 }
+function cssToScssModules(input: Record<string, unknown>): Record<string, string> {
+  const css = boundedText(input, "css");
+  const autoVariables = input.autoVariables !== false;
+  const variables: Array<{ name: string; value: string }> = [];
+  const seen = new Set<string>();
+  const addValues = (values: string[], prefix: string) => {
+    for (const value of values) {
+      if (seen.has(value.toLowerCase())) continue;
+      seen.add(value.toLowerCase());
+      const number = variables.filter(candidate => candidate.name.startsWith("$" + prefix + "-")).length + 1;
+      variables.push({ name: "$" + prefix + "-" + number, value });
+    }
+  };
+  addValues(css.match(/#(?:[0-9a-f]{3}){1,2}\b|rgba?\([^)]*\)|hsla?\([^)]*\)/gi) ?? [], "color");
+  if (autoVariables) addValues(css.match(/(?<=:\s?)(?!(?:0|1px|100%)\b)(\d+(?:\.\d+)?(?:px|rem|em|vh|vw))/g) ?? [], "size");
+  const files: Record<string, string> = {
+    "_variables.scss": "// Variables\n" + variables.map(variable => variable.name + ": " + variable.value + ";").join("\n") + (variables.length ? "\n" : ""),
+    "_reset.scss": "// Base\n",
+    "_typography.scss": "// Typography\n",
+    "_layout.scss": "// Layout\n",
+    "_components.scss": "// Components\n"
+  };
+  for (const rawBlock of css.split("}")) {
+    if (!rawBlock.trim() || !rawBlock.includes("{")) continue;
+    let block = rawBlock.trim() + "}";
+    for (const variable of variables) block = block.split(variable.value).join(variable.name);
+    const selector = block.slice(0, block.indexOf("{")).trim();
+    const target = /^(html|body|\*|audio|video)/.test(selector) ? "_reset.scss"
+      : /^(h[1-6]|p|a|span|blockquote|li|ul|ol)/.test(selector) ? "_typography.scss"
+        : /(\.container|\.grid|\.row|\.col|header|footer|nav)/.test(selector) ? "_layout.scss"
+          : "_components.scss";
+    files[target] += block + "\n\n";
+  }
+  const imports = Object.entries(files)
+    .filter(([fileName, content]) => fileName !== "_variables.scss" ? content.split("\n").length > 2 : variables.length > 0)
+    .map(([fileName]) => "@import '" + fileName.replace(".scss", "").replace("_", "") + "';")
+    .join("\n");
+  return { ...files, "main.scss": "/** Manifest **/\n\n" + imports + "\n" };
+}
 const manifestActions: Readonly<Record<string, ManifestAction>> = {
   async qr({ manifest, input, dependencies }) {
     const text = requiredText(input, "text");
@@ -203,7 +247,7 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
     dependencies.runtimeState.recordAction("dashboard:qr-code-creator", `Generated QR code ${imported.id}.`);
     return imported;
   },
-  async csharpExtract({ input, dependencies }) {
+  async csharpExtract({ manifest, input, dependencies }) {
     const code = boundedText(input, "code");
     const usings = (code.match(/using\s+[\w.]+;/g) ?? []).join("\n");
     const namespaceName = code.match(/namespace\s+([\w.]+)/)?.[1];
@@ -226,10 +270,17 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
       const content = `${usings}${usings ? "\n\n" : ""}${namespaceName ? `namespace ${namespaceName}\n{\n` : ""}${body}${namespaceName ? "\n}" : ""}`;
       files.push({ fileName: `${name}.cs`, content, type: match[1] ?? "class" });
     }
+    const artifacts = await Promise.all(files.map(file => saveToolArtifact({
+      sourceToolId: manifest.id,
+      fileName: file.fileName,
+      mimeType: "text/plain; charset=utf-8",
+      data: file.content,
+      metadata: { declarationType: file.type }
+    })));
     dependencies.runtimeState.recordAction("dashboard:csharp-class-extractor", `Extracted ${files.length} C# declarations.`);
-    return { files };
+    return { files, artifacts };
   },
-  async htmlSeparateCombine({ input, dependencies }) {
+  async htmlSeparateCombine({ manifest, input, dependencies }) {
     const mode = input.mode === undefined ? "separate" : requiredText(input, "mode");
     const html = boundedText(input, "html");
     if (mode === "separate") {
@@ -239,8 +290,16 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
       let match: RegExpExecArray | null;
       while ((match = pattern.exec(html)) !== null) if ((match[2] ?? "").trim()) scripts.push((match[2] ?? "").trim());
       const separatedHtml = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '<link rel="stylesheet" href="style.css">').replace(pattern, '<script src="script.js"><\/script>').trim();
+      const files = { "index.html": separatedHtml, "style.css": css, "script.js": scripts.join("\n\n") };
+      const artifacts = await Promise.all(Object.entries(files).map(async ([fileName, content]) => saveToolArtifact({
+        sourceToolId: manifest.id,
+        fileName,
+        mimeType: fileName.endsWith(".html") ? "text/html; charset=utf-8" : fileName.endsWith(".css") ? "text/css; charset=utf-8" : "text/javascript; charset=utf-8",
+        data: content,
+        metadata: { mode }
+      })));
       dependencies.runtimeState.recordAction("dashboard:html-separator-and-combiner", "Separated HTML document.");
-      return { html: separatedHtml, css, js: scripts.join("\n\n") };
+      return { html: separatedHtml, css, js: scripts.join("\n\n"), artifacts };
     }
     if (mode === "combine") {
       const css = typeof input.css === "string" ? input.css.trim() : "";
@@ -248,20 +307,43 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
       let combined = html.replace(/<link[^>]*href=["'][^"']*style\.css["'][^>]*>/gi, "").replace(/<script[^>]*src=["'][^"']*script\.js["'][^>]*><\/script>/gi, "");
       if (css) combined = combined.includes("</head>") ? combined.replace("</head>", `\n<style>\n${css}\n</style>\n</head>`) : `<style>\n${css}\n</style>\n${combined}`;
       if (js) combined = combined.includes("</body>") ? combined.replace("</body>", `\n<script>\n${js}\n</script>\n</body>`) : `${combined}\n<script>\n${js}\n</script>`;
+      const outputHtml = combined.trim();
+      const artifact = await saveToolArtifact({ sourceToolId: manifest.id, fileName: "index.html", mimeType: "text/html; charset=utf-8", data: outputHtml, metadata: { mode } });
       dependencies.runtimeState.recordAction("dashboard:html-separator-and-combiner", "Combined HTML document.");
-      return { html: combined.trim() };
+      return { html: outputHtml, artifact };
     }
     throw new ToolInvocationError(400, "mode must be separate or combine.");
   },
-  async cssBackground({ input, dependencies }) {
+  async cssBackground({ manifest, input, dependencies }) {
     const css = generatedBackgroundCss(input);
+    const artifact = await saveToolArtifact({ sourceToolId: manifest.id, fileName: "background.css", mimeType: "text/css; charset=utf-8", data: css });
     dependencies.runtimeState.recordAction("dashboard:css-background-generator", "Generated CSS background.");
-    return { css };
+    return { css, artifact };
   },
-  async htmlButton({ input, dependencies }) {
+  seamlessTexture: createMirroredSeamlessTexture,
+  gameJuice: createGameJuicePresets,
+  imageToSvg: createSvgFromImage,
+  spritesheetGrid: sliceSpritesheetGrid,
+  async cssToScss({ manifest, input, dependencies }) {
+    const files = cssToScssModules(input);
+    const artifacts = await Promise.all(Object.entries(files).map(async ([fileName, content]) => saveToolArtifact({
+      sourceToolId: manifest.id,
+      fileName,
+      mimeType: "text/x-scss; charset=utf-8",
+      data: content,
+      metadata: { module: fileName }
+    })));
+    dependencies.runtimeState.recordAction("dashboard:css-to-scss", "Converted CSS into " + Object.keys(files).length + " SCSS module files.");
+    return { files, artifacts, sourceTool: manifest.id };
+  },
+  async htmlButton({ manifest, input, dependencies }) {
     const result = generatedButtonCode(input);
+    const artifacts = await Promise.all([
+      saveToolArtifact({ sourceToolId: manifest.id, fileName: "button.html", mimeType: "text/html; charset=utf-8", data: result.html }),
+      saveToolArtifact({ sourceToolId: manifest.id, fileName: "button.css", mimeType: "text/css; charset=utf-8", data: result.css })
+    ]);
     dependencies.runtimeState.recordAction("dashboard:html-button-generator", "Generated HTML button markup and CSS.");
-    return result;
+    return { ...result, artifacts };
   },
   async pseudoAlbedo({ manifest, input, dependencies }) {
     const { imageId, imageFileName } = sourceImageInput(input);
@@ -364,14 +446,15 @@ const manifestActions: Readonly<Record<string, ManifestAction>> = {
     dependencies.runtimeState.recordAction("dashboard:favicon-creator", `Created ${icons.length} favicon assets from image ${imageId}.`);
     return { icons, siteWebManifest: faviconWebManifest() };
   },
-  async metaOg({ input, dependencies }) {
+  async metaOg({ manifest, input, dependencies }) {
     const title = boundedText(input, "title");
     const description = boundedText(input, "description");
     const url = httpUrl(input, "url");
     const imageUrl = httpUrl(input, "imageUrl");
     const html = createOpenGraphTags(title, description, url, imageUrl);
+    const artifact = await saveToolArtifact({ sourceToolId: manifest.id, fileName: "open-graph-tags.html", mimeType: "text/html; charset=utf-8", data: html, metadata: { url } });
     dependencies.runtimeState.recordAction("dashboard:meta-og-tag-generator", `Generated OG tags for ${url}.`);
-    return { html, title, description, url, imageUrl };
+    return { html, title, description, url, imageUrl, artifact };
   },
   async metadataStrip({ manifest, input, dependencies }) {
     const { imageId, imageFileName } = sourceImageInput(input);
