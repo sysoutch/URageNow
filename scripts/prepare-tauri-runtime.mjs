@@ -111,6 +111,10 @@ await copyRuntimeSource("node_modules", shouldCopyProductionDependency);
 for (const relativePath of ["package.json", "package-lock.json", ".env.public.example"]) {
   await copyFile(path.join(workspaceRoot, relativePath), path.join(runtimeBundle, relativePath));
 }
+const runtimePackagePath = path.join(runtimeBundle, "package.json");
+const runtimePackage = JSON.parse(await readFile(runtimePackagePath, "utf8"));
+delete runtimePackage.scripts;
+await writeFile(runtimePackagePath, `${JSON.stringify(runtimePackage, null, 2)}\n`, "utf8");
 
 const prunedNodeModulesSize = await directorySize(path.join(runtimeBundle, "node_modules"));
 for (const requiredPackage of ["tsx"]) {

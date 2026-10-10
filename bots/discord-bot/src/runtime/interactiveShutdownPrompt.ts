@@ -7,7 +7,11 @@ export interface InteractiveShutdownPromptOptions {
   runtimeName: string;
   getDependencies: () => Promise<RuntimeShutdownDependency[]>;
   stop: () => Promise<void> | void;
+  confirmOnSigint?: boolean;
+  shutdownTimeoutMs?: number;
 }
+
+const DEFAULT_SHUTDOWN_TIMEOUT_MS = 10_000;
 
 function writeLine(message = ""): void {
   process.stdout.write(`${message}\n`);
@@ -33,48 +37,67 @@ async function askForConfirmation(runtimeName: string): Promise<boolean> {
   });
 }
 
-/**
- * Keeps Ctrl+C interactive for the launcher console instead of immediately
- * terminating the Node process (and releasing the dashboard port).
- */
+async function stopWithTimeout(stop: () => Promise<void> | void, timeoutMs: number): Promise<void> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      Promise.resolve().then(stop),
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => reject(new Error(`shutdown exceeded ${timeoutMs} ms`)), timeoutMs);
+      })
+    ]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
 export function installInteractiveShutdownPrompt(options: InteractiveShutdownPromptOptions): void {
-  let confirmationInProgress = false;
+  let shutdownInProgress = false;
 
   process.on("SIGINT", () => {
-    if (confirmationInProgress) {
-      writeLine("\nA shutdown confirmation is already open. Answer y or n.");
+    if (shutdownInProgress) {
+      writeLine(`\n${options.runtimeName} shutdown is already in progress. Please wait.`);
       return;
     }
-    confirmationInProgress = true;
+    shutdownInProgress = true;
 
     void (async () => {
+      let stopping = false;
       try {
-        const dependencies = await options.getDependencies();
         writeLine(`\n${options.runtimeName} shutdown requested.`);
-        if (dependencies.length > 0) {
-          writeLine("Current runtime impact:");
-          for (const dependency of dependencies) {
-            writeLine(`- ${dependency.label}: ${dependency.detail}`);
+        if (options.confirmOnSigint !== false) {
+          const dependencies = await options.getDependencies();
+          if (dependencies.length > 0) {
+            writeLine("Current runtime impact:");
+            for (const dependency of dependencies) {
+              writeLine(`- ${dependency.label}: ${dependency.detail}`);
+            }
+          } else {
+            writeLine("No managed bots or ComfyUI runtime are currently detected.");
           }
-        } else {
-          writeLine("No managed bots or ComfyUI runtime are currently detected.");
+
+          const confirmed = await askForConfirmation(options.runtimeName);
+          if (!confirmed) {
+            writeLine(`${options.runtimeName} shutdown cancelled; the server is still running and its port remains open.`);
+            return;
+          }
         }
 
-        const confirmed = await askForConfirmation(options.runtimeName);
-        if (!confirmed) {
-          writeLine(`${options.runtimeName} shutdown cancelled; the server is still running and its port remains open.`);
-          return;
-        }
-
+        stopping = true;
         writeLine(`Stopping ${options.runtimeName.toLowerCase()}.`);
-        await options.stop();
+        await stopWithTimeout(options.stop, options.shutdownTimeoutMs ?? DEFAULT_SHUTDOWN_TIMEOUT_MS);
+        writeLine(`${options.runtimeName} stopped. Exiting now.`);
         process.exit(0);
       } catch (error) {
         const detail = error instanceof Error ? error.message : String(error);
+        if (stopping) {
+          writeLine(`${options.runtimeName} cleanup could not finish: ${detail}. Exiting the process now.`);
+          process.exit(1);
+        }
         writeLine(`Could not complete the shutdown prompt: ${detail}`);
         writeLine(`${options.runtimeName} shutdown cancelled; the server is still running.`);
       } finally {
-        confirmationInProgress = false;
+        shutdownInProgress = false;
       }
     })();
   });

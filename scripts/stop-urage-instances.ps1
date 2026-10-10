@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
-$knownRuntimePorts = @(4782, 4791, 4792, 4793, 5581)
+$knownRuntimePorts = @(4782, 4783, 4784, 4791, 4792, 4793, 5581)
 $targetPorts = if ($Port -and $Port.Count -gt 0) {
   $Port
 } elseif ($All) {

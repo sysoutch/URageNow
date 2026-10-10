@@ -31,8 +31,10 @@ export function renderDashboardMessengerDashboardView(): string {
               <button class="ghost active" data-view="dashboard" type="button">Overview</button>
               <button class="ghost" data-view="messaging" data-discord-only="true" type="button">Messages</button>
               <button class="ghost" data-view="messenger" data-non-discord-only="true" type="button">Messages</button>
-              <button class="ghost" data-view="guild" data-discord-only="true" type="button">Members</button>
+              <button class="ghost" data-view="guild" data-discord-only="true" type="button">Guild</button>
+              <button class="ghost" data-view="games" data-discord-only="true" type="button">Games</button>
               <button class="ghost" data-view="automation" type="button">Automation</button>
+              <button class="ghost" data-view="moderation" data-discord-only="true" type="button">Moderation</button>
               <button class="ghost" data-view="activity" type="button">Activity</button>
             </div>
           </article>

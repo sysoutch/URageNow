@@ -52,8 +52,10 @@ const lastSeenWriteIntervalMs = 60 * 1000;
 let pairingCode = "";
 let pairingToken = "";
 let pairingExpiresAt = 0;
-let failedPairingAttempts = 0;
-let pairingLockedUntil = 0;
+const pairingAttemptsByClient = new Map<string, {failedAttempts: number; lockedUntil: number; lastAttemptAt: number}>();
+const maxPairingAttemptClients = 256;
+const pairingAttemptRetentionMs = 10 * 60 * 1000;
+const pairingLockoutMs = 30_000;
 let deviceMutationQueue: Promise<unknown> = Promise.resolve();
 let cachedDefaultPermissions: CompanionPermissionSet | null = null;
 
@@ -145,17 +147,50 @@ function pairingCredentialMatches(candidate: string): boolean {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-export async function pairCompanionDevice(credential: string, name: string): Promise<{ deviceId: string; token: string }> {
-  if (Date.now() < pairingLockedUntil) throw new Error("Pairing is temporarily locked after repeated failed attempts.");
+function normalizePairingClientKey(value: string): string {
+  return value.trim().replace(/^::ffff:/i, "").toLowerCase().slice(0, 128) || "unknown";
+}
+
+function getPairingAttemptState(clientKey: string, now: number): {failedAttempts: number; lockedUntil: number; lastAttemptAt: number} {
+  for (const [key, state] of pairingAttemptsByClient) {
+    if (now - state.lastAttemptAt > pairingAttemptRetentionMs && state.lockedUntil <= now) pairingAttemptsByClient.delete(key);
+  }
+  let state = pairingAttemptsByClient.get(clientKey);
+  if (!state) {
+    if (pairingAttemptsByClient.size >= maxPairingAttemptClients) {
+      const oldest = [...pairingAttemptsByClient.entries()].sort((left, right) => left[1].lastAttemptAt - right[1].lastAttemptAt)[0];
+      if (oldest) pairingAttemptsByClient.delete(oldest[0]);
+    }
+    state = {failedAttempts: 0, lockedUntil: 0, lastAttemptAt: now};
+    pairingAttemptsByClient.set(clientKey, state);
+  }
+  state.lastAttemptAt = now;
+  return state;
+}
+
+export async function pairCompanionDevice(credential: string, name: string, sourceAddress = "unknown"): Promise<{ deviceId: string; token: string }> {
+  const clientKey = normalizePairingClientKey(sourceAddress);
+  const nowMs = Date.now();
+  const attemptState = getPairingAttemptState(clientKey, nowMs);
+  if (nowMs < attemptState.lockedUntil) throw new Error("Pairing is temporarily locked for this client after repeated failed attempts.");
+  if (attemptState.lockedUntil > 0 && nowMs >= attemptState.lockedUntil) {
+    attemptState.lockedUntil = 0;
+    attemptState.failedAttempts = 0;
+  }
   const active = getCompanionPairingCode();
   if (Date.now() >= pairingExpiresAt || !pairingCredentialMatches(credential)) {
-    failedPairingAttempts += 1;
-    if (failedPairingAttempts >= 5) {
-      pairingLockedUntil = Date.now() + 30_000;
-      failedPairingAttempts = 0;
+    attemptState.failedAttempts += 1;
+    if (attemptState.failedAttempts >= 5) {
+      attemptState.lockedUntil = Date.now() + pairingLockoutMs;
+      attemptState.failedAttempts = 0;
     }
     throw new Error("The pairing code is invalid or expired.");
   }
+  // Consume synchronously before the first await so concurrent requests cannot
+  // both exchange the same code or QR token for different device credentials.
+  pairingCode = "";
+  pairingToken = "";
+  pairingExpiresAt = 0;
   const deviceId = randomBytes(12).toString("hex");
   const token = randomBytes(32).toString("base64url");
   const now = new Date().toISOString();
@@ -164,11 +199,7 @@ export async function pairCompanionDevice(credential: string, name: string): Pro
     if (devices.length > 50) devices.splice(0, devices.length - 50);
     return { result: undefined, changed: true };
   });
-  pairingCode = "";
-  pairingToken = "";
-  pairingExpiresAt = 0;
-  failedPairingAttempts = 0;
-  pairingLockedUntil = 0;
+  pairingAttemptsByClient.delete(clientKey);
   await appendCompanionAccessAudit({event: "device.paired", deviceId, deviceName: name.trim().slice(0, 80) || "Android companion", allowed: true});
   return { deviceId, token };
 }

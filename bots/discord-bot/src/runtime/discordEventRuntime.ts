@@ -50,6 +50,7 @@ type DiscordEventRuntimeInput = {
   handleModerationVeto: (interaction: any) => Promise<void>;
   handleHoneypotVerify: (interaction: any) => Promise<void>;
   handleSlashCommand: (interaction: any) => Promise<void>;
+  discordGameRuntime: { handleInteraction: (interaction: Interaction) => Promise<boolean> };
   enforceModerationRoleRestrictions: (message: Message) => Promise<boolean>;
   duplicateSpamGuard: {
     inspectMessage: (message: Message) => Promise<void>;
@@ -126,6 +127,7 @@ export function createDiscordEventRuntime(input: DiscordEventRuntimeInput) {
         `${interaction.user.tag} used ${interaction.isChatInputCommand() ? `/${interaction.commandName}` : "an interaction"}`
       );
     }
+    if (await input.discordGameRuntime.handleInteraction(interaction)) return;
     if (interaction.isButton() && interaction.customId.startsWith("media-rule:")) {
       const [, action, sourceMessageId, resultChannelId] = interaction.customId.split(":");
       await interaction.reply({

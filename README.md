@@ -28,6 +28,13 @@ Open `http://127.0.0.1:4782`. Most provider paths and credentials can then be
 configured in **Studio Settings**. Keep secrets out of committed environment
 files; use the Settings credential actions or the scripts described below.
 
+Press Ctrl+C once to stop the dashboard. It prints `Dashboard stopped. Exiting
+now.` after cleanup; if cleanup stalls for 10 seconds, it reports the timeout
+and exits the process so its port is released. In a Windows Command Prompt
+launched through a `.cmd` file or `npm run`, `cmd.exe` may also ask `Terminate
+batch job (Y/N)?`. Answer `Y` to close that batch wrapper; the dashboard itself
+does not ask for a second confirmation.
+
 Other supported ways to run it:
 
 | Goal | Command |
@@ -153,7 +160,7 @@ The prioritized hardening, cleanup, UX, and delivery work is tracked in [`memory
 - **Dashboard host:** set `DASHBOARD_BIND_HOST=0.0.0.0`, `DASHBOARD_PUBLIC_BASE_URL=http://<dashboard-ip>:4782`, `DASHBOARD_EXPOSE_API=true`, and a long `DASHBOARD_ACCESS_TOKEN`. Open `http://<dashboard-ip>:4782/?accessToken=<token>` once from each browser; the URL immediately redirects without the token and saves a short-lived HTTP-only session cookie. Optionally set `DASHBOARD_ALLOWED_CLIENTS` to comma-separated client IPs, IPv6 addresses, or IPv4 CIDR ranges. For reverse-proxied HTTPS companion access, use the canonical `https://` public URL and optionally set `COMPANION_TLS_CERTIFICATE_SHA256` to the leaf-certificate digest advertised for additional Android pinning.
 - **Settings helper:** Dashboard `Settings -> Network` detects usable LAN addresses, shows readiness checks, recommends a URL and CIDR allowlist, persists the safe settings to `.env.main.local`, stores generated tokens in the OS credential store, and applies the listener/discovery changes live. It also provides scoped Windows Private-network firewall commands for manual review.
 - **Remote browser login:** open the dashboard LAN URL normally. The dashboard presents a token login page and stores an eight-hour HTTP-only browser session. Copy the existing token explicitly from the dashboard PC with `Settings -> Network -> Copy Token`; tokens are never rendered automatically. The connection page also links to the allowlisted dashboard's signed Android APK page and to GitHub Releases as a fallback, without requiring a dashboard session.
-- **Worker host:** set `REMOTE_WORKER_BIND_HOST=0.0.0.0` and a `REMOTE_WORKER_SHARED_SECRET`. On the dashboard host, set `REMOTE_WORKER_BASE_URL=http://<worker-ip>:5581` and the same secret, then choose the remote execution target.
+- **Worker host:** set a strong `REMOTE_WORKER_SHARED_SECRET` (or provision the native `remote-worker.default.shared-secret` credential) before starting the worker. The worker refuses to start without a secret. For a LAN worker, set `REMOTE_WORKER_BIND_HOST=0.0.0.0`; otherwise use a loopback bind. On the dashboard host, set `REMOTE_WORKER_BASE_URL=http://<worker-ip>:5581` and the same secret, then choose the remote execution target. Plain HTTP shared-secret traffic is suitable only on a trusted development LAN; use TLS for untrusted networks.
 - **Bot host:** run Discord with `scripts\bots\discord\run-main.cmd start-headless`, or run Telegram/Matrix/WhatsApp with their own environment files. Set `DASHBOARD_BASE_URL` (or `NODE_BOT_DASHBOARD_URL`) to the dashboard public URL and set the same `DASHBOARD_ACCESS_TOKEN` for bots that call dashboard APIs.
 - **Messenger admin host:** point `TELEGRAM_ADMIN_BASE_URL`, `MATRIX_ADMIN_BASE_URL`, or `WHATSAPP_ADMIN_BASE_URL` at the bot machine. Bind those admin listeners only to the LAN when needed and use the same `MESSENGER_ADMIN_SHARED_SECRET` on the dashboard and bot hosts; also restrict the port with a firewall.
 - **Android companion:** follow [`apps/android-companion/README.md`](apps/android-companion/README.md) or the standalone [URage Now Android Companion repository](https://github.com/sysoutch/urage-now-android-companion). It discovers HTTP/HTTPS dashboards on UDP `47820`, supports one-scan short-lived QR pairing and optional certificate pinning, stores its device token behind Android Keystore encryption, pages through stable media cursors, renders cached 320×240 thumbnails, and transfers media through revocable resumable upload/download jobs. Settings supports global and per-device policies, JSON backup/restore, and an access audit.
@@ -274,6 +281,38 @@ npm run build:all
 .\scripts\run-dashboard.cmd start
 .\scripts\run-worker.cmd start
 ```
+
+In VS Code, **Build URage NOW from source** is the default build task and runs
+with the repository root as its working directory. The `src-tauri/runtime-bundle`
+and `src-tauri/target/*/runtime-bundle` folders are packaged runtime copies,
+not development checkouts; the workspace excludes their npm tasks from VS Code
+discovery. Run builds from the repository root. If an old generated task still
+appears, use **Developer: Reload Window** to refresh VS Code's task list.
+
+For a Discord bot dashboard without Studio, LazyDev, tools, companion discovery,
+or other messenger runtimes, run `npm run start:discord-dashboard` (or
+`npm run dev:discord-dashboard`). Open `http://127.0.0.1:4783`. This is a
+separate, loopback-only dashboard with bot status, Guild, Commands, Messages,
+text-template Automation, Moderation, Games, and Activity controls. Existing
+LLM, media, and cross-messenger automations are skipped in this mode. The
+standalone Guild, Moderation, and Automation forms currently cover the core
+controls; advanced Studio-only controls are tracked for parity. Set
+`URAGE_DISCORD_DASHBOARD_PORT` to use a
+different port. The regular dashboard and URage Now Studio retain their Discord
+view. Running both dashboards with the same Discord token at once can create
+two bot sessions, so operate one bot-owning process at a time. Use
+`npm run stop:discord-dashboard` to stop the default standalone port if its
+terminal was closed without stopping the child process.
+
+For one standalone dashboard covering Discord, Telegram, Matrix, and WhatsApp,
+run `npm run start:bots-dashboard` (or `npm run dev:bots-dashboard`) and open
+`http://127.0.0.1:4784`. This loopback-only runtime starts bot services according
+to their saved autostart settings, but skips model discovery, ComfyUI startup,
+remote-worker synchronization, companion discovery, Tools, and LazyDev. The Bots
+workspace inside Studio lazily embeds this same `/bots-dashboard` document, so
+the standalone runner and Studio do not maintain separate bot-dashboard markup.
+Use `npm run stop:bots-dashboard` to stop its default port. Run only one
+bot-owning dashboard process for a given set of credentials.
 
 `run-dashboard.cmd` is sufficient for local dashboard use. `run-worker.cmd` is optional and is only required for remote execution mode.
 

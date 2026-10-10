@@ -1,0 +1,54 @@
+{
+  "manifest": {
+    "id": "derby-lab",
+    "name": "Derby Lab",
+    "description": "Secretly bet credits on an animated animal racer, watch the race replay, and collect pool-based payouts.",
+    "version": "1.0.0",
+    "runtimes": ["discord"],
+    "gameType": "animal-racing"
+  },
+  "configuration": {
+    "rounds": 3,
+    "rosterMode": "sequential",
+    "houseFee": 5,
+    "bonusPool": 500,
+    "rosters": [
+      {
+        "label": "Horses",
+        "species": "horse",
+        "racers": [
+          { "name": "Thunderbolt", "color": "#f4bc55", "power": 9.4 },
+          { "name": "Night Rider", "color": "#a78bfa", "power": 8.1 },
+          { "name": "Red Comet", "color": "#fd7971", "power": 7 },
+          { "name": "Blue Moon", "color": "#64baf4", "power": 6 },
+          { "name": "Lucky Clover", "color": "#5bd7a7", "power": 4.6 },
+          { "name": "Wild Card", "color": "#f29cdb", "power": 3.4 }
+        ]
+      },
+      {
+        "label": "Emus",
+        "species": "emu",
+        "racers": [
+          { "name": "Turbo Feathers", "color": "#f4bc55", "power": 9.4 },
+          { "name": "Outback Rocket", "color": "#a78bfa", "power": 8.1 },
+          { "name": "Dust Devil", "color": "#fd7971", "power": 7 },
+          { "name": "Long Legs", "color": "#64baf4", "power": 6 },
+          { "name": "Bush Runner", "color": "#5bd7a7", "power": 4.6 },
+          { "name": "Chaos Bird", "color": "#f29cdb", "power": 3.4 }
+        ]
+      },
+      {
+        "label": "Penguins",
+        "species": "penguin",
+        "racers": [
+          { "name": "Icebreaker", "color": "#f4bc55", "power": 9.4 },
+          { "name": "Snowball Express", "color": "#a78bfa", "power": 8.1 },
+          { "name": "Frostbite", "color": "#fd7971", "power": 7 },
+          { "name": "Waddles", "color": "#64baf4", "power": 6 },
+          { "name": "Pebble", "color": "#5bd7a7", "power": 4.6 },
+          { "name": "Sir Slips", "color": "#f29cdb", "power": 3.4 }
+        ]
+      }
+    ]
+  }
+}

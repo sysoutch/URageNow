@@ -297,6 +297,7 @@ export interface DashboardModelRealWorldHeightDecision {
 }
 
 export interface DashboardDependencies {
+  dashboardScope?: "full" | "discord" | "bots";
   port: number;
   host: string;
   enabled?: boolean;

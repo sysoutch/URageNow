@@ -8,7 +8,7 @@ import { generateGeneratedModelLods, importUploadedSourceModel, toGeneratedModel
 import { createGenerationJob, updateGenerationJob } from "@urage/server/services/generationJobStore";
 import { appConfig } from "@urage/server/config/appConfig";
 import { preflightComfyImageWorkflowNodeTypes } from "@urage/server/services/comfyWorkflowPreflight";
-import { parseJsonBody, sendJson } from "../http.js";
+import { parseJsonBody, RequestBodyTooLargeError, sendJson } from "../http.js";
 import { createDashboardRouteTable, dispatchDashboardRoute, getRoute, postRoute } from "../router.js";
 import { interruptDashboardRequest, isDashboardAbortError, registerDashboardRequest } from "../dashboardInterrupts.js";
 import { channelMessagingRouteDefinitions } from "./channelMessagingRoutes.js";
@@ -224,7 +224,7 @@ function createToolThumbnailBackupName(): string {
 }
 
 async function handlePostApiModelImageUpload(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
   const requestedFileName = typeof body.fileName === "string" ? body.fileName.trim() : "model_source.png";
   const match = dataUrl.match(/^data:(image\/[a-z0-9.+-]+);base64,(.+)$/i);
@@ -290,7 +290,7 @@ async function handlePostApiModel3dStartNotice(request: IncomingMessage, respons
 }
 
 async function handlePostApiModel3dGenerate(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const imageInput = typeof body.imageInput === "string" ? body.imageInput.trim() : "";
   const imageFileNameHint = typeof body.imageFileNameHint === "string" ? body.imageFileNameHint.trim() : "";
   const workflowPathOverride = typeof body.workflowPathOverride === "string" ? body.workflowPathOverride.trim() : "";
@@ -433,7 +433,7 @@ async function handlePostApiModel3dGenerate(request: IncomingMessage, response: 
 }
 
 async function handlePostApiModel3dLowPolyUpload(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
   const requestedFileName = typeof body.fileName === "string" ? body.fileName.trim() : "uploaded-model.glb";
   const useLlmTargetFaces = body.llmTargetFaces === true;
@@ -988,7 +988,7 @@ async function handleGetApiImageWorkflowPreflight(request: IncomingMessage, resp
   return;
 }
 async function handlePostApiModel3dEdit(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const modelId = typeof body.modelId === "string" ? body.modelId.trim() : "";
   const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
   const fileName = typeof body.fileName === "string" ? body.fileName.trim() : "uploaded-model.glb";
@@ -1100,7 +1100,7 @@ async function handlePostApiModel3dWebsiteImport(request: IncomingMessage, respo
   sendJson(response, 200, { imported: await importWebsiteModelArchive({ downloadUrl, modelName }) });
 }
 async function handlePostApiModel3dImport(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
   const fileName = typeof body.fileName === "string" ? body.fileName.trim() : "pasted-model.glb";
   const parsedDataUrl = parseBase64DataUrl(dataUrl);
@@ -1185,11 +1185,28 @@ async function handlePostApiLlmLoadActive(request: IncomingMessage, response: Se
   return;
 }
 
+const imageOverwriteQueues = new Map<string, Promise<void>>();
+
+async function serializeImageOverwrite<T>(imageId: string, operation: () => Promise<T>): Promise<T> {
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const previous = imageOverwriteQueues.get(imageId) || Promise.resolve();
+  const queued = previous.then(() => gate);
+  imageOverwriteQueues.set(imageId, queued);
+  await previous;
+  try {
+    return await operation();
+  } finally {
+    release();
+    if (imageOverwriteQueues.get(imageId) === queued) imageOverwriteQueues.delete(imageId);
+  }
+}
+
 async function handlePostApiImageGenerate(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   let dashboardRequest: ReturnType<typeof registerDashboardRequest> | null = null;
   let generationJobId = "";
   try {
-    const body = await parseJsonBody(request);
+    const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
     dashboardRequest = registerDashboardRequest({ requestId: body.dashboardRequestId, workflow: "image" });
     const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
     const promptTextFile = typeof body.promptTextFile === "string" ? body.promptTextFile.trim() : "";
@@ -1275,32 +1292,42 @@ async function handlePostApiImageGenerate(request: IncomingMessage, response: Se
       signal: dashboardRequest.signal
     });
     if (overwriteImageId) {
-      const generatedFile = await dependencies.readGeneratedImageFile(generated.id, generated.imageFileName);
-      await dependencies.deleteGeneratedImage(overwriteImageId);
-      const overwritten = await dependencies.importGeneratedImage({
-        desiredId: overwriteImageId,
-        imageFileName: generated.imageFileName,
-        imageData: generatedFile.data,
-        prompt: generated.prompt,
-        description: generated.description,
-        width: generated.width || undefined,
-        height: generated.height || undefined,
-        seed: generated.seed,
-        steps: generated.steps,
-        cfg: generated.cfg,
-        model: generated.model,
-        metadata: {
-          ...(generated.metadata || {}),
-          overwrittenFromGeneratedImageId: generated.id,
-          overwrittenAt: new Date().toISOString()
+      const overwritten = await serializeImageOverwrite(overwriteImageId, async () => {
+        const existingImage = (await dependencies.listGeneratedImages()).find(entry => entry.id === overwriteImageId);
+        if (!existingImage) throw new Error("The image selected for overwrite no longer exists.");
+
+        const generatedFile = await dependencies.readGeneratedImageFile(generated.id, generated.imageFileName);
+        const replacement = await dependencies.importGeneratedImage({
+          imageFileName: generated.imageFileName,
+          imageData: generatedFile.data,
+          prompt: generated.prompt,
+          description: generated.description,
+          width: generated.width || undefined,
+          height: generated.height || undefined,
+          seed: generated.seed,
+          steps: generated.steps,
+          cfg: generated.cfg,
+          model: generated.model,
+          metadata: {
+            ...(generated.metadata || {}),
+            overwrittenFromImageId: overwriteImageId,
+            overwrittenFromGeneratedImageId: generated.id,
+            overwrittenAt: new Date().toISOString()
+          }
+        });
+        const removedOriginal = await dependencies.deleteGeneratedImage(overwriteImageId);
+        if (!removedOriginal) {
+          await dependencies.deleteGeneratedImage(replacement.id);
+          throw new Error("The original image changed during overwrite; the replacement was not committed.");
         }
+        return replacement;
       });
-      if (generated.id !== overwriteImageId) {
+      if (generated.id !== overwriteImageId && generated.id !== overwritten.id) {
         await dependencies.deleteGeneratedImage(generated.id);
       }
       dependencies.runtimeState.recordAction(
         "dashboard:image",
-        `Overwrote generated image ${overwriteImageId}${channelId ? ` and posted to ${channelId}` : ""}.`
+        `Overwrote generated image ${overwriteImageId} as ${overwritten.id}${channelId ? ` and posted to ${channelId}` : ""}.`
       );
       await updateGenerationJob(generationJobId, {status: "succeeded", artifactId: overwritten.id});
       sendJson(response, 200, overwritten);
@@ -1314,6 +1341,10 @@ async function handlePostApiImageGenerate(request: IncomingMessage, response: Se
     sendJson(response, 200, generated);
     return;
   } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      sendJson(response, error.statusCode, {error: "Request body is too large.", maxBytes: error.maxBytes});
+      return;
+    }
     if (generationJobId) {
       await updateGenerationJob(generationJobId, {
         status: isDashboardAbortError(error) ? "cancelled" : "failed",
@@ -1329,7 +1360,7 @@ async function handlePostApiImageGenerate(request: IncomingMessage, response: Se
   }
 }
 async function handlePostApiImageRemoveBackground(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const imageInput = typeof body.imageInput === "string" ? body.imageInput.trim() : "";
   const imageFileNameHint = typeof body.imageFileNameHint === "string" ? body.imageFileNameHint.trim() : "";
   const mode = typeof body.mode === "string" ? body.mode.trim() : "";
@@ -1359,7 +1390,7 @@ async function handlePostApiImageRemoveBackground(request: IncomingMessage, resp
   return;
 }
 async function handlePostApiImageInterpretPrompt(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const imageInput = typeof body.imageInput === "string" ? body.imageInput.trim() : "";
   const imageInputs = (Array.isArray(body.imageInputs) ? body.imageInputs : [imageInput])
     .filter((value): value is string => typeof value === "string")
@@ -1460,7 +1491,7 @@ async function handlePostApiImageRewritePrompt(request: IncomingMessage, respons
   return;
 }
 async function handlePostApiImageIdentifyObjects(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const imageInput = typeof body.imageInput === "string" ? body.imageInput.trim() : "";
   const imageFileNameHint = typeof body.imageFileNameHint === "string" ? body.imageFileNameHint.trim() : "";
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
@@ -1520,7 +1551,7 @@ async function handlePostApiToolInvoke(request: IncomingMessage, response: Serve
   }
 }
 async function handlePostApiImageImport(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
   const parsed = parseBase64DataUrl(dataUrl);
   if (!parsed || !parsed.mimeType.toLowerCase().startsWith("image/")) {

@@ -17,6 +17,7 @@ type PendingSelfTaskBatch = {
 
 type SlashCommandHandlerServiceDependencies = {
   isCommandEnabled: (guildId: string | null, commandName: string) => boolean;
+  handleGamesCommand: (interaction: ChatInputCommandInteraction) => Promise<void>;
   handleHelpCommand: (interaction: ChatInputCommandInteraction) => Promise<void>;
   handleAdminCoreSlashCommands: (interaction: ChatInputCommandInteraction, context: any) => Promise<boolean>;
   adminCoreContext: any;
@@ -60,6 +61,10 @@ export function createSlashCommandHandlerService(dependencies: SlashCommandHandl
     }
     if (interaction.commandName === "help") {
       await dependencies.handleHelpCommand(interaction);
+      return;
+    }
+    if (interaction.commandName === "game") {
+      await dependencies.handleGamesCommand(interaction);
       return;
     }
     if (!hasPrivilegedGuildPermissions(interaction)) {

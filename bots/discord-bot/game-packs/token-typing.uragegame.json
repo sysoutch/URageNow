@@ -1,0 +1,19 @@
+{
+  "manifest": {
+    "id": "token-typing",
+    "name": "Token Typing",
+    "description": "Watch a hidden text-generation speed, then estimate its tokens per second. Each player scores independently.",
+    "version": "1.0.0",
+    "runtimes": ["discord"],
+    "gameType": "typing-speed"
+  },
+  "configuration": {
+    "rounds": 5,
+    "textMode": "sequential",
+    "texts": [
+      "This is a simulated AI response. Watch the words appear one at a time, as if a model were generating them live. Notice the pauses between words and the full time needed to complete the paragraph before choosing your speed estimate.",
+      "A small team is planning a weekend trip. They compare train times, check the weather, and pick a place to meet. The message appears gradually on screen, giving everyone the same chance to judge how quickly the text is being produced.",
+      "The studio dashboard brings tools, bots, and creative projects into one workspace. This sample message is long enough to make its typing pace visible. Watch the animation carefully, then decide how many tokens you think were shown each second."
+    ]
+  }
+}

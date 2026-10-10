@@ -30,6 +30,7 @@ interface AutomationContext {
 }
 
 interface AutomationEngineDependencies {
+  allowAutomation?: (entry: ScheduledAutomation | JoinAutomation) => boolean;
   askModel: (prompt: string) => Promise<string>;
   buildGiftMessageIfAvailable?: () => Promise<string | null>;
   sendMessageToChannel: (channelId: string, content: string) => Promise<void>;
@@ -626,7 +627,7 @@ export function createAutomationEngine(dependencies: AutomationEngineDependencie
     lastMinuteKey = minuteKey;
     const entries = await listAllScheduledAutomations();
     for (const entry of entries) {
-      if (!entry.enabled) {
+      if (!entry.enabled || dependencies.allowAutomation?.(entry) === false) {
         continue;
       }
 
@@ -709,7 +710,7 @@ export function createAutomationEngine(dependencies: AutomationEngineDependencie
   async function handleMemberJoin(member: GuildMember): Promise<void> {
     const entries = await listJoinAutomations(member.guild.id);
     for (const entry of entries) {
-      if (!entry.enabled) {
+      if (!entry.enabled || dependencies.allowAutomation?.(entry) === false) {
         continue;
       }
 

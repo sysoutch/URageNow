@@ -54,6 +54,8 @@ export const dashboardClientScriptParts: DashboardClientScriptPart[] = [
   { relativePath: "client/modules/aiWorkflowDataHelpers.js", required: false },
   { relativePath: "client/modules/studioSidebarHelpers.js", required: false },
   { relativePath: "client/modules/messenger/handlers.js", required: false },
+  { relativePath: "client/modules/gamesDashboard.js", required: false },
+  { relativePath: "client/modules/botsDashboardHost.js", required: false },
   { relativePath: "client/modules/userSearchHandlers.js", required: false },
   { relativePath: "features/discord/client/modules/workspaceHelpers.js", required: false },
   { relativePath: "client/modules/dashboard/media/workflowSeedHelpers.js", required: false },

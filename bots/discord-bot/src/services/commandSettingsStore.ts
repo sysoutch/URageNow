@@ -4,10 +4,13 @@ import { appConfig } from "@urage/server/config/appConfig";
 import { getAllCommandNames } from "./commandCatalog.js";
 
 export interface CommandSettings {
+  catalogVersion?: number;
   globalEnabledCommands: string[];
   guildEnabledCommands: Record<string, string[]>;
   guildDisabledInheritedCommands: Record<string, string[]>;
 }
+
+const commandSettingsCatalogVersion = 1;
 
 const dataDirectory = path.resolve(appConfig.dataDirectory);
 const storePath = path.join(dataDirectory, "command-settings.json");
@@ -27,6 +30,7 @@ function sanitizeCommandNameList(value: unknown): string[] {
 
 function defaultSettings(): CommandSettings {
   return {
+    catalogVersion: commandSettingsCatalogVersion,
     globalEnabledCommands: getAllCommandNames(),
     guildEnabledCommands: {},
     guildDisabledInheritedCommands: {}
@@ -49,11 +53,17 @@ function sanitizeRecord(value: unknown): Record<string, string[]> {
   return result;
 }
 
-function sanitizeSettings(value: unknown): CommandSettings {
+function sanitizeSettings(value: unknown, migrateCatalog = false): CommandSettings {
   const raw = typeof value === "object" && value !== null ? value as Partial<CommandSettings> : {};
   const defaults = defaultSettings();
+  const globalEnabledCommands = sanitizeCommandNameList(raw.globalEnabledCommands ?? defaults.globalEnabledCommands);
+  if (migrateCatalog && (raw.catalogVersion ?? 0) < commandSettingsCatalogVersion) {
+    // `game` was introduced after unversioned settings files may already have been created.
+    if (!globalEnabledCommands.includes("game")) globalEnabledCommands.push("game");
+  }
   return {
-    globalEnabledCommands: sanitizeCommandNameList(raw.globalEnabledCommands ?? defaults.globalEnabledCommands),
+    catalogVersion: commandSettingsCatalogVersion,
+    globalEnabledCommands,
     guildEnabledCommands: sanitizeRecord(raw.guildEnabledCommands),
     guildDisabledInheritedCommands: sanitizeRecord(raw.guildDisabledInheritedCommands)
   };
@@ -72,7 +82,15 @@ async function ensureStoreFile(): Promise<void> {
 export async function loadCommandSettings(): Promise<CommandSettings> {
   await ensureStoreFile();
   const raw = await readFile(storePath, "utf8");
-  return sanitizeSettings(JSON.parse(raw) as unknown);
+  const parsed = JSON.parse(raw) as unknown;
+  const settings = sanitizeSettings(parsed, true);
+  const parsedCatalogVersion = typeof parsed === "object" && parsed !== null
+    ? (parsed as { catalogVersion?: unknown }).catalogVersion
+    : undefined;
+  if (parsedCatalogVersion !== commandSettingsCatalogVersion) {
+    await writeFile(storePath, JSON.stringify(settings, null, 2), "utf8");
+  }
+  return settings;
 }
 
 export async function saveCommandSettings(settings: CommandSettings): Promise<CommandSettings> {

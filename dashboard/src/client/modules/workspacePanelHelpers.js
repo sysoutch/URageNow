@@ -1,22 +1,50 @@
+let dashboardWorkspaceSubviewState = null;
+const dashboardWorkspacePendingSubview = { guild: null, moderation: null };
+
+function switchDashboardWorkspaceSubview(group, panel) {
+  const stateKey = group === "guild" ? "guildSubview" : "moderationSubview";
+  dashboardWorkspacePendingSubview[group] = panel;
+  if (dashboardWorkspaceSubviewState) dashboardWorkspaceSubviewState[stateKey] = panel;
+  document.querySelectorAll("[data-subview]").forEach(button => {
+    const value = button.getAttribute("data-subview") || "";
+    if (!value.startsWith(group + "-")) return;
+    button.classList.toggle("active", value === panel);
+  });
+  document.querySelectorAll("[data-subview-panel]").forEach(node => {
+    const value = node.getAttribute("data-subview-panel") || "";
+    if (!value.startsWith(group + "-")) return;
+    node.classList.toggle("hidden-by-subview", value !== panel);
+  });
+}
+
+function bindDashboardWorkspaceSubviewClicks() {
+  if (document.documentElement.dataset.subviewTabsBound === "true") return;
+  document.documentElement.dataset.subviewTabsBound = "true";
+  document.addEventListener("click", event => {
+    const target = event.target instanceof Element ? event.target.closest("[data-subview]") : null;
+    if (!target) return;
+    const value = target.getAttribute("data-subview") || "";
+    if (value.startsWith("guild-")) {
+      event.preventDefault();
+      switchDashboardWorkspaceSubview("guild", value);
+    } else if (value.startsWith("moderation-")) {
+      event.preventDefault();
+      switchDashboardWorkspaceSubview("moderation", value);
+    }
+  });
+}
+
+// Bind independently of the dashboard's asynchronous startup so these tabs remain usable
+// even when an unrelated startup request or panel initialization fails.
+bindDashboardWorkspaceSubviewClicks();
+
 function createDashboardWorkspacePanelHelpers(input) {
   const { state, setDetailsPaneVisible } = input;
+  if (dashboardWorkspacePendingSubview.guild) state.guildSubview = dashboardWorkspacePendingSubview.guild;
+  if (dashboardWorkspacePendingSubview.moderation) state.moderationSubview = dashboardWorkspacePendingSubview.moderation;
+  dashboardWorkspaceSubviewState = state;
   function switchSubview(group, panel) {
-    const stateKey = group === "guild" ? "guildSubview" : "moderationSubview";
-    state[stateKey] = panel;
-    document.querySelectorAll("[data-subview]").forEach(button => {
-      const value = button.getAttribute("data-subview") || "";
-      if (!value.startsWith(group + "-")) {
-        return;
-      }
-      button.classList.toggle("active", value === panel);
-    });
-    document.querySelectorAll("[data-subview-panel]").forEach(node => {
-      const value = node.getAttribute("data-subview-panel") || "";
-      if (!value.startsWith(group + "-")) {
-        return;
-      }
-      node.classList.toggle("hidden-by-subview", value !== panel);
-    });
+    switchDashboardWorkspaceSubview(group, panel);
   }
   function switchDetailTab(tab) {
     state.detailTab = tab;
@@ -36,18 +64,7 @@ function createDashboardWorkspacePanelHelpers(input) {
     }
   }
   function bindSubviewTabs() {
-    document.querySelectorAll("[data-subview]").forEach(button => {
-      button.addEventListener("click", event => {
-        const value = event.currentTarget.getAttribute("data-subview") || "";
-        if (value.startsWith("guild-")) {
-          switchSubview("guild", value);
-          return;
-        }
-        if (value.startsWith("moderation-")) {
-          switchSubview("moderation", value);
-        }
-      });
-    });
+    bindDashboardWorkspaceSubviewClicks();
   }
   function initializeFoldAccordions() {
     document.querySelectorAll("details.fold-card").forEach(card => {

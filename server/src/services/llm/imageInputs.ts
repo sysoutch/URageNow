@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { fetchRemoteImage } from "../safeRemoteImage.js";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { resolveGeneratedImageApiSourceToFilePath } from "../internalGeneratedImageSource.js";
@@ -74,13 +75,9 @@ async function preprocessImageBuffer(bytes: Buffer, input: { mimeType?: string |
 }
 
 async function fetchImageAsProviderInput(input: string, provider: LlmProvider): Promise<string> {
-  const response = await fetch(input);
-  if (!response.ok) {
-    throw new Error(`Image fetch failed with status ${response.status}`);
-  }
-  const rawBytes = Buffer.from(await response.arrayBuffer());
-  const prepared = await preprocessImageBuffer(rawBytes, {
-    mimeType: response.headers.get("content-type"),
+  const remote = await fetchRemoteImage(input);
+  const prepared = await preprocessImageBuffer(remote.bytes, {
+    mimeType: remote.mimeType,
     sourceName: input
   });
   return provider === "ollama"

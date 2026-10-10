@@ -87,12 +87,17 @@ const interpretation = context.createPromptInterpretation({
   }
 });
 
-await assert.rejects(() => interpretation.setSourceFromFile({name: "notes.txt", type: "text/plain"}), /choose an image file/i);
+await assert.rejects(() => interpretation.setSourceFromFile({name: "notes.txt", type: "text/plain"}), /choose (?:at least one )?image file/i);
 await interpretation.setSourceFromFile({name: "observatory.png", type: "image/png"});
-assert.deepEqual({...interpretation.getSource()}, {
+const selectedSource = interpretation.getSource();
+assert.deepEqual({...selectedSource, sources: Array.from(selectedSource.sources, source => ({value: source.value, fileName: source.fileName}))}, {
   value: "data:image/png;base64,source",
   previewUrl: "data:image/png;base64,source",
   fileName: "observatory.png",
+  sources: [{
+    value: "data:image/png;base64,source",
+    fileName: "observatory.png"
+  }],
   detailMode: "normal"
 });
 assert.equal(nodes.get("image-prompt-interpret-preview-image").src, "data:image/png;base64,source");
@@ -107,7 +112,10 @@ assert.deepEqual(JSON.parse(JSON.stringify(requests)), [{
   route: "/api/image-interpret-prompt",
   body: {
     imageInput: "data:image/png;base64,source",
+    imageInputs: ["data:image/png;base64,source"],
     imageFileNameHint: "observatory.png",
+    imageFileNameHints: ["observatory.png"],
+    combineSources: false,
     detailMode: "normal",
     direction: "focus on architecture"
   }

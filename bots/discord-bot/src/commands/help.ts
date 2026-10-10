@@ -6,7 +6,7 @@ export async function handleHelpCommand(
   await interaction.reply({
     content: [
       "This is the Discrod bot interface.",
-      "Available slash commands: `/help`, `/ping`, `/ask`, `/say`, `/dm`, `/gift`, `/humble`, `/model`, `/lowpoly`, `/image`, `/imagepooladd`, `/audio`, `/music`, `/invite`, `/task`",
+      "Available slash commands: `/help`, `/game`, `/ping`, `/ask`, `/say`, `/dm`, `/gift`, `/humble`, `/model`, `/lowpoly`, `/image`, `/imagepooladd`, `/audio`, `/music`, `/invite`, `/task`",
       "Rod is available locally for text and vision prompts on the machine running the bot."
     ].join("\n"),
     flags: MessageFlags.Ephemeral

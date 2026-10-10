@@ -1,3 +1,17 @@
+.bots-dashboard-host-view {
+  padding: 0;
+  min-height: calc(100vh - 150px);
+}
+
+.bots-dashboard-frame {
+  display: block;
+  width: 100%;
+  min-height: calc(100vh - 150px);
+  border: 0;
+  border-radius: 14px;
+  background: var(--panel);
+}
+
 .messenger-dashboard-view {
   .messenger-dashboard-shell {
     display: grid;
@@ -155,7 +169,7 @@
     font-weight: 800;
   }
 
-  .messenger-dashboard-header-card > .dashboard-tabs .ghost.active {
+.messenger-dashboard-header-card > .dashboard-tabs .ghost.active {
     border-color: color-mix(in srgb, var(--accent) 56%, white 10%);
     background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 92%, transparent), color-mix(in srgb, var(--accent-soft) 48%, transparent));
     color: #f5f8ff;
@@ -377,6 +391,178 @@
     background: linear-gradient(180deg, rgba(118, 102, 255, 0.52) 0%, rgba(95, 78, 255, 0.34) 100%);
     color: #f4f8ff;
     box-shadow: 0 10px 20px rgba(42, 58, 145, 0.26);
+  }
+}
+
+.games-dashboard-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.games-dashboard-intro,
+.games-package-heading,
+.games-runtime-controls,
+.games-import-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.games-dashboard-intro h3,
+.games-list-card h3 {
+  margin: 0 0 6px;
+}
+
+.games-import-file-label {
+  cursor: pointer;
+}
+
+.games-package-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.games-package-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line, #333);
+  border-radius: 10px;
+  padding: 13px;
+}
+
+.games-package-heading {
+  justify-content: flex-start;
+}
+
+.games-package-copy > .panel-subtitle {
+  margin: 6px 0 0;
+}
+
+.games-runtime-controls {
+  justify-content: flex-end;
+}
+
+.games-runtime-controls .is-enabled {
+  border-color: var(--success, #4b9c79);
+}
+
+.games-config-editor {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid var(--line, #333);
+}
+
+.games-config-editor h4,
+.games-config-editor .panel-subtitle,
+.games-config-editor .hint {
+  margin: 0;
+}
+
+.games-config-field,
+.games-text-row {
+  display: grid;
+  gap: 6px;
+}
+
+.games-config-field select,
+.games-config-field input,
+.games-text-row textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.games-text-list {
+  display: grid;
+  gap: 12px;
+}
+
+.games-text-row {
+  padding: 12px;
+  border: 1px solid var(--line, #333);
+  border-radius: 8px;
+}
+
+.games-text-row .compact {
+  justify-self: start;
+}
+
+
+.games-roster-list,
+.games-roster-racers {
+  display: grid;
+  gap: 12px;
+}
+
+.games-roster-row {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line, #333);
+  border-radius: 8px;
+}
+
+.games-roster-row input {
+  width: 100%;
+  min-width: 0;
+}
+
+.games-roster-row .compact {
+  justify-self: start;
+}
+
+.games-racer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line, #333);
+  border-radius: 6px;
+}
+
+.games-racer-row input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.games-racer-row label,
+.games-racer-row .compact {
+  flex: none;
+}
+
+.games-config-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.games-package-warning {
+  color: var(--text-muted, #999);
+  font-size: .82rem;
+}
+
+@media (max-width: 760px) {
+  .games-dashboard-intro,
+  .games-package-card {
+    grid-template-columns: 1fr;
+  }
+
+  .games-package-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .games-runtime-controls {
+    justify-content: flex-start;
   }
 }
 

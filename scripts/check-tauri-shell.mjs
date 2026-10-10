@@ -4,15 +4,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const [configSource, rustSource, runtimeSource, packagerSource, chromeSource, pageSource, serverSource] = await Promise.all([
+const [configSource, rustModules, runtimeSource, packagerSource, chromeSource, pageSource, serverSource] = await Promise.all([
   readFile(path.join(repoRoot, "src-tauri", "tauri.conf.json"), "utf8"),
-  readFile(path.join(repoRoot, "src-tauri", "src", "lib.rs"), "utf8"),
+  Promise.all(["lib.rs", "paths.rs", "runtime.rs", "tray.rs", "window.rs"].map(file =>
+    readFile(path.join(repoRoot, "src-tauri", "src", file), "utf8"))),
   readFile(path.join(repoRoot, "runtime", "dashboardRuntime.ts"), "utf8"),
   readFile(path.join(repoRoot, "scripts", "prepare-tauri-runtime.mjs"), "utf8"),
   readFile(path.join(repoRoot, "dashboard", "src", "client", "modules", "desktopWindowChrome.js"), "utf8"),
   readFile(path.join(repoRoot, "dashboard", "src", "page.ts"), "utf8"),
   readFile(path.join(repoRoot, "dashboard", "src", "server.ts"), "utf8")
 ]);
+const rustSource = rustModules.join("\n");
 const config = JSON.parse(configSource);
 const [bootstrapIconCss, bootstrapIconWoff2] = await Promise.all([
   readFile(path.join(repoRoot, "dashboard", "assets", "vendor", "bootstrap-icons", "bootstrap-icons.min.css")),

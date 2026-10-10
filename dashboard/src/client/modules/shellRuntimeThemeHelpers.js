@@ -3,7 +3,7 @@ function createDashboardShellRuntimeThemeHelpers(input) {
     constructor(options) {
       this.input = options || {};
       this.state = this.input.state || {};
-      this.discordOnlyViews = new Set(["guild", "moderation"]);
+      this.discordOnlyViews = new Set(["guild", "moderation", "games"]);
       this.dashboardThemeOrder = (window.dashboardThemeOrder || []).slice();
       this.dashboardThemes = new Set(this.dashboardThemeOrder);
       this.dashboardThemeStorageKey = "urage-dashboard-theme";

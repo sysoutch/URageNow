@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { stripImageMetadataToPng } from "../imageSanitizer.js";
+import { fetchRemoteImage } from "../safeRemoteImage.js";
 import type { GenerateModelInput } from "../model3d.js";
 import { getComfyRuntimeSettings } from "../comfyRuntimeSettings.js";
 import { resolveGeneratedImageApiSourceToFilePath } from "../internalGeneratedImageSource.js";
@@ -49,12 +50,9 @@ export async function stageImageInputForComfy(input: StageComfySourceImageInput)
     imageData = dataUrlPayload.data;
     extension = mimeToExtension(dataUrlPayload.mimeType);
   } else if (/^https?:\/\//i.test(rawInput)) {
-    const response = await fetch(rawInput);
-    if (!response.ok) {
-      throw new Error(`Failed to download source image (${response.status}).`);
-    }
-    imageData = Buffer.from(await response.arrayBuffer());
-    extension = extensionFromFileName(new URL(rawInput).pathname) || mimeToExtension(response.headers.get("content-type"));
+    const remote = await fetchRemoteImage(rawInput);
+    imageData = remote.bytes;
+    extension = extensionFromFileName(new URL(rawInput).pathname) || mimeToExtension(remote.mimeType);
   } else {
     const generatedImagePath = await resolveGeneratedImageApiSourceToFilePath(rawInput);
     const normalizedPath = generatedImagePath

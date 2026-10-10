@@ -9,9 +9,9 @@ export function renderDashboardModerationView(): string {
           </div>
         </article>
         <div class="tabs workspace-subtabs">
-          <button class="ghost active" data-subview="moderation-rules">Rules</button>
-          <button class="ghost" data-subview="moderation-simulator">Simulator</button>
-          <button class="ghost" data-subview="moderation-log">Log</button>
+          <button class="ghost active" type="button" data-subview="moderation-rules">Rules</button>
+          <button class="ghost" type="button" data-subview="moderation-simulator">Simulator</button>
+          <button class="ghost" type="button" data-subview="moderation-log">Log</button>
         </div>
         <div class="content-grid two-up">
           <article class="panel-card" data-subview-panel="moderation-rules">

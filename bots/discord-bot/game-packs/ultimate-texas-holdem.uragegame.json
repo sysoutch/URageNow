@@ -1,0 +1,22 @@
+{
+  "manifest": {
+    "id": "ultimate-texas-holdem",
+    "name": "Ultimate Texas Hold'em",
+    "description": "Seat at a casino table, get your hole cards in a private message, then Play, Call, or Fold before the flop and Bet or Check after it.",
+    "version": "1.0.0",
+    "runtimes": ["discord"],
+    "gameType": "ultimate-texas-holdem"
+  },
+  "configuration": {
+    "anteOptions": [5, 10, 25, 50, 100, 250, 500, 1000],
+    "defaultAnte": 10,
+    "minBet": 5,
+    "hands": 10,
+    "tripsPaytable": {
+      "royalFlush": 100,
+      "straightFlush": 20,
+      "quads": 2,
+      "trips": 1
+    }
+  }
+}

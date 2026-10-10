@@ -45,7 +45,7 @@ function createDashboardShellRuntimeThemeFallback(input) {
       return "discord";
     },
     isDiscordOnlyView(view) {
-      return ["guild", "moderation"].includes(String(view || "").trim());
+      return ["guild", "moderation", "games"].includes(String(view || "").trim());
     },
     getActiveView() {
       const panel = document.querySelector("[data-view-panel].active");

@@ -49,6 +49,25 @@ try {
   assert.equal(imported.updatedDevices, 1);
   assert.equal((await access.getCompanionAccessPolicy()).defaults["media.delete"], false);
   assert.equal(await access.revokeCompanionDevice(device.id), true);
+
+  const concurrentPairing = access.getCompanionPairingPayload();
+  const concurrentResults = await Promise.allSettled([
+    access.pairCompanionDevice(concurrentPairing.token, "Concurrent Device A", "192.0.2.10"),
+    access.pairCompanionDevice(concurrentPairing.token, "Concurrent Device B", "192.0.2.11")
+  ]);
+  assert.equal(concurrentResults.filter(result => result.status === "fulfilled").length, 1);
+  assert.equal(concurrentResults.filter(result => result.status === "rejected").length, 1);
+
+  const nextPairing = access.getCompanionPairingPayload();
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await assert.rejects(access.pairCompanionDevice("invalid", "Attacker", "192.0.2.20"));
+  }
+  const otherClient = await access.pairCompanionDevice(nextPairing.token, "Other Client", "192.0.2.21");
+  assert.ok(otherClient.deviceId);
+  await assert.rejects(
+    access.pairCompanionDevice("invalid", "Attacker", "192.0.2.20"),
+    /locked for this client/
+  );
 } finally {
   const resolvedTemporaryRoot = path.resolve(temporaryRoot);
   if (!resolvedTemporaryRoot.startsWith(path.resolve(os.tmpdir()) + path.sep)) {

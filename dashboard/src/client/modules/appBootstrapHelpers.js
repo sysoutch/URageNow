@@ -128,7 +128,6 @@ function createDashboardAppBootstrapHelpers(input) {
     switchDetailTab("current");
     switchSubview("guild", state.guildSubview);
     switchSubview("moderation", state.moderationSubview);
-    bindSubviewTabs();
     renderAiImageList();
     renderModerationImageList();
     renderGuildChannelPlan();
@@ -158,6 +157,7 @@ function createDashboardAppBootstrapHelpers(input) {
     }, 5_000);
   }
   async function start() {
+    bindSubviewTabs();
     bindRuntimeEvents();
     await bootstrap();
   }

@@ -248,7 +248,7 @@ function createDashboardStudioSidebarHelpers(input) {
       setStudioRailHoverGroup("");
       return;
     }
-    if (target.closest("[data-tools-filter]")) {
+    if (target.closest(".rail-tools-categories [data-tools-filter]")) {
       document.querySelector(".rail-tools-button")?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
       setStudioRailHoverGroup("");
       return;

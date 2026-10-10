@@ -25,14 +25,9 @@ import {
   model3dInitialThreadExtraText
 } from "@urage/shared/model3d.postText";
 import { renderDashboardAiView } from "./pageSections/aiView.js";
-import { renderDashboardMessagingView } from "./features/discord/ui/messagingView.js";
 import { renderDashboardAutomationView } from "./pageSections/automationView.js";
-import { renderDashboardGuildView } from "./features/discord/ui/guildView.js";
-import { renderDashboardModerationView } from "./features/discord/ui/moderationView.js";
-import { renderDashboardActivityView } from "./pageSections/activityView.js";
 import { renderDashboardProfileView } from "./pageSections/profileView.js";
-import { renderDashboardMessengerView } from "./pageSections/messengerView.js";
-import { renderDashboardMessengerDashboardView } from "./pageSections/messengerDashboardView.js";
+import { renderBotsDashboardHostView } from "./botsDashboardPage.js";
 import { renderDashboardDetailsPane } from "./pageSections/detailsPane.js";
 import { renderDashboardMobileNav } from "./pageSections/mobileNav.js";
 import { getDashboardToolsCatalog, renderDashboardToolsRailCategories, renderDashboardToolsView } from "./pageSections/toolsView.js";
@@ -543,6 +538,7 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
               <button class="nav-link tab-link" data-view="automation" title="Automation">&#9201; Automation</button>
               <button class="nav-link tab-link" data-view="guild" data-discord-only="true" title="Guild">&#9881; Guild</button>
               <button class="nav-link tab-link" data-view="moderation" data-discord-only="true" title="Moderation">&#128737; Moderation</button>
+              <button class="nav-link tab-link" data-view="games" data-discord-only="true" title="Games">&#127918; Games</button>
               <button class="nav-link tab-link" data-view="activity" title="Activity">&#128203; Activity</button>
             </div>
           </div>
@@ -560,17 +556,8 @@ ${renderDashboardAiView({ model3dInitialThreadExtraText, model3dDestinationExtra
 ${renderDashboardToolsView(toolsCatalogEntries)}
 ${renderDashboardBlenderAddonsView()}
 ${renderDashboardAssetsView()}
-${renderDashboardMessengerDashboardView()}
-${renderDashboardMessagingView()}
+${renderBotsDashboardHostView()}
 ${renderDashboardAutomationView({ model3dInitialThreadExtraText, model3dDestinationExtraText })}
-
-${renderDashboardGuildView()}
-
-${renderDashboardModerationView()}
-
-${renderDashboardMessengerView()}
-
-${renderDashboardActivityView()}
 
 ${renderDashboardProfileView(port)}
     </section>

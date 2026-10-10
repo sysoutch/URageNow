@@ -1,4 +1,5 @@
-﻿const desktopToolQuickPickerStorageKey = "urage-tools-desktop-pinned";
+const desktopToolQuickPickerStorageKey = "urage-tools-desktop-pinned";
+let toolsViewEventsBound = false;
 
 function getToolQuickActionUi(kind) {
     if (kind === "video") {
@@ -1368,6 +1369,10 @@ function getToolQuickActionUi(kind) {
     }, true);
   }
   function bindToolsViewEvents() {
+    if (toolsViewEventsBound) {
+      return;
+    }
+    toolsViewEventsBound = true;
     bindToolWorkspaceThemeEvents();
     const toolButtons = getToolsCatalogButtons();
     const layoutNode = document.querySelector(".tools-workspace-card");
@@ -3989,5 +3994,10 @@ function getToolQuickActionUi(kind) {
       return;
     }
     pending.reject(new Error("Tool returned an unsupported bridge response."));
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindToolsViewEvents, { once: true });
+  } else {
+    bindToolsViewEvents();
   }
   

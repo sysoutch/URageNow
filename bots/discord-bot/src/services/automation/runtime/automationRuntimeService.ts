@@ -1,4 +1,4 @@
-import { normalizeImagePostOptions, type ImageAutomationPostOptions, type ImagePostProcessingOptions } from "@urage/shared/automation/index";
+import { normalizeImagePostOptions, type ImageAutomationPostOptions, type ImagePostProcessingOptions, type ScheduledAutomation, type JoinAutomation } from "@urage/shared/automation/index";
 import { buildModelPostSummaryExtraContent } from "../../model3d/post/modelPostHelpers.js";
 
 function inferImageFileNameHint(imageInput: string): string | undefined {
@@ -82,6 +82,7 @@ function buildModelFollowUpProgressText(input: {
 
 type AutomationRuntimeServiceDependencies = {
   createAutomationEngine: (input: {
+    allowAutomation?: (entry: ScheduledAutomation | JoinAutomation) => boolean;
     askModel: (prompt: string) => Promise<string>;
     buildGiftMessageIfAvailable?: () => Promise<string | null>;
     sendMessageToChannel: (channelId: string, content: string) => Promise<void>;
@@ -207,6 +208,7 @@ type AutomationRuntimeServiceDependencies = {
   mergeContentBlocks: (segments: any[]) => string | undefined;
   postExistingGeneratedModelToChannel: (input: any) => Promise<any>;
   getGuildName: (guildId: string) => string | null;
+  allowAutomation?: (entry: ScheduledAutomation | JoinAutomation) => boolean;
 };
 
 type AutomationRuntimeService = {
@@ -465,6 +467,7 @@ export function createAutomationRuntimeService(dependencies: AutomationRuntimeSe
       return images;
     };
     return dependencies.createAutomationEngine({
+      allowAutomation: dependencies.allowAutomation,
       askModel: async prompt => dependencies.askText(prompt),
       buildGiftMessageIfAvailable: dependencies.buildGiftMessageIfAvailable,
       sendMessageToChannel: dependencies.sendMessageToChannel,

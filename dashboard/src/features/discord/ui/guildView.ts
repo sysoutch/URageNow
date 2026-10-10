@@ -15,12 +15,12 @@ export function renderDashboardGuildView(): string {
           </div>
         </article>
         <div class="tabs workspace-subtabs">
-          <button class="ghost active" data-subview="guild-overview">People</button>
-          <button class="ghost" data-subview="guild-channels">Channels</button>
-          <button class="ghost" data-subview="guild-invites">Invites</button>
-          <button class="ghost" data-subview="guild-bot">Bot</button>
-          <button class="ghost" data-subview="guild-commands">Commands</button>
-          <button class="ghost" data-subview="guild-rod">Rod Tools</button>
+          <button class="ghost active" type="button" data-subview="guild-overview">People</button>
+          <button class="ghost" type="button" data-subview="guild-channels">Channels</button>
+          <button class="ghost" type="button" data-subview="guild-invites">Invites</button>
+          <button class="ghost" type="button" data-subview="guild-bot">Bot</button>
+          <button class="ghost" type="button" data-subview="guild-commands">Commands</button>
+          <button class="ghost" type="button" data-subview="guild-rod">Rod Tools</button>
         </div>
         <div class="content-grid two-up guild-grid">
 ${renderDashboardGuildOverviewPanels()}

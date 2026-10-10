@@ -26,6 +26,16 @@ They use `scripts\run-server.cmd`, force the headless role, never bind the dashb
 
 - `.\scripts\run-dashboard.cmd start`
 - `.\scripts\run-dashboard.cmd dev`
+- `.\scripts\run-discord-dashboard.cmd start` — standalone Discord-only bot dashboard on loopback port 4783
+- `.\scripts\run-discord-dashboard.cmd dev`
+- `.\scripts\run-bots-dashboard.cmd start` — shared Discord, Telegram, Matrix, and WhatsApp dashboard on loopback port 4784
+- `.\scripts\run-bots-dashboard.cmd dev`
+
+The shared Bots dashboard is also served at `/bots-dashboard` by the full Studio
+runtime. Studio mounts it in a lazy iframe only when the Bots workspace opens;
+both entry points therefore use the same bot view components and controller.
+The bot-only runner excludes Studio media, tool, LazyDev, companion-discovery,
+ComfyUI-startup, and remote-worker-sync behavior.
 
 `run-dashboard.cmd` is the only dashboard launcher and always runs as the signed-in desktop user. To let that dashboard start Discord later:
 

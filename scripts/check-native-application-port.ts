@@ -30,7 +30,7 @@ const [blenderService, printManager, runtimeSource, typeScriptAdapter, rustAdapt
   readFile(new URL("../shared/src/runtime/nativeApplicationRuntime.ts", import.meta.url), "utf8"),
   readFile(new URL("../shared/src/runtime/typeScriptNativeApplicationAdapter.ts", import.meta.url), "utf8"),
   readFile(new URL("../shared/src/runtime/rustNativeApplicationAdapter.ts", import.meta.url), "utf8"),
-  readFile(new URL("../src-tauri/src/lib.rs", import.meta.url), "utf8"),
+  readFile(new URL("../src-tauri/src/runtime.rs", import.meta.url), "utf8"),
   readFile(new URL("./prepare-tauri-runtime.mjs", import.meta.url), "utf8")
 ]);
 assert.match(blenderService, /nativeApplicationPort\.launch/);

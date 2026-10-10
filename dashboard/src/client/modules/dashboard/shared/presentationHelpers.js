@@ -123,10 +123,15 @@ function createDashboardPresentationHelpers() {
     const rawHtml = parser
       ? parser.parse(source, { breaks: true, gfm: true, renderer })
       : "<p>" + escapeHtml(source).replace(/\n/g, "<br>") + "</p>";
-    if (window.DOMPurify && typeof window.DOMPurify.sanitize === "function") {
-      return window.DOMPurify.sanitize(rawHtml);
+    const renderEscapedFallback = () => "<p>" + escapeHtml(source).replace(/\n/g, "<br>") + "</p>";
+    if (!window.DOMPurify || typeof window.DOMPurify.sanitize !== "function") {
+      return renderEscapedFallback();
     }
-    return rawHtml;
+    try {
+      return window.DOMPurify.sanitize(rawHtml);
+    } catch {
+      return renderEscapedFallback();
+    }
   }
   function renderMarkdownInto(target, value, emptyText) {
     const element = typeof target === "string" ? document.getElementById(target) : target;

@@ -1,19 +1,25 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { createHash, randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { AddressInfo } from "node:net";
-import { extname, resolve, sep } from "node:path";
+import { extname, resolve } from "node:path";
 import { repositoryRootCandidates } from "@urage/server/config/repositoryPaths";
 import { createRequestId, redactLogText } from "@urage/server/security/logRedaction";
+import { resolveContainedStaticFilePath } from "@urage/server/security/staticFilePath";
 import { recordRuntimeFailure } from "@urage/server/services/failureLogStore";
 import type { GlobalDashboardSettings } from "@urage/shared/dashboard/runtimeContracts";
 import { appConfig, applyDashboardNetworkRuntimeConfig, type DashboardDependencies } from "./server/runtime/botBridge.js";
-import { sendJson } from "./server/http.js";
+import { RequestBodyTooLargeError, parseJsonBody, sendJson } from "./server/http.js";
+import { isBotsDashboardPath, isDiscordOnlyDashboardPath } from "./server/discordOnlyScope.js";
+import { renderDiscordOnlyDashboardHtml } from "./discordOnlyDashboardPage.js";
+import { renderBotsDashboardHtml } from "./botsDashboardPage.js";
 import { handleDashboardReadRoutes } from "./server/routes/readRoutes.js";
 import { handleDashboardSettingsAndGuildRoutes } from "./features/discord/server/routes/settingsAndGuildRoutes.js";
 import { handleDashboardMessagingAndModelRoutes } from "./server/routes/messagingAndModelRoutes.js";
 import { handleDashboardAutomationRoutes } from "./server/routes/automationRoutes.js";
 import { handleDashboardMediaConverterRoutes } from "./server/routes/mediaConverterRoutes.js";
 import { handleDashboardResourceHubRoutes } from "./server/routes/resourceHubRoutes.js";
+import { handleDashboardGameRoutes } from "./server/routes/gameRoutes.js";
 import {
   describeCompanionPairing,
   handleAuthenticatedCompanionRequest,
@@ -26,16 +32,6 @@ import { startLanDiscoveryService, type LanDiscoveryHandle } from "./server/comp
 import {androidCompanionGithubReleasesUrl, readLatestAndroidCompanionRelease} from "./server/companion/androidReleaseDistribution.js";
 import {renderRemoteBrowserLoginPage} from "./server/remoteBrowserLoginPage.js";
 import {startComfyUiRuntimeWhenConfigured} from "./server/comfyUi/comfyUiRuntimeManager.js";
-
-function resolveSafeStaticPath(baseRoot: string, requestPath: string): string | null {
-  const relativePath = requestPath.replace(/^\/+/, "");
-  const resolvedPath = resolve(baseRoot, relativePath);
-  const normalizedRoot = baseRoot.endsWith(sep) ? baseRoot : `${baseRoot}${sep}`;
-  if (resolvedPath === baseRoot || resolvedPath.startsWith(normalizedRoot)) {
-    return resolvedPath;
-  }
-  return null;
-}
 
 function getStaticMimeType(filePath: string): string {
   const extension = extname(filePath).toLowerCase();
@@ -123,51 +119,140 @@ function getRequestHeader(request: IncomingMessage, name: string): string {
   return Array.isArray(value) ? String(value[0] || "").trim() : String(value || "").trim();
 }
 
-function getDashboardAccessTokens(): string[] {
-  return [appConfig.dashboardAccessToken.trim(), appConfig.remoteWorkerSharedSecret.trim()].filter(Boolean);
-}
-
-function hasMatchingDashboardAccessToken(request: IncomingMessage): boolean {
-  const tokens = getDashboardAccessTokens();
-  if (tokens.length === 0) {
-    return false;
-  }
-  const encodedCookieToken = (getRequestHeader(request, "cookie").match(/(?:^|;\s*)urage_dashboard_access=([^;]+)/)?.[1] || "").trim();
-  let cookieToken = "";
+function normalizeRequestAuthority(authority: string, protocol = "http:"): string | null {
   try {
-    cookieToken = decodeURIComponent(encodedCookieToken);
+    const parsed = new URL(`${protocol}//${authority}`);
+    if (parsed.username || parsed.password || parsed.pathname !== "/" || parsed.search || parsed.hash) return null;
+    const defaultPort = parsed.protocol === "https:" ? "443" : "80";
+    return `${parsed.hostname.toLowerCase()}:${parsed.port || defaultPort}`;
   } catch {
-    cookieToken = "";
+    return null;
   }
-  const providedTokens = [
-    getRequestHeader(request, "x-dashboard-access-token"),
-    getRequestHeader(request, "x-remote-worker-secret"),
-    cookieToken
-  ];
-  return providedTokens.some(value => tokens.includes(value));
 }
 
-function authorizeDashboardBrowser(request: IncomingMessage, response: ServerResponse, url: URL): boolean {
-  if (isLocalAddress(request.socket.remoteAddress) || hasMatchingDashboardAccessToken(request)) {
-    return false;
+function isAllowedDashboardHost(request: IncomingMessage, port: number, runtimeHost: string): boolean {
+  const requestAuthority = normalizeRequestAuthority(getRequestHeader(request, "host"));
+  if (!requestAuthority) return false;
+  const allowed = new Set<string>();
+  const addHost = (host: string, hostPort = port) => {
+    const trimmed = host.trim().toLowerCase();
+    if (!trimmed || trimmed === "0.0.0.0" || trimmed === "::") return;
+    const authority = trimmed.startsWith("[") ? `${trimmed}:${hostPort}`
+      : trimmed.includes(":") ? `[${trimmed}]:${hostPort}` : `${trimmed}:${hostPort}`;
+    const normalized = normalizeRequestAuthority(authority);
+    if (normalized) allowed.add(normalized);
+  };
+  addHost("localhost");
+  addHost("127.0.0.1");
+  addHost("::1");
+  addHost(runtimeHost);
+  addHost(appConfig.dashboardBindHost);
+  try {
+    const configured = new URL(appConfig.dashboardPublicBaseUrl);
+    const host = configured.hostname.includes(":")
+      ? `[${configured.hostname.replace(/^\[|\]$/g, "")}]`
+      : configured.hostname;
+    const authorities = configured.port
+      ? [configured.host]
+      : [`${host}:${port}`, `${host}:${configured.protocol === "https:" ? 443 : 80}`, `${host}:80`];
+    for (const authority of authorities) {
+      const normalized = normalizeRequestAuthority(authority);
+      if (normalized) allowed.add(normalized);
+    }
+  } catch {
+    // An invalid configured public URL does not expand the accepted Host set.
   }
-  if (!isAllowedDashboardClient(request)) {
-    return false;
+  return allowed.has(requestAuthority);
+}
+
+function hasSafeBrowserMutationContext(request: IncomingMessage, pathname: string): boolean {
+  const method = String(request.method || "GET").toUpperCase();
+  if (method === "GET" || method === "HEAD" || method === "OPTIONS") return true;
+  const originHeader = getRequestHeader(request, "origin");
+  if (originHeader) {
+    try {
+      const origin = new URL(originHeader);
+      const authority = normalizeRequestAuthority(getRequestHeader(request, "host"), origin.protocol);
+      const originAuthority = normalizeRequestAuthority(origin.host, origin.protocol);
+      if (!authority || !originAuthority || authority !== originAuthority
+        || (origin.protocol !== "http:" && origin.protocol !== "https:")
+        || origin.username || origin.password || origin.pathname !== "/" || origin.search || origin.hash) return false;
+    } catch {
+      return false;
+    }
   }
-  const requestedToken = url.searchParams.get("accessToken")?.trim() || "";
-  if (!requestedToken || !getDashboardAccessTokens().includes(requestedToken)) {
-    return false;
+  const fetchSite = getRequestHeader(request, "sec-fetch-site").toLowerCase();
+  if (fetchSite === "cross-site" || fetchSite === "none") return false;
+  const isBrowserRequest = Boolean(originHeader || fetchSite || getRequestHeader(request, "sec-fetch-mode"));
+  if (isBrowserRequest && pathname.startsWith("/api/")) {
+    const contentType = (getRequestHeader(request, "content-type").split(";", 1)[0] || "").trim().toLowerCase();
+    if (contentType !== "application/json" && !/^application\/[a-z0-9.+-]+\+json$/.test(contentType)
+      && contentType !== "multipart/form-data") return false;
   }
-  url.searchParams.delete("accessToken");
-  response.writeHead(302, {
-    location: `${url.pathname}${url.search}`,
-    "set-cookie": `urage_dashboard_access=${encodeURIComponent(requestedToken)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`
-  });
-  response.end();
   return true;
 }
 
-async function sendDashboardBrowserLogin(response: ServerResponse, invalidToken: boolean): Promise<void> {
+function getDashboardAccessTokens(): string[] {
+  return appConfig.dashboardAccessToken.trim() ? [appConfig.dashboardAccessToken.trim()] : [];
+}
+
+const DASHBOARD_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+const dashboardSessions = new Map<string, number>();
+
+function hashDashboardSession(sessionId: string): string {
+  return createHash("sha256").update(sessionId).digest("hex");
+}
+
+function issueDashboardSession(): string {
+  const now = Date.now();
+  for (const [key, expiresAt] of dashboardSessions) if (expiresAt <= now) dashboardSessions.delete(key);
+  if (dashboardSessions.size >= 4096) {
+    const oldestSessionKey = dashboardSessions.keys().next().value as string | undefined;
+    if (oldestSessionKey) dashboardSessions.delete(oldestSessionKey);
+  }
+  const sessionId = randomBytes(32).toString("base64url");
+  dashboardSessions.set(hashDashboardSession(sessionId), now + DASHBOARD_SESSION_TTL_MS);
+  return sessionId;
+}
+
+function isSecureDashboardContext(request: IncomingMessage): boolean {
+  if ("encrypted" in request.socket && Boolean((request.socket as {encrypted?: boolean}).encrypted)) return true;
+  try { return new URL(appConfig.dashboardPublicBaseUrl).protocol === "https:"; } catch { return false; }
+}
+
+function dashboardSessionCookie(request: IncomingMessage, sessionId: string): string {
+  return `urage_dashboard_session=${encodeURIComponent(sessionId)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${DASHBOARD_SESSION_TTL_MS / 1000}${isSecureDashboardContext(request) ? "; Secure" : ""}`;
+}
+
+function readDashboardSessionCookie(request: IncomingMessage): string {
+  const match = getRequestHeader(request, "cookie").match(/(?:^|;\s*)urage_dashboard_session=([^;]+)/);
+  if (!match?.[1]) return "";
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return "";
+  }
+}
+
+function hasMatchingDashboardAccessToken(request: IncomingMessage): boolean {
+  const token = getRequestHeader(request, "x-dashboard-access-token");
+  if (token && getDashboardAccessTokens().includes(token)) return true;
+  const match = getRequestHeader(request, "cookie").match(/(?:^|;\s*)urage_dashboard_session=([^;]+)/);
+  let sessionId = "";
+  try { sessionId = decodeURIComponent(match?.[1] || ""); } catch { return false; }
+  const key = sessionId ? hashDashboardSession(sessionId) : "";
+  const expiresAt = key ? dashboardSessions.get(key) : undefined;
+  if (!expiresAt) return false;
+  if (expiresAt <= Date.now()) { dashboardSessions.delete(key); return false; }
+  return true;
+}
+
+async function sendDashboardBrowserLogin(response: ServerResponse, invalidToken: boolean, discordOnly = false): Promise<void> {
+  if (discordOnly) {
+    response.writeHead(invalidToken ? 401 : 200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+    response.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Discord Bot Dashboard · Sign in</title><style>body{font:16px system-ui;background:#101418;color:#f4f2ed;min-height:100vh;display:grid;place-items:center;margin:0}main{background:#1b242b;border:1px solid #52616a;border-radius:14px;padding:28px;width:min(400px,90vw)}label{display:grid;gap:9px}input,button{font:inherit;padding:10px;width:100%;box-sizing:border-box;margin-top:10px}button{background:#e88b52;border:0;border-radius:7px;cursor:pointer}.error{color:#ffb4a2}</style></head><body><main><h1>Discord Bot Dashboard</h1>${invalidToken ? '<p class="error">Access token was not accepted.</p>' : ""}<form action="/dashboard-login" method="post"><label>Dashboard access token<input type="password" name="accessToken" autocomplete="current-password" required autofocus></label><button>Sign in</button></form></main></body></html>`);
+    return;
+  }
   const release = await readLatestAndroidCompanionRelease();
   const releaseLabel = release ? `Version ${release.versionName} (${release.versionCode})` : "No local APK; GitHub fallback will be used";
   const html = renderRemoteBrowserLoginPage({
@@ -182,7 +267,7 @@ async function sendDashboardBrowserLogin(response: ServerResponse, invalidToken:
   response.end(html);
 }
 
-async function handleDashboardBrowserLogin(request: IncomingMessage, response: ServerResponse): Promise<void> {
+async function handleDashboardBrowserLogin(request: IncomingMessage, response: ServerResponse, discordOnly = false): Promise<void> {
   if (!appConfig.dashboardExposeApi || !isAllowedDashboardClient(request)) {
     sendJson(response, 403, {error: "Dashboard remote access is not available for this client."});
     return;
@@ -200,12 +285,14 @@ async function handleDashboardBrowserLogin(request: IncomingMessage, response: S
   }
   const token = new URLSearchParams(Buffer.concat(chunks).toString("utf8")).get("accessToken")?.trim() || "";
   if (!token || !getDashboardAccessTokens().includes(token)) {
-    await sendDashboardBrowserLogin(response, true);
+    await sendDashboardBrowserLogin(response, true, discordOnly);
     return;
   }
+  const sessionId = issueDashboardSession();
   response.writeHead(303, {
     location: "/",
-    "set-cookie": `urage_dashboard_access=${encodeURIComponent(token)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`
+    "cache-control": "no-store",
+    "set-cookie": dashboardSessionCookie(request, sessionId)
   });
   response.end();
 }
@@ -359,21 +446,25 @@ function serveStaticFile(url: URL, response: any): boolean {
     return false;
   }
   for (const workspaceRoot of repositoryRootCandidates) {
-    const staticRoot = servesMessengerAsset || servesGameEngineAsset || servesDashboardVendorAsset
+    const staticRoot = servesToolFile
+      ? resolve(workspaceRoot, "tools")
+      : servesMessengerAsset || servesGameEngineAsset || servesDashboardVendorAsset
       ? resolve(workspaceRoot, "dashboard", "assets")
       : servesThreeModule
         ? resolve(workspaceRoot, "node_modules", "three")
         : servesBootstrapIcons
           ? resolve(workspaceRoot, "node_modules", "bootstrap-icons")
         : workspaceRoot;
-    const staticPath = servesMessengerAsset || servesGameEngineAsset || servesDashboardVendorAsset
+    const staticPath = servesToolFile
+      ? decodedPathname.slice("/tools".length)
+      : servesMessengerAsset || servesGameEngineAsset || servesDashboardVendorAsset
       ? decodedPathname.slice("/assets".length)
       : servesThreeModule
         ? decodedPathname.slice("/vendor/three".length)
         : servesBootstrapIcons
           ? decodedPathname.slice("/vendor/bootstrap-icons".length)
         : decodedPathname;
-    const resolvedPath = resolveSafeStaticPath(staticRoot, staticPath);
+    const resolvedPath = resolveContainedStaticFilePath(staticRoot, staticPath);
     if (!resolvedPath) {
       continue;
     }
@@ -382,8 +473,10 @@ function serveStaticFile(url: URL, response: any): boolean {
       : [resolvedPath];
     for (const candidatePath of candidatePaths) {
       try {
-        const content = readFileSync(candidatePath);
-        response.writeHead(200, { "Content-Type": getStaticMimeType(candidatePath) });
+        const containedCandidatePath = resolveContainedStaticFilePath(staticRoot, candidatePath.slice(staticRoot.length));
+        if (!containedCandidatePath) continue;
+        const content = readFileSync(containedCandidatePath);
+        response.writeHead(200, { "Content-Type": getStaticMimeType(containedCandidatePath) });
         response.end(content);
         return true;
       } catch {
@@ -401,7 +494,7 @@ export interface DashboardServerHandle {
   address: () => AddressInfo | null;
 }
 
-export function startDashboardServer(dependencies: DashboardDependencies): DashboardServerHandle {
+export function startDashboardServer(dependencies: DashboardDependencies, options: { scope?: "full" | "discord" | "bots" } = {}): DashboardServerHandle {
   if (dependencies.enabled === false) {
     console.log("Dashboard server disabled (DASHBOARD_ENABLED=false).");
     return {
@@ -411,13 +504,17 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
       address: () => null
     };
   }
+  const discordOnly = options.scope === "discord";
+  const botsOnly = options.scope === "bots";
+  const scopedBotDashboard = discordOnly || botsOnly;
   const routeGroups = [
     handleDashboardReadRoutes,
     handleDashboardSettingsAndGuildRoutes,
     handleDashboardMessagingAndModelRoutes,
     handleDashboardAutomationRoutes,
     handleDashboardResourceHubRoutes,
-    handleDashboardMediaConverterRoutes
+    handleDashboardMediaConverterRoutes,
+    handleDashboardGameRoutes
   ] as const;
   const processDashboardRequest = async (request: IncomingMessage, response: ServerResponse, runtimeDependencies: DashboardDependencies) => {
     const requestId = createRequestId();
@@ -426,8 +523,27 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
         sendJson(response, 404, { error: "Not found" });
         return;
       }
-      const url = new URL(request.url, `http://${runtimeDependencies.host}:${runtimeDependencies.port}`);
-      const apiOnlyHost = !appConfig.dashboardUiEnabled;
+      const requestPort = runtimeDependencies.port === 0 ? (request.socket.localPort || 0) : runtimeDependencies.port;
+      const url = new URL(request.url, `http://${runtimeDependencies.host}:${requestPort}`);
+      if (!isAllowedDashboardHost(request, requestPort, runtimeDependencies.host)) {
+        sendJson(response, 421, {error: "Unrecognized dashboard Host header."});
+        return;
+      }
+      if (url.searchParams.has("accessToken")) {
+        url.search = "";
+        response.writeHead(303, {location: url.pathname, "cache-control": "no-store"});
+        response.end();
+        return;
+      }
+      if (!hasSafeBrowserMutationContext(request, url.pathname)) {
+        sendJson(response, 403, {error: "Cross-origin or unsafe browser mutation rejected."});
+        return;
+      }
+      if (scopedBotDashboard && !(botsOnly ? isBotsDashboardPath(request.method, url.pathname) : isDiscordOnlyDashboardPath(request.method, url.pathname))) {
+        sendJson(response, 404, { error: "Not available in the bot dashboard." });
+        return;
+      }
+      const apiOnlyHost = !scopedBotDashboard && !appConfig.dashboardUiEnabled;
       if (apiOnlyHost && url.pathname !== "/health" && url.pathname !== "/ready" && !url.pathname.startsWith("/api/")) {
         sendJson(response, 404, { error: "Not found" });
         return;
@@ -447,10 +563,18 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
         }
       }
       if (url.pathname === "/dashboard-login" && request.method === "POST") {
-        await handleDashboardBrowserLogin(request, response);
+        await handleDashboardBrowserLogin(request, response, scopedBotDashboard);
         return;
       }
-      if (authorizeDashboardBrowser(request, response, url)) {
+      if (url.pathname === "/dashboard-logout" && request.method === "POST") {
+        const sessionId = readDashboardSessionCookie(request);
+        if (sessionId) dashboardSessions.delete(hashDashboardSession(sessionId));
+        response.writeHead(303, {
+          location: "/",
+          "cache-control": "no-store",
+          "set-cookie": `urage_dashboard_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${isSecureDashboardContext(request) ? "; Secure" : ""}`
+        });
+        response.end();
         return;
       }
       if (companionClientAllowed && isPublicCompanionPath(url.pathname)) {
@@ -475,7 +599,7 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
           && isAllowedDashboardClient(request)
           && getDashboardAccessTokens().length > 0;
         if (isRemoteDashboardPage) {
-          await sendDashboardBrowserLogin(response, url.searchParams.has("accessToken"));
+          await sendDashboardBrowserLogin(response, url.searchParams.has("accessToken"), scopedBotDashboard);
           return;
         }
         if (!appConfig.dashboardExposeApi) {
@@ -490,6 +614,10 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
         return;
       }
       if (url.pathname === "/ready") {
+        if (scopedBotDashboard) {
+          sendJson(response, 200, { ok: true, service: botsOnly ? "bots-dashboard" : "discord-dashboard", discord: runtimeDependencies.getBotSnapshot().id ? "ready" : "stopped", ...(botsOnly ? { runtimes: runtimeDependencies.getMessengerRuntimeSnapshot().runtimes } : {}) });
+          return;
+        }
         const llmSettings = runtimeDependencies.runtimeState.getGlobalDashboardSettings();
         const [remoteWorkerReadiness, llmReadiness, comfyUi] = await Promise.all([
           getRemoteWorkerReadiness(),
@@ -517,6 +645,99 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
           checks,
           remoteWorkerCapacity: remoteWorkerReadiness.capacity
         });
+        return;
+      }
+      if (url.pathname === "/bots-dashboard" && request.method === "GET") {
+        response.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+        response.end(renderBotsDashboardHtml());
+        return;
+      }
+      if (scopedBotDashboard && url.pathname === "/" && request.method === "GET") {
+        response.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+        response.end(botsOnly ? renderBotsDashboardHtml() : renderDiscordOnlyDashboardHtml());
+        return;
+      }
+      if (scopedBotDashboard && url.pathname === "/api/discord/status" && request.method === "GET") {
+        const snapshot = runtimeDependencies.getMessengerRuntimeSnapshot();
+        sendJson(response, 200, { bot: runtimeDependencies.getBotSnapshot(), runtime: snapshot.runtimes.find(runtime => runtime.messenger === "discord"), events: snapshot.events.filter(event => event.messenger === "discord") });
+        return;
+      }
+      if (scopedBotDashboard && url.pathname === "/api/discord/runtime" && request.method === "POST") {
+        const body = await parseJsonBody(request);
+        const action = body.action;
+        if (action !== "start" && action !== "stop" && action !== "restart") {
+          sendJson(response, 400, { error: "Use start, stop, or restart." });
+          return;
+        }
+        const runtime = await runtimeDependencies.controlMessengerRuntime({ messenger: "discord", action });
+        sendJson(response, 200, { runtime });
+        return;
+      }
+      if (scopedBotDashboard && url.pathname === "/api/discord/moderation" && request.method === "POST") {
+        const body = await parseJsonBody(request);
+        const guildId = typeof body.guildId === "string" ? body.guildId.trim() : "";
+        if (!guildId) {
+          sendJson(response, 400, { error: "Choose a server first." });
+          return;
+        }
+        const settings = runtimeDependencies.runtimeState.updateGuildDashboardSettings(guildId, {
+          antiSpamEnabled: body.antiSpamEnabled === true,
+          antiSpamApplyTimeouts: body.antiSpamApplyTimeouts === true,
+          antiSpamTextRulePatterns: Array.isArray(body.antiSpamTextRulePatterns)
+            ? body.antiSpamTextRulePatterns.filter((entry): entry is string => typeof entry === "string") : []
+        });
+        await runtimeDependencies.saveDashboardSettings(runtimeDependencies.runtimeState.getStoredDashboardSettings());
+        sendJson(response, 200, settings);
+        return;
+      }
+      if (scopedBotDashboard && url.pathname === "/api/discord/automations") {
+        const body = request.method === "POST" ? await parseJsonBody(request) : undefined;
+        const guildId = String(body?.guildId || url.searchParams.get("guildId") || "").trim();
+        if (!guildId) {
+          sendJson(response, 400, { error: "Choose a server first." });
+          return;
+        }
+        if (request.method === "GET") {
+          const [scheduled, joins] = await Promise.all([
+            runtimeDependencies.listScheduledAutomations(guildId), runtimeDependencies.listJoinAutomations(guildId)
+          ]);
+          sendJson(response, 200, { scheduled: scheduled.filter(entry => entry.targetMessenger === "discord"), joins });
+          return;
+        }
+        if (body?.action === "delete") {
+          const id = String(body.id || "").trim();
+          const scheduled = (await runtimeDependencies.listScheduledAutomations(guildId)).find(entry => entry.id === id && entry.targetMessenger === "discord");
+          const join = (await runtimeDependencies.listJoinAutomations(guildId)).find(entry => entry.id === id);
+          const deleted = scheduled ? await runtimeDependencies.deleteScheduledAutomation(id)
+            : join ? await runtimeDependencies.deleteJoinAutomation(id) : false;
+          sendJson(response, deleted ? 200 : 404, deleted ? { ok: true } : { error: "Discord automation not found." });
+          return;
+        }
+        const name = typeof body?.name === "string" ? body.name.trim() : "";
+        const channelId = typeof body?.channelId === "string" ? body.channelId.trim() : "";
+        const template = typeof body?.template === "string" ? body.template.trim() : "";
+        if (!name || !channelId || !template || !(await runtimeDependencies.listChannels(guildId)).some(channel => channel.id === channelId)) {
+          sendJson(response, 400, { error: "Name, text, and a channel in the selected server are required." });
+          return;
+        }
+        const action = { source: "template" as const, template, prompt: "", jokesFile: "" };
+        if (body?.scope === "member-join") {
+          const saved = await runtimeDependencies.saveJoinAutomation({ guildId, channelId, name, enabled: true,
+            delaySeconds: 0, action });
+          sendJson(response, 200, saved);
+          return;
+        }
+        const intervalValue = Number(body?.intervalValue);
+        if (!Number.isInteger(intervalValue) || intervalValue < 1 || intervalValue > 10_000) {
+          sendJson(response, 400, { error: "Interval must be from 1 to 10000." });
+          return;
+        }
+        const intervalUnit = body?.intervalUnit === "minutes" || body?.intervalUnit === "hours" || body?.intervalUnit === "days"
+          ? body.intervalUnit : "hours";
+        const saved = await runtimeDependencies.saveScheduledAutomation({ guildId, channelId, name, enabled: true,
+          targetMessenger: "discord", triggerMode: "interval", cron: "", intervalValue, intervalUnit,
+          repeatCount: 1, repeatDelaySeconds: 0, action });
+        sendJson(response, 200, saved);
         return;
       }
       if (serveStaticFile(url, response)) {
@@ -547,6 +768,10 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
         detail: redactedDetail
       });
       console.error(JSON.stringify({event: "dashboard.request.failed", requestId, method: request.method || "GET", path, detail: redactedDetail}));
+      if (error instanceof RequestBodyTooLargeError) {
+        sendJson(response, error.statusCode, {error: "Request body is too large.", maxBytes: error.maxBytes, requestId});
+        return;
+      }
       sendJson(response, 500, { error: "Dashboard request failed.", requestId });
     }
   };
@@ -647,6 +872,7 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
     };
   activeDependencies = {
     ...dependencies,
+    dashboardScope: botsOnly ? "bots" : discordOnly ? "discord" : "full",
     restartDashboardServer,
     applyDashboardNetworkConfig
   };
@@ -655,11 +881,13 @@ export function startDashboardServer(dependencies: DashboardDependencies): Dashb
   });
   const ready = listenServer(initialServer).then(() => {
     server = initialServer;
-    console.log(`${appConfig.dashboardUiEnabled ? "Dashboard" : "API"} listening on ${getServerUrl(initialServer)}`);
-    void startLanDiscovery();
-    void startComfyUiRuntimeWhenConfigured().catch(error => {
-      console.error(`Configured ComfyUI startup failed: ${error instanceof Error ? error.message : String(error)}`);
-    });
+    console.log(`${botsOnly ? "Bots dashboard" : discordOnly ? "Discord bot dashboard" : appConfig.dashboardUiEnabled ? "Dashboard" : "API"} listening on ${getServerUrl(initialServer)}`);
+    if (!scopedBotDashboard) {
+      void startLanDiscovery();
+      void startComfyUiRuntimeWhenConfigured().catch(error => {
+        console.error(`Configured ComfyUI startup failed: ${error instanceof Error ? error.message : String(error)}`);
+      });
+    }
   });
   void ready.catch(error => {
     const detail = error instanceof Error ? error.message : "Unknown error";

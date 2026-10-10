@@ -21,6 +21,14 @@ export const commandCatalog: CommandCatalogEntry[] = [
       .setDescription("Show Discrod status and basic help")
   },
   {
+    name: "game",
+    description: "Start an enabled Discord game",
+    adminOnly: false,
+    build: () => new SlashCommandBuilder()
+      .setName("game")
+      .setDescription("Start an enabled Discord game")
+  },
+  {
     name: "ping",
     description: "Check whether the bot is responding",
     adminOnly: true,

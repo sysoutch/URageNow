@@ -4,9 +4,10 @@ import { existsSync } from "node:fs";
 import os from "node:os";
 import { promisify } from "node:util";
 import { appConfig } from "@urage/server/config/appConfig";
-import { parseJsonBody, sendBinary, sendJson } from "@urage/server/http/http";
+import { parseJsonBody, RequestBodyTooLargeError, sendBinary, sendJson } from "@urage/server/http/http";
 import { createRequestId, redactLogText } from "@urage/server/security/logRedaction";
 import { recordRuntimeFailure } from "@urage/server/services/failureLogStore";
+import { hasValidRemoteWorkerSecret, requireRemoteWorkerSecret } from "@urage/server/security/remoteWorkerAuth";
 import { resolveImagePrompt, resolveImagePromptFromBaseImage, resolveModelPrompt } from "@urage/server/services/generationFacade";
 import { updateComfyRuntimeSettings } from "@urage/server/services/comfyRuntimeSettings";
 import {
@@ -51,6 +52,9 @@ import { suggestModelRealWorldHeight } from "@urage/server/services/model3d/mode
 type WorkerHandler = (request: IncomingMessage, response: ServerResponse, url: URL) => Promise<void>;
 
 const execFileAsync = promisify(execFile);
+// Validate before creating or binding the listener; an empty secret must never
+// turn the optional worker into an unauthenticated network service.
+const remoteWorkerSecret = requireRemoteWorkerSecret(appConfig.remoteWorkerSharedSecret);
 
 function parseBase64DataUrl(dataUrl: string): { mimeType: string; base64Data: string; } | null {
   const match = dataUrl.match(/^data:([a-z0-9/+.-]+);base64,(.+)$/i);
@@ -439,15 +443,7 @@ async function suggestModelFileNameAndDescription(input: {
 }
 
 function hasValidWorkerSecret(request: IncomingMessage): boolean {
-  const expected = appConfig.remoteWorkerSharedSecret.trim();
-  if (!expected) {
-    return true;
-  }
-  const provided = request.headers["x-remote-worker-secret"];
-  if (Array.isArray(provided)) {
-    return provided.some(value => value.trim() === expected);
-  }
-  return typeof provided === "string" && provided.trim() === expected;
+  return hasValidRemoteWorkerSecret(remoteWorkerSecret, request.headers["x-remote-worker-secret"]);
 }
 
 function ensureAuthorized(request: IncomingMessage, response: ServerResponse): boolean {
@@ -709,7 +705,7 @@ async function handlePostModel3dLowPolyGenerate(request: IncomingMessage, respon
   sendJson(response, 200, generated);
 }
 async function handlePostModel3dLowPolyUpload(request: IncomingMessage, response: ServerResponse, url: URL): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const dataUrl = typeof body.dataUrl === "string" ? body.dataUrl.trim() : "";
   const requestedFileName = typeof body.fileName === "string" ? body.fileName.trim() : "uploaded-model.glb";
   const useLlmTargetFaces = body.llmTargetFaces === true;
@@ -934,7 +930,7 @@ async function handlePostBlenderOpenBatch(request: IncomingMessage, response: Se
 }
 
 async function handlePostImageGenerate(request: IncomingMessage, response: ServerResponse, url: URL): Promise<void> {
-  const body = await parseJsonBody(request);
+  const body = await parseJsonBody(request, {maxBytes: 128 * 1024 * 1024});
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
   const imageInput = typeof body.imageInput === "string" ? body.imageInput.trim() : "";
   const imageFileNameHint = typeof body.imageFileNameHint === "string" ? body.imageFileNameHint.trim() : "";
@@ -1125,53 +1121,73 @@ const getRouteHandlers = new Map<string, WorkerHandler>([
 
 async function handleWorkerRequest(request: IncomingMessage, response: ServerResponse): Promise<void> {
   const requestId = createRequestId();
-  const url = new URL(request.url || "/", `http://${request.headers.host || "127.0.0.1"}`);
-  if (url.pathname === "/health") {
-    sendJson(response, 200, { ok: true });
-    return;
-  }
-  if (!ensureAuthorized(request, response)) {
-    return;
-  }
-  if (url.pathname === "/capabilities") {
-    const snapshot = await getWorkerCapabilitySnapshot();
-    sendJson(response, 200, {ok: true, service: "remote-worker", ...snapshot});
-    return;
-  }
-  if (url.pathname === "/ready") {
-    const snapshot = await getWorkerCapabilitySnapshot();
-    const ok = snapshot.capabilities.comfyUi === "ready";
-    sendJson(response, ok ? 200 : 503, {
-      ok,
-      service: "remote-worker",
-      checks: snapshot.capabilities
-    });
-    return;
-  }
   const method = request.method === "POST" || request.method === "GET" ? request.method : "";
-  const routeTable = method === "POST" ? postRouteHandlers : method === "GET" ? getRouteHandlers : null;
-  if (!routeTable) {
-    sendJson(response, 405, { error: "Method not allowed." });
-    return;
-  }
-  const handler = routeTable.get(url.pathname);
-  if (!handler) {
-    sendJson(response, 404, { error: "Not found." });
-    return;
-  }
+  let pathname = "/";
+  let requestTargetParsed = false;
   try {
+    const url = new URL(request.url || "/", `http://${request.headers.host || "127.0.0.1"}`);
+    requestTargetParsed = true;
+    pathname = url.pathname;
+    if (url.pathname === "/health") {
+      sendJson(response, 200, { ok: true });
+      return;
+    }
+    if (!ensureAuthorized(request, response)) {
+      return;
+    }
+    if (url.pathname === "/capabilities") {
+      const snapshot = await getWorkerCapabilitySnapshot();
+      sendJson(response, 200, {ok: true, service: "remote-worker", ...snapshot});
+      return;
+    }
+    if (url.pathname === "/ready") {
+      const snapshot = await getWorkerCapabilitySnapshot();
+      const ok = snapshot.capabilities.comfyUi === "ready";
+      sendJson(response, ok ? 200 : 503, {
+        ok,
+        service: "remote-worker",
+        checks: snapshot.capabilities
+      });
+      return;
+    }
+    const routeTable = method === "POST" ? postRouteHandlers : method === "GET" ? getRouteHandlers : null;
+    if (!routeTable) {
+      sendJson(response, 405, { error: "Method not allowed." });
+      return;
+    }
+    const handler = routeTable.get(url.pathname);
+    if (!handler) {
+      sendJson(response, 404, { error: "Not found." });
+      return;
+    }
     await handler(request, response, url);
   } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      sendJson(response, error.statusCode, {error: "Request body is too large.", maxBytes: error.maxBytes, requestId});
+      return;
+    }
+    if (!requestTargetParsed) {
+      sendJson(response, 400, {error: "Malformed request target or Host header.", requestId});
+      return;
+    }
     const detail = error instanceof Error ? error.message : String(error);
     const redactedDetail = redactLogText(detail);
-    recordRuntimeFailure({source: "remote-worker:http", requestId, method, path: url.pathname, detail: redactedDetail});
-    console.error(JSON.stringify({event: "remote-worker.request.failed", requestId, method, path: url.pathname, detail: redactedDetail}));
-    sendJson(response, 500, { error: "Remote worker request failed.", requestId });
+    recordRuntimeFailure({source: "remote-worker:http", requestId, method, path: pathname, detail: redactedDetail});
+    console.error(JSON.stringify({event: "remote-worker.request.failed", requestId, method, path: pathname, detail: redactedDetail}));
+    if (!response.headersSent && !response.destroyed) {
+      sendJson(response, 500, { error: "Remote worker request failed.", requestId });
+    }
   }
 }
 
 const server = createServer((request, response) => {
-  void handleWorkerRequest(request, response);
+  void handleWorkerRequest(request, response).catch(error => {
+    const detail = redactLogText(error instanceof Error ? error.message : String(error));
+    console.error(JSON.stringify({event: "remote-worker.request.unhandled", method: request.method || "GET", detail}));
+    if (!response.headersSent && !response.destroyed) {
+      sendJson(response, 500, {error: "Remote worker request failed."});
+    }
+  });
 });
 
 server.listen(appConfig.remoteWorkerPort, appConfig.remoteWorkerBindHost, () => {

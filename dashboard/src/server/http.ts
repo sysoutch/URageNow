@@ -1,1 +1,1 @@
-export { parseJsonBody, sendBinary, sendJson } from "@urage/server/http/http";
+export { parseJsonBody, RequestBodyTooLargeError, sendBinary, sendJson } from "@urage/server/http/http";

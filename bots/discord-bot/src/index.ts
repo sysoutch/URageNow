@@ -363,6 +363,7 @@ import { createAutomationMediaRuntime } from "./runtime/automationMediaRuntime.j
 import { createGeneratedImageRuntime } from "./runtime/generatedImageRuntime.js";
 import { createGeneratedImageInteractionRuntime } from "./runtime/generatedImageInteractionRuntime.js";
 import { createDiscordEventRuntime } from "./runtime/discordEventRuntime.js";
+import { createDiscordGameRuntime } from "./runtime/discordGameRuntime.js";
 import { createDiscordRuntimeControl } from "./runtime/discordRuntimeControl.js";
 
 const discordTokenRuntime = appConfig.discordToken.trim();
@@ -385,6 +386,19 @@ const client = new Client({
 const voiceManager = new VoiceManager();
 const persistedDashboardSettings = await loadDashboardSettings();
 const messengerAutostartDisabled = process.env.URAGE_DISABLE_MESSENGER_AUTOSTART?.trim().toLowerCase() === "true";
+const discordOnlyDashboard = process.env.URAGE_DASHBOARD_SCOPE?.trim().toLowerCase() === "discord";
+const botsDashboard = process.env.URAGE_DASHBOARD_SCOPE?.trim().toLowerCase() === "bots";
+const scopedBotDashboard = discordOnlyDashboard || botsDashboard;
+const discordDashboardPortOverride = Number(process.env.URAGE_DISCORD_DASHBOARD_PORT);
+const botsDashboardPortOverride = Number(process.env.URAGE_BOTS_DASHBOARD_PORT);
+const dashboardPort = botsDashboard
+  ? Number.isInteger(botsDashboardPortOverride) && botsDashboardPortOverride >= 1 && botsDashboardPortOverride <= 65535
+    ? botsDashboardPortOverride : 4784
+  : discordOnlyDashboard
+  ? Number.isInteger(discordDashboardPortOverride) && discordDashboardPortOverride >= 1 && discordDashboardPortOverride <= 65535
+    ? discordDashboardPortOverride : 4783
+  : appConfig.dashboardPort;
+const dashboardHost = scopedBotDashboard ? "127.0.0.1" : appConfig.dashboardBindHost;
 
 const runtimeState = new RuntimeState({
   globalSettings: {
@@ -457,8 +471,10 @@ async function readImageAssetDataUrlForRemoteWorker(assetPath: string, fileName:
   return `data:${getImageMimeTypeFromFileName(fileName)};base64,${data.toString("base64")}`;
 }
 
-await ensureAvailableOllamaModels();
-syncValidatedActiveModelsToRuntimeState(runtimeState);
+if (!scopedBotDashboard) {
+  await ensureAvailableOllamaModels();
+  syncValidatedActiveModelsToRuntimeState(runtimeState);
+}
 try {
   await saveDashboardSettings(runtimeState.getStoredDashboardSettings());
 } catch (error) {
@@ -492,7 +508,7 @@ const guildFactAndSafetyHelpers = createGuildFactAndSafetyHelpers({
     comfyUiVideoWorkflowPath: globalSettings.comfyUiVideoWorkflowPath,
     comfyUiVideoImageWorkflowPath: globalSettings.comfyUiVideoImageWorkflowPath
   });
-  if (appConfig.remoteWorkerBaseUrl.trim().length > 0) {
+  if (!scopedBotDashboard && appConfig.remoteWorkerBaseUrl.trim().length > 0) {
     void syncComfySettingsViaRemoteWorker({
       comfyUiBaseUrl: globalSettings.comfyUiBaseUrl,
       comfyUiModelBaseUrl: globalSettings.comfyUiModelBaseUrl,
@@ -1018,8 +1034,10 @@ const generatedModelInteractionService = createGeneratedModelInteractionService(
 });
 const handleGeneratedModelButton = generatedModelInteractionService.handleGeneratedModelButton;
 const handleGeneratedModelModal = generatedModelInteractionService.handleGeneratedModelModal;
+const discordGameRuntime = createDiscordGameRuntime();
 const slashCommandHandlerService = createSlashCommandHandlerService({
   isCommandEnabled: (guildId, commandName) => isCommandEnabledForGuild(commandSettings, guildId, commandName),
+  handleGamesCommand: discordGameRuntime.handleGamesCommand,
   handleHelpCommand,
   handleAdminCoreSlashCommands,
   adminCoreContext: {
@@ -1236,6 +1254,7 @@ const handleGifFrameDownloadButton = automationMediaRuntime.handleGifFrameDownlo
 
 const automationRuntimeService = createAutomationRuntimeService({
   createAutomationEngine,
+  allowAutomation: entry => !scopedBotDashboard || (entry.action.source === "template" && (!discordOnlyDashboard || !("targetMessenger" in entry) || entry.targetMessenger === "discord")),
   askText: prompt => askOllama(prompt, false),
   buildGiftMessageIfAvailable,
   sendMessageToChannel,
@@ -1374,6 +1393,7 @@ const discordEventRuntime = createDiscordEventRuntime({
   handleModerationVeto,
   handleHoneypotVerify,
   handleSlashCommand,
+  discordGameRuntime,
   enforceModerationRoleRestrictions,
   duplicateSpamGuard,
   maybeOfferMediaReactionActions,
@@ -1416,27 +1436,27 @@ const messengerRuntimeManager = createMessengerRuntimeManager({
   telegram: {
     entryPath: appConfig.telegramBotEntryPath,
     workingDirectory: appConfig.telegramBotWorkingDirectory,
-    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.telegramRuntimeAutostart,
+    autoStart: !discordOnlyDashboard && !messengerAutostartDisabled && messengerRuntimeSettings.telegramRuntimeAutostart,
     healthCheck: createLocalMessengerHealthCheck(appConfig.telegramAdminBaseUrl)
   },
   matrix: {
     entryPath: appConfig.matrixBotEntryPath,
     workingDirectory: appConfig.matrixBotWorkingDirectory,
-    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.matrixRuntimeAutostart,
+    autoStart: !discordOnlyDashboard && !messengerAutostartDisabled && messengerRuntimeSettings.matrixRuntimeAutostart,
     healthCheck: createLocalMessengerHealthCheck(appConfig.matrixAdminBaseUrl)
   },
   whatsapp: {
     entryPath: appConfig.whatsappBotEntryPath,
     workingDirectory: appConfig.whatsappBotWorkingDirectory,
-    autoStart: !messengerAutostartDisabled && messengerRuntimeSettings.whatsappRuntimeAutostart,
+    autoStart: !discordOnlyDashboard && !messengerAutostartDisabled && messengerRuntimeSettings.whatsappRuntimeAutostart,
     healthCheck: createLocalMessengerHealthCheck(appConfig.whatsappAdminBaseUrl)
   }
 });
 
 const dashboardServer = startDashboardServer({
-  enabled: appConfig.dashboardEnabled,
-  port: appConfig.dashboardPort,
-  host: appConfig.dashboardBindHost,
+  enabled: scopedBotDashboard || appConfig.dashboardEnabled,
+  port: dashboardPort,
+  host: dashboardHost,
   runtimeState,
   saveDashboardSettings,
   setLlmConnectionSettings: input => {
@@ -1450,7 +1470,7 @@ const dashboardServer = startDashboardServer({
     avatarUrl: client.user?.displayAvatarURL({ size: 128, extension: "png" }) ?? null,
     guildCount: client.guilds.cache.size,
     startedAt: new Date().toISOString(),
-    dashboardPort: appConfig.dashboardPort
+    dashboardPort
   }),
   askModel: async prompt => {
     const response = await askOllama(prompt, false);
@@ -2646,7 +2666,8 @@ const dashboardServer = startDashboardServer({
   listJoinAutomations,
   saveJoinAutomation,
   deleteJoinAutomation
-});
+}, { scope: discordOnlyDashboard ? "discord" : botsDashboard ? "bots" : "full" });
+if (scopedBotDashboard) await dashboardServer.ready;
 
 const isComfyUiReachable = async (): Promise<boolean> => {
   const configuredBaseUrl = runtimeState.getGlobalDashboardSettings().comfyUiBaseUrl.trim();
@@ -2664,7 +2685,8 @@ const isComfyUiReachable = async (): Promise<boolean> => {
 };
 
 installInteractiveShutdownPrompt({
-  runtimeName: appConfig.dashboardEnabled ? "Dashboard" : "Headless server",
+  runtimeName: botsDashboard ? "Bots dashboard" : discordOnlyDashboard ? "Discord bot dashboard" : appConfig.dashboardUiEnabled ? "Dashboard" : appConfig.dashboardEnabled ? "API server" : "Headless server",
+  confirmOnSigint: !scopedBotDashboard && !appConfig.dashboardUiEnabled,
   getDependencies: async () => {
     const dependencies = messengerRuntimeManager.getSnapshot().runtimes
       .filter(runtime => runtime.status === "running" || runtime.status === "starting")
@@ -2675,7 +2697,7 @@ installInteractiveShutdownPrompt({
           : "runs in a separate process and can operate without the dashboard; this dashboard session will no longer manage it."
       }));
 
-    if (await isComfyUiReachable()) {
+    if (!scopedBotDashboard && await isComfyUiReachable()) {
       dependencies.push({
         label: "ComfyUI",
         detail: "is reachable and runs independently; it will remain available after the dashboard stops."

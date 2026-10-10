@@ -298,9 +298,9 @@ export async function handlePublicCompanionRequest(request: IncomingMessage, res
     return true;
   }
   if (url.pathname === "/api/companion/pair" && request.method === "POST") {
-    const body = await parseJsonBody(request);
+    const body = await parseJsonBody(request, {maxBytes: 4 * 1024});
     try {
-      sendJson(response, 201, await pairCompanionDevice(String(body.token || body.code || "").trim(), String(body.deviceName || "").trim()));
+      sendJson(response, 201, await pairCompanionDevice(String(body.token || body.code || "").trim(), String(body.deviceName || "").trim(), request.socket.remoteAddress || "unknown"));
     } catch (error) {
       sendJson(response, 401, { error: error instanceof Error ? error.message : "Pairing failed." });
     }

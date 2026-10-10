@@ -14,6 +14,7 @@ Durable project context for URageStudio. This folder keeps architecture notes, s
 | `architecture-cleanup-roadmap.md` | Package boundaries, runtime composition extraction, and remaining structural cleanup |
 | `studio-workflow-ux-plan.md` | Studio home and focused-workflow UX contract, references, rollout, and acceptance criteria |
 | `API.md` | API endpoint reference template — fill in as routes are stabilized |
+| [`../docs/security-review-2026-10-08.md`](../docs/security-review-2026-10-08.md) | Security and reliability findings, exposure conditions, validation limits and Taskitty remediation references |
 
 ## How to Use This Folder
 
