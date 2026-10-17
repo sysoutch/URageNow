@@ -53,7 +53,6 @@ function createDashboardStudioSidebarFoldouts(input) {
     }
     if (sidebarId === "audio-sidebar-panel" && child.classList.contains("audio-preview-card")) return "Latest Preview";
     if (sidebarId === "music-sidebar-panel" && child.classList.contains("music-side-card")) return "Latest Preview";
-    if (sidebarId === "video-sidebar-panel" && child.classList.contains("video-queue-panel")) return "Generation Queue";
     return "";
   }
 

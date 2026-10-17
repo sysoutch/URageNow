@@ -44,7 +44,6 @@ vm.runInContext(`${source}\nthis.createFoldouts = createDashboardStudioSidebarFo
 const foldouts = context.createFoldouts({setupSplitPanes() {}});
 
 assert.equal(foldouts.getTitle("image-sidebar-panel", new TestElement({id: "image-sidebar-advanced-stack"})), "Image Tools");
-assert.equal(foldouts.getTitle("video-sidebar-panel", new TestElement({classes: ["video-queue-panel"]})), "Generation Queue");
 assert.equal(foldouts.getTitle("audio-sidebar-panel", new TestElement({classes: ["audio-preview-card"]})), "Latest Preview");
 
 const label = new TestElement();

@@ -71,6 +71,16 @@ body.view-ai-active {
     overflow: auto;
   }
 
+  // The queue header reuses the dock tab row geometry but is a heading, not a tab control.
+  .studio-generation-queue-title {
+    margin: 0;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
   .studio-component-empty-state {
     display: grid;
     place-items: center;

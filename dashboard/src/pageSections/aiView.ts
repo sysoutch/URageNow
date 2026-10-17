@@ -1825,6 +1825,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                       <div class="list medium-list" id="model3d-history-list"></div>
                     </div>
                   </section>
+                  <section class="model3d-dock-panel model3d-queue-panel studio-component-queue" aria-labelledby="model3d-generation-queue-title">
+                    <div class="studio-tabs"><h3 class="studio-generation-queue-title" id="model3d-generation-queue-title">Generation Queue</h3></div>
+                    <div class="model3d-queue-list" id="model3d-bottom-queue-list" role="status" aria-live="polite"></div>
+                  </section>
                 </div>
               </div>
               <div class="studio-workflow-side-resizer" data-workflow-sidebar-resizer="model3d" aria-hidden="true"></div>
@@ -2808,6 +2812,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <div class="recent-media-controls" id="image-recent-media-controls"></div>
                   <div class="image-filmstrip" id="image-bottom-filmstrip"></div>
                 </section>
+                <section class="image-dock-panel image-queue-panel studio-component-queue" aria-labelledby="image-generation-queue-title">
+                  <div class="studio-tabs"><h3 class="studio-generation-queue-title" id="image-generation-queue-title">Generation Queue</h3></div>
+                  <div class="image-queue-list" id="image-bottom-queue-list" role="status" aria-live="polite"></div>
+                </section>
               </div>
             </div>
             ${renderWorkflowSettingsFooter([
@@ -3045,6 +3053,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <div class="recent-media-controls" id="audio-recent-media-controls"></div>
                   <div class="audio-filmstrip" id="audio-bottom-filmstrip"></div>
                 </section>
+                <section class="audio-dock-panel audio-queue-panel studio-component-queue" aria-labelledby="audio-generation-queue-title">
+                  <div class="studio-tabs"><h3 class="studio-generation-queue-title" id="audio-generation-queue-title">Generation Queue</h3></div>
+                  <div class="audio-queue-list" id="audio-bottom-queue-list" role="status" aria-live="polite"></div>
+                </section>
               </div>
             </div>
             ${renderWorkflowSettingsFooter([
@@ -3172,6 +3184,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <div class="studio-tabs"><button class="active" type="button">Recent Music</button><button type="button">Favorites</button></div>
                   <div class="recent-media-controls" id="music-recent-media-controls"></div>
                   <div class="music-filmstrip" id="music-bottom-filmstrip"></div>
+                </section>
+                <section class="music-dock-panel music-queue-panel studio-component-queue" aria-labelledby="music-generation-queue-title">
+                  <div class="studio-tabs"><h3 class="studio-generation-queue-title" id="music-generation-queue-title">Generation Queue</h3></div>
+                  <div class="music-queue-list" id="music-bottom-queue-list" role="status" aria-live="polite"></div>
                 </section>
               </div>
             </div>
@@ -3437,6 +3453,10 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                     <div class="studio-tabs"><button class="active" type="button">Project Videos</button><button type="button">Favorites</button></div>
                     <div class="recent-media-controls" id="video-recent-media-controls"></div>
                     <div class="video-filmstrip" id="video-bottom-filmstrip"></div>
+                  </section>
+                  <section class="video-dock-panel video-queue-panel studio-component-queue" aria-labelledby="video-generation-queue-title">
+                    <div class="studio-tabs"><h3 class="studio-generation-queue-title" id="video-generation-queue-title">Generation Queue</h3></div>
+                    <div class="video-queue-list" id="video-bottom-queue-list" role="status" aria-live="polite"></div>
                   </section>
                 </div>
               </div>
