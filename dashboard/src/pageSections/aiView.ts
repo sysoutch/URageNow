@@ -75,7 +75,7 @@ function renderWorkflowSettingsFooter(buttons: WorkflowSettingsButtonInput[]): s
                 <span class="studio-workflow-settings-footer-label">Workflow Settings</span>
                 <span class="studio-workflow-settings-footer-hint">Open connection, path, and shared pool tools in focused overlay windows.</span>
               </div>
-              <div class="row studio-workflow-settings-footer-actions">
+              <div class="studio-workflow-settings-footer-actions">
                 <button class="secondary studio-workflow-settings-button studio-workflow-settings-button-global" data-workflow-global-action="image-pools" type="button">${renderButtonIcon("folder")}<span>Image Pools</span></button>
                 ${buttons.map(button => `
                   <button

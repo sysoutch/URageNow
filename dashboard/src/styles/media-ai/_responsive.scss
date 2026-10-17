@@ -294,7 +294,26 @@
       display: none;
     }
 
+    // Phones cannot fit the label plus a sideways-scrolling button strip: the
+    // strip shrank to ~120px and hid the Studio's own settings button off
+    // screen. Put the label on its own line and let the buttons wrap instead.
+    .studio-workflow-settings-footer {
+      flex-wrap: wrap;
+    }
+
+    .studio-workflow-settings-footer-copy,
     .studio-workflow-settings-footer-actions {
-      display: flex;
+      flex: 1 1 100%;
+    }
+
+    .studio-workflow-settings-footer-actions {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+
+    .studio-workflow-settings-footer-actions>button {
+      flex: 1 1 140px;
+      min-width: 0;
+      max-width: none;
     }
   }
