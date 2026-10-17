@@ -26,7 +26,7 @@ const stylesheetLineBudgets = new Map([
   ["_cards-components.scss", 2595],
   ["studio/_core.scss", 2287],
   ["_content-layout.scss", 2202],
-  ["_tools.scss", 2094]
+  ["_tools.scss", 2026]
 ]);
 
 async function collectScssFiles(directory) {

@@ -1,0 +1,72 @@
+// Shared collection layout toolbar (Cards/List/Table + density) used by Tools, 3D Suites, and Game Engines.
+
+.dashboard-layout-toolbar {
+  position: static;
+  top: 0;
+  z-index: 5;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  background: color-mix(in srgb, var(--studio-surface-bg, var(--panel)) 92%, black 8%);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-layout-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-layout-switcher {
+  display: inline-grid;
+  grid-auto-flow: column;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  background: color-mix(in srgb, var(--panel) 84%, black 16%);
+}
+
+.dashboard-layout-switcher button {
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 0;
+  border-right: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.dashboard-layout-switcher button:last-child {
+  border-right: 0;
+}
+
+.dashboard-layout-switcher button:hover,
+.dashboard-layout-switcher button.active {
+  background: var(--studio-accent-soft, var(--accent-soft));
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--studio-accent-1, var(--accent));
+}
+
+@media (max-width: 760px) {
+  .dashboard-layout-toolbar {
+    position: static;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .dashboard-layout-switcher {
+    width: 100%;
+    max-width: 260px;
+  }
+
+  .dashboard-layout-switcher button {
+    min-width: 0;
+    padding-inline: 7px;
+  }
+}
