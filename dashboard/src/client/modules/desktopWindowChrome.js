@@ -6,6 +6,8 @@
   document.body.classList.add("tauri-desktop-shell");
   const titlebar = document.getElementById("desktop-window-titlebar");
   if (titlebar) titlebar.hidden = false;
+  // The title bar carries the Discord link here, so drop the browser rail copy.
+  document.querySelector(".server-rail .rail-discord-link")?.remove();
   const dragRegion = titlebar?.querySelector(".desktop-window-drag-region");
 
   function invokeDesktop(command) {
@@ -60,4 +62,16 @@
     });
   }
   bind("desktop-window-close", "desktop_hide");
+
+  // The webview has no opener plugin, so hand community links to the
+  // system browser instead of letting target="_blank" open inside the shell.
+  document.querySelectorAll('[data-desktop-external-link="discord"]').forEach(link => {
+    link.addEventListener("click", event => {
+      if (typeof invoke !== "function") return;
+      event.preventDefault();
+      event.stopPropagation();
+      invokeDesktop("desktop_open_discord")
+        .catch(error => console.error("Opening the URage Discord failed.", error));
+    });
+  });
 })();

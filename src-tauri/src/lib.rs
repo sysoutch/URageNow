@@ -11,7 +11,7 @@ use runtime::{
 };
 use tray::install_tray;
 use window::{
-    desktop_hide, desktop_minimize, desktop_start_dragging, desktop_toggle_maximize,
+    desktop_hide, desktop_minimize, desktop_open_discord, desktop_start_dragging, desktop_toggle_maximize,
 };
 
 pub fn run() {
@@ -20,7 +20,8 @@ pub fn run() {
             desktop_minimize,
             desktop_start_dragging,
             desktop_toggle_maximize,
-            desktop_hide
+            desktop_hide,
+            desktop_open_discord
         ])
         .setup(|app| {
             let log_path = app
