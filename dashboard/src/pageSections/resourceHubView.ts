@@ -1,4 +1,4 @@
-﻿import { existsSync, readdirSync, statSync } from "node:fs";
+﻿import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { repoRoot } from "@urage/server/config/repositoryPaths";
 import { renderBlenderIconSvg, renderButtonIcon, renderBootstrapIcon } from "../shared/dashboardIcons.js";
@@ -28,6 +28,14 @@ type ResourceRootInput = {
   depth?: number;
 };
 
+type SuiteStarterCollection = {
+  suite: string;
+  displayName: string;
+  relativePath: string;
+  absolutePath: string;
+  scripts: Array<{ title: string; path: string; }>;
+};
+
 type RecommendedBlenderAddon = {
   title: string;
   description: string;
@@ -35,6 +43,7 @@ type RecommendedBlenderAddon = {
   flair: string;
 };
 
+const suiteStarterCollectionRoots = ["maya-scripts", "3dsmax-scripts", "houdini-scripts", "cinema4d-scripts"];
 const externalBlenderAddonRoot = "C:\\Files\\github\\URage-suite\\URage Addons\\blender";
 const recommendedBlenderAddons: RecommendedBlenderAddon[] = [
   {
@@ -183,6 +192,44 @@ function collectResourceEntries(input: ResourceRootInput, limit = 120): Resource
     });
   }
   return entries.sort((a, b) => a.title.localeCompare(b.title));
+}
+
+function collectSuiteStarterCollections(): SuiteStarterCollection[] {
+  const collections: SuiteStarterCollection[] = [];
+  for (const root of suiteStarterCollectionRoots) {
+    const absolutePath = resolveInputRoot(root);
+    try {
+      const catalog = JSON.parse(readFileSync(path.join(absolutePath, "catalog.json"), "utf8")) as { suite?: unknown; displayName?: unknown; scripts?: unknown; };
+      const scripts = Array.isArray(catalog.scripts) ? catalog.scripts : [];
+      collections.push({
+        suite: String(catalog.suite || root),
+        displayName: String(catalog.displayName || toTitleCase(root)),
+        relativePath: getDisplayPath(absolutePath),
+        absolutePath,
+        scripts: scripts
+          .filter((entry): entry is { title?: unknown; path?: unknown; } => Boolean(entry) && typeof entry === "object")
+          .map(entry => ({ title: String(entry.title || entry.path || ""), path: String(entry.path || "") }))
+          .filter(entry => entry.title && entry.path)
+      });
+    } catch {
+      continue;
+    }
+  }
+  return collections;
+}
+
+function renderSuiteStarterCollectionCard(collection: SuiteStarterCollection): string {
+  return `
+                <article class="resource-hub-card asset-resource-card" data-suite-starter-collection="${escapeHtml(collection.suite)}">
+                  <div class="resource-hub-card-icon" aria-hidden="true">${renderBootstrapIcon("code-slash")}</div>
+                  <div class="resource-hub-card-copy">
+                    <span class="panel-kicker">Starter Collection</span>
+                    <h4>${escapeHtml(collection.displayName)}</h4>
+                    <p>${escapeHtml(collection.scripts.map(script => script.title).join(", ") || "No starter scripts.")}</p>
+                    <code title="${escapeHtml(collection.absolutePath)}">${escapeHtml(collection.relativePath)}</code>
+                    <small>${collection.scripts.length} starter scripts</small>
+                  </div>
+                </article>`;
 }
 
 function renderResourceHubHomeTile(input: { title: string; description: string; iconKey: "download" | "sparkle" | "folder" | "wand" | "box" | "refresh" | "expand"; actionLabel: string; actionAttribute: string; actionValue: string; }): string {
@@ -607,6 +654,7 @@ ${entries.map(renderBlenderAddonCard).join("\n") || `                  <div clas
 <!-- Global Scripts Panel (curated script catalog for supported suites) -->
 <div class="resource-hub-content-wrap global-scripts-panel hidden" data-dashboard-layout-panel="3d-suites-scripts">
 ${renderDashboardLayoutSwitcher("3d-suites-scripts")}
+            <div class="global-scripts-scroll">
             <section class="resource-manager-panel resource-hub-section active">
               <div class="resource-manager-panel-head">
                 <div><span class="panel-kicker">Cached GitHub Catalog</span><h4>Blender Scripts</h4></div>
@@ -615,6 +663,13 @@ ${renderDashboardLayoutSwitcher("3d-suites-scripts")}
               <div class="hint" data-blender-script-catalog-status>Loading Blender scripts from sysoutch/URage-Blender-Scripts...</div>
               <div class="resource-hub-grid" data-blender-script-catalog-list><div class="tools-workspace-empty">Loading cached Blender script catalog...</div></div>
             </section>
+            <section class="resource-manager-panel resource-hub-section active">
+              <div class="resource-manager-panel-head">
+                <div><span class="panel-kicker">Repository Starters</span><h4>Local Starter Collections</h4></div>
+              </div>
+              <div class="resource-hub-grid">${collectSuiteStarterCollections().map(renderSuiteStarterCollectionCard).join("") || `<div class="tools-workspace-empty">No local starter collections found.</div>`}</div>
+            </section>
+            </div>
 </div>
           </article>`;
 }

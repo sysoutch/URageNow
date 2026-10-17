@@ -42,7 +42,8 @@ const variantDeleteService = modelService.slice(
   modelService.indexOf("export async function deleteGeneratedModelVariant"),
   modelService.indexOf("export async function setGeneratedModelPreviewGif")
 );
-assert.equal(variantDeleteService.includes("deleteGeneratedModel(safeModelId)"), false);
+assert.equal(variantDeleteService.split("deleteGeneratedModel(safeModelId)").length, 2);
+assert.match(variantDeleteService, /if \(variant === "merged" && \(!remainingFileName \|\| remainingFileName === expectedFileName\)\) \{\s*await deleteGeneratedModel\(safeModelId\);\s*return null;/);
 assert.ok(variantDeleteService.includes("lowPolyModelFileName: null"));
 assert.ok(routingHelpers.includes('document.addEventListener("visibilitychange"'));
 assert.ok(routingHelpers.includes("unloadModel3dViewerPreview()"));

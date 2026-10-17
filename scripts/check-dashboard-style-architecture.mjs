@@ -19,14 +19,14 @@ const sharedPopupPath = path.join(stylesRoot, "shared", "_popup.scss");
 const legacyWorkflowStylesPath = path.join(stylesRoot, "media-ai", "_workflow-active.scss");
 const stylesheetLineBudgets = new Map([
   ["shared/_studio-components.scss", 3492],
-  ["media-ai/_model3d.scss", 2783],
+  ["media-ai/_model3d.scss", 2657],
   ["studio/_focused-workflow.scss", 673],
   ["studio/_focused-workflow-image-video.scss", 1952],
   // Re-baselined from the committed state at HEAD (75e3f73), which had already drifted past the previous ratchets.
   ["_cards-components.scss", 2595],
   ["studio/_core.scss", 2287],
   ["_content-layout.scss", 2202],
-  ["_tools.scss", 2137]
+  ["_tools.scss", 2094]
 ]);
 
 async function collectScssFiles(directory) {

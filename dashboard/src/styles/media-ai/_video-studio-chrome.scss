@@ -1,0 +1,111 @@
+.video-editor-appbar {
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(280px, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 8px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--studio-panel-border, var(--line)) 72%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 88%, black 12%), color-mix(in srgb, var(--panel) 72%, black 28%));
+}
+
+.video-appbar-brand,
+.video-appbar-actions,
+.video-autosave-status {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.video-app-logo {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--ink);
+  background: linear-gradient(145deg, var(--studio-accent-soft, var(--accent-soft)), color-mix(in srgb, var(--panel) 74%, black 26%));
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 36%, transparent);
+}
+
+.video-app-title {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.video-project-dropdown {
+  justify-self: center;
+  min-height: 34px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--panel) 82%, black 18%);
+}
+
+.video-appbar-actions {
+  justify-self: end;
+}
+
+.video-autosave-status {
+  color: color-mix(in srgb, var(--muted) 82%, white 18%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.video-autosave-status span {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #57e586 82%, var(--studio-accent-1, var(--accent)) 18%);
+  box-shadow: 0 0 12px color-mix(in srgb, #57e586 46%, transparent);
+}
+
+.video-user-avatar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--studio-accent-soft, var(--accent-soft)) 80%, var(--panel)), color-mix(in srgb, var(--panel) 70%, black 30%));
+  border: 1px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 32%, transparent);
+}
+
+.video-preview-scrubber {
+  flex: 1 1 auto;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 50%, transparent);
+  overflow: hidden;
+}
+
+.video-preview-scrubber i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--studio-accent-2, var(--accent));
+}
+
+.video-creative-control-stack,
+.video-creative-group,
+.video-creative-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.video-creative-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#video-studio-card .studio-chip-grid,
+#video-studio-card .studio-segmented-control {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+#video-studio-card .studio-segmented-control {
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+}

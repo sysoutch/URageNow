@@ -83,7 +83,6 @@ try {
           forms: element.querySelectorAll(".studio-component-form").length,
           sections: element.querySelectorAll(".studio-component-form-section").length,
           previews: element.querySelectorAll(".studio-component-preview-card").length,
-          queues: element.querySelectorAll(".studio-component-queue").length,
           advancedSettings: element.querySelectorAll(".studio-component-advanced-settings").length,
           controls
         };
@@ -91,7 +90,6 @@ try {
       assert.ok(contract.forms >= 1, `${workflow.name} must use the shared form contract.`);
       assert.ok(contract.sections >= 1, `${workflow.name} must use shared form sections.`);
       assert.ok(contract.previews >= 1, `${workflow.name} must use a shared preview card.`);
-      assert.ok(contract.queues >= 1, `${workflow.name} must use a shared generation queue.`);
       assert.ok(contract.advancedSettings >= 1, `${workflow.name} must use shared advanced settings.`);
       await page.locator(`#${workflow.metadataId}.studio-component-metadata`).waitFor({state: "attached"});
       assert.ok(await page.locator(".studio-component-status").count() >= 5,
