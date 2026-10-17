@@ -385,8 +385,6 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
               </span>
             </button>
           </div>
-          <div class="section-label">Main Navigation</div>
-          <div class="chip">Use the left rail workflow buttons to jump to Studio sections.</div>
         </article>
       </section>
     </aside>
@@ -424,8 +422,6 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
               </span>
             </button>
           </div>
-          <div class="section-label">Main Navigation</div>
-          <div class="chip">Use the left rail workflow buttons to jump to Studio sections.</div>
         </article>
         <article class="sidebar-mode-panel" data-sidebar-mode="messenger">
           <div class="section-label">Messenger Switcher</div>

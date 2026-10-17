@@ -1,6 +1,6 @@
 # List: Done (id=1)
 
-> Exported from Taskitty at `2026-10-10T16:13:59.570Z` (no filters applied)
+> Exported from Taskitty at `2026-10-17T22:24:36.401Z` (no filters applied)
 
 Board: **General** (id=1)
 
@@ -13,3 +13,4 @@ Board: **General** (id=1)
 - **Fix VS Code build task selecting Tauri runtime bundle** (id=28)
 - **Add standalone Discord bot dashboard mode beside full Studio** (id=29)
 - **Add standalone all-bots dashboard runner** (id=32)
+- **Improve and clean the overall dashboard UI** (id=33)

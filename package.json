@@ -15,7 +15,7 @@
     "check": "npm run check:architecture && npm run check:paths && npm run check:runtime && npm run check:games && npm run check:packages && npm run check:discord && npm run check:worker && npm run check:dashboard && npm run check:studio-visual && npm run check:companion",
     "check:games": "tsx scripts/check-token-typing-config.ts && tsx scripts/check-games-dashboard-editor.ts && tsx scripts/check-token-typing-results.ts && npm run check:derby-lab && tsx scripts/check-discord-game-start-routing.ts && tsx scripts/check-discord-ultimate-texas-holdem.ts",
     "check:derby-lab": "tsx scripts/check-derby-lab-config.ts && tsx scripts/check-derby-lab-rules.ts && tsx scripts/check-derby-lab-results.ts && tsx scripts/check-derby-lab-dashboard-editor.ts",
-    "check:studio-visual": "node scripts/check-generation-queue-presenter.mjs && tsx scripts/check-studio-workflows-browser.ts",
+    "check:studio-visual": "tsx scripts/check-dashboard-bootstrap-ready.ts && node scripts/check-generation-queue-presenter.mjs && tsx scripts/check-studio-workflows-browser.ts",
     "check:messenger-dm-rail": "node scripts/check-messenger-direct-message-rail.mjs && node scripts/check-discord-direct-message-conversation.mjs && tsx scripts/check-whatsapp-recipient-store.ts",
     "check:matrix-workflows": "node scripts/check-matrix-workflows.mjs",
     "check:tool-editor": "node scripts/check-tool-editor.mjs",

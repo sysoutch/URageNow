@@ -89,7 +89,10 @@ try {
       assert.ok(metrics.toolImport?.formWidth > 280, `${viewport.name} leaves too little width for repository import`);
     }
     if (viewport.name === "desktop-tools-browser") {
-      assert.ok(metrics.toolImport?.panelHeight > 60 && metrics.toolImport.panelHeight < 360, `${viewport.name} stretches the repository import panel`);
+      // Tools Home hides the import panel (it opens from the Add Tool action);
+      // when it is shown it must keep its compact height.
+      const panelHeight = metrics.toolImport?.panelHeight ?? 0;
+      assert.ok(panelHeight === 0 || (panelHeight > 60 && panelHeight < 360), `${viewport.name} stretches the repository import panel`);
     }
     if (viewport.toolId) {
       assert.ok(metrics.toolWorkspace?.footerHeight > 30 && metrics.toolWorkspace.footerHeight < 120, `${viewport.name} stretches the tool workspace footer`);

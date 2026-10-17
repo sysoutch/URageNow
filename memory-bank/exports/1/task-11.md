@@ -1,6 +1,6 @@
 # Task: [SEC-02] Confine encoded /tools static paths to the tools directory (id=11)
 
-> Exported from Taskitty at `2026-10-10T16:13:59.570Z`.
+> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
 
 - **State:** done
 - **List:** Done (id=1)

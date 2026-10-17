@@ -4058,7 +4058,9 @@ function createDashboardAiActionHelpers(input) {
       }
     }
 
-    document.getElementById("apply-guild-channel-plan-button").addEventListener("click", async () => {
+    // Guild and moderation panels render only in the bot dashboards; the Studio
+    // page shares these bindings, and a missing panel must not abort bootstrap.
+    document.getElementById("apply-guild-channel-plan-button")?.addEventListener("click", async () => {
       if (!input.state.selectedGuildId) return void input.setOutput("Select a guild first.");
         if (!input.state.guildChannelPlan || !Array.isArray(input.state.guildChannelPlan.entries) || input.state.guildChannelPlan.entries.length === 0) {
         return void input.setOutput("Plan channels first.");
@@ -4076,14 +4078,14 @@ function createDashboardAiActionHelpers(input) {
       input.setOutput("Rod channel plan applied.");
     });
 
-    document.getElementById("clear-guild-channel-plan-button").addEventListener("click", () => {
+    document.getElementById("clear-guild-channel-plan-button")?.addEventListener("click", () => {
       input.state.guildChannelPlan = null;
       input.renderGuildChannelPlan();
       input.renderMarkdownInto("guild-ai-output", "", "No LazyDev guild action run yet.");
       input.setOutput("Cleared LazyDev channel plan.");
     });
 
-    document.getElementById("run-guild-audit-button").addEventListener("click", async () => {
+    document.getElementById("run-guild-audit-button")?.addEventListener("click", async () => {
       if (!input.state.selectedGuildId) return void input.setOutput("Select a guild first.");
       const prompt = document.getElementById("guild-ai-prompt").value.trim();
       const payload = await input.request("/api/guild-ai/audit", {
@@ -4094,7 +4096,7 @@ function createDashboardAiActionHelpers(input) {
       input.setOutput("Rod guild audit finished.");
     });
 
-    document.getElementById("simulate-moderation-button").addEventListener("click", async () => {
+    document.getElementById("simulate-moderation-button")?.addEventListener("click", async () => {
       const payload = await input.request("/api/moderation/simulate", {
         guildId: input.state.selectedGuildId,
         text: document.getElementById("moderation-test-text").value,
@@ -4104,7 +4106,7 @@ function createDashboardAiActionHelpers(input) {
       input.setOutput("Moderation simulation finished.");
     });
 
-    document.getElementById("clear-moderation-simulation-button").addEventListener("click", () => {
+    document.getElementById("clear-moderation-simulation-button")?.addEventListener("click", () => {
       document.getElementById("moderation-simulation-output").textContent = "No moderation simulation run yet.";
       document.getElementById("moderation-test-text").value = "";
       input.clearModerationImages();

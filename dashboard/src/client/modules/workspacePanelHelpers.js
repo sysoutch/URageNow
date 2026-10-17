@@ -46,7 +46,7 @@ function createDashboardWorkspacePanelHelpers(input) {
   function switchSubview(group, panel) {
     switchDashboardWorkspaceSubview(group, panel);
   }
-  function switchDetailTab(tab) {
+  function switchDetailTab(tab, options = {}) {
     state.detailTab = tab;
     document.querySelectorAll("[data-detail-tab]").forEach(button => {
       button.classList.toggle("active", button.getAttribute("data-detail-tab") === tab);
@@ -59,7 +59,9 @@ function createDashboardWorkspacePanelHelpers(input) {
     if (usersPanel) {
       usersPanel.classList.toggle("hidden", tab !== "users");
     }
-    if (window.innerWidth <= 1550) {
+    // Initialization only selects the tab; opening the overlay inspector on
+    // load dimmed the whole page behind its scrim at compact widths.
+    if (options.reveal !== false && window.innerWidth <= 1550) {
       setDetailsPaneVisible(true);
     }
   }

@@ -77,7 +77,10 @@
     state.snapshot = await api("/api/messenger-runtimes");
     renderSnapshot();
     if (state.messenger === "discord") {
-      const result = await api("/api/discord/status");
+      // Only the scoped bot servers expose this route; the Studio-embedded
+      // frame keeps the runtime snapshot instead of reporting "Not found".
+      const result = await api("/api/discord/status").catch(() => null);
+      if (!result) return;
       byId("messenger-dashboard-bot-name").textContent = result.bot?.tag || "Discord bot";
       byId("messenger-dashboard-bot-id").textContent = result.bot?.id || "Not connected";
       byId("messenger-dashboard-space-count").textContent = String(result.bot?.guildCount || 0);
@@ -162,6 +165,22 @@
     await api("/api/matrix/workflow-permissions", { roomId, workflows, allowAllMembers: byId("matrix-workflow-allow-all-members").checked });
     notice("Matrix room permissions saved.");
   }));
+  function syncHostTheme() {
+    let host;
+    try { host = window.parent !== window ? window.parent.document : null; } catch { host = null; }
+    if (!host) return;
+    const apply = () => {
+      const theme = host.body.getAttribute("data-dashboard-theme");
+      if (theme) document.body.setAttribute("data-dashboard-theme", theme);
+      document.documentElement.style.cssText = host.documentElement.style.cssText;
+      document.body.style.cssText = host.body.style.cssText;
+    };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(host.body, { attributes: true, attributeFilter: ["data-dashboard-theme", "style"] });
+    observer.observe(host.documentElement, { attributes: true, attributeFilter: ["style"] });
+  }
+  syncHostTheme();
   const initialMessenger = new URLSearchParams(window.location.search).get("messenger") || "discord";
   setMessenger(names[initialMessenger] ? initialMessenger : "discord");
   run(refresh);

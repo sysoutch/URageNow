@@ -426,6 +426,7 @@ function startDashboardClient() {
         bindAiMediaStudioEvents,
         bindImagePoolEvents: (...args) => bindImagePoolEvents(...args),
         bindAutomationTextSourceEvents: (...args) => bindAutomationTextSourceEvents(...args),
+        updateAutomationTextPromptPreset: (...args) => updateAutomationTextPromptPreset(...args),
         bindToolsViewEvents,
         bindAiToolQuickActionEvents,
         bindShellOverlayEvents,
@@ -741,5 +742,9 @@ function startDashboardClient() {
   setDashboardGuildChannelRuntimeHelpers(guildRuntimeHelpers);
   dashboardBootstrapStart()
     .then(() => window.dispatchEvent(new Event("dashboard:ready")))
-    .catch(error => setOutput(error.message || "Failed to load dashboard."));
+    .catch(error => {
+      // A failed bootstrap leaves the shell half-initialized; keep it visible.
+      console.error("Dashboard bootstrap failed.", error);
+      setOutput(error.message || "Failed to load dashboard.");
+    });
 }

@@ -1415,6 +1415,9 @@
     display: flex;
     align-items: center;
     flex: 0 0 auto;
+    // Keep the actions beside the mode switch; space-between alone parked
+    // them in the middle of the header.
+    margin-left: auto;
     gap: 6px;
     max-width: 100%;
     overflow-x: auto;
@@ -1536,7 +1539,9 @@
     gap: 8px;
   }
 
-  .tools-filter-chip {
+  // Scoped under .app-shell so the shell-wide `button { font: inherit; border: none }`
+  // reset cannot strip the chip size and border.
+  .app-shell .tools-filter-chip {
     width: auto !important;
     flex: 0 0 auto;
     min-height: 36px;

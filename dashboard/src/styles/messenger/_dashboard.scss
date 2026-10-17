@@ -1,12 +1,18 @@
+// The content shell still reserves an auto row for the retired stage header.
+// Span both rows so the frame fills the shell instead of leaving an empty
+// strip under a viewport-offset guess.
 .bots-dashboard-host-view {
+  grid-row: 1 / -1;
   padding: 0;
-  min-height: calc(100vh - 150px);
+  height: 100%;
+  min-height: 0;
 }
 
 .bots-dashboard-frame {
   display: block;
   width: 100%;
-  min-height: calc(100vh - 150px);
+  height: 100%;
+  min-height: 0;
   border: 0;
   border-radius: 14px;
   background: var(--panel);

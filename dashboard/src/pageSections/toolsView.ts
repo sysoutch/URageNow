@@ -393,7 +393,7 @@ ${entries.map(entry => renderToolsCatalogButton(entry, false)).join("\n")}
                 <span class="tools-search-icon" aria-hidden="true">${renderToolsSearchIcon()}</span>
                 <input id="tools-search-input" type="search" placeholder="Search tools by name, category, description, or tag" autocomplete="off" aria-controls="tools-main-catalog">
               </label>
-              <div class="row tools-filter-chip-row" aria-label="Tool filters">
+              <div class="tools-filter-chip-row" role="group" aria-label="Tool filters">
 ${filterChipsMarkup}
               </div>
             </div>

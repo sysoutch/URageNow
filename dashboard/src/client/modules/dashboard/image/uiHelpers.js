@@ -154,6 +154,9 @@ async function filesToAiImages(files) {
 
 function renderImageList(containerId, images, emptyText, removeImage) {
   const container = document.getElementById(containerId);
+  if (!container) {
+    return;
+  }
   clearChildren(container);
   if (images.length === 0) {
     const empty = document.createElement("div");

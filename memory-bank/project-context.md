@@ -1,5 +1,13 @@
 # Project Context
 
+## 2026-10-18 — Studio bootstrap and shell layout contracts
+
+- The full Studio page shares client bindings with the bot dashboards, but Guild/Moderation panels now render only in `/bots-dashboard`. Any bootstrap-time binding or render to a panel that may be absent must tolerate a missing element; one unguarded `getElementById(...).addEventListener` aborted the whole async bootstrap, which silently left rail, home, theme and runtime state uninitialized. Bootstrap failures now `console.error`, and `scripts/check-dashboard-bootstrap-ready.ts` (in `check:studio-visual`) requires `dashboard:ready` with no bootstrap error.
+- Bootstrap only selects the inspector tab (`switchDetailTab("current", { reveal: false })`); revealing it opened the overlay inspector and its scrim on every load below 1550px.
+- `.rail-home-wrap` is the single rail scroller, so its rows use `grid-auto-rows: max-content`. With implicit auto rows, an open section (`min-height: 0`) collapsed to a 0px track and its buttons painted over the next categories.
+- `.content-shell` still declares `auto 1fr` rows for a retired stage header; full-height views (the Bots frame host) span `grid-row: 1 / -1` instead of guessing `100vh - Npx`.
+- `/bots-dashboard` has no `.app-shell`, so it carries its own token-based button base and mirrors the parent Studio's `data-dashboard-theme` and inline token styles when embedded. A global `[class$="-tabs"]` rule forces `display: inline-flex !important`, so hiding tab rows (and `[hidden]`) there needs `!important`.
+
 ## 2026-10-10 — Tools dashboard filter routing
 
 - `studioSidebarHelpers` promotes a selected rail category into its parent workspace. That promotion is scoped to `.rail-tools-categories [data-tools-filter]`; the Tools page uses the same attribute for its own catalog filters, which must reach `workspaceHelpers` directly. Keep the scope narrow so catalog category selection neither redirects to the rail nor loses its active state. `workspaceHelpers` also self-binds its Tools handlers at `DOMContentLoaded`, guarded against duplicate calls, because the full dashboard bootstrap can be delayed or bypassed. `scripts/check-tools-filter-event-scope.mjs` guards both contracts through `npm run check:tools`.

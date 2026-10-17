@@ -125,7 +125,7 @@ function createDashboardAppBootstrapHelpers(input) {
     dashboardAutomationViewHelpers?.switchChannelSettingsTab("discord");
     dashboardAiStudioLayoutHelpers?.switchModel3dStudioTab("generate");
     dashboardAiStudioLayoutHelpers?.switchImageStudioTab("generate");
-    switchDetailTab("current");
+    switchDetailTab("current", { reveal: false });
     switchSubview("guild", state.guildSubview);
     switchSubview("moderation", state.moderationSubview);
     renderAiImageList();

@@ -1,6 +1,6 @@
 # Task: [DEP-02] Update Sass dependency source-map-js past indexed-map DoS advisory (id=22)
 
-> Exported from Taskitty at `2026-10-10T16:13:59.570Z`.
+> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
 
 - **State:** open
 - **List:** Under Review (id=2)

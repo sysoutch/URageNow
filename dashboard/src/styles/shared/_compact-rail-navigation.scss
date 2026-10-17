@@ -128,3 +128,30 @@
     display: none !important;
   }
 }
+
+// Phone rails are icon-only and hide the other footer actions. The theme
+// picker is the one footer item that stays, so it follows the same icon-only
+// treatment instead of showing the native disclosure marker and an
+// overflowing label.
+@media (max-width: 980px) {
+  .rail-theme-picker-summary {
+    min-height: 54px;
+    display: grid;
+    place-items: center;
+    list-style: none;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .rail-theme-picker-summary::-webkit-details-marker,
+  .rail-theme-picker-summary > span:not(:first-child) {
+    display: none;
+  }
+
+  // Category children (Bots included) are icon-only here like Tools; each
+  // button keeps its aria-label and title.
+  .server-rail .rail-resource-section-label,
+  .server-rail .rail-direct-messages-empty {
+    display: none;
+  }
+}

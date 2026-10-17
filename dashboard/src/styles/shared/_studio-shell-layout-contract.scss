@@ -8,6 +8,10 @@ $studio-rail-views: ".view-ai-active, .view-tools-active, .view-profile-active, 
 body:is(#{$studio-rail-views}) .rail-home-wrap {
   display: grid !important;
   align-content: start !important;
+  // Rows must keep their content height. With implicit auto rows, an open
+  // section (min-height: 0) collapsed to a 0px track once the rail was
+  // shorter than its rows, and its buttons painted over the next categories.
+  grid-auto-rows: max-content !important;
   min-height: 0 !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;

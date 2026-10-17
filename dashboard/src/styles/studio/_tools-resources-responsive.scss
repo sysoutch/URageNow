@@ -5,11 +5,8 @@
   }
 
   @media (max-width: 1180px) {
-    /* Desktop mode replaces the browser frame with this scrolling panel. */
-    body.tools-desktop-mode .tools-workspace-card {
-      grid-template-rows: auto auto minmax(0, 1fr);
-    }
-
+    /* Desktop mode keeps the base head/toolbar/import/panel row template; a
+       three-row override here collapsed the import panel under the launcher. */
     body.tools-desktop-mode .tool-import-panel {
       align-content: start;
       min-height: max-content;

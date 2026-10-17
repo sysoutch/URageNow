@@ -3486,7 +3486,7 @@ function createDashboardAiMediaStudioHelpers(input) {
       input.request("/api/image-history"),
       ensureMediaConverterGifHistoryLoaded().catch(() => {})
     ]);
-    input.state.generatedImages = images;
+    input.state.generatedImages = Array.isArray(images) ? images : [];
     const candidateId = preferredImageId && input.state.generatedImages.some(item => item.id === preferredImageId)
       ? preferredImageId
       : input.state.selectedGeneratedImageId;
@@ -3503,7 +3503,7 @@ function createDashboardAiMediaStudioHelpers(input) {
       input.request("/api/video-history"),
       ensureMediaConverterGifHistoryLoaded().catch(() => {})
     ]);
-    input.state.generatedVideos = videos;
+    input.state.generatedVideos = Array.isArray(videos) ? videos : [];
     const candidateId = preferredVideoId && input.state.generatedVideos.some(item => item.id === preferredVideoId)
       ? preferredVideoId
       : input.state.selectedGeneratedVideoId;
