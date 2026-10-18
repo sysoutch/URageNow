@@ -41,7 +41,13 @@ try {
   const rootResponse = await fetch(`${baseUrl}/`);
   assert.equal(rootResponse.status, 200);
   assert.match(rootResponse.headers.get("content-type") || "", /^text\/html/);
-  assert.match(await rootResponse.text(), /URage NOW/);
+  const rootPage = await rootResponse.text();
+  assert.match(rootPage, /URage NOW/);
+  // A built tool opens its tool.json publishEntry, not the Vite source page.
+  assert.match(rootPage, /data-tools-src="\/tools\/game\/billards\/dist\/index\.html"/, "Billiards must open its built dist entry.");
+  const billiardsResponse = await fetch(`${baseUrl}/tools/game/billards/dist/index.html`);
+  assert.equal(billiardsResponse.status, 200);
+  assert.match(await billiardsResponse.text(), /dashboard-theme\.js/);
 
   const androidPageResponse = await fetch(`${baseUrl}/android-companion`, {redirect: "manual"});
   assert.ok(androidPageResponse.status === 200 || androidPageResponse.status === 302);

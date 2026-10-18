@@ -2446,9 +2446,11 @@ body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-pre
 
 // The play overlay shares the preview cell, which becomes its containing
 // block; otherwise it centered on the whole panel, over the action buttons.
+// Both lines are explicit: for an absolutely positioned grid item an `auto`
+// end line means the container's padding edge, not the next track.
 body.view-ai-active.studio-workflow-focused #image-studio-card #image-preview-play-overlay {
-  grid-row: 1 !important;
-  grid-column: 1 !important;
+  grid-row: 1 / 2 !important;
+  grid-column: 1 / 2 !important;
 }
 
 body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools:not(.image-tool-quick-actions) {

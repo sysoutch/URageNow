@@ -166,6 +166,26 @@ function buildFallbackToolDescription(title: string, categoryLabel: string, tool
   return `${title} for ${readableCategory.toLowerCase()} workflows (${readableSlug}).`;
 }
 
+// Built tools (Vite projects such as Billiards) name their runnable page in
+// tool.json; the source index.html only loads /src/main.ts for `vite dev`.
+function resolveToolEntryFile(toolDirectory: string): string {
+  const manifestPath = path.join(toolDirectory, "tool.json");
+  if (!existsSync(manifestPath)) {
+    return "index.html";
+  }
+  try {
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { publishEntry?: unknown };
+    const entry = typeof manifest.publishEntry === "string" ? manifest.publishEntry.trim().replace(/\\/g, "/") : "";
+    const safe = entry.length > 0 && !entry.startsWith("/") && !entry.split("/").includes("..");
+    if (safe && existsSync(path.join(toolDirectory, entry))) {
+      return entry;
+    }
+  } catch {
+    // A malformed manifest falls back to the source page.
+  }
+  return "index.html";
+}
+
 function loadToolsCatalog(): ToolsCatalogEntry[] {
   const toolsRootDirectory = resolveToolsRootDirectory();
   if (!toolsRootDirectory) {
@@ -202,7 +222,7 @@ function loadToolsCatalog(): ToolsCatalogEntry[] {
         toolSlug,
         title,
         description,
-        sourcePath: `/tools/${encodeURIComponent(category)}/${encodeURIComponent(toolSlug)}/index.html`,
+        sourcePath: `/tools/${encodeURIComponent(category)}/${encodeURIComponent(toolSlug)}/${resolveToolEntryFile(toolDirectory).split("/").map(encodeURIComponent).join("/")}`,
         thumbnailPath: resolveToolThumbnailPath(toolDirectory, category, toolSlug),
         readmePath: resolveToolReadmePath(toolDirectory, category, toolSlug),
         tags: metadata.toolTags[`${category}__${toolSlug}`] || [],
