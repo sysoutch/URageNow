@@ -54,7 +54,7 @@ assert.match(routes, /\/api\/companion\/workflows\/model3d/);
 assert.match(routes, /applySoulPromptContext/);
 assert.match(access, /createHash\("sha256"\)/);
 assert.match(access, /timingSafeEqual/);
-assert.match(access, /failedPairingAttempts >= 5/);
+assert.match(access, /failedAttempts >= 5/, "Pairing must lock a peer out after five failed codes.");
 assert.match(access, /revokeCompanionDevice/);
 assert.match(access, /"workflow\.chat": false/);
 assert.match(access, /"workflow\.image\.generate": false/);
