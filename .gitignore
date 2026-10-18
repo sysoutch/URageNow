@@ -69,3 +69,6 @@ __pycache__/
 /tools/dev/map-generator/images/*.jpg
 src-tauri/binaries/
 src-tauri/runtime-bundle/
+
+# Local agent memory (Taskitty exports, notes); kept on disk, never committed.
+/memory-bank/
