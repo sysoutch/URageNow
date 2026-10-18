@@ -30,7 +30,7 @@ try {
     runtimeState: {recordAction: () => {}},
     askModel: async (prompt: string) => `Mobile reply to: ${prompt}`,
     askVisionModel: async (prompt: string, images: string[]) =>
-      `Interpreted ${images.length} reference images as ${prompt.includes("individually") ? "parts" : "whole"}`,
+      `Interpreted ${images.length} reference images as ${prompt.includes("visible parts") ? "parts" : prompt.includes("Source 1:") ? "separate prompts" : "whole"}`,
     askModelDetailedStream: async (prompt: string, callbacks: {onResponseDelta?: (delta: string) => void}) => {
       callbacks.onResponseDelta?.("Streamed ");
       callbacks.onResponseDelta?.("reply");
@@ -172,13 +172,22 @@ try {
   const image = await call("/api/companion/workflows/image", {prompt: "small robot", width: 1024, height: 1024});
   assert.equal(image.status, 200);
   assert.equal((image.payload.item as Record<string, unknown>).kind, "image");
+  // Parts mode only shapes a combined prompt; without combineSources each
+  // reference gets its own prompt (the default since d8d992c).
   const interpreted = await call("/api/companion/workflows/image/interpret", {
     mode: "parts",
+    combineSources: true,
     prompt: "combine these references",
     images: [{id: "image-1", fileName: "image-1.png"}, {id: "image-2", fileName: "image-2.png"}]
   });
   assert.equal(interpreted.status, 200);
   assert.match(String(interpreted.payload.prompt || ""), /2 reference images as parts/);
+  const separatePrompts = await call("/api/companion/workflows/image/interpret", {
+    mode: "parts",
+    images: [{id: "image-1", fileName: "image-1.png"}, {id: "image-2", fileName: "image-2.png"}]
+  });
+  assert.equal(separatePrompts.status, 200);
+  assert.match(String(separatePrompts.payload.prompt || ""), /2 reference images as separate prompts/);
   const unsupportedVisionDependencies = {
     ...dependencies,
     askVisionModel: async () => {
