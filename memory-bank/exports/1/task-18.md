@@ -1,6 +1,6 @@
 # Task: [REL-01] Catch worker request failures before URL parsing and capability discovery (id=18)
 
-> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
+> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
 
 - **State:** open
 - **List:** Under Review (id=2)

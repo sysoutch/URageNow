@@ -2438,16 +2438,25 @@ body.view-ai-active .lazydev-home-list .lazydev-home-action-button>span:not(.but
   }
 }
 
+// The preview keeps a floor: with minmax(0, 1fr) the action rows took the
+// whole fixed-height panel on phones and the image overflowed under the header.
 body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-panel {
-  grid-template-rows: minmax(0, 1fr) auto auto auto !important;
+  grid-template-rows: minmax(min(200px, 32vh), 1fr) auto auto auto !important;
+}
+
+// The play overlay shares the preview cell, which becomes its containing
+// block; otherwise it centered on the whole panel, over the action buttons.
+body.view-ai-active.studio-workflow-focused #image-studio-card #image-preview-play-overlay {
+  grid-row: 1 !important;
+  grid-column: 1 !important;
 }
 
 body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools:not(.image-tool-quick-actions) {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr)) !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr)) !important;
   align-items: stretch !important;
   justify-content: stretch !important;
-  gap: 8px !important;
+  gap: 6px !important;
   overflow: visible !important;
 }
 
@@ -2463,10 +2472,10 @@ body.view-ai-active.studio-workflow-focused #image-studio-card .image-tool-quick
 body.view-ai-active.studio-workflow-focused #image-studio-card .image-tool-quick-actions:not(.hidden):not(:empty) {
   grid-row: 4 !important;
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)) !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr)) !important;
   align-items: stretch !important;
   justify-content: stretch !important;
-  gap: 8px !important;
+  gap: 6px !important;
   width: 100% !important;
   max-width: 100% !important;
   margin-top: 8px !important;
@@ -2480,10 +2489,25 @@ body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-pre
   box-sizing: border-box !important;
 }
 
+// One compact action shape: icon inline before a single-line label. Some
+// buttons had no display set and stacked the icon above the label.
 body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools :is(.mini-button, .tool-quick-action-button, .studio-tool-picker > button) {
-  min-height: 36px !important;
-  justify-content: center !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  min-height: 32px !important;
+  height: auto !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
   overflow: hidden !important;
+}
+
+body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools :is(.mini-button, .tool-quick-action-button, .studio-tool-picker > button) .button-icon {
+  flex: 0 0 auto !important;
+  font-size: 13px !important;
 }
 
 body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools :is(.mini-button, .tool-quick-action-button, .studio-tool-picker > button) span:not(.button-icon) {

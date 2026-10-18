@@ -51,7 +51,9 @@
   body.view-ai-active.studio-workflow-focused #image-studio-card .image-editor-appbar,
   body.view-ai-active.studio-workflow-focused #video-studio-card .video-editor-appbar,
   body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-editor-appbar {
-    grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr) !important;
+    // The action cluster needs its full width (~420px); an equal 1fr track let
+    // it spill left over the project chip.
+    grid-template-columns: minmax(150px, 1fr) auto max-content !important;
   }
 
   body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-studio-preview-panel, #video-studio-card .video-preview-card-main, #model3d-studio-card .model3d-main-threejs-panel) {
@@ -88,9 +90,12 @@
     grid-template-columns: minmax(0, 1fr) auto !important;
   }
 
-  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .editor-project-pill, #video-studio-card .editor-project-pill, #model3d-studio-card .editor-project-pill),
-  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .editor-autosave, #video-studio-card .editor-autosave, #model3d-studio-card .editor-autosave),
-  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .editor-appbar-actions .mini-button:not(.share), #video-studio-card .editor-appbar-actions .mini-button:not(.share), #model3d-studio-card .editor-appbar-actions .mini-button:not(.share)) {
+  // Narrow app bars keep the Studio name, Share and the avatar; the project
+  // pill, auto-save label and secondary icon actions would wrap into a clipped
+  // second row. (These selectors used to name classes that do not exist.)
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-project-dropdown, #video-studio-card .video-project-dropdown, #model3d-studio-card .model3d-project-dropdown),
+  body.view-ai-active.studio-workflow-focused :is(#image-studio-card .image-autosave-status, #video-studio-card .video-autosave-status, #model3d-studio-card .model3d-autosave-status),
+  body.view-ai-active.studio-workflow-focused :is(.image-appbar-actions, .video-appbar-actions, .model3d-appbar-actions) > .mini-button:not(.image-share-button, .video-share-button, .model3d-share-button) {
     display: none !important;
   }
 

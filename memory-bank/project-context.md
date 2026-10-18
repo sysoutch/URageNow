@@ -6,6 +6,8 @@
 - Bootstrap only selects the inspector tab (`switchDetailTab("current", { reveal: false })`); revealing it opened the overlay inspector and its scrim on every load below 1550px.
 - `.rail-home-wrap` is the single rail scroller, so its rows use `grid-auto-rows: max-content`. With implicit auto rows, an open section (`min-height: 0`) collapsed to a 0px track and its buttons painted over the next categories.
 - `.content-shell` still declares `auto 1fr` rows for a retired stage header; full-height views (the Bots frame host) span `grid-row: 1 / -1` instead of guessing `100vh - Npx`.
+- Studio quick-action bars (3D, Video, and the Studio app bars) are owned by `shared/_studio-quick-actions.scss`; Image Studio's matching rules sit with its preview panel in `shared/_studio-components.scss`. Actions share one shape (inline icon + single-line label, 32px, auto-fill columns). Do not style actions by `:nth-child` position; that hid or highlighted arbitrary buttons as markup changed.
+- Generated sidebar foldouts take their title from `data-foldout-title` when present. Sections are re-parented into foldouts on every refresh, so sibling-index fallbacks named all four 3D inspector sections "Transform".
 - `/bots-dashboard` has no `.app-shell`, so it carries its own token-based button base and mirrors the parent Studio's `data-dashboard-theme` and inline token styles when embedded. A global `[class$="-tabs"]` rule forces `display: inline-flex !important`, so hiding tab rows (and `[hidden]`) there needs `!important`.
 
 ## 2026-10-10 — Tools dashboard filter routing

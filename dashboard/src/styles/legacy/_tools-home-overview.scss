@@ -1372,8 +1372,9 @@ body:is(.view-blender-addons-active, .view-assets-active) .resource-hub-command-
 body.view-blender-addons-active .resource-hub-suite-quick-grid small { color:var(--muted); font-size:10px; }
 body:is(.view-blender-addons-active, .view-assets-active) .resource-hub-command-metrics strong { font-size:22px; color:var(--accent); }
 body.view-blender-addons-active .resource-hub-suite-quick-grid button { grid-template-columns:28px 1fr; grid-template-areas:"icon title" "icon copy"; cursor:pointer; }
-body.view-blender-addons-active .resource-hub-suite-quick-grid button svg { grid-area:icon; width:24px; height:24px; }
-body.view-blender-addons-active .resource-hub-suite-quick-grid button span { grid-area:title; font-weight:750; }
+/* Icons are .button-icon spans since the Bootstrap Icons migration; a bare span selector put them in the title cell. */
+body.view-blender-addons-active .resource-hub-suite-quick-grid button :is(svg, .button-icon) { grid-area:icon; width:24px; height:24px; display:grid; place-items:center; }
+body.view-blender-addons-active .resource-hub-suite-quick-grid button span:not(.button-icon) { grid-area:title; font-weight:750; }
 body.view-blender-addons-active .resource-hub-suite-quick-grid button small { grid-area:copy; }
 body.view-blender-addons-active .resource-hub-suite-quick-grid button:hover { border-color:color-mix(in srgb,var(--accent) 60%,var(--line)); background:color-mix(in srgb,var(--panel) 84%,var(--accent) 16%); }
 @media(max-width:900px){body:is(.view-blender-addons-active,.view-assets-active) .resource-hub-command-metrics,body.view-blender-addons-active .resource-hub-suite-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}

@@ -24,13 +24,12 @@ function createDashboardStudioSidebarFoldouts(input) {
     if (child.id === "videogen-meta-output") return "Video Info";
     if (child.classList.contains("studio-inspector-tabs")) return "Inspector";
     if (child.classList.contains("image-history-search")) return "History Search";
+    // Sections are re-parented into foldouts on every refresh, so a sibling
+    // index cannot name them; the markup names each section explicitly.
+    if (child.dataset?.foldoutTitle) return child.dataset.foldoutTitle.trim();
     if (child.classList.contains("model3d-inspector-section")) {
       const sectionTitle = child.querySelector(":scope > .model3d-inspector-section-head span");
       if (sectionTitle instanceof HTMLElement) return String(sectionTitle.textContent || "").trim();
-      const sectionSiblings = Array.from(child.parentElement?.children || []).filter(node => node instanceof HTMLElement && node.classList.contains("model3d-inspector-section"));
-      const sectionIndex = sectionSiblings.indexOf(child);
-      const sectionFallbacks = ["Transform", "Mesh", "Materials", "UV & Textures"];
-      if (sectionFallbacks[sectionIndex]) return sectionFallbacks[sectionIndex];
     }
     if (sidebarId === "model3d-sidebar-panel" && child.classList.contains("model3d-side-card")) {
       if (child.querySelector(":scope #model3d-variant-gallery")) return "Model Variants";

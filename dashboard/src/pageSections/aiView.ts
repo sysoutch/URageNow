@@ -1836,26 +1836,26 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <button type="button">Export</button>
                   <button type="button">History</button>
                 </div>
-                <div class="model3d-inspector-section">
+                <div class="model3d-inspector-section" data-foldout-title="Transform">
                   <div class="model3d-transform-grid">
                     <span>Position</span><input value="X  0.00"><input value="Y  0.00"><input value="Z  0.00">
                     <span>Rotation</span><input value="X  0°"><input value="Y  0°"><input value="Z  0°">
                     <span>Scale</span><input value="X  1.00"><input value="Y  1.00"><input value="Z  1.00">
                   </div>
                 </div>
-                <div class="model3d-inspector-section">
+                <div class="model3d-inspector-section" data-foldout-title="Mesh">
                   <div class="field"><label for="model3d-inspector-mesh-name">Mesh Name</label><input id="model3d-inspector-mesh-name" placeholder="Select a model" value=""></div>
                   <div class="field"><label for="model3d-inspector-lod-group">LOD Group</label><select id="model3d-inspector-lod-group"><option>None</option><option>Prop</option><option>Hero Asset</option></select></div>
                   <label class="toggle compact-toggle"><span>Auto LOD</span><input id="model3d-inspector-auto-lod" type="checkbox" checked></label>
                   <button class="secondary" id="model3d-inspector-generate-lods-button" type="button">Generate LODs</button>
                   <div class="model3d-inspector-lod-results" id="model3d-inspector-lod-results"></div>
                 </div>
-                <div class="model3d-inspector-section">
+                <div class="model3d-inspector-section" data-foldout-title="Materials">
                   <div class="model3d-material-list">
                     <span>No material data loaded.</span>
                   </div>
                 </div>
-                <div class="model3d-inspector-section">
+                <div class="model3d-inspector-section" data-foldout-title="UV &amp; Textures">
                   <div class="field"><label for="model3d-inspector-uv">UV Sets</label><select id="model3d-inspector-uv"><option>Unknown</option><option>1</option><option>2</option></select></div>
                   <div class="field"><label for="model3d-inspector-texture-resolution">Texture Resolution</label><select id="model3d-inspector-texture-resolution"><option>4096 x 4096</option><option>2048 x 2048</option></select></div>
                   <label class="toggle compact-toggle"><span>Channel Packing</span><input type="checkbox" checked></label>

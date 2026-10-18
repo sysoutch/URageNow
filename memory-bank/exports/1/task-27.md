@@ -1,6 +1,6 @@
 # Task: Make dashboard Ctrl+C shutdown immediate and clearly reported (id=27)
 
-> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
+> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
 
 - **State:** done
 - **List:** Done (id=1)

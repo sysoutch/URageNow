@@ -495,13 +495,6 @@ body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-pre
   white-space: nowrap !important;
 }
 
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(1),
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(3),
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(8),
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(9) {
-  display: none !important;
-}
-
 body.view-ai-active.studio-workflow-focused #image-studio-card #image-preview-quick-action-hint {
   display: none !important;
 }
@@ -821,12 +814,6 @@ body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-pre
   text-overflow: ellipsis !important;
 }
 
-body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools .mini-button:nth-child(1),
-body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools .mini-button:nth-child(2),
-body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools .mini-button:nth-child(6) {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--editor-accent) 72%, transparent), color-mix(in srgb, var(--editor-accent-strong) 42%, var(--editor-bg-deep) 58%)) !important;
-}
-
 body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools + .video-studio-preview-tools {
   display: none !important;
 }
@@ -933,13 +920,6 @@ body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-pre
 
 body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools + .video-studio-preview-tools {
   display: flex !important;
-}
-
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(1),
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(3),
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(8),
-body.view-ai-active.studio-workflow-focused #image-studio-card .image-studio-preview-tools .mini-button:nth-child(9) {
-  display: inline-flex !important;
 }
 
 body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions {

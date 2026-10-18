@@ -1,6 +1,6 @@
 # Task: [DEP-03] Upgrade DOMPurify in root and packaged dashboard for IN_PLACE advisories (id=23)
 
-> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
+> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
 
 - **State:** open
 - **List:** Under Review (id=2)

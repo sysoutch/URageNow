@@ -1,6 +1,6 @@
 # Task: Improve and clean the overall dashboard UI (id=33)
 
-> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
+> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
 
 - **State:** done
 - **List:** Done (id=1)
@@ -10,7 +10,7 @@
 
 User request 2026-10-17: further improve and clean the overall URage Now dashboard UI. Scope: audit the main Studio dashboard views (home, studios, tools, bots, settings) for visual inconsistencies, layout defects, responsive problems and dead/duplicated styling; fix root causes per memory-bank/styleguides/html-css-styleguide.md; keep existing checks (build:all, check:dashboard style architecture, responsive audit) passing.
 
-## Comments (3)
+## Comments (4)
 
 > **rainer** — 2026-10-17T22:05:09.485Z
 > Root cause of the broken-looking shell found: the full Studio dashboard bootstrap aborted on every load, silently (the rejection went only to setOutput). Three faults in sequence: (1) aiActionHelpers bound guild/moderation buttons that are no longer rendered in the Studio page (Bots now mounts /bots-dashboard) — made optional; (2) rootBootstrapTailHelpers received undefined updateAutomationTextPromptPreset — now passed as a deferred call like sibling helpers; (3) renderImageList threw for the absent moderation list — now returns when its container is missing. Consequences of the abort: rail foldouts overlapping (no studio-home-active / rail-expanded classes), unbound rail/hover handlers, missing theme/runtime polling. Bootstrap failures now also console.error. Added scripts/check-dashboard-bootstrap-ready.ts (Playwright: page must dispatch dashboard:ready with no bootstrap error and a home mode class) and wired it into check:studio-visual.
@@ -36,4 +36,7 @@ User request 2026-10-17: further improve and clean the overall URage Now dashboa
 > Troubles: The server assembles the client script and CSS at startup, so each verification needed a rebuild plus restart. Baseline comparison required temporarily stashing the working tree.
 > Findings: Running bootstrap exposed behavior that only appeared once it completed (overlay inspector opening on load, unnormalized history responses throwing in switchView). Several check-suite failures predate this work and stop their && chains, so later checks were silently not running.
 > Todos: Fix the seven pre-existing dashboard check failures (dashboard-server listener, studio-workflows shared queue, studio-media-performance, _model3d.scss line budget, remote Blender catalog label, tool bridge/theme scripts in individual tools) so check:dashboard and check:studio-visual run green end to end
+
+> **rainer** — 2026-10-17T22:25:55.548Z
+> Committed on main as 63f5e77 "Fix Studio bootstrap abort and clean up dashboard layout". Not pushed.
 

@@ -1,0 +1,72 @@
+// Compact quick-action bars for the 3D and Video Studios (Image Studio's
+// matching rules live with its preview panel in _studio-components.scss).
+// One action shape everywhere: icon inline before a single-line label,
+// 32px tall, in columns that fill the available width. Earlier layers gave
+// 40px fixed-width 3D buttons and highlighted Video actions by position.
+
+$quick-action-button: ":is(.mini-button, button, .studio-tool-picker > button)";
+
+body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr)) !important;
+  gap: 6px !important;
+}
+
+body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions > :is(button, .studio-tool-picker),
+body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions .studio-tool-picker > button {
+  flex: none !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions #{$quick-action-button},
+body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools #{$quick-action-button} {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  height: auto !important;
+  min-height: 32px !important;
+  max-height: none !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions #{$quick-action-button} span:not(.button-icon),
+body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools #{$quick-action-button} span:not(.button-icon) {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.view-ai-active.studio-workflow-focused #video-studio-card .video-preview-tool-group {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr)) !important;
+  gap: 6px !important;
+}
+
+body.view-ai-active.studio-workflow-focused #video-studio-card .video-preview-tool-group > :is(.mini-button, .studio-tool-picker) {
+  flex: none !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+// Studio app bars use the same inline shape. Their buttons had no display
+// set, so at ~1024px Share stacked its icon over the label and the auto-save
+// status wrapped to two lines.
+body.view-ai-active.studio-workflow-focused :is(.image-appbar-actions, .model3d-appbar-actions, .video-appbar-actions) > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
+
+body.view-ai-active.studio-workflow-focused :is(.image-autosave-status, .model3d-autosave-status, .video-autosave-status) {
+  white-space: nowrap !important;
+}

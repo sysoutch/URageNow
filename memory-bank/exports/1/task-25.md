@@ -1,6 +1,6 @@
 # Task: [SEC-10] Constrain server-side image sources and bound remote fetches (id=25)
 
-> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
+> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
 
 - **State:** open
 - **List:** Under Review (id=2)

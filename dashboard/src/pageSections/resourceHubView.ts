@@ -523,7 +523,6 @@ ${otherSuiteSections}
 <!-- Global Addons Panel (always visible when Addons tab is selected) -->
 <div class="resource-hub-content-wrap global-addons-panel hidden" data-dashboard-layout-panel="3d-suites-addons">
 ${renderDashboardLayoutSwitcher("3d-suites-addons")}
-            ${renderDashboardLayoutSwitcher("3d-suites-addons")}
             <section class="resource-hub-command-center resource-hub-3d-command-center" aria-labelledby="three-d-command-center-title">
               <header><div><span class="panel-kicker">3D Suites</span><h3 id="three-d-command-center-title">Create across your suites</h3><p>Choose a suite, manage its executable, then work with addons and automation.</p></div></header>
               <div class="resource-hub-command-metrics"><article><div class="resource-hub-command-icon">${renderButtonIcon("cube")}</div><span>Supported suites</span><strong>4</strong><small>Blender, 3ds Max, Houdini, Cinema 4D</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("wand")}</div><span>Workspace</span><strong>Addons</strong><small>Install, inspect, and update</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("sparkle")}</div><span>Automation</span><strong>Scripts</strong><small>Curated runnable tools</small></article><article><div class="resource-hub-command-icon">${renderButtonIcon("folder")}</div><span>Projects</span><strong>Browse</strong><small>Switch to project workspace</small></article></div>

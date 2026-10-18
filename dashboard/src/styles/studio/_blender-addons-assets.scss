@@ -536,11 +536,13 @@ body:is(.view-blender-addons-active, .view-assets-active) {
   gap: 10px;
 }
 
+// Actions sit under the copy: beside it, two buttons took ~200px of a ~400px
+// card and truncated the project name.
 .game-engine-project-card {
   min-width: 0;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
   gap: 12px;
   padding: 12px;
   border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
@@ -613,7 +615,9 @@ body[data-dashboard-theme="light"] .studio-rail-expanded .rail-resource-section-
 }
 
 .game-engine-project-actions {
+  grid-column: 2;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

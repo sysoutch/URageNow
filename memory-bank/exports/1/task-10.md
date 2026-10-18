@@ -1,6 +1,6 @@
 # Task: [SEC-01] Fail closed when the remote worker has no authentication secret (id=10)
 
-> Exported from Taskitty at `2026-10-17T22:24:36.401Z`.
+> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
 
 - **State:** done
 - **List:** Done (id=1)

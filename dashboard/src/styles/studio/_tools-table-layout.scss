@@ -90,6 +90,7 @@
 }
 
 [data-dashboard-layout="table"] .game-engine-project-actions {
+  grid-column: auto;
   align-self: center;
   align-items: center;
   justify-content: flex-end;

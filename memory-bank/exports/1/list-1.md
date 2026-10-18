@@ -1,6 +1,6 @@
 # List: Done (id=1)
 
-> Exported from Taskitty at `2026-10-17T22:24:36.401Z` (no filters applied)
+> Exported from Taskitty at `2026-10-17T23:59:27.122Z` (no filters applied)
 
 Board: **General** (id=1)
 
@@ -14,3 +14,11 @@ Board: **General** (id=1)
 - **Add standalone Discord bot dashboard mode beside full Studio** (id=29)
 - **Add standalone all-bots dashboard runner** (id=32)
 - **Improve and clean the overall dashboard UI** (id=33)
+- **Fix the seven pre-existing dashboard check failures (dashboard-server listener, studio-workflows shared queue, studio-media-performance, _model3d.scss line budget, remote Blender catalog label, tool bridge/theme scripts in individual tools) so check:dashboard and check:studio-visual run green end to end** (id=34)
+- **Commit the URageTools page edits (data-dashboard-theme, bridge trio, theme script) in C:\Files\URageNow\tools, required for check-dashboard-tool-bridges/themes on main** (id=35)
+- **3D Suites tabs at 320px: the layout switcher labels overlap (Cards/Table/SIZE) and the tab icons collide with labels** (id=37)
+- **Remove dead per-Studio generation queue renderers (*-bottom-queue-list) and the .studio-component-queue CSS, or restore a deliberate queue region** (id=36)
+- **Audio/Music Studio phone layout: studio-workflow-layout resolves to 0px main + 280px side at <=375px, so the main column collapses and the bottom dock overflows the card** (id=38)
+- **Studio workflow settings footer hides its settings button on phones and overshoots the footer edge** (id=40)
+- **add button in header in tauri and somewhere else at the top for browser for discord with discordicon and a link to the URage Discord** (id=39)
+- **Compact quick action buttons and polish remaining dashboard views** (id=41)
