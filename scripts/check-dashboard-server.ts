@@ -69,7 +69,11 @@ try {
   assert.ok(networkSettings.mode === "local" || networkSettings.mode === "lan");
   assert.ok(networkSettings.checks?.some(check => check.id === "listener"));
   assert.ok(networkSettings.firewallCommands?.some(command => command.includes("UDP localport=47820")));
-  const accessTokenResponse = await fetch(`${baseUrl}/api/settings/network/access-token`, {method: "POST"});
+  const accessTokenResponse = await fetch(`${baseUrl}/api/settings/network/access-token`, {
+    method: "POST",
+    headers: {"content-type": "application/json"},
+    body: "{}"
+  });
   assert.ok(accessTokenResponse.status === 200 || accessTokenResponse.status === 404);
   if (accessTokenResponse.status === 200) {
     const tokenPayload = await accessTokenResponse.json() as {accessToken?: string};

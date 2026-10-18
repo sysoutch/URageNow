@@ -198,6 +198,7 @@ Completed:
 - Focused workflow breakpoint rules moved into `studio/_focused-workflow-responsive.scss`, reducing the base focused stylesheet to its non-responsive ownership.
 - The final focused 3D viewer/action refinement block moved from the shared focused workflow stylesheet into `studio/_focused-workflow-model3d.scss` without changing generated CSS order.
 - Cross-media dock, queue, and filmstrip rules moved out of `media-ai/_model3d.scss` into `media-ai/_media-docks.scss`.
+- Video Studio chrome (app bar, scrubber, creative grid) and the 3D low-poly configuration panel moved from the tail of `media-ai/_model3d.scss` into `media-ai/_video-studio-chrome.scss` and `media-ai/_model3d-lowpoly-configuration.scss`, loaded directly after it so the generated CSS is byte-identical. The Tools README overlay moved from `_tools.scss` into `legacy/_tools-readme-overlay.scss`. Both line budgets were ratcheted down (2657 and 2094).
 - Removed hundreds of blank-only lines from the legacy Tools stylesheet and added an automated guard against excessive blank-line runs.
 - Added no-growth line budgets for the seven remaining stylesheet hotspots so ongoing feature work must extract ownership instead of making them larger.
 - Dashboard checks now enforce the root loading map and workflow-tab stylesheet ownership.

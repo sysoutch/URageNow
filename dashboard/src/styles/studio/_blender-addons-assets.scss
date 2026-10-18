@@ -80,6 +80,13 @@ body:is(.view-blender-addons-active, .view-assets-active) {
     white-space: nowrap;
     transition: color 160ms ease, opacity 160ms ease;
     cursor: pointer;
+
+    // Phone widths cannot fit icon and label side by side, so stack them instead of overflowing.
+    @media (max-width: 760px) {
+      flex-direction: column;
+      gap: 2px;
+      padding-inline: 4px;
+    }
   }
 
   .blender-workspace-tabs .dashboard-tab::after {
@@ -158,6 +165,24 @@ body:is(.view-blender-addons-active, .view-assets-active) {
     min-height: 0;
     overflow: hidden;
     width: 100%;
+  }
+
+  // Like the addon sub-panels, the scripts list owns scrolling so stacked catalogs keep their height.
+  .global-scripts-scroll {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+
+    // This view opts out of the content-shell clearance, so the list clears the mobile bottom nav itself.
+    @media (max-width: 980px) {
+      padding-bottom: calc(var(--dashboard-mobile-nav-clearance) + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .global-scripts-scroll > .resource-manager-panel {
+    flex: 0 0 auto;
   }
 
   // JS toggles the hidden class - show when NOT hidden (regardless of body class)

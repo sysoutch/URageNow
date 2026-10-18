@@ -92,6 +92,8 @@ try {
       assert.ok(contract.sections >= 1, `${workflow.name} must use shared form sections.`);
       assert.ok(contract.previews >= 1, `${workflow.name} must use a shared preview card.`);
       assert.ok(contract.queues >= 1, `${workflow.name} must use a shared generation queue.`);
+      assert.equal(await card.locator(`#${workflow.name}-bottom-queue-list[role="status"]`).count(), 1,
+        `${workflow.name} must render its generation queue into a live status region.`);
       assert.ok(contract.advancedSettings >= 1, `${workflow.name} must use shared advanced settings.`);
       await page.locator(`#${workflow.metadataId}.studio-component-metadata`).waitFor({state: "attached"});
       assert.ok(await page.locator(".studio-component-status").count() >= 5,

@@ -16,6 +16,11 @@
     grid-template-columns: minmax(0, 1fr) minmax(280px, 32%);
     gap: 10px;
     margin-top: 10px;
+
+    // Phones cannot fit the filmstrip beside a 280px queue, so the queue stacks below it.
+    @media (max-width: 760px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .audio-dock-panel,
