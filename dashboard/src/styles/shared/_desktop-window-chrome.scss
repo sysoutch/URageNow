@@ -79,3 +79,31 @@ body.tauri-desktop-shell {
   box-shadow: inset 0 0 0 2px var(--accent-strong, #ff70b5);
   outline: none;
 }
+
+.desktop-window-community-link {
+  align-items: center;
+  align-self: center;
+  border: 1px solid color-mix(in srgb, var(--border-color, #54223e) 80%, transparent);
+  border-radius: 999px;
+  color: var(--text-muted, #c5b7bf);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 6px;
+  height: 26px;
+  margin-inline-end: 8px;
+  padding-inline: 10px;
+  text-decoration: none;
+  -webkit-app-region: no-drag;
+}
+
+.desktop-window-community-link:hover {
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #fff;
+}
+
+.desktop-window-community-link:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-strong, #ff70b5);
+  outline: none;
+}

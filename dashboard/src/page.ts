@@ -33,6 +33,8 @@ import { renderDashboardMobileNav } from "./pageSections/mobileNav.js";
 import { getDashboardToolsCatalog, renderDashboardToolsRailCategories, renderDashboardToolsView } from "./pageSections/toolsView.js";
 import { renderDashboardAssetsView, renderDashboardBlenderAddonsView } from "./pageSections/resourceHubView.js";
 
+// Opened in the system browser by the desktop shell (desktop_open_discord).
+const urageDiscordUrl = "https://discord.gg/n3jkrtN";
 const moduleRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../");
 const dashboardAppearanceComponentOptions: ReadonlyArray<readonly [string, string]> = [
   ["Tabs", "tabs"],
@@ -175,6 +177,7 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
       <i class="bi bi-stars desktop-window-mark" aria-hidden="true"></i>
       <span class="desktop-window-title dashboard-wordmark" data-tauri-drag-region aria-label="URage Now"><span class="dashboard-wordmark-u">U</span><span class="dashboard-wordmark-rage">RAGE</span><span class="dashboard-wordmark-now">Now</span><span class="dashboard-wordmark-descriptor">Studio</span></span>
     </div>
+    <a class="desktop-window-community-link" href="${urageDiscordUrl}" target="_blank" rel="noopener noreferrer" data-desktop-external-link="discord" title="Join the URage Discord" aria-label="Join the URage Discord"><i class="bi bi-discord" aria-hidden="true"></i><span>Discord</span></a>
     <div class="desktop-window-controls" aria-label="Window controls">
       <button class="desktop-window-control" id="desktop-window-minimize" type="button" title="Minimize" aria-label="Minimize window"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
       <button class="desktop-window-control" id="desktop-window-maximize" type="button" title="Maximize or restore" aria-label="Maximize or restore window"><i class="bi bi-square" aria-hidden="true"></i></button>
@@ -191,6 +194,10 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
         <span aria-hidden="true">&#8646;</span>
       </button>
       <div class="rail-home-wrap">
+        <a class="nav-link rail-settings-button rail-discord-link" href="${urageDiscordUrl}" target="_blank" rel="noopener noreferrer" data-desktop-external-link="discord" title="Join the URage Discord" aria-label="Join the URage Discord">
+          <span aria-hidden="true"><i class="bi bi-discord"></i></span>
+          <span class="rail-bottom-label">Discord</span>
+        </a>
         <button class="nav-link rail-nav-button rail-app-button active" data-rail-category="studio" data-view="ai" data-studio-home-view="studio" title="URage Now Home" aria-label="Open URage Now Home">
           <span class="rail-home-mark">
             <img class="rail-home-mark-logo" data-dashboard-theme-logo="studio" src="/assets/dashboard-theme-logo.png?theme=${defaultDashboardTheme}" alt="URage Now">

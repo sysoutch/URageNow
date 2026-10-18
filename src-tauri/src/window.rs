@@ -70,3 +70,24 @@ pub(crate) fn desktop_toggle_maximize(window: WebviewWindow) -> Result<bool, Str
 pub(crate) fn desktop_hide(window: WebviewWindow) -> Result<(), String> {
     window.hide().map_err(|error| error.to_string())
 }
+
+// Fixed URL on purpose: the webview cannot ask the shell to open arbitrary links.
+const URAGE_DISCORD_URL: &str = "https://discord.gg/n3jkrtN";
+
+#[tauri::command]
+pub(crate) fn desktop_open_discord() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    let mut command = std::process::Command::new("explorer");
+    #[cfg(target_os = "macos")]
+    let mut command = std::process::Command::new("open");
+    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+    let mut command = std::process::Command::new("xdg-open");
+
+    // explorer.exe exits non-zero even when it opens the URL, so only a spawn
+    // failure counts as an error.
+    command
+        .arg(URAGE_DISCORD_URL)
+        .spawn()
+        .map(|_| ())
+        .map_err(|error| error.to_string())
+}
