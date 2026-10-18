@@ -1,9 +1,9 @@
 # Task: Bring advanced Discord Guild, Moderation, and Automation controls to parity in the standalone bot dashboard (id=30)
 
-> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
+> Exported from Taskitty at `2026-10-18T14:53:27.989Z`.
 
 - **State:** open
-- **List:** Normal Priority (id=5)
+- **List:** High Priority (id=4)
 - **Added:** 2026-10-09T19:08:26.767Z
 
 ## Description

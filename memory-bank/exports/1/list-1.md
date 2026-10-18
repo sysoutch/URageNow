@@ -1,6 +1,6 @@
 # List: Done (id=1)
 
-> Exported from Taskitty at `2026-10-17T23:59:27.122Z` (no filters applied)
+> Exported from Taskitty at `2026-10-18T14:53:27.989Z` (no filters applied)
 
 Board: **General** (id=1)
 
@@ -22,3 +22,5 @@ Board: **General** (id=1)
 - **Studio workflow settings footer hides its settings button on phones and overshoots the footer edge** (id=40)
 - **add button in header in tauri and somewhere else at the top for browser for discord with discordicon and a link to the URage Discord** (id=39)
 - **Compact quick action buttons and polish remaining dashboard views** (id=41)
+- **Fix the two failing companion checks so npm run check passes** (id=42)
+- **UI/UX and tools audit 2026-10-18 (survey record)** (id=57)

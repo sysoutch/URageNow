@@ -1,6 +1,6 @@
 # Task: Add standalone Discord bot dashboard mode beside full Studio (id=29)
 
-> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
+> Exported from Taskitty at `2026-10-18T14:53:27.989Z`.
 
 - **State:** done
 - **List:** Done (id=1)

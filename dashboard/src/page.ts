@@ -194,10 +194,6 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
         <span aria-hidden="true">&#8646;</span>
       </button>
       <div class="rail-home-wrap">
-        <a class="nav-link rail-settings-button rail-discord-link" href="${urageDiscordUrl}" target="_blank" rel="noopener noreferrer" data-desktop-external-link="discord" title="Join the URage Discord" aria-label="Join the URage Discord">
-          <span aria-hidden="true"><i class="bi bi-discord"></i></span>
-          <span class="rail-bottom-label">Discord</span>
-        </a>
         <button class="nav-link rail-nav-button rail-app-button active" data-rail-category="studio" data-view="ai" data-studio-home-view="studio" title="URage Now Home" aria-label="Open URage Now Home">
           <span class="rail-home-mark">
             <img class="rail-home-mark-logo" data-dashboard-theme-logo="studio" src="/assets/dashboard-theme-logo.png?theme=${defaultDashboardTheme}" alt="URage Now">
@@ -294,6 +290,10 @@ export function renderDashboardHtml(port: number, clientScript: string): string 
           </span>
           <span class="rail-bottom-label">About</span>
         </button>
+        <a class="nav-link rail-settings-button rail-discord-link" href="${urageDiscordUrl}" target="_blank" rel="noopener noreferrer" data-desktop-external-link="discord" title="Join the URage Discord" aria-label="Join the URage Discord">
+          <span aria-hidden="true"><i class="bi bi-discord"></i></span>
+          <span class="rail-bottom-label">Discord</span>
+        </a>
         <button class="nav-link rail-settings-button rail-resources-button" id="rail-resources-button" type="button" title="Resources" aria-label="Open Resources">
           <span aria-hidden="true">
             ${renderDashboardNavigationIcon("resources")}

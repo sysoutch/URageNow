@@ -1,6 +1,6 @@
 # Task: Compact quick action buttons and polish remaining dashboard views (id=41)
 
-> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
+> Exported from Taskitty at `2026-10-18T14:53:27.989Z`.
 
 - **State:** done
 - **List:** Done (id=1)
@@ -10,7 +10,7 @@
 
 Follow-up to #33 (user request 2026-10-18): make the quick action buttons more compact and continue improving the remaining dashboard views (Studio workflows, 3D Suites, Game Engines, settings/overlays). Fix root causes per memory-bank/styleguides/html-css-styleguide.md; verify at 320/375/768/1024/1440.
 
-## Comments (2)
+## Comments (3)
 
 > **rainer** — 2026-10-17T23:59:23.714Z
 > Quick actions compacted and more views polished (uncommitted on main).
@@ -33,4 +33,7 @@ Follow-up to #33 (user request 2026-10-18): make the quick action buttons more c
 > Solution: Gave quick actions one owned contract (shared/_studio-quick-actions.scss plus the Image block in place), removed positional rules, pointed stale selectors at real classes, named foldouts explicitly with data-foldout-title, removed duplicated markup, and restacked Game Engines cards.
 > Troubles: Several SCSS files mix CRLF and LF line endings, so the replacements needed an EOL-tolerant helper.
 > Findings: The unmerged side branches overlap this area (phone workspace stacking, style budgets), so they should be merged into main before further Studio layout work to avoid conflicts.
+
+> **rainer** — 2026-10-18T10:54:39.226Z
+> Committed as 18a22cf. Then merged refs/heads/claude/angry-shtern-02ae07 (7e4c025, #34) and refs/heads/claude/gracious-mahavira-5c004f (e7fe86a, #38/#39) into main. Only dashboard/src/generated.css conflicted, and it was regenerated from the merged sources. On the merged tree, check:dashboard, check:studio-visual and check:runtime pass end to end, and the responsive audit passes all 11 viewports. Full `npm run check`: architecture/paths/games/packages/discord/worker pass. In check:companion, a stale lockout assertion (failedPairingAttempts was renamed in the SEC-08 refactor) was fixed in d738dee. Two companion checks predate this session and still fail: check-android-companion.mjs (manifest configChanges regex) and check-companion-workflows.ts ("2 reference images as parts"). Nothing pushed.
 

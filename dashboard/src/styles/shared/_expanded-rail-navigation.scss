@@ -30,17 +30,6 @@ $collapsed-rail-views: ".view-ai-active, .view-tools-active, .view-profile-activ
     box-shadow: none !important;
   }
 
-  // In the browser the Discord link is the first rail row, so the toggle
-  // shares that row instead of floating between it and the brand row. The
-  // desktop shell removes the link and keeps the brand-row alignment above.
-  body.studio-rail-expanded[class] .server-rail:has(.rail-discord-link) #rail-workflow-expand-button {
-    top: 3px;
-  }
-
-  body.studio-rail-expanded[class][class] .rail-home-wrap > .rail-discord-link {
-    padding-right: 48px !important;
-  }
-
   body.studio-rail-expanded[class] #rail-workflow-expand-button:hover {
     background: color-mix(in srgb, var(--rail-sidebar-accent) 7%, transparent) !important;
     box-shadow: inset 2px 0 0 var(--rail-sidebar-accent) !important;

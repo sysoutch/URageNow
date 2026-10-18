@@ -1,6 +1,6 @@
 # Task: Audio/Music Studio phone layout: studio-workflow-layout resolves to 0px main + 280px side at <=375px, so the main column collapses and the bottom dock overflows the card (id=38)
 
-> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
+> Exported from Taskitty at `2026-10-18T14:53:27.989Z`.
 
 - **State:** done
 - **List:** Done (id=1)

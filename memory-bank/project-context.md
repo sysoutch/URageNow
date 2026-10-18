@@ -1,5 +1,10 @@
 # Project Context
 
+## 2026-10-18 — UI/UX and tools audit (Taskitty #57, follow-ups #43–#56)
+
+- A full-view survey (Playwright screenshots at 1440/390 plus computed-style counts) is the baseline for UI work. Known open gaps: Audio/Music/Chat still use the legacy large header (#46); no toast layer (#53); 9–10px text dominates dense views and button heights spread over 11 values (#50); the Tools home analytics card is hard-coded (#45); 39 of 67 tool pages lack the dashboard bridge and only 17 have `tool.json` (#51); `tools/README.md` describes a retired static-site deployment (#52).
+- The bots page remaps `messaging` → `messenger` for every messenger, which blanks Discord's Messages tab (#43). The community Discord link (#39) currently occupies the first rail slot above the brand (#47).
+
 ## 2026-10-18 — Studio bootstrap and shell layout contracts
 
 - The full Studio page shares client bindings with the bot dashboards, but Guild/Moderation panels now render only in `/bots-dashboard`. Any bootstrap-time binding or render to a panel that may be absent must tolerate a missing element; one unguarded `getElementById(...).addEventListener` aborted the whole async bootstrap, which silently left rail, home, theme and runtime state uninitialized. Bootstrap failures now `console.error`, and `scripts/check-dashboard-bootstrap-ready.ts` (in `check:studio-visual`) requires `dashboard:ready` with no bootstrap error.

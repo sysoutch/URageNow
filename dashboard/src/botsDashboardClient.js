@@ -16,7 +16,12 @@
     notice("");
     try { await callback(); } catch (error) { notice(error instanceof Error ? error.message : "Request failed."); }
   }
-  function showView(view) {
+  function showView(requested) {
+    // Discord renders its chat in the "messaging" panel; the other messengers
+    // share the "messenger" panel. Both tab buttons must land on the right one.
+    const view = requested === "messaging" || requested === "messenger"
+      ? (state.messenger === "discord" ? "messaging" : "messenger")
+      : requested;
     state.view = view;
     document.querySelectorAll("[data-view-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.viewPanel === view));
     document.querySelectorAll(".messenger-dashboard-view [data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === view));
@@ -135,11 +140,11 @@
   });
   document.querySelectorAll(".messenger-dashboard-view [data-view]").forEach(button => button.addEventListener("click", () => {
     const view = button.dataset.view;
-    showView(view === "messaging" ? "messenger" : view);
+    showView(view);
   }));
   document.querySelectorAll("[data-bots-view]").forEach(button => button.addEventListener("click", () => {
     const view = button.dataset.botsView;
-    showView(view === "messaging" ? "messenger" : view);
+    showView(view);
   }));
   for (const action of ["start", "stop", "restart"]) byId(`bots-${action}`).addEventListener("click", () => run(() => control(action)));
   byId("messenger-dashboard-quick-runtime-button").addEventListener("click", () => run(() => control(byId("bots-start").disabled ? "stop" : "start")));

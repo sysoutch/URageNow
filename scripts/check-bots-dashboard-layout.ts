@@ -34,8 +34,14 @@ try {
   await workspaceTabs.getByText("Moderation", { exact: true }).click();
   assert.equal(await page.locator('[data-view-panel="moderation"]').isVisible(), true);
 
+  // Discord chat lives in the "messaging" panel; other messengers share "messenger".
+  await page.locator('.bots-workspace-tabs [data-bots-view="messaging"]').click();
+  assert.equal(await page.locator('[data-view-panel="messaging"]').isVisible(), true, "Discord Messages must show the Discord chat panel.");
+
   await page.locator('[data-bot="telegram"]').click();
   assert.equal(await page.locator("#messenger-dashboard-title").textContent(), "Telegram");
+  await page.locator('.bots-workspace-tabs [data-bots-view="messenger"]').click();
+  assert.equal(await page.locator('[data-view-panel="messenger"]').isVisible(), true, "Telegram Messages must show the messenger panel.");
   assert.deepEqual(errors, []);
   console.log("Bots dashboard keeps the shared dashboard style and exposes every Discord workspace view.");
 } finally {

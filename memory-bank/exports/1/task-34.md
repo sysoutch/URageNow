@@ -1,6 +1,6 @@
 # Task: Fix the seven pre-existing dashboard check failures (dashboard-server listener, studio-workflows shared queue, studio-media-performance, _model3d.scss line budget, remote Blender catalog label, tool bridge/theme scripts in individual tools) so check:dashboard and check:studio-visual run green end to end (id=34)
 
-> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
+> Exported from Taskitty at `2026-10-18T14:53:27.989Z`.
 
 - **State:** done
 - **List:** Done (id=1)

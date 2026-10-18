@@ -1,6 +1,6 @@
 # Task: 3D Suites tabs at 320px: the layout switcher labels overlap (Cards/Table/SIZE) and the tab icons collide with labels (id=37)
 
-> Exported from Taskitty at `2026-10-17T23:59:27.122Z`.
+> Exported from Taskitty at `2026-10-18T14:53:27.989Z`.
 
 - **State:** done
 - **List:** Done (id=1)
