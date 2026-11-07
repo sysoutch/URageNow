@@ -72,3 +72,6 @@ src-tauri/runtime-bundle/
 
 # Local agent memory (Taskitty exports, notes); kept on disk, never committed.
 /memory-bank/
+
+# Personal notes about the user for the chat (shared/USER.md): local only. Missing means the template text is used.
+/shared/USER.md
