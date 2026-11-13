@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { config as loadEnv } from "dotenv";
 import { dataRoot, repositoryRootCandidates, resolveRepoPath } from "./repositoryPaths.js";
@@ -66,6 +66,35 @@ function optionalNumber(name: string, fallback: number): number {
   }
 
   return parsed;
+}
+
+// Used when BLENDER_EXECUTABLE_PATH is not set: the newest "Blender X.Y" install that
+// has a blender.exe, so installing a new Blender needs no config change.
+const BLENDER_FALLBACK_EXECUTABLE = "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe";
+const BLENDER_INSTALL_FOLDER_PATTERN = /^Blender (\d+)\.(\d+)$/i;
+
+function resolveNewestInstalledBlender(): string {
+  const roots = [process.env.ProgramFiles, process.env["ProgramFiles(x86)"]]
+    .filter((root): root is string => Boolean(root))
+    .map(root => path.join(root, "Blender Foundation"));
+  const installs: Array<{ major: number; minor: number; executable: string }> = [];
+  for (const root of roots) {
+    let entries: string[] = [];
+    try {
+      entries = readdirSync(root);
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const match = BLENDER_INSTALL_FOLDER_PATTERN.exec(entry);
+      const executable = path.join(root, entry, "blender.exe");
+      if (match && existsSync(executable)) {
+        installs.push({ major: Number(match[1]), minor: Number(match[2]), executable });
+      }
+    }
+  }
+  installs.sort((left, right) => (right.major - left.major) || (right.minor - left.minor));
+  return installs[0]?.executable ?? BLENDER_FALLBACK_EXECUTABLE;
 }
 
 function optionalString(name: string, fallback: string): string {
@@ -226,7 +255,7 @@ export const appConfig = {
   comfyUiModelTargetFaceInputKey: optionalString("COMFYUI_3D_TARGET_FACE_INPUT_KEY", ""),
   comfyUiModelPollMs: optionalNumber("COMFYUI_3D_POLL_MS", 7_500),
   comfyUiModelTimeoutMs: optionalNumber("COMFYUI_3D_TIMEOUT_MS", 15 * 60_000),
-  blenderExecutablePath: optionalString("BLENDER_EXECUTABLE_PATH", "C:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe"),
+  blenderExecutablePath: optionalString("BLENDER_EXECUTABLE_PATH", resolveNewestInstalledBlender()),
   bambuStudioExecutablePath: optionalString("BAMBU_STUDIO_EXECUTABLE_PATH", ""),
   cargoExecutablePath: optionalString("CARGO_EXECUTABLE_PATH", "cargo"),
   rustWorkerWorkspacePath: optionalString("RUST_WORKER_WORKSPACE_PATH", resolveRepoPath("workers", "rust")),

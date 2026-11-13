@@ -367,10 +367,18 @@ def setup_world():
     )
 
 
+def set_eevee_engine(scene):
+    """Blender 4.2-4.5 call EEVEE "BLENDER_EEVEE_NEXT"; 5.x renamed it back to "BLENDER_EEVEE"."""
+    try:
+        scene.render.engine = "BLENDER_EEVEE_NEXT"
+    except TypeError:
+        scene.render.engine = "BLENDER_EEVEE"
+
+
 def configure_render():
     scene = bpy.context.scene
 
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    set_eevee_engine(scene)
 
     scene.render.resolution_x = 768
     scene.render.resolution_y = 768

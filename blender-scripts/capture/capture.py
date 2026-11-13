@@ -139,7 +139,11 @@ def configure_skybox(scene):
     output = nodes.new(type="ShaderNodeOutputWorld")
     background = nodes.new(type="ShaderNodeBackground")
     sky = nodes.new(type="ShaderNodeTexSky")
-    sky.sky_type = "NISHITA"
+    # Blender 5 replaced the "NISHITA" sky with SINGLE/MULTIPLE_SCATTERING.
+    try:
+        sky.sky_type = "NISHITA"
+    except TypeError:
+        sky.sky_type = "MULTIPLE_SCATTERING"
     background.inputs["Strength"].default_value = 0.35
     links.new(sky.outputs["Color"], background.inputs["Color"])
     links.new(background.outputs["Background"], output.inputs["Surface"])
@@ -164,13 +168,23 @@ def select_object(name=None):
     return mesh_objects[0]
 
 
+def apply_render_engine(scene, render_engine):
+    """Set the engine; "BLENDER_EEVEE_NEXT" (Blender 4.2-4.5) is "BLENDER_EEVEE" again in 5.x."""
+    try:
+        scene.render.engine = render_engine
+    except TypeError:
+        if render_engine != "BLENDER_EEVEE_NEXT":
+            raise
+        scene.render.engine = "BLENDER_EEVEE"
+
+
 def setup_render(args):
     scene = bpy.context.scene
     render_engine = args.engine
     if args.background == "skybox" and render_engine == "BLENDER_WORKBENCH":
         render_engine = "BLENDER_EEVEE_NEXT"
-        print("Skybox capture uses Eevee Next because Workbench cannot render world sky shaders.")
-    scene.render.engine = render_engine
+        print("Skybox capture uses Eevee because Workbench cannot render world sky shaders.")
+    apply_render_engine(scene, render_engine)
     scene.render.resolution_x = args.width
     scene.render.resolution_y = args.height
     scene.render.resolution_percentage = 100
