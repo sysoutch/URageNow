@@ -1629,6 +1629,47 @@ function getToolQuickActionUi(kind) {
     };
 
     let isToolsHomeCatalogExpanded = false;
+    // The collapsed catalog shows whole rows only, so no card sits alone on a row.
+    const TOOLS_CATALOG_PREVIEW_ROWS = 2;
+    let toolsCatalogResizeObserver = null;
+    const countGridColumns = grid => {
+      const template = getComputedStyle(grid).gridTemplateColumns || "";
+      return Math.max(1, template.split(" ").filter(Boolean).length);
+    };
+    const applyToolsCatalogPreview = (section, totalCount) => {
+      const grid = section?.querySelector(".tools-home-card-grid");
+      if (!grid) {
+        return;
+      }
+      const cards = [...grid.children];
+      const summary = section.querySelector(".tools-home-section-head p");
+      const toggle = section.querySelector(".tools-home-catalog-toggle");
+      const listLayout = section.closest("[data-dashboard-layout]")?.getAttribute("data-dashboard-layout") || "cards";
+      const previewCount = isToolsHomeCatalogExpanded
+        ? cards.length
+        : Math.min(cards.length, countGridColumns(grid) * TOOLS_CATALOG_PREVIEW_ROWS * (listLayout === "cards" ? 1 : 4));
+      cards.forEach((card, index) => card.toggleAttribute("hidden", index >= previewCount));
+      if (summary) {
+        summary.textContent = previewCount >= totalCount
+          ? totalCount + " tools in your local catalog."
+          : "Showing " + previewCount + " of " + totalCount + " tools.";
+      }
+      if (toggle) {
+        const canCollapse = isToolsHomeCatalogExpanded && cards.length > countGridColumns(grid) * TOOLS_CATALOG_PREVIEW_ROWS;
+        toggle.hidden = !(previewCount < totalCount || canCollapse);
+        toggle.textContent = isToolsHomeCatalogExpanded ? "Show fewer" : "Show all " + totalCount + " tools";
+        toggle.setAttribute("aria-expanded", isToolsHomeCatalogExpanded ? "true" : "false");
+      }
+    };
+    const watchToolsCatalogPreview = (section, totalCount) => {
+      toolsCatalogResizeObserver?.disconnect();
+      if (typeof ResizeObserver !== "function" || !section) {
+        return;
+      }
+      // Column count changes with window width, the size slider and the sidebar.
+      toolsCatalogResizeObserver = new ResizeObserver(() => applyToolsCatalogPreview(section, totalCount));
+      toolsCatalogResizeObserver.observe(section.querySelector(".tools-home-card-grid") || section);
+    };
     const renderToolsHomeOverview = (entries, showActivity) => {
       if (homeToolCountNode) homeToolCountNode.textContent = String(entries.length);
       if (!homeCategoryActionsNode) return;
@@ -1713,11 +1754,16 @@ function getToolQuickActionUi(kind) {
         setDashboardClientSvgIcon(icon, "tools");
       }
       const favoriteButton = document.createElement("button");
-      favoriteButton.className = "tools-card-favorite";
+      const isFavorite = toolsWorkspaceState.favoriteToolIds.includes(entry.id);
+      favoriteButton.className = "tools-card-favorite" + (isFavorite ? " is-favorite" : "");
       favoriteButton.type = "button";
-      favoriteButton.textContent = toolsWorkspaceState.favoriteToolIds.includes(entry.id) ? "*" : "+";
-      favoriteButton.title = "Toggle favorite";
-      favoriteButton.setAttribute("aria-label", "Toggle favorite for " + entry.title);
+      const favoriteIcon = document.createElement("i");
+      favoriteIcon.className = "bi " + (isFavorite ? "bi-star-fill" : "bi-star");
+      favoriteIcon.setAttribute("aria-hidden", "true");
+      favoriteButton.appendChild(favoriteIcon);
+      favoriteButton.title = isFavorite ? "Remove from favorites" : "Add to favorites";
+      favoriteButton.setAttribute("aria-label", (isFavorite ? "Remove " : "Add ") + entry.title + (isFavorite ? " from favorites" : " to favorites"));
+      favoriteButton.setAttribute("aria-pressed", isFavorite ? "true" : "false");
       favoriteButton.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();
@@ -1793,7 +1839,22 @@ function getToolQuickActionUi(kind) {
         grid.appendChild(createToolHomeCard(entry, options));
       });
       section.appendChild(grid);
+      if (options && options.catalog) {
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "secondary tools-home-catalog-toggle";
+        toggle.hidden = true;
+        toggle.addEventListener("click", () => {
+          isToolsHomeCatalogExpanded = !isToolsHomeCatalogExpanded;
+          applyToolsCatalogPreview(section, entries.length);
+          if (!isToolsHomeCatalogExpanded) {
+            section.scrollIntoView({ block: "nearest" });
+          }
+        });
+        section.appendChild(toggle);
+      }
       (targetNode || homeGridNode).appendChild(section);
+      return section;
     };
     const renderWorkspaceHomeCards = () => {
       if (!homeGridNode) {
@@ -1860,15 +1921,16 @@ function getToolQuickActionUi(kind) {
         { quick: true }
       );
       const catalogEntries = entries.slice().sort((a, b) => a.title.localeCompare(b.title));
-      const visibleCatalogEntries = isToolsHomeCatalogExpanded ? catalogEntries : catalogEntries.slice(0, 12);
-      appendHomeSection(
+      const catalogSection = appendHomeSection(
         "Tool catalog",
-        isToolsHomeCatalogExpanded
-          ? catalogEntries.length + " tools in your local catalog."
-          : "Showing " + visibleCatalogEntries.length + " of " + catalogEntries.length + " tools.",
-        visibleCatalogEntries,
+        catalogEntries.length + " tools in your local catalog.",
+        catalogEntries,
         { catalog: true }
-      );      homeGridNode.appendChild(homeContent);
+      );
+      homeGridNode.appendChild(homeContent);
+      // Measure columns only once the grid is in the document.
+      applyToolsCatalogPreview(catalogSection, catalogEntries.length);
+      watchToolsCatalogPreview(catalogSection, catalogEntries.length);
     };
     const setWorkspaceHome = () => {
       toolButtons.forEach(node => {

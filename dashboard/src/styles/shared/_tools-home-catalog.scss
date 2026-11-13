@@ -1,0 +1,72 @@
+// Tools dashboard: "Continue building" and "Tool catalog" cards.
+//
+// On wide screens the old grid packed 8-11 cards per row and the title column
+// (between icon and favorite) was ~120px, so names were cut to a few letters.
+// Cards now get at least 240px and titles may use two lines. The collapsed
+// catalog shows two full rows (see applyToolsCatalogPreview in workspaceHelpers.js).
+
+$tools-card-min-width: 240px;
+$tools-scope: "body.view-tools-active";
+
+#{$tools-scope} .tools-home-section .tools-home-card-grid.tools-home-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(#{$tools-card-min-width} * var(--dashboard-collection-scale, 1))), 1fr));
+  gap: 10px;
+}
+
+// Continue building uses the same columns, so its cards line up with the catalog
+// instead of one card stretching across an otherwise empty panel.
+#{$tools-scope} .tools-home-section.is-quick .tools-home-card-grid.tools-home-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(#{$tools-card-min-width} * var(--dashboard-collection-scale, 1))), 1fr));
+}
+
+#{$tools-scope} .tools-workspace-home-card h4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+  text-overflow: clip;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+#{$tools-scope} .tools-workspace-home-card p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+}
+
+#{$tools-scope} .tools-workspace-home-card[hidden] {
+  display: none !important;
+}
+
+// Favorite: star icon, filled and accent-coloured when set.
+#{$tools-scope} .tools-card-favorite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+}
+
+#{$tools-scope} .tools-card-favorite.is-favorite {
+  color: var(--studio-accent-1, var(--accent));
+}
+
+#{$tools-scope} .tools-home-catalog-toggle {
+  justify-self: center;
+  margin-top: 12px;
+  padding: 0 18px;
+  height: 34px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#{$tools-scope} .tools-home-catalog-toggle[hidden] {
+  display: none !important;
+}
