@@ -48,3 +48,28 @@ Example:
 ```
 
 Subdivision level `0` displaces existing vertices only. Levels `1-8` apply either Subdivision Surface or Multiresolution and convert the result to real vertices, edges, and faces before displacement. The workflow can weld duplicates both before and after this topology pass. Weld cleanup does not undo ordinary subdivision topology. Start with `0` or `1` on dense generated models.
+
+## Remesh
+
+`remesh/remesh_model.py` rebuilds a model as a lighter mesh and bakes its look onto it (the Studio's Remesh quick action). `--method=quadriflow|voxel` run with `--background`; `quadremesher` and `--bake_engine=bakelab` need Blender with a window.
+
+```powershell
+& $env:BLENDER_EXECUTABLE_PATH --background --python blender-scripts/remesh/remesh_model.py --python-exit-code 1 -- `
+  --filepath=.\models\source.glb --output_path=.\models\source-remesh.glb `
+  --method=quadriflow --target_faces=5000 --bake_engine=builtin --bake_maps=albedo,normal
+```
+
+## Bake
+
+`bake/bake_maps.py` bakes albedo, normal, roughness, metallic, AO and emission into one PBR material (the Studio's Bake quick action). Without `--source_path` it flattens the model's own materials; with it, it bakes that high-poly model onto `--filepath`. `--engine=bakelab` uses the BakeLab2 add-on (window required; set `--bakelab_path` or `URAGE_BAKELAB_PATH`).
+
+## Migrate add-ons between Blender versions
+
+`addons/migrate_addons.py` copies every user add-on and extension from one Blender version to another, enables the same set, and backs up the target's `userpref.blend` first. Run it in the **target** Blender; it starts the source Blender to read what is enabled.
+
+```powershell
+& "C:\Program Files\Blender Foundation\Blender 5.1\blender.exe" --background --python blender-scripts/addons/migrate_addons.py -- `
+  --source_blender="C:\Program Files\Blender Foundation\Blender 4.5\blender.exe"
+```
+
+Options: `--dry_run=true` (report only), `--enable=all` (enable every copied add-on, not just the ones enabled in the source), `--overwrite=true` (replace add-ons the target already has). Add-ons that fail to load in the target are listed with the reason; for example, Python 3.13 in Blender 5.x no longer has `imghdr`.
