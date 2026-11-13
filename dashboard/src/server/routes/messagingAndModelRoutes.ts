@@ -663,6 +663,47 @@ async function handlePostApiModel3dAlbedoToGeometry(request: IncomingMessage, re
   }
 }
 
+const REMESH_METHODS = new Set(["quadriflow", "voxel", "quadremesher"]);
+const REMESH_DEFAULT_TARGET_FACES = 5000;
+const REMESH_MIN_TARGET_FACES = 100;
+const REMESH_MAX_TARGET_FACES = 200_000;
+
+async function handlePostApiModel3dRemesh(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const body = await parseJsonBody(request);
+  const modelId = typeof body.modelId === "string" ? body.modelId.trim() : "";
+  if (!modelId) {
+    sendJson(response, 400, { error: "modelId is required." });
+    return;
+  }
+  const method = typeof body.method === "string" && REMESH_METHODS.has(body.method)
+    ? body.method as "quadriflow" | "voxel" | "quadremesher"
+    : "quadriflow";
+  const requestedFaces = typeof body.targetFaces === "number" && Number.isFinite(body.targetFaces) ? body.targetFaces : REMESH_DEFAULT_TARGET_FACES;
+  const targetFaceCount = Math.max(REMESH_MIN_TARGET_FACES, Math.min(REMESH_MAX_TARGET_FACES, Math.round(requestedFaces)));
+  try {
+    const result = await dependencies.remeshModel({
+      modelId,
+      method,
+      targetFaceCount,
+      bakeTextures: body.bakeTextures !== false,
+      bakeNormal: body.bakeNormal !== false,
+      textureSize: typeof body.textureSize === "number" ? body.textureSize : undefined,
+      preserveSharp: body.preserveSharp !== false,
+      symmetryX: body.symmetryX === true,
+      adaptQuadCount: body.adaptQuadCount === true
+    });
+    dependencies.runtimeState.recordAction(
+      "dashboard:model3d-remesh",
+      `Remeshed ${modelId} with ${method} (${result.faceCount ?? "?"} faces) into ${result.generated.id}.`
+    );
+    sendJson(response, 200, result);
+  } catch (error) {
+    const detail = error instanceof Error ? (error.message?.trim() || "Remesh failed.") : (String(error).trim() || "Remesh failed.");
+    console.error("Dashboard remesh failed:", { modelId, method, targetFaceCount, detail });
+    throw new Error(detail);
+  }
+}
+
 async function handlePostApiModel3dLowPolyGenerate(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
   const modelId = typeof body.modelId === "string" ? body.modelId.trim() : "";
@@ -2257,6 +2298,7 @@ const dashboardMessagingAndModelRouteTable = createDashboardRouteTable([
   postRoute("/api/model3d-lowpoly-generate", handlePostApiModel3dLowPolyGenerate),
   postRoute("/api/model3d-generate-lods", handlePostApiModel3dGenerateLods),
   postRoute("/api/model3d-albedo-to-geometry", handlePostApiModel3dAlbedoToGeometry),
+  postRoute("/api/model3d-remesh", handlePostApiModel3dRemesh),
   postRoute("/api/model3d-separate-loose-parts", handlePostApiModel3dSeparateByLooseParts),
   postRoute("/api/model3d-separate-by-loose-parts", handlePostApiModel3dSeparateByLooseParts),
   postRoute("/api/model3d-autorig-preview", handlePostApiModel3dAutoRigPreview),

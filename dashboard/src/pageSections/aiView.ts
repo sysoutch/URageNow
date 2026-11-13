@@ -1606,16 +1606,27 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                     </div>
                     <div class="model3d-viewer-overlay" id="model3d-threejs-status">Select a generated model to preview it here.</div>
                   </div>
-                  <div class="model3d-preview-quick-actions">
-                    <button class="secondary" id="model3d-open-in-blender-button" type="button">${renderButtonIcon("cube")}<span>Open In Blender</span></button>
-                    <button class="secondary" id="model3d-llm-real-height-button" data-model3d-llm-real-height-action type="button" title="Estimate real-life height and uniformly scale the selected model">${renderButtonIcon("sparkle")}<span>Ask LLM For Real-Life Height</span></button>
-                    <button class="secondary" id="model3d-separate-by-loose-parts-button" type="button">${renderButtonIcon("settings")}<span>Separate By Loose Parts</span></button>
-                    <button class="secondary" id="model3d-rotate-button" type="button">${renderButtonIcon("video")}<span>Rotate</span></button>
-                    <button class="secondary" id="model3d-delight-button" type="button">${renderButtonIcon("sparkle")}<span>Delight</span></button>
-                    <button class="secondary" id="model3d-albedo-to-geometry-button" type="button">${renderButtonIcon("sparkle")}<span>Albedo To Geometry</span></button>
-                    <button class="secondary" id="model3d-create-lowpoly-button" type="button">${renderButtonIcon("box")}<span>Create Lowpoly</span></button>
-                    <button class="secondary" id="model3d-autorig-button" type="button">${renderButtonIcon("settings")}<span>Open Rig Panel</span></button>
-                    <button class="secondary" id="model3d-send-menu-toggle" type="button" aria-expanded="false" aria-controls="model3d-send-destination-panel">${renderButtonIcon("upload")}<span>Send To ...</span></button>
+                  <div class="model3d-preview-quick-actions studio-quick-actions" role="toolbar" aria-label="3D model quick actions">
+                    <div class="studio-quick-action-group" role="group" aria-label="Mesh">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Mesh</span>
+                      <button class="secondary" id="model3d-remesh-button" type="button" title="Rebuild as a clean, lighter mesh that keeps its look (saved as a new model)">${renderButtonIcon("remesh")}<span>Remesh</span></button>
+                      <button class="secondary" id="model3d-create-lowpoly-button" type="button" title="Create a stylized low-poly version with a colour-palette texture">${renderButtonIcon("lowpoly")}<span>Low Poly</span></button>
+                      <button class="secondary" id="model3d-separate-by-loose-parts-button" type="button" title="Separate the model by loose parts">${renderButtonIcon("split")}<span>Split Parts</span></button>
+                      <button class="secondary" id="model3d-albedo-to-geometry-button" type="button" title="Displace the mesh from its albedo texture (albedo to geometry)">${renderButtonIcon("relief")}<span>Albedo Relief</span></button>
+                    </div>
+                    <div class="studio-quick-action-group" role="group" aria-label="Capture">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Capture</span>
+                      <button class="secondary" id="model3d-delight-button" type="button" title="Render a flat, delit capture of the model">${renderButtonIcon("sun")}<span>Delight</span></button>
+                      <button class="secondary" id="model3d-rotate-button" type="button" title="Render a turntable rotation capture">${renderButtonIcon("rotate")}<span>Turntable</span></button>
+                    </div>
+                    <div class="studio-quick-action-group" role="group" aria-label="Setup">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Setup</span>
+                      <button class="secondary" id="model3d-llm-real-height-button" data-model3d-llm-real-height-action type="button" title="Ask the LLM for the real-life height and scale the model to it">${renderButtonIcon("ruler")}<span>Real Scale</span></button>
+                      <button class="secondary" id="model3d-autorig-button" type="button" title="Open the auto-rig panel">${renderButtonIcon("rig")}<span>Rig</span></button>
+                    </div>
+                    <div class="studio-quick-action-group studio-quick-action-group-end" role="group" aria-label="Open and share">
+                      <button class="secondary" id="model3d-open-in-blender-button" type="button" title="Open the selected model in Blender">${renderButtonIcon("external")}<span>Blender</span></button>
+                      <button class="primary studio-quick-action-primary" id="model3d-send-menu-toggle" type="button" aria-expanded="false" aria-controls="model3d-send-destination-panel" title="Send the model to a tool, game engine, 3D suite or printer">${renderButtonIcon("send")}<span>Send To&hellip;</span></button>
                     <div class="studio-send-destination-panel hidden" id="model3d-send-destination-panel" role="dialog" aria-modal="true" aria-labelledby="model3d-send-destination-title">
                       <div class="studio-send-destination-header">
                         <div>
@@ -1699,6 +1710,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <div class="hint" id="model3d-print-send-status">Select a generated model to send.</div>
                         </div>
                       </div>
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -2135,22 +2147,31 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                       <span><span id="image-preview-reveal-value">50</span>%</span>
                     </label>
                   </div>
-                  <div class="row image-studio-preview-tools studio-component-toolbar">
-                    <button class="secondary mini-button" id="image-rotate-button" type="button">${renderButtonIcon("video")}<span>Rotate 360 Clip</span></button>
-                    <button class="secondary mini-button" id="image-to-3d-button" type="button">${renderButtonIcon("cube")}<span>Create 3D From Preview</span></button>
-                    <button class="secondary mini-button" id="image-to-video-button" type="button">${renderButtonIcon("video")}<span>Generate Video From Image</span></button>
-                    <button class="secondary mini-button" id="image-regenerate-from-prompt-button" type="button">${renderButtonIcon("refresh")}<span>Regenerate From Prompt</span></button>
-                    <button class="secondary mini-button" id="image-remove-background-button" type="button">${renderButtonIcon("wand")}<span>Remove Background</span></button>
-                    <button class="secondary mini-button" id="image-remove-background-crop-button" type="button">${renderButtonIcon("wand")}<span>Remove Background + Crop</span></button>
-                    <button class="secondary mini-button" id="image-separate-layers-button" type="button">${renderButtonIcon("image")}<span">Layers</span></button>
-                    <button class="secondary mini-button" id="image-upscale-button" type="button">${renderButtonIcon("expand")}<span>Upscale</span></button>
-                    <button class="secondary mini-button" id="image-pixel-art-button" type="button">${renderButtonIcon("image")}<span>Convert To Pixel Art</span></button>
-                    <button class="secondary mini-button" id="image-delight-button" type="button">${renderButtonIcon("sparkle")}<span>Delight Image</span></button>
-                    <button class="secondary mini-button" id="image-normal-map-button" type="button">${renderButtonIcon("image")}<span>Create Normal Map</span></button>
+                  <div class="row image-studio-preview-tools studio-component-toolbar studio-quick-actions" role="toolbar" aria-label="Image quick actions">
+                    <div class="studio-quick-action-group" role="group" aria-label="Create from image">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Create</span>
+                      <button class="secondary mini-button" id="image-to-3d-button" type="button" title="Create a 3D model from this preview">${renderButtonIcon("cube")}<span>3D Model</span></button>
+                      <button class="secondary mini-button" id="image-to-video-button" type="button" title="Generate a video from this image">${renderButtonIcon("video")}<span>Video</span></button>
+                      <button class="secondary mini-button" id="image-rotate-button" type="button" title="Create a rotating 360-degree clip">${renderButtonIcon("rotate")}<span>360&deg; Clip</span></button>
+                      <button class="secondary mini-button" id="image-regenerate-from-prompt-button" type="button" title="Regenerate from the original prompt">${renderButtonIcon("refresh")}<span>Regenerate</span></button>
+                    </div>
+                    <div class="studio-quick-action-group" role="group" aria-label="Edit image">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Edit</span>
+                      <button class="secondary mini-button" id="image-remove-background-button" type="button" title="Remove the background">${renderButtonIcon("wand")}<span>Remove BG</span></button>
+                      <button class="secondary mini-button" id="image-remove-background-crop-button" type="button" title="Remove the background and crop to the subject">${renderButtonIcon("crop")}<span>Remove BG + Crop</span></button>
+                      <button class="secondary mini-button" id="image-separate-layers-button" type="button" title="Separate the image into layers">${renderButtonIcon("layers")}<span>Layers</span></button>
+                      <button class="secondary mini-button" id="image-upscale-button" type="button" title="Upscale the image">${renderButtonIcon("expand")}<span>Upscale</span></button>
+                      <button class="secondary mini-button" id="image-delight-button" type="button" title="Remove baked lighting and shadows (delight)">${renderButtonIcon("sun")}<span>Delight</span></button>
+                    </div>
+                    <div class="studio-quick-action-group" role="group" aria-label="Convert image">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Convert</span>
+                      <button class="secondary mini-button" id="image-pixel-art-button" type="button" title="Convert to pixel art">${renderButtonIcon("palette")}<span>Pixel Art</span></button>
+                      <button class="secondary mini-button" id="image-normal-map-button" type="button" title="Create a normal map">${renderButtonIcon("relief")}<span>Normal Map</span></button>
+                    </div>
                   </div>
-                  <div class="row image-studio-preview-tools studio-component-toolbar">
-                    <button class="secondary mini-button" id="image-preview-download-button" type="button">${renderButtonIcon("download")}<span>Download Preview</span></button>
-                    <button class="secondary mini-button" id="image-send-menu-toggle" type="button" aria-expanded="false" aria-controls="image-send-destination-panel">${renderButtonIcon("upload")}<span>Send To ...</span></button>
+                  <div class="row image-studio-preview-tools studio-component-toolbar studio-quick-actions studio-quick-actions-export" role="toolbar" aria-label="Export image">
+                    <button class="secondary mini-button" id="image-preview-download-button" type="button" title="Download the preview">${renderButtonIcon("download")}<span>Download</span></button>
+                    <button class="primary mini-button studio-quick-action-primary" id="image-send-menu-toggle" type="button" aria-expanded="false" aria-controls="image-send-destination-panel" title="Send the image to a tool, game engine or 3D suite">${renderButtonIcon("send")}<span>Send To&hellip;</span></button>
                     <div class="studio-send-destination-panel hidden" id="image-send-destination-panel" role="dialog" aria-modal="true" aria-labelledby="image-send-destination-title">
                       <div class="studio-send-destination-header">
                         <div>
@@ -2185,7 +2206,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                         </div>
                       </div>
                     </div>
-                    <button class="secondary mini-button" id="image-use-as-tool-logo-button" type="button">${renderButtonIcon("save")}<span>Use As Tool Logo</span></button>
+                    <button class="secondary mini-button" id="image-use-as-tool-logo-button" type="button" title="Use this image as a tool logo">${renderButtonIcon("save")}<span>Use As Tool Logo</span></button>
                   </div>
                   <div class="row image-studio-preview-tools image-tool-quick-actions" id="image-tool-quick-actions"></div>
                   <div class="hint" id="image-preview-quick-action-hint">Select a generated image or uploaded source to unlock preview quick actions.</div>
@@ -3233,24 +3254,26 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   <label>Latest Preview</label>
                   <video id="videogen-preview" controls></video>
                   <div class="hint video-preview-scrub-hint" id="videogen-preview-scrub-hint">Pause and drag left or right on the preview to scrub frames.</div>
-                  <div class="row video-studio-preview-tools studio-component-toolbar">
-                    <div class="video-preview-tool-group video-preview-edit-tools">
+                  <div class="row video-studio-preview-tools studio-component-toolbar studio-quick-actions" role="toolbar" aria-label="Video quick actions">
+                    <div class="video-preview-tool-group video-preview-edit-tools studio-quick-action-group" role="group" aria-label="Edit video">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Edit</span>
                       <button class="secondary mini-button" data-video-preview-action="upscale" type="button">${renderButtonIcon("expand")}<span>Upscale</span></button>
                       <button class="secondary mini-button" data-video-preview-action="extend" type="button">${renderButtonIcon("plus")}<span>Extend</span></button>
                       <button class="secondary mini-button" data-video-preview-action="edit" type="button">${renderButtonIcon("wand")}<span>Edit</span></button>
-                      <button class="secondary mini-button" data-video-preview-action="delight" type="button">${renderButtonIcon("sparkle")}<span>Delight</span></button>
-                      <button class="secondary mini-button" data-video-preview-action="remove-bg" type="button">${renderButtonIcon("trash")}<span>Remove BG</span></button>
-                      <button class="secondary mini-button" data-video-preview-action="reframe" type="button">${renderButtonIcon("image")}<span>Reframe</span></button>
+                      <button class="secondary mini-button" data-video-preview-action="delight" type="button">${renderButtonIcon("sun")}<span>Delight</span></button>
+                      <button class="secondary mini-button" data-video-preview-action="remove-bg" type="button">${renderButtonIcon("wand")}<span>Remove BG</span></button>
+                      <button class="secondary mini-button" data-video-preview-action="reframe" type="button">${renderButtonIcon("crop")}<span>Reframe</span></button>
                       <button class="secondary mini-button" data-video-preview-action="add-audio" type="button">${renderButtonIcon("audio")}<span>Add Audio</span></button>
                     </div>
-                    <div class="video-preview-tool-group video-preview-export-tools">
-                      <button class="secondary mini-button" id="video-convert-gif-button" type="button">${renderButtonIcon("video")}<span>Create GIF</span></button>
+                    <div class="video-preview-tool-group video-preview-export-tools studio-quick-action-group" role="group" aria-label="Export video">
+                      <span class="studio-quick-action-group-label" aria-hidden="true">Export</span>
+                      <button class="secondary mini-button" id="video-convert-gif-button" type="button" title="Convert the video to an animated GIF">${renderButtonIcon("image")}<span>Create GIF</span></button>
                       <div class="studio-tool-picker" id="video-tool-picker">
                         <button class="secondary mini-button" id="video-tool-picker-toggle" type="button" aria-expanded="false">${renderButtonIcon("settings")}<span id="video-tool-picker-label">Select Tool</span></button>
                         <div class="studio-tool-picker-menu hidden" id="video-tool-picker-menu"></div>
                       </div>
                       <button class="secondary mini-button" id="video-send-to-tool-button" type="button">${renderButtonIcon("expand")}<span>Send To Tool</span></button>
-                      <button class="secondary mini-button" id="video-send-to-game-engine-button" type="button">${renderButtonIcon("upload")}<span>Send To Engine</span></button>
+                      <button class="secondary mini-button" id="video-send-to-game-engine-button" type="button">${renderButtonIcon("send")}<span>Send To Engine</span></button>
                     </div>
                   </div>
                   <div class="row video-studio-preview-tools video-tool-quick-actions" id="video-tool-quick-actions"></div>

@@ -211,8 +211,20 @@ function createDashboardModel3dBootstrapAssemblyHelpers(input) {
         stopModel3dGeneration: () => dashboardModel3dStudioActionHelpers.stopModel3dGeneration()
       })
     : null;
+  const dashboardModel3dRemeshQuickActionHelpers = typeof createDashboardThreeDRemeshQuickActionHelpers === "function"
+    ? createDashboardThreeDRemeshQuickActionHelpers({
+        request,
+        getSelectedGeneratedModel,
+        setOutput,
+        setModel3dStatus,
+        loadModel3dHistory,
+        escapeHtml,
+        describeClientError
+      })
+    : null;
   const dashboardModel3dStudioEventBindingHelpers = typeof createDashboardThreeDStudioEventBindingHelpers === "function"
     ? createDashboardThreeDStudioEventBindingHelpers({
+        remeshQuickActionHelpers: dashboardModel3dRemeshQuickActionHelpers,
         state,
         model3dViewer,
         request,

@@ -93,7 +93,7 @@ try {
   await page.locator('[data-studio-home-view="workflow"]').first().click();
   await page.locator('.lazydev-home-workflow-button[data-ai-scroll-target="model3d-studio-card"]').click();
   await page.locator("#model3d-llm-real-height-button").waitFor({state: "visible"});
-  assert.equal((await page.locator("#model3d-llm-real-height-button").textContent())?.trim(), "Ask LLM For Real-Life Height");
+  assert.equal((await page.locator("#model3d-llm-real-height-button").textContent())?.trim(), "Real Scale");
   await page.screenshot({path: path.join(outputDirectory, "desktop-model3d-llm-real-height-action.png"), fullPage: true});
   await page.close();
 } finally {

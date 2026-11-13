@@ -1,5 +1,5 @@
 export type DashboardWorkflowIconKey = "chat" | "image" | "model3d" | "audio" | "music" | "video";
-export type ButtonIconKey = "plus" | "send" | "history" | "upload" | "trash" | "image" | "camera" | "box" | "sparkle" | "refresh" | "download" | "copy" | "expand" | "settings" | "tags" | "wand" | "folder" | "save" | "undo" | "file" | "cube" | "hand" | "video" | "audio" | "close" | "pin" | "float" | "collapseLeft";
+export type ButtonIconKey = "plus" | "send" | "history" | "upload" | "trash" | "image" | "camera" | "box" | "sparkle" | "refresh" | "download" | "copy" | "expand" | "settings" | "tags" | "wand" | "folder" | "save" | "undo" | "file" | "cube" | "hand" | "video" | "audio" | "close" | "pin" | "float" | "collapseLeft" | "remesh" | "split" | "rig" | "rotate" | "ruler" | "lowpoly" | "sun" | "relief" | "external" | "layers" | "crop" | "palette";
 
 const workflowBootstrapIconNames: Record<DashboardWorkflowIconKey, string> = {
   chat: "chat-dots",
@@ -38,7 +38,19 @@ const buttonBootstrapIconNames: Record<ButtonIconKey, string> = {
   close: "x-lg",
   pin: "pin-angle",
   float: "window-stack",
-  collapseLeft: "layout-sidebar-inset"
+  collapseLeft: "layout-sidebar-inset",
+  remesh: "grid-3x3",
+  split: "scissors",
+  rig: "person-arms-up",
+  rotate: "arrow-repeat",
+  ruler: "rulers",
+  lowpoly: "gem",
+  sun: "brightness-high",
+  relief: "layers-half",
+  external: "box-arrow-up-right",
+  layers: "layers",
+  crop: "crop",
+  palette: "palette"
 };
 
 const toolsBootstrapIconNames = {

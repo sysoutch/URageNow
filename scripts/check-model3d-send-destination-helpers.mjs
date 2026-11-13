@@ -20,7 +20,7 @@ const pageSource = await readFile(path.join(repoRoot, "dashboard", "src", "pageS
 const runtime = vm.createContext({});
 vm.runInContext(`${source}\nthis.createSendDestinations = createDashboardModel3dSendDestinationHelpers;`, runtime, {filename: modulePath});
 
-assert.match(pageSource, /id="model3d-send-menu-toggle"[\s\S]*?<span>Send To \.\.\.<\/span>/);
+assert.match(pageSource, /id="model3d-send-menu-toggle"[\s\S]*?<span>Send To&hellip;<\/span>/);
 assert.match(pageSource, /class="studio-send-destination-panel hidden" id="model3d-send-destination-panel" role="dialog" aria-modal="true"/);
 assert.match(source, /overlayBackdrop\.className = "studio-send-destination-backdrop hidden"/);
 assert.match(pageSource, /id="model3d-send-destination-close"/);

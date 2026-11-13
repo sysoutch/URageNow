@@ -66,6 +66,7 @@ import { interruptComfyWorkflow } from "./services/comfyInterrupts.js";
 import {
   applyGeneratedModelAutoRig,
   applyGeneratedModelAlbedoToGeometry,
+  remeshGeneratedModel,
   captureGeneratedModelArtifact,
   applyGeneratedModelMaterialFinish,
   applyGeneratedModelSeparateByLooseParts,
@@ -1864,6 +1865,7 @@ const dashboardServer = startDashboardServer({
       mergeDistance: input.mergeDistance
     });
   },
+  remeshModel: async input => remeshGeneratedModel(input),
   applyModelAlbedoToGeometry: async input => {
     return applyGeneratedModelAlbedoToGeometry(input);
   },

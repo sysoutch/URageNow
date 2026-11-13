@@ -59,6 +59,27 @@ export interface ModelAlbedoToGeometryRunInput {
   timeoutMs?: number;
 }
 
+export type ModelRemeshMethod = "quadriflow" | "voxel" | "quadremesher";
+
+export interface ModelRemeshRunInput {
+  sourceModelPath: string;
+  outputModelPath: string;
+  method: ModelRemeshMethod;
+  targetFaceCount: number;
+  bakeTextures?: boolean;
+  bakeNormal?: boolean;
+  textureSize?: number;
+  preserveSharp?: boolean;
+  symmetryX?: boolean;
+  adaptQuadCount?: boolean;
+  timeoutMs?: number;
+}
+
+export interface ModelRemeshRunResult {
+  outputPath: string;
+  faceCount: number | null;
+}
+
 export interface ModelSeparateByLoosePartsRunInput {
   sourceModelPath: string;
   outputModelPath: string;
@@ -170,6 +191,10 @@ function assertModelMaterialScriptPath(): void {
 
 function assertModelAlbedoToGeometryScriptPath(): void {
   assertScriptPath("BLENDER_MODEL_ALBEDO_TO_GEOMETRY_SCRIPT_PATH", appConfig.blenderModelAlbedoToGeometryScriptPath, "albedo_to_geometry.py");
+}
+
+function assertModelRemeshScriptPath(): void {
+  assertScriptPath("BLENDER_MODEL_REMESH_SCRIPT_PATH", appConfig.blenderModelRemeshScriptPath, "remesh", "remesh_model.py");
 }
 
 function assertModelScaleScriptPath(): void {
@@ -372,10 +397,15 @@ function formatBlenderFailure(label: string, attempt: BlenderAttemptResult): str
   return `${label} (code=${attempt.result.exitCode}, signal=${attempt.result.signal ?? "none"}).\n${detail}`;
 }
 
-function runBlenderProcess(args: string[], timeoutMs: number): Promise<ProcessResult> {
+interface BlenderProcessOptions {
+  /** Show Blender's window. Needed by add-ons that only finish inside the UI event loop. */
+  showWindow?: boolean;
+}
+
+function runBlenderProcess(args: string[], timeoutMs: number, options: BlenderProcessOptions = {}): Promise<ProcessResult> {
   return new Promise((resolve, reject) => {
     const child = spawn(appConfig.blenderExecutablePath, args, {
-      windowsHide: true,
+      windowsHide: options.showWindow !== true,
       stdio: ["ignore", "pipe", "pipe"]
     });
     let settled = false;
@@ -730,6 +760,55 @@ export async function runModelAlbedoToGeometryScript(input: ModelAlbedoToGeometr
     throw new Error(`Blender albedo-to-geometry script failed (code=${result.exitCode}, signal=${result.signal ?? "none"}).\n${detail}`);
   }
   return resolveScriptOutputPath(outputModelPath, result.output);
+}
+
+const REMESH_MIN_TARGET_FACES = 100;
+const REMESH_MAX_TARGET_FACES = 200_000;
+const REMESH_TEXTURE_SIZES = [512, 1024, 2048, 4096];
+const REMESH_DEFAULT_TEXTURE_SIZE = 2048;
+
+export async function runModelRemeshScript(input: ModelRemeshRunInput): Promise<ModelRemeshRunResult> {
+  assertModelRemeshScriptPath();
+  const sourceModelPath = path.resolve(input.sourceModelPath);
+  const outputModelPath = path.resolve(input.outputModelPath);
+  const timeoutMs = normalizePositiveInteger(input.timeoutMs, appConfig.blenderModelRemeshTimeoutMs);
+  const targetFaceCount = Math.max(REMESH_MIN_TARGET_FACES, Math.min(REMESH_MAX_TARGET_FACES, Math.round(input.targetFaceCount)));
+  const textureSize = REMESH_TEXTURE_SIZES.includes(input.textureSize ?? 0) ? input.textureSize as number : REMESH_DEFAULT_TEXTURE_SIZE;
+  // Quad Remesher's engine reports back through Blender's UI event loop, so it cannot run headless.
+  const needsWindow = input.method === "quadremesher";
+  await stat(sourceModelPath);
+  const args = [
+    ...(needsWindow ? [] : ["--background"]),
+    "--python",
+    appConfig.blenderModelRemeshScriptPath,
+    "--python-exit-code",
+    "1",
+    "--",
+    `--filepath=${sourceModelPath}`,
+    `--output_path=${outputModelPath}`,
+    `--method=${input.method}`,
+    `--target_faces=${targetFaceCount}`,
+    `--bake_textures=${boolToArg(input.bakeTextures !== false)}`,
+    `--bake_normal=${boolToArg(input.bakeNormal !== false)}`,
+    `--texture_size=${textureSize}`,
+    `--preserve_sharp=${boolToArg(input.preserveSharp !== false)}`,
+    `--symmetry_x=${boolToArg(input.symmetryX === true)}`,
+    `--adapt_quad_count=${boolToArg(input.adaptQuadCount === true)}`
+  ];
+  const result = await runBlenderProcess(args, timeoutMs, { showWindow: needsWindow });
+  const errorMatch = /REMESH_ERROR (.+)/.exec(result.output);
+  if (!isAttemptSuccessful(result) || errorMatch) {
+    const reason = errorMatch?.[1]?.trim();
+    const detail = trimProcessOutput(result.output);
+    throw new Error(reason
+      ? `Remesh failed: ${reason}`
+      : `Blender remesh script failed (code=${result.exitCode}, signal=${result.signal ?? "none"}).\n${detail}`);
+  }
+  const faceMatch = /REMESH_RESULT faces=(\d+)/.exec(result.output);
+  return {
+    outputPath: await resolveScriptOutputPath(outputModelPath, result.output),
+    faceCount: faceMatch ? Number.parseInt(faceMatch[1] ?? "", 10) : null
+  };
 }
 
 export async function runModelScaleScript(input: ModelScaleRunInput): Promise<string> {

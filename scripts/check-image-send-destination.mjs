@@ -10,7 +10,7 @@ const [page, helper, quickActions, styles, imageStyles, mediaStudio] = await Pro
   readFile(new URL("../dashboard/src/client/modules/aiMediaStudioHelpers.js", import.meta.url), "utf8")
 ]);
 
-assert.match(page, /id="image-send-menu-toggle"[\s\S]*?<span>Send To \.\.\.<\/span>/);
+assert.match(page, /id="image-send-menu-toggle"[\s\S]*?<span>Send To&hellip;<\/span>/);
 assert.match(page, /id="image-generation-placeholder"/);
 assert.match(page, /Shaping pixels from your prompt/);
 assert.match(page, /class="studio-send-destination-panel hidden" id="image-send-destination-panel" role="dialog" aria-modal="true"/);

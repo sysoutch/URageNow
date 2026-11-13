@@ -1,59 +1,213 @@
-// Compact quick-action bars for the 3D and Video Studios (Image Studio's
-// matching rules live with its preview panel in _studio-components.scss).
-// One action shape everywhere: icon inline before a single-line label,
-// 32px tall, in columns that fill the available width. Earlier layers gave
-// 40px fixed-width 3D buttons and highlighted Video actions by position.
+// Studio quick-action bars (3D, Image and Video preview toolbars).
+//
+// Every bar is a `.studio-quick-actions` toolbar made of labelled
+// `.studio-quick-action-group`s. Buttons size to their (short) label and the
+// bar wraps, so nothing is truncated; the full description lives in `title`.
+// The old layers gave every action the same fixed column width, which cut
+// labels off ("Separate By Loo…") and made all actions look equally important.
+//
+// Older Studio layers style these bars with `#card .bar > button` selectors and
+// `!important`. The scope below repeats the bar class to outrank them without
+// depending on stylesheet order.
 
-$quick-action-button: ":is(.mini-button, button, .studio-tool-picker > button)";
+$qa-cards: ":is(#model3d-studio-card, #image-studio-card, #video-studio-card)";
+$qa-bar: "body.view-ai-active #{$qa-cards} .studio-quick-actions.studio-quick-actions.studio-quick-actions.studio-quick-actions";
+$qa-button: ":is(button, .studio-tool-picker > button)";
+$qa-button-height: 30px;
+$qa-group-gap: 4px;
+$qa-group-separator-gap: 12px;
+$qa-phone-breakpoint: 640px;
+$qa-phone-min-column: 136px;
 
-body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr)) !important;
-  gap: 6px !important;
+#{$qa-bar} {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px $qa-group-separator-gap !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 8px 10px !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
 }
 
-body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions > :is(button, .studio-tool-picker),
-body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions .studio-tool-picker > button {
-  flex: none !important;
-  width: 100% !important;
+#{$qa-bar} > .studio-quick-action-group {
+  display: inline-flex !important;
+  flex: 0 1 auto !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: $qa-group-gap !important;
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+}
+
+// A thin divider between groups reads as structure without extra boxes.
+#{$qa-bar} > .studio-quick-action-group + .studio-quick-action-group {
+  padding-left: $qa-group-separator-gap !important;
+  border-left: 1px solid color-mix(in srgb, var(--line, #444) 70%, transparent) !important;
+}
+
+// Open/share actions sit at the far end, like a dialog's confirm button.
+#{$qa-bar} > .studio-quick-action-group-end {
+  margin-left: auto !important;
+}
+
+#{$qa-bar} .studio-quick-action-group-label {
+  flex: 0 0 auto;
+  margin-right: 2px;
+  color: color-mix(in srgb, var(--muted, var(--ink)) 82%, transparent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+#{$qa-bar} #{$qa-button} {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: $qa-button-height !important;
+  min-height: $qa-button-height !important;
+  max-height: $qa-button-height !important;
+  padding: 0 10px !important;
+  box-sizing: border-box !important;
+  border: 1px solid color-mix(in srgb, var(--line, #444) 85%, transparent) !important;
+  border-radius: var(--dashboard-control-radius, 6px) !important;
+  background: color-mix(in srgb, var(--panel, #1a1a1a) 80%, black 20%) !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  transform: none !important;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease !important;
+}
+
+#{$qa-bar} > .studio-tool-picker,
+#{$qa-bar} > .studio-quick-action-group > .studio-tool-picker {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
 }
 
-body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions #{$quick-action-button},
-body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools #{$quick-action-button} {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 6px !important;
-  height: auto !important;
-  min-height: 32px !important;
-  max-height: none !important;
-  padding: 4px 10px !important;
-  font-size: 12px !important;
-  line-height: 1.2 !important;
+#{$qa-bar} #{$qa-button} span:not(.button-icon) {
+  display: inline !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
   white-space: nowrap !important;
-  overflow: hidden !important;
+  line-height: 1 !important;
 }
 
-body.view-ai-active.studio-workflow-focused #model3d-studio-card .model3d-preview-quick-actions #{$quick-action-button} span:not(.button-icon),
-body.view-ai-active.studio-workflow-focused #video-studio-card .video-studio-preview-tools #{$quick-action-button} span:not(.button-icon) {
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+#{$qa-bar} #{$qa-button} .button-icon {
+  flex: 0 0 auto !important;
+  font-size: 13px !important;
+  opacity: 0.85;
 }
 
-body.view-ai-active.studio-workflow-focused #video-studio-card .video-preview-tool-group {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr)) !important;
-  gap: 6px !important;
+#{$qa-bar} #{$qa-button}:is(:hover, :focus-visible, .active) {
+  border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 14%, var(--panel, #1a1a1a)) !important;
 }
 
-body.view-ai-active.studio-workflow-focused #video-studio-card .video-preview-tool-group > :is(.mini-button, .studio-tool-picker) {
-  flex: none !important;
-  width: 100% !important;
-  min-width: 0 !important;
+#{$qa-bar} #{$qa-button}:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 80%, white 10%) !important;
+  outline-offset: 1px !important;
+}
+
+#{$qa-bar} #{$qa-button}:is(:disabled, [aria-disabled="true"]) {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+// The bar's main destination: filled with the Studio accent.
+#{$qa-bar} .studio-quick-action-primary.studio-quick-action-primary {
+  border-color: transparent !important;
+  background: var(--studio-accent-1, var(--accent)) !important;
+  color: var(--accent-ink, #fff) !important;
+}
+
+#{$qa-bar} .studio-quick-action-primary.studio-quick-action-primary:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 85%, white 15%) !important;
+}
+
+// Long-running action in progress (e.g. Remesh): keep the label, show a spinner.
+#{$qa-bar} #{$qa-button}.is-busy {
+  opacity: 1 !important;
+  cursor: progress !important;
+}
+
+#{$qa-bar} #{$qa-button}.is-busy .button-icon i::before {
+  display: inline-block;
+  animation: studio-quick-action-spin 0.9s linear infinite;
+}
+
+@keyframes studio-quick-action-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Phones: each group becomes its own row with its label on top, and buttons
+// share the row so touch targets stay wide.
+@media (max-width: $qa-phone-breakpoint) {
+  #{$qa-bar} {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  // Columns appear only when a full label fits; on very narrow cards (the
+  // Studio rail eats most of a phone) it falls back to one action per row.
+  #{$qa-bar} > .studio-quick-action-group,
+  #{$qa-bar} > .studio-quick-action-group + .studio-quick-action-group {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax($qa-phone-min-column, 1fr)) !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    border-left: 0 !important;
+  }
+
+  #{$qa-bar} .studio-quick-action-group-label {
+    grid-column: 1 / -1;
+    margin: 2px 0;
+  }
+
+  #{$qa-bar} #{$qa-button},
+  #{$qa-bar} .studio-tool-picker {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #{$qa-bar} #{$qa-button} span:not(.button-icon) {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #{$qa-bar} #{$qa-button} {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+  }
 }
 
 // Studio app bars use the same inline shape. Their buttons had no display

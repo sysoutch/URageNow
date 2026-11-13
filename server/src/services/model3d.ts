@@ -1,8 +1,9 @@
-import { copyFile, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { appConfig } from "../config/appConfig.js";
 import { getComfyRuntimeSettings, resolveComfyWorkspacePath } from "./comfyRuntimeSettings.js";
-import { runLowPolyModelScript, runModelAlbedoToGeometryScript, runModelAutoRigPreviewScript, runModelAutoRigScript, runModelDecimateToFacesScript, runModelMaterialScript, runModelMergeVerticesScript, runModelMetallicScript, runModelScaleScript, runModelSeparateByLoosePartsScript } from "./model3d/lowPolyModelService.js";
+import { runLowPolyModelScript, runModelAlbedoToGeometryScript, runModelAutoRigPreviewScript, runModelAutoRigScript, runModelDecimateToFacesScript, runModelMaterialScript, runModelMergeVerticesScript, runModelMetallicScript, runModelRemeshScript, runModelScaleScript, runModelSeparateByLoosePartsScript } from "./model3d/lowPolyModelService.js";
 import {
   comfyGetJson,
   comfyPostJson,
@@ -1852,6 +1853,83 @@ export async function applyGeneratedModelAlbedoToGeometry(input: {
     };
   });
   return toGeneratedModelPublicRecord(updated);
+}
+
+export type GeneratedModelRemeshMethod = "quadriflow" | "voxel" | "quadremesher";
+
+export interface GeneratedModelRemeshResult {
+  generated: GeneratedModelPublicRecord;
+  sourceModelId: string;
+  method: GeneratedModelRemeshMethod;
+  targetFaceCount: number;
+  faceCount: number | null;
+}
+
+/**
+ * Remesh a model into a clean, lighter mesh and bake its original look onto it.
+ * The result is saved as a NEW model entry so the source stays untouched.
+ */
+export async function remeshGeneratedModel(input: {
+  modelId: string;
+  method: GeneratedModelRemeshMethod;
+  targetFaceCount: number;
+  bakeTextures?: boolean;
+  bakeNormal?: boolean;
+  textureSize?: number;
+  preserveSharp?: boolean;
+  symmetryX?: boolean;
+  adaptQuadCount?: boolean;
+}): Promise<GeneratedModelRemeshResult> {
+  const safeModelId = sanitizeFileName(input.modelId, "");
+  if (!safeModelId) {
+    throw new Error("Invalid model id.");
+  }
+  const sourceRecord = (await readGeneratedModelIndex()).find(entry => entry.id === safeModelId);
+  if (!sourceRecord) {
+    throw new Error("Model entry was not found.");
+  }
+  const modelDirectory = path.join(generatedModelsDirectory, safeModelId);
+  const sourceModelPath = path.join(modelDirectory, sourceRecord.modelFileName);
+  await stat(sourceModelPath);
+  const sourceExt = path.extname(sourceRecord.modelFileName);
+  const sourceStem = path.basename(sourceRecord.modelFileName, sourceExt) || "model";
+  const outputFileName = sanitizeFileName(`${sourceStem}_remesh_${input.method}_${Math.round(input.targetFaceCount)}.glb`, "model_remesh.glb");
+  const workDirectory = await mkdtemp(path.join(os.tmpdir(), "urage-remesh-"));
+  try {
+    const outputModelPath = path.join(workDirectory, outputFileName);
+    const result = await runModelRemeshScript({
+      sourceModelPath,
+      outputModelPath,
+      method: input.method,
+      targetFaceCount: input.targetFaceCount,
+      bakeTextures: input.bakeTextures,
+      bakeNormal: input.bakeNormal,
+      textureSize: input.textureSize,
+      preserveSharp: input.preserveSharp,
+      symmetryX: input.symmetryX,
+      adaptQuadCount: input.adaptQuadCount
+    });
+    await assertRustValidatedModelArtifact(result.outputPath, "Remeshed model");
+    const imported = await importUploadedSourceModel({
+      fileName: outputFileName,
+      fileData: await readFile(result.outputPath),
+      prompt: sourceRecord.prompt,
+      useSourceAsCurrent: true
+    });
+    const generated = await getGeneratedModelPublicById(imported.id);
+    if (!generated) {
+      throw new Error("Remeshed model was saved but could not be read back.");
+    }
+    return {
+      generated,
+      sourceModelId: safeModelId,
+      method: input.method,
+      targetFaceCount: Math.round(input.targetFaceCount),
+      faceCount: result.faceCount
+    };
+  } finally {
+    await rm(workDirectory, { recursive: true, force: true }).catch(() => undefined);
+  }
 }
 
 export async function applyGeneratedModelScaleToHeight(input: {

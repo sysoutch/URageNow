@@ -170,6 +170,7 @@ function createDashboardThreeDStudioEventBindingHelpers(input) {
         await runLowPolyGenerationForSelectedModel();
       });
     }
+    input?.remeshQuickActionHelpers?.bindRemeshQuickAction?.();
     document.getElementById("model3d-create-lowpoly-button")?.addEventListener("click", async event => {
       event.preventDefault();
       await runLowPolyGenerationForSelectedModel();

@@ -614,6 +614,23 @@ export interface DashboardDependencies {
     mergeAfterSubdivide?: boolean;
     mergeDistance?: number;
   }) => Promise<GeneratedModelPublicRecord>;
+  remeshModel: (input: {
+    modelId: string;
+    method: "quadriflow" | "voxel" | "quadremesher";
+    targetFaceCount: number;
+    bakeTextures?: boolean;
+    bakeNormal?: boolean;
+    textureSize?: number;
+    preserveSharp?: boolean;
+    symmetryX?: boolean;
+    adaptQuadCount?: boolean;
+  }) => Promise<{
+    generated: GeneratedModelPublicRecord;
+    sourceModelId: string;
+    method: "quadriflow" | "voxel" | "quadremesher";
+    targetFaceCount: number;
+    faceCount: number | null;
+  }>;
   applyModelSeparateByLooseParts: (input: {
     modelId: string;
     executionTarget?: "local" | "remote";

@@ -13,7 +13,7 @@ const [viewSource, viewportSource, actionSource, eventBindingSource] = await Pro
 ]);
 
 assert.match(viewSource, /id="model3d-llm-real-height-button"[^>]*data-model3d-llm-real-height-action/);
-assert.match(viewSource, /Ask LLM For Real-Life Height/);
+assert.match(viewSource, /title="Ask the LLM for the real-life height[^"]*"[^>]*>\$\{renderButtonIcon\("ruler"\)\}<span>Real Scale<\/span>/);
 assert.equal((viewSource.match(/data-model3d-llm-real-height-action/g) || []).length, 3);
 assert.match(viewportSource, /\+ "\[data-model3d-llm-real-height-action\],"/);
 assert.match(viewportSource, /getAttribute\("data-model3d-llm-real-height-action"\)/);
