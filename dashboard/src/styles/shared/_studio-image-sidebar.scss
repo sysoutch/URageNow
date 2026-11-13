@@ -70,8 +70,63 @@ $img-primary-height: 40px;
 }
 
 #{$img-card}.image-studio-edit-mode .image-prompt-interpret-panel,
-#{$img-card}.image-studio-edit-mode #image-generate-from-prompt-button {
+#{$img-card}.image-studio-edit-mode #image-generate-from-prompt-button,
+#{$img-card}.image-studio-edit-mode .image-object-prompt-editor,
+#{$img-card}.image-studio-edit-mode .image-prompt-processing-controls,
+#{$img-card}.image-studio-edit-mode .image-prompt-fields-section > .image-sidebar-section-title {
   display: none !important;
+}
+
+// Edit mode is ONE card: source images on top, the change prompt below, Apply Edit
+// pinned at the bottom. The two parts live in different elements (the prompt card
+// is shared with Generate), so the source part draws the card's top and the prompt
+// section its bottom, with no gap or border between them.
+$img-edit-card-border: 1px solid color-mix(in srgb, var(--studio-accent-1, var(--accent)) 35%, transparent);
+$img-edit-card-radius: 8px;
+
+#{$img-card}.image-studio-edit-mode .image-studio-left-sidebar.image-studio-left-sidebar {
+  row-gap: 0 !important;
+}
+
+#{$img-card}.image-studio-edit-mode #image-studio-panel-edit .image-edit-source-layout {
+  display: grid !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 14px 14px 4px !important;
+  border: $img-edit-card-border !important;
+  border-bottom: 0 !important;
+  border-radius: $img-edit-card-radius $img-edit-card-radius 0 0 !important;
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 4%, transparent) !important;
+}
+
+// Flatten the boxes nested inside the merged card.
+#{$img-card}.image-studio-edit-mode #image-studio-panel-edit :is(.image-studio-edit-hint-panel, .image-edit-source-import-panel, .image-edit-source-preview-field, .image-edit-source-grid > .field) {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#{$img-card}.image-studio-edit-mode #image-studio-panel-edit .image-edit-source-main-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+
+#{$img-card}.image-studio-edit-mode .image-prompt-card > .image-prompt-fields-section {
+  margin-top: 0 !important;
+  padding-top: 4px !important;
+  border: $img-edit-card-border !important;
+  border-top: 0 !important;
+  border-radius: 0 0 $img-edit-card-radius $img-edit-card-radius !important;
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 4%, transparent) !important;
+}
+
+// The prompt card's own top padding would open a gap inside the merged card.
+#{$img-card}.image-studio-edit-mode .image-studio-left-sidebar > .image-prompt-card {
+  padding-top: 0 !important;
+  border-bottom: 0 !important;
 }
 
 // ---------------------------------------------------------------- compact button rows

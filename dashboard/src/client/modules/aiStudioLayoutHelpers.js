@@ -1061,6 +1061,13 @@ function createDashboardAiStudioLayoutHelpers(input) {
     if (editPanel) {
       editPanel.classList.toggle("active", input.state.imageStudioTab === "edit");
     }
+    // The same prompt field serves both modes; say what it is for in each.
+    const promptField = document.getElementById("imagegen-prompt");
+    if (promptField) {
+      promptField.placeholder = input.state.imageStudioTab === "edit"
+        ? "Describe the change, e.g. make the sky a sunset, remove the person on the left."
+        : "Describe the image you want.";
+    }
     updateGenerateImageButtonLabel();
     const sidebarAdvancedStack = document.getElementById("image-sidebar-advanced-stack");
     if (sidebarAdvancedStack) {
