@@ -67,6 +67,7 @@ import {
   applyGeneratedModelAutoRig,
   applyGeneratedModelAlbedoToGeometry,
   remeshGeneratedModel,
+  bakeGeneratedModel,
   captureGeneratedModelArtifact,
   applyGeneratedModelMaterialFinish,
   applyGeneratedModelSeparateByLooseParts,
@@ -1866,6 +1867,7 @@ const dashboardServer = startDashboardServer({
     });
   },
   remeshModel: async input => remeshGeneratedModel(input),
+  bakeModel: async input => bakeGeneratedModel(input),
   applyModelAlbedoToGeometry: async input => {
     return applyGeneratedModelAlbedoToGeometry(input);
   },

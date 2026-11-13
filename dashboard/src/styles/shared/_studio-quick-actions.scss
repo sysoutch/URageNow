@@ -210,6 +210,25 @@ $qa-phone-min-column: 136px;
   }
 }
 
+// Quick-action dialogs (Bake): a fieldset legend reads as a field label, not a heading.
+.model3d-bake-configuration-overlay .model3d-bake-maps {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.model3d-bake-configuration-overlay .model3d-bake-maps > legend {
+  margin-bottom: 6px;
+  padding: 0;
+  color: var(--muted, var(--ink));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 // Studio app bars use the same inline shape. Their buttons had no display
 // set, so at ~1024px Share stacked its icon over the label and the auto-save
 // status wrapped to two lines.

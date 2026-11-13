@@ -33,6 +33,11 @@ const REMESH_FACE_PRESETS = [
   { value: 40000, label: "Detailed — 40,000 faces" }
 ];
 
+const REMESH_BAKE_ENGINES = [
+  { value: "builtin", label: "Built-in (Cycles)" },
+  { value: "bakelab", label: "BakeLab2 add-on (opens a Blender window)" }
+];
+
 const REMESH_TEXTURE_SIZES = [1024, 2048, 4096];
 const REMESH_DEFAULT_TEXTURE_SIZE = 2048;
 
@@ -79,6 +84,7 @@ function createDashboardThreeDRemeshQuickActionHelpers(input) {
         + "<div class='field hidden' id='model3d-remesh-custom-field'><label for='model3d-remesh-target'>Custom Faces</label><input id='model3d-remesh-target' type='number' min='" + REMESH_MIN_TARGET_FACES + "' max='" + REMESH_MAX_TARGET_FACES + "' step='100' value='" + REMESH_DEFAULT_TARGET_FACES + "'></div>"
         + "<div class='field'><label for='model3d-remesh-texture-size'>Baked Texture Size</label><select id='model3d-remesh-texture-size'>" + renderOptions(REMESH_TEXTURE_SIZES.map(size => ({ value: size, label: size + " × " + size })), REMESH_DEFAULT_TEXTURE_SIZE) + "</select></div>"
         + "<label class='toggle'><span>Bake original colors</span><input id='model3d-remesh-bake' type='checkbox' checked></label>"
+        + "<div class='field'><label for='model3d-remesh-bake-engine'>Bake With</label><select id='model3d-remesh-bake-engine'>" + renderOptions(REMESH_BAKE_ENGINES, "builtin") + "</select></div>"
         + "<label class='toggle'><span>Bake normal map (keeps surface detail)</span><input id='model3d-remesh-bake-normal' type='checkbox' checked></label>"
         + "<label class='toggle'><span>Keep sharp edges</span><input id='model3d-remesh-sharp' type='checkbox' checked></label>"
         + "<label class='toggle'><span>Mirror symmetry (X)</span><input id='model3d-remesh-symmetry' type='checkbox'></label>"
@@ -92,6 +98,7 @@ function createDashboardThreeDRemeshQuickActionHelpers(input) {
       const bake = overlay.querySelector("#model3d-remesh-bake");
       const bakeNormal = overlay.querySelector("#model3d-remesh-bake-normal");
       const textureSize = overlay.querySelector("#model3d-remesh-texture-size");
+      const bakeEngine = overlay.querySelector("#model3d-remesh-bake-engine");
 
       const close = value => {
         document.removeEventListener("keydown", onKeyDown);
@@ -108,6 +115,7 @@ function createDashboardThreeDRemeshQuickActionHelpers(input) {
         customField.classList.toggle("hidden", preset.value !== "custom");
         bakeNormal.disabled = !bake.checked;
         textureSize.disabled = !bake.checked;
+        bakeEngine.disabled = !bake.checked;
       };
 
       method.addEventListener("change", syncFields);
@@ -124,6 +132,7 @@ function createDashboardThreeDRemeshQuickActionHelpers(input) {
           targetFaces,
           bakeTextures: bake.checked,
           bakeNormal: bake.checked && bakeNormal.checked,
+          bakeEngine: bakeEngine.value,
           textureSize: Number.parseInt(textureSize.value, 10) || REMESH_DEFAULT_TEXTURE_SIZE,
           preserveSharp: overlay.querySelector("#model3d-remesh-sharp").checked,
           symmetryX: overlay.querySelector("#model3d-remesh-symmetry").checked

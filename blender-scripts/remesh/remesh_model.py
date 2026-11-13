@@ -1,8 +1,11 @@
 """Remesh a model into a clean, lighter mesh that keeps its look.
 
 Pipeline: import -> join meshes -> duplicate -> remesh the duplicate -> UV unwrap ->
-bake the original's base color (and optionally normals) onto it -> export only the
-remeshed object.
+bake the original's look onto it -> export only the remeshed object.
+
+Baking is done by ../bake/bake_maps.py with either engine:
+  builtin  Blender's Cycles baker, headless.
+  bakelab  The BakeLab2 add-on; needs Blender with a window (like Quad Remesher).
 
 Methods:
   quadriflow   Blender's built-in quad remesher. Runs headless (--background).
@@ -13,7 +16,8 @@ Methods:
 
 Usage:
   blender [--background] --python remesh_model.py --python-exit-code 1 -- \
-    --filepath=in.glb --output_path=out.glb --method=quadriflow --target_faces=5000
+    --filepath=in.glb --output_path=out.glb --method=quadriflow --target_faces=5000 \
+    --bake_engine=builtin --bake_maps=albedo,normal
 
 The script prints "Exported model to: <path>" and "REMESH_RESULT faces=<n>" on success,
 and "REMESH_ERROR <message>" on failure (and exits with code 1).
@@ -26,6 +30,9 @@ import traceback
 
 import bpy
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bake"))
+import bake_maps  # noqa: E402  (shared bake engines, see blender-scripts/bake)
+
 # --- Tunables -------------------------------------------------------------------------
 
 DEFAULT_TARGET_FACES = 5000
@@ -37,12 +44,6 @@ MERGE_DISTANCE = 0.0001
 # QuadriFlow needs a manifold input. Generated models rarely are, so when the first
 # attempt fails we voxel-remesh at this many times the target density, then retry.
 QUADRIFLOW_VOXEL_PREPASS_DENSITY = 4.0
-# Bake rays start this fraction of the bounding-box diagonal outside the low mesh.
-BAKE_CAGE_EXTRUSION_RATIO = 0.01
-BAKE_MAX_RAY_DISTANCE_RATIO = 0.05
-BAKE_MARGIN_PX = 8
-SMART_UV_ANGLE_LIMIT_RADIANS = math.radians(66.0)
-SMART_UV_ISLAND_MARGIN = 0.003
 # Quad Remesher polling: how often to look for its "Retopo_*" result, and when to give up.
 QUADREMESHER_POLL_SECONDS = 1.0
 QUADREMESHER_TIMEOUT_SECONDS = 15 * 60
@@ -94,6 +95,10 @@ def read_options():
         "target_faces": parse_int(get_arg_value(args, "target_faces", DEFAULT_TARGET_FACES), DEFAULT_TARGET_FACES, MIN_TARGET_FACES, MAX_TARGET_FACES),
         "bake_textures": parse_bool(get_arg_value(args, "bake_textures", "true"), True),
         "bake_normal": parse_bool(get_arg_value(args, "bake_normal", "true"), True),
+        "bake_engine": "bakelab" if get_arg_value(args, "bake_engine", "builtin").strip().lower() == "bakelab" else "builtin",
+        # Explicit map list wins; otherwise albedo (+ normal when bake_normal is on).
+        "bake_maps": [name for name in get_arg_value(args, "bake_maps", "").split(",") if name.strip()],
+        "bakelab_path": get_arg_value(args, "bakelab_path", "").strip() or None,
         "texture_size": texture_size,
         "preserve_sharp": parse_bool(get_arg_value(args, "preserve_sharp", "true"), True),
         "symmetry_x": parse_bool(get_arg_value(args, "symmetry_x", "false"), False),
@@ -105,6 +110,8 @@ def read_options():
         raise RuntimeError("--filepath is required.")
     if not options["output_path"]:
         raise RuntimeError("--output_path is required.")
+    if not options["bake_maps"]:
+        options["bake_maps"] = ["albedo", "normal"] if options["bake_normal"] else ["albedo"]
     return options
 
 
@@ -285,152 +292,50 @@ def find_quad_remesher_result(target):
     return None
 
 
-# --- UV + bake ------------------------------------------------------------------------
-
-def smart_uv_unwrap(obj):
-    set_only_active(obj)
-    while obj.data.uv_layers:
-        obj.data.uv_layers.remove(obj.data.uv_layers[0])
-    obj.data.uv_layers.new(name="UVMap")
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=SMART_UV_ANGLE_LIMIT_RADIANS, island_margin=SMART_UV_ISLAND_MARGIN, scale_to_bounds=False)
-    bpy.ops.object.mode_set(mode="OBJECT")
-
-
-def create_bake_material(target, texture_size, bake_normal):
-    material = bpy.data.materials.new(name="RemeshedMaterial")
-    material.use_nodes = True
-    nodes = material.node_tree.nodes
-    links = material.node_tree.links
-    principled = next(node for node in nodes if node.type == "BSDF_PRINCIPLED")
-    principled.inputs["Metallic"].default_value = 0.0
-    principled.inputs["Roughness"].default_value = 0.8
-
-    color_image = bpy.data.images.new("remesh_basecolor", texture_size, texture_size, alpha=False)
-    color_node = nodes.new("ShaderNodeTexImage")
-    color_node.image = color_image
-    color_node.location = (-500, 250)
-
-    normal_node = None
-    if bake_normal:
-        normal_image = bpy.data.images.new("remesh_normal", texture_size, texture_size, alpha=False, float_buffer=False)
-        normal_image.colorspace_settings.name = "Non-Color"
-        normal_node = nodes.new("ShaderNodeTexImage")
-        normal_node.image = normal_image
-        normal_node.location = (-500, -150)
-        normal_map = nodes.new("ShaderNodeNormalMap")
-        normal_map.location = (-200, -150)
-
-    target.data.materials.clear()
-    target.data.materials.append(material)
-    return material, color_node, normal_node
-
-
-def link_baked_textures(material, color_node, normal_node):
-    """Wire the baked images in only after baking, so no bake reads its own output."""
-    nodes = material.node_tree.nodes
-    links = material.node_tree.links
-    principled = next(node for node in nodes if node.type == "BSDF_PRINCIPLED")
-    links.new(color_node.outputs["Color"], principled.inputs["Base Color"])
-    if normal_node:
-        normal_map = next(node for node in nodes if node.type == "NORMAL_MAP")
-        links.new(normal_node.outputs["Color"], normal_map.inputs["Color"])
-        links.new(normal_map.outputs["Normal"], principled.inputs["Normal"])
-
-
-def bake_pass(source, target, material, image_node, bake_type, diagonal):
-    material.node_tree.nodes.active = image_node
-    bpy.ops.object.select_all(action="DESELECT")
-    source.select_set(True)
-    target.select_set(True)
-    bpy.context.view_layer.objects.active = target
-    bake_kwargs = {
-        "type": bake_type,
-        "use_selected_to_active": True,
-        "cage_extrusion": diagonal * BAKE_CAGE_EXTRUSION_RATIO,
-        "max_ray_distance": diagonal * BAKE_MAX_RAY_DISTANCE_RATIO,
-        "margin": BAKE_MARGIN_PX,
-    }
-    if bake_type == "DIFFUSE":
-        # Only the surface color, no lighting: the result stays usable under any light.
-        bake_kwargs["pass_filter"] = {"COLOR"}
-    bpy.ops.object.bake(**bake_kwargs)
-
-
-def save_and_pack(image, directory, stem):
-    os.makedirs(directory, exist_ok=True)
-    image_path = os.path.join(directory, f"{stem}.png")
-    image.filepath_raw = image_path
-    image.file_format = "PNG"
-    image.save()
-    image.pack()
-    try:
-        os.remove(image_path)
-    except OSError:
-        pass
-
-
-def neutralize_source_metallic(source):
-    """The diffuse bake returns base color * (1 - metallic); a metallic source bakes black.
-
-    Only the throwaway source copy is touched, never the user's file.
-    """
-    for slot in source.material_slots:
-        material = slot.material
-        if not material or not material.use_nodes:
-            continue
-        for node in material.node_tree.nodes:
-            if node.type != "BSDF_PRINCIPLED":
-                continue
-            for input_name in ("Metallic", "Transmission Weight", "Transmission"):
-                socket = node.inputs.get(input_name)
-                if socket is None:
-                    continue
-                for link in list(socket.links):
-                    material.node_tree.links.remove(link)
-                socket.default_value = 0.0
-
-
-def bake_original_look(source, target, options):
-    neutralize_source_metallic(source)
-    scene = bpy.context.scene
-    scene.render.engine = "CYCLES"
-    scene.cycles.device = "CPU"
-    # Color and normal passes are deterministic; one sample is enough and keeps it fast.
-    scene.cycles.samples = 1
-    material, color_node, normal_node = create_bake_material(target, options["texture_size"], options["bake_normal"])
-    diagonal = bounding_diagonal(source)
-    log("Baking base color...")
-    bake_pass(source, target, material, color_node, "DIFFUSE", diagonal)
-    if normal_node:
-        log("Baking normal map...")
-        bake_pass(source, target, material, normal_node, "NORMAL", diagonal)
-    link_baked_textures(material, color_node, normal_node)
-    stem = os.path.splitext(os.path.basename(options["output_path"]))[0]
-    texture_dir = os.path.dirname(options["output_path"])
-    save_and_pack(color_node.image, texture_dir, f"{stem}_basecolor")
-    if normal_node:
-        save_and_pack(normal_node.image, texture_dir, f"{stem}_normal")
-
-
 # --- Finish ---------------------------------------------------------------------------
 
 def finalize_and_export(source, target, options):
+    """UV-unwrap, bake (maybe asynchronously), then export.
+
+    With an async step pending (Quad Remesher or BakeLab) Blender runs with a window,
+    so the process is ended explicitly once the file is written.
+    """
     ensure_object_mode()
     set_only_active(target)
     bpy.ops.object.shade_smooth()
-    smart_uv_unwrap(target)
-    if options["bake_textures"]:
-        bake_original_look(source, target, options)
-    bpy.data.objects.remove(source, do_unlink=True)
-    for obj in list(bpy.context.scene.objects):
-        if obj is not target:
-            bpy.data.objects.remove(obj, do_unlink=True)
-    target.data.name = TARGET_OBJECT_NAME
-    export_model(target, options["output_path"])
-    print(f"Exported model to: {options['output_path']}", flush=True)
-    print(f"REMESH_RESULT faces={len(target.data.polygons)} method={options['method']}", flush=True)
+    bake_maps.smart_uv_unwrap(target)
+    stem = os.path.splitext(os.path.basename(options["output_path"]))[0]
+
+    def export(images):
+        try:
+            if images:
+                bake_maps.pack_images(images, os.path.dirname(options["output_path"]), stem)
+            if source.name in bpy.data.objects:
+                bpy.data.objects.remove(source, do_unlink=True)
+            for obj in list(bpy.context.scene.objects):
+                if obj is not target:
+                    bpy.data.objects.remove(obj, do_unlink=True)
+            target.data.name = TARGET_OBJECT_NAME
+            export_model(target, options["output_path"])
+            print(f"Exported model to: {options['output_path']}", flush=True)
+            print(f"REMESH_RESULT faces={len(target.data.polygons)} method={options['method']} bake={options['bake_engine'] if options['bake_textures'] else 'none'}", flush=True)
+            sys.stdout.flush()
+        except Exception as error:  # noqa: BLE001
+            fail(error)
+        if not bpy.app.background:
+            os._exit(0)
+
+    if not options["bake_textures"]:
+        target.data.materials.clear()
+        export({})
+        return
+    bake_maps.bake(source, target, {
+        "engine": options["bake_engine"],
+        "maps": options["bake_maps"],
+        "texture_size": options["texture_size"],
+        "image_prefix": stem,
+        "bakelab_path": options["bakelab_path"],
+    }, export, fail)
 
 
 def export_model(obj, output_path):
@@ -477,8 +382,6 @@ def run_quad_remesher_async(source, target, options):
             result.data.materials.clear()
             log(f"Quad Remesher -> {len(result.data.polygons)} faces")
             finalize_and_export(source, result, options)
-            sys.stdout.flush()
-            os._exit(0)
         except Exception as error:  # noqa: BLE001 - every failure must end the process
             fail(error)
         return None
@@ -492,7 +395,9 @@ def main():
         options = read_options()
         if options["method"] == "quadremesher" and bpy.app.background:
             raise RuntimeError("Quad Remesher needs Blender with a window; run without --background.")
-        log(f"Method={options['method']} target_faces={options['target_faces']} bake={options['bake_textures']}")
+        if options["bake_textures"] and options["bake_engine"] == "bakelab" and bpy.app.background:
+            raise RuntimeError("BakeLab needs Blender with a window; run without --background.")
+        log(f"Method={options['method']} target_faces={options['target_faces']} bake={options['bake_engine'] if options['bake_textures'] else 'none'} maps={','.join(options['bake_maps'])}")
         clear_scene()
         import_model(options["filepath"])
         source = build_source_object()

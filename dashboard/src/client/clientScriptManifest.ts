@@ -121,6 +121,7 @@ export const dashboardClientScriptParts: DashboardClientScriptPart[] = [
   { relativePath: "client/modules/dashboard/3d/sendDestinationHelpers.js", required: false },
   { relativePath: "client/modules/dashboard/3d/loosePartsPreviewHelpers.js", required: false },
   { relativePath: "client/modules/dashboard/3d/remeshQuickActionHelpers.js", required: false },
+  { relativePath: "client/modules/dashboard/3d/bakeQuickActionHelpers.js", required: false },
   { relativePath: "client/modules/dashboard/3d/studioEventBindingHelpers.js", required: false },
   { relativePath: "client/modules/studioBootstrapBindingHelpers.js", required: false },
   { relativePath: "client/modules/settingsEventBindingHelpers.js", required: false },

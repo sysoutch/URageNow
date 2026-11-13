@@ -222,9 +222,22 @@ function createDashboardModel3dBootstrapAssemblyHelpers(input) {
         describeClientError
       })
     : null;
+  const dashboardModel3dBakeQuickActionHelpers = typeof createDashboardThreeDBakeQuickActionHelpers === "function"
+    ? createDashboardThreeDBakeQuickActionHelpers({
+        state,
+        request,
+        getSelectedGeneratedModel,
+        setOutput,
+        setModel3dStatus,
+        loadModel3dHistory,
+        escapeHtml,
+        describeClientError
+      })
+    : null;
   const dashboardModel3dStudioEventBindingHelpers = typeof createDashboardThreeDStudioEventBindingHelpers === "function"
     ? createDashboardThreeDStudioEventBindingHelpers({
         remeshQuickActionHelpers: dashboardModel3dRemeshQuickActionHelpers,
+        bakeQuickActionHelpers: dashboardModel3dBakeQuickActionHelpers,
         state,
         model3dViewer,
         request,

@@ -246,6 +246,9 @@ export const appConfig = {
   blenderModelMetallicScriptPath: optionalRepositoryPath("BLENDER_MODEL_METALLIC_SCRIPT_PATH", resolveRepoPath("blender-scripts", "apply_metallic.py")),
   blenderModelMaterialScriptPath: optionalRepositoryPath("BLENDER_MODEL_MATERIAL_SCRIPT_PATH", resolveRepoPath("blender-scripts", "apply_material_finish.py")),
   blenderModelAlbedoToGeometryScriptPath: optionalRepositoryPath("BLENDER_MODEL_ALBEDO_TO_GEOMETRY_SCRIPT_PATH", resolveRepoPath("blender-scripts", "albedo_to_geometry.py")),
+  blenderModelBakeScriptPath: optionalRepositoryPath("BLENDER_MODEL_BAKE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "bake", "bake_maps.py")),
+  // BakeLab2 add-on source folder; empty lets bake_maps.py use its own default.
+  blenderBakeLabAddonPath: optionalString("BAKELAB_ADDON_PATH", ""),
   blenderModelRemeshScriptPath: optionalRepositoryPath("BLENDER_MODEL_REMESH_SCRIPT_PATH", resolveRepoPath("blender-scripts", "remesh", "remesh_model.py")),
   blenderModelScaleScriptPath: optionalRepositoryPath("BLENDER_MODEL_SCALE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "transform", "scale.py")),
   blenderModelAutoRigScriptPath: optionalRepositoryPath("BLENDER_MODEL_AUTORIG_SCRIPT_PATH", resolveRepoPath("blender-scripts", "rig", "autorigger", "autorig.py")),
@@ -256,6 +259,7 @@ export const appConfig = {
   blenderModelMergeVerticesTimeoutMs: optionalNumber("BLENDER_MODEL_MERGE_VERTICES_TIMEOUT_MS", 10 * 60_000),
   blenderModelMetallicTimeoutMs: optionalNumber("BLENDER_MODEL_METALLIC_TIMEOUT_MS", 10 * 60_000),
   blenderModelAlbedoToGeometryTimeoutMs: optionalNumber("BLENDER_MODEL_ALBEDO_TO_GEOMETRY_TIMEOUT_MS", 20 * 60_000),
+  blenderModelBakeTimeoutMs: optionalNumber("BLENDER_MODEL_BAKE_TIMEOUT_MS", 30 * 60_000),
   blenderModelRemeshTimeoutMs: optionalNumber("BLENDER_MODEL_REMESH_TIMEOUT_MS", 20 * 60_000),
   blenderModelScaleTimeoutMs: optionalNumber("BLENDER_MODEL_SCALE_TIMEOUT_MS", 10 * 60_000),
   blenderModelAutoRigTimeoutMs: optionalNumber("BLENDER_MODEL_AUTORIG_TIMEOUT_MS", 20 * 60_000),

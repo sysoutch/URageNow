@@ -60,6 +60,23 @@ export interface ModelAlbedoToGeometryRunInput {
 }
 
 export type ModelRemeshMethod = "quadriflow" | "voxel" | "quadremesher";
+export type ModelBakeEngine = "builtin" | "bakelab";
+export type ModelBakeMap = "albedo" | "normal" | "roughness" | "metallic" | "ao" | "emission";
+
+export const MODEL_BAKE_MAPS: readonly ModelBakeMap[] = ["albedo", "normal", "roughness", "metallic", "ao", "emission"];
+
+export interface ModelBakeRunInput {
+  targetModelPath: string;
+  /** High-poly model to bake from; omitted = flatten the target's own materials. */
+  sourceModelPath?: string;
+  outputModelPath: string;
+  engine: ModelBakeEngine;
+  maps: ModelBakeMap[];
+  textureSize?: number;
+  /** false keeps the target's UVs (when it has some); default makes a fresh unwrap. */
+  newUvs?: boolean;
+  timeoutMs?: number;
+}
 
 export interface ModelRemeshRunInput {
   sourceModelPath: string;
@@ -72,6 +89,8 @@ export interface ModelRemeshRunInput {
   preserveSharp?: boolean;
   symmetryX?: boolean;
   adaptQuadCount?: boolean;
+  bakeEngine?: ModelBakeEngine;
+  bakeMaps?: ModelBakeMap[];
   timeoutMs?: number;
 }
 
@@ -195,6 +214,20 @@ function assertModelAlbedoToGeometryScriptPath(): void {
 
 function assertModelRemeshScriptPath(): void {
   assertScriptPath("BLENDER_MODEL_REMESH_SCRIPT_PATH", appConfig.blenderModelRemeshScriptPath, "remesh", "remesh_model.py");
+}
+
+function assertModelBakeScriptPath(): void {
+  assertScriptPath("BLENDER_MODEL_BAKE_SCRIPT_PATH", appConfig.blenderModelBakeScriptPath, "bake", "bake_maps.py");
+}
+
+function bakeLabPathArgs(): string[] {
+  const addonPath = appConfig.blenderBakeLabAddonPath.trim();
+  return addonPath ? [`--bakelab_path=${addonPath}`] : [];
+}
+
+function normalizeBakeMaps(maps: readonly string[] | undefined): ModelBakeMap[] {
+  const selected = MODEL_BAKE_MAPS.filter(map => maps?.includes(map));
+  return selected.length > 0 ? selected : ["albedo", "normal"];
 }
 
 function assertModelScaleScriptPath(): void {
@@ -774,8 +807,9 @@ export async function runModelRemeshScript(input: ModelRemeshRunInput): Promise<
   const timeoutMs = normalizePositiveInteger(input.timeoutMs, appConfig.blenderModelRemeshTimeoutMs);
   const targetFaceCount = Math.max(REMESH_MIN_TARGET_FACES, Math.min(REMESH_MAX_TARGET_FACES, Math.round(input.targetFaceCount)));
   const textureSize = REMESH_TEXTURE_SIZES.includes(input.textureSize ?? 0) ? input.textureSize as number : REMESH_DEFAULT_TEXTURE_SIZE;
-  // Quad Remesher's engine reports back through Blender's UI event loop, so it cannot run headless.
-  const needsWindow = input.method === "quadremesher";
+  const bakeEngine: ModelBakeEngine = input.bakeEngine === "bakelab" ? "bakelab" : "builtin";
+  // Quad Remesher and BakeLab both finish inside Blender's UI event loop, so they cannot run headless.
+  const needsWindow = input.method === "quadremesher" || (input.bakeTextures !== false && bakeEngine === "bakelab");
   await stat(sourceModelPath);
   const args = [
     ...(needsWindow ? [] : ["--background"]),
@@ -793,7 +827,10 @@ export async function runModelRemeshScript(input: ModelRemeshRunInput): Promise<
     `--texture_size=${textureSize}`,
     `--preserve_sharp=${boolToArg(input.preserveSharp !== false)}`,
     `--symmetry_x=${boolToArg(input.symmetryX === true)}`,
-    `--adapt_quad_count=${boolToArg(input.adaptQuadCount === true)}`
+    `--adapt_quad_count=${boolToArg(input.adaptQuadCount === true)}`,
+    `--bake_engine=${bakeEngine}`,
+    ...(input.bakeMaps?.length ? [`--bake_maps=${normalizeBakeMaps(input.bakeMaps).join(",")}`] : []),
+    ...bakeLabPathArgs()
   ];
   const result = await runBlenderProcess(args, timeoutMs, { showWindow: needsWindow });
   const errorMatch = /REMESH_ERROR (.+)/.exec(result.output);
@@ -808,6 +845,56 @@ export async function runModelRemeshScript(input: ModelRemeshRunInput): Promise<
   return {
     outputPath: await resolveScriptOutputPath(outputModelPath, result.output),
     faceCount: faceMatch ? Number.parseInt(faceMatch[1] ?? "", 10) : null
+  };
+}
+
+export interface ModelBakeRunResult {
+  outputPath: string;
+  maps: ModelBakeMap[];
+}
+
+export async function runModelBakeScript(input: ModelBakeRunInput): Promise<ModelBakeRunResult> {
+  assertModelBakeScriptPath();
+  const targetModelPath = path.resolve(input.targetModelPath);
+  const sourceModelPath = input.sourceModelPath ? path.resolve(input.sourceModelPath) : null;
+  const outputModelPath = path.resolve(input.outputModelPath);
+  const timeoutMs = normalizePositiveInteger(input.timeoutMs, appConfig.blenderModelBakeTimeoutMs);
+  const engine: ModelBakeEngine = input.engine === "bakelab" ? "bakelab" : "builtin";
+  const maps = normalizeBakeMaps(input.maps);
+  const textureSize = REMESH_TEXTURE_SIZES.includes(input.textureSize ?? 0) ? input.textureSize as number : REMESH_DEFAULT_TEXTURE_SIZE;
+  await stat(targetModelPath);
+  if (sourceModelPath) {
+    await stat(sourceModelPath);
+  }
+  const needsWindow = engine === "bakelab";
+  const args = [
+    ...(needsWindow ? [] : ["--background"]),
+    "--python",
+    appConfig.blenderModelBakeScriptPath,
+    "--python-exit-code",
+    "1",
+    "--",
+    `--filepath=${targetModelPath}`,
+    ...(sourceModelPath ? [`--source_path=${sourceModelPath}`] : []),
+    `--output_path=${outputModelPath}`,
+    `--engine=${engine}`,
+    `--maps=${maps.join(",")}`,
+    `--texture_size=${textureSize}`,
+    `--new_uvs=${input.newUvs === false ? "false" : "true"}`,
+    ...bakeLabPathArgs()
+  ];
+  const result = await runBlenderProcess(args, timeoutMs, { showWindow: needsWindow });
+  const errorMatch = /BAKE_ERROR (.+)/.exec(result.output);
+  if (!isAttemptSuccessful(result) || errorMatch) {
+    const reason = errorMatch?.[1]?.trim();
+    throw new Error(reason
+      ? `Bake failed: ${reason}`
+      : `Blender bake script failed (code=${result.exitCode}, signal=${result.signal ?? "none"}).\n${trimProcessOutput(result.output)}`);
+  }
+  const mapsMatch = /BAKE_RESULT maps=([a-z,]+)/.exec(result.output);
+  return {
+    outputPath: await resolveScriptOutputPath(outputModelPath, result.output),
+    maps: mapsMatch ? normalizeBakeMaps(mapsMatch[1]?.split(",")) : maps
   };
 }
 

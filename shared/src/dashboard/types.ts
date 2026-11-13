@@ -624,12 +624,28 @@ export interface DashboardDependencies {
     preserveSharp?: boolean;
     symmetryX?: boolean;
     adaptQuadCount?: boolean;
+    bakeEngine?: "builtin" | "bakelab";
+    bakeMaps?: Array<"albedo" | "normal" | "roughness" | "metallic" | "ao" | "emission">;
   }) => Promise<{
     generated: GeneratedModelPublicRecord;
     sourceModelId: string;
     method: "quadriflow" | "voxel" | "quadremesher";
     targetFaceCount: number;
     faceCount: number | null;
+  }>;
+  bakeModel: (input: {
+    modelId: string;
+    sourceModelId?: string;
+    engine: "builtin" | "bakelab";
+    maps: Array<"albedo" | "normal" | "roughness" | "metallic" | "ao" | "emission">;
+    textureSize?: number;
+    newUvs?: boolean;
+  }) => Promise<{
+    generated: GeneratedModelPublicRecord;
+    targetModelId: string;
+    sourceModelId: string | null;
+    engine: "builtin" | "bakelab";
+    maps: Array<"albedo" | "normal" | "roughness" | "metallic" | "ao" | "emission">;
   }>;
   applyModelSeparateByLooseParts: (input: {
     modelId: string;

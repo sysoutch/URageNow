@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { appConfig } from "../config/appConfig.js";
 import { getComfyRuntimeSettings, resolveComfyWorkspacePath } from "./comfyRuntimeSettings.js";
-import { runLowPolyModelScript, runModelAlbedoToGeometryScript, runModelAutoRigPreviewScript, runModelAutoRigScript, runModelDecimateToFacesScript, runModelMaterialScript, runModelMergeVerticesScript, runModelMetallicScript, runModelRemeshScript, runModelScaleScript, runModelSeparateByLoosePartsScript } from "./model3d/lowPolyModelService.js";
+import { runLowPolyModelScript, runModelAlbedoToGeometryScript, runModelAutoRigPreviewScript, runModelAutoRigScript, runModelDecimateToFacesScript, runModelMaterialScript, runModelMergeVerticesScript, runModelBakeScript, runModelMetallicScript, runModelRemeshScript, runModelScaleScript, runModelSeparateByLoosePartsScript } from "./model3d/lowPolyModelService.js";
 import {
   comfyGetJson,
   comfyPostJson,
@@ -1856,6 +1856,8 @@ export async function applyGeneratedModelAlbedoToGeometry(input: {
 }
 
 export type GeneratedModelRemeshMethod = "quadriflow" | "voxel" | "quadremesher";
+export type GeneratedModelBakeEngine = "builtin" | "bakelab";
+export type GeneratedModelBakeMap = "albedo" | "normal" | "roughness" | "metallic" | "ao" | "emission";
 
 export interface GeneratedModelRemeshResult {
   generated: GeneratedModelPublicRecord;
@@ -1879,6 +1881,8 @@ export async function remeshGeneratedModel(input: {
   preserveSharp?: boolean;
   symmetryX?: boolean;
   adaptQuadCount?: boolean;
+  bakeEngine?: GeneratedModelBakeEngine;
+  bakeMaps?: GeneratedModelBakeMap[];
 }): Promise<GeneratedModelRemeshResult> {
   const safeModelId = sanitizeFileName(input.modelId, "");
   if (!safeModelId) {
@@ -1907,7 +1911,9 @@ export async function remeshGeneratedModel(input: {
       textureSize: input.textureSize,
       preserveSharp: input.preserveSharp,
       symmetryX: input.symmetryX,
-      adaptQuadCount: input.adaptQuadCount
+      adaptQuadCount: input.adaptQuadCount,
+      bakeEngine: input.bakeEngine,
+      bakeMaps: input.bakeMaps
     });
     await assertRustValidatedModelArtifact(result.outputPath, "Remeshed model");
     const imported = await importUploadedSourceModel({
@@ -1926,6 +1932,82 @@ export async function remeshGeneratedModel(input: {
       method: input.method,
       targetFaceCount: Math.round(input.targetFaceCount),
       faceCount: result.faceCount
+    };
+  } finally {
+    await rm(workDirectory, { recursive: true, force: true }).catch(() => undefined);
+  }
+}
+
+export interface GeneratedModelBakeResult {
+  generated: GeneratedModelPublicRecord;
+  targetModelId: string;
+  sourceModelId: string | null;
+  engine: GeneratedModelBakeEngine;
+  maps: GeneratedModelBakeMap[];
+}
+
+async function readModelPathById(modelId: string): Promise<{ record: GeneratedModelRecord; modelPath: string }> {
+  const safeModelId = sanitizeFileName(modelId, "");
+  if (!safeModelId) {
+    throw new Error("Invalid model id.");
+  }
+  const record = (await readGeneratedModelIndex()).find(entry => entry.id === safeModelId);
+  if (!record) {
+    throw new Error(`Model entry ${safeModelId} was not found.`);
+  }
+  const modelPath = path.join(generatedModelsDirectory, safeModelId, record.modelFileName);
+  await stat(modelPath);
+  return { record, modelPath };
+}
+
+/**
+ * Bake a model's look into one clean PBR texture set.
+ * Without a source model it flattens the model's own materials; with one it bakes
+ * that (high-poly) model onto this one. The result is saved as a NEW model entry.
+ */
+export async function bakeGeneratedModel(input: {
+  modelId: string;
+  sourceModelId?: string;
+  engine: GeneratedModelBakeEngine;
+  maps: GeneratedModelBakeMap[];
+  textureSize?: number;
+  newUvs?: boolean;
+}): Promise<GeneratedModelBakeResult> {
+  const target = await readModelPathById(input.modelId);
+  const source = input.sourceModelId && input.sourceModelId !== target.record.id
+    ? await readModelPathById(input.sourceModelId)
+    : null;
+  const targetExt = path.extname(target.record.modelFileName);
+  const targetStem = path.basename(target.record.modelFileName, targetExt) || "model";
+  const outputFileName = sanitizeFileName(`${targetStem}_baked_${input.engine}.glb`, "model_baked.glb");
+  const workDirectory = await mkdtemp(path.join(os.tmpdir(), "urage-bake-"));
+  try {
+    const result = await runModelBakeScript({
+      targetModelPath: target.modelPath,
+      sourceModelPath: source?.modelPath,
+      outputModelPath: path.join(workDirectory, outputFileName),
+      engine: input.engine,
+      maps: input.maps,
+      textureSize: input.textureSize,
+      newUvs: input.newUvs
+    });
+    await assertRustValidatedModelArtifact(result.outputPath, "Baked model");
+    const imported = await importUploadedSourceModel({
+      fileName: outputFileName,
+      fileData: await readFile(result.outputPath),
+      prompt: target.record.prompt,
+      useSourceAsCurrent: true
+    });
+    const generated = await getGeneratedModelPublicById(imported.id);
+    if (!generated) {
+      throw new Error("Baked model was saved but could not be read back.");
+    }
+    return {
+      generated,
+      targetModelId: target.record.id,
+      sourceModelId: source?.record.id ?? null,
+      engine: input.engine,
+      maps: result.maps
     };
   } finally {
     await rm(workDirectory, { recursive: true, force: true }).catch(() => undefined);

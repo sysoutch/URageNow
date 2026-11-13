@@ -1610,6 +1610,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                     <div class="studio-quick-action-group" role="group" aria-label="Mesh">
                       <span class="studio-quick-action-group-label" aria-hidden="true">Mesh</span>
                       <button class="secondary" id="model3d-remesh-button" type="button" title="Rebuild as a clean, lighter mesh that keeps its look (saved as a new model)">${renderButtonIcon("remesh")}<span>Remesh</span></button>
+                      <button class="secondary" id="model3d-bake-button" type="button" title="Bake textures (albedo, normal, roughness, AO...) from this model or a high-poly model, with Blender or BakeLab2">${renderButtonIcon("bake")}<span>Bake</span></button>
                       <button class="secondary" id="model3d-create-lowpoly-button" type="button" title="Create a stylized low-poly version with a colour-palette texture">${renderButtonIcon("lowpoly")}<span>Low Poly</span></button>
                       <button class="secondary" id="model3d-separate-by-loose-parts-button" type="button" title="Separate the model by loose parts">${renderButtonIcon("split")}<span>Split Parts</span></button>
                       <button class="secondary" id="model3d-albedo-to-geometry-button" type="button" title="Displace the mesh from its albedo texture (albedo to geometry)">${renderButtonIcon("relief")}<span>Albedo Relief</span></button>

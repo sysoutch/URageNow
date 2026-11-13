@@ -667,6 +667,51 @@ const REMESH_METHODS = new Set(["quadriflow", "voxel", "quadremesher"]);
 const REMESH_DEFAULT_TARGET_FACES = 5000;
 const REMESH_MIN_TARGET_FACES = 100;
 const REMESH_MAX_TARGET_FACES = 200_000;
+const BAKE_MAPS = ["albedo", "normal", "roughness", "metallic", "ao", "emission"] as const;
+type BakeMap = typeof BAKE_MAPS[number];
+
+function parseBakeEngine(value: unknown): "builtin" | "bakelab" {
+  return value === "bakelab" ? "bakelab" : "builtin";
+}
+
+function parseBakeMaps(value: unknown): BakeMap[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const maps = BAKE_MAPS.filter(map => value.includes(map));
+  return maps.length > 0 ? maps : undefined;
+}
+
+async function handlePostApiModel3dBake(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const body = await parseJsonBody(request);
+  const modelId = typeof body.modelId === "string" ? body.modelId.trim() : "";
+  if (!modelId) {
+    sendJson(response, 400, { error: "modelId is required." });
+    return;
+  }
+  const sourceModelId = typeof body.sourceModelId === "string" && body.sourceModelId.trim() ? body.sourceModelId.trim() : undefined;
+  const engine = parseBakeEngine(body.engine);
+  const maps = parseBakeMaps(body.maps) ?? ["albedo", "normal"];
+  try {
+    const result = await dependencies.bakeModel({
+      modelId,
+      sourceModelId,
+      engine,
+      maps,
+      textureSize: typeof body.textureSize === "number" ? body.textureSize : undefined,
+      newUvs: body.newUvs !== false
+    });
+    dependencies.runtimeState.recordAction(
+      "dashboard:model3d-bake",
+      `Baked ${result.maps.join(", ")} for ${modelId}${sourceModelId ? ` from ${sourceModelId}` : ""} with ${engine} into ${result.generated.id}.`
+    );
+    sendJson(response, 200, result);
+  } catch (error) {
+    const detail = error instanceof Error ? (error.message?.trim() || "Bake failed.") : (String(error).trim() || "Bake failed.");
+    console.error("Dashboard bake failed:", { modelId, sourceModelId, engine, maps, detail });
+    throw new Error(detail);
+  }
+}
 
 async function handlePostApiModel3dRemesh(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
@@ -690,7 +735,9 @@ async function handlePostApiModel3dRemesh(request: IncomingMessage, response: Se
       textureSize: typeof body.textureSize === "number" ? body.textureSize : undefined,
       preserveSharp: body.preserveSharp !== false,
       symmetryX: body.symmetryX === true,
-      adaptQuadCount: body.adaptQuadCount === true
+      adaptQuadCount: body.adaptQuadCount === true,
+      bakeEngine: parseBakeEngine(body.bakeEngine),
+      bakeMaps: parseBakeMaps(body.bakeMaps)
     });
     dependencies.runtimeState.recordAction(
       "dashboard:model3d-remesh",
@@ -2299,6 +2346,7 @@ const dashboardMessagingAndModelRouteTable = createDashboardRouteTable([
   postRoute("/api/model3d-generate-lods", handlePostApiModel3dGenerateLods),
   postRoute("/api/model3d-albedo-to-geometry", handlePostApiModel3dAlbedoToGeometry),
   postRoute("/api/model3d-remesh", handlePostApiModel3dRemesh),
+  postRoute("/api/model3d-bake", handlePostApiModel3dBake),
   postRoute("/api/model3d-separate-loose-parts", handlePostApiModel3dSeparateByLooseParts),
   postRoute("/api/model3d-separate-by-loose-parts", handlePostApiModel3dSeparateByLooseParts),
   postRoute("/api/model3d-autorig-preview", handlePostApiModel3dAutoRigPreview),
