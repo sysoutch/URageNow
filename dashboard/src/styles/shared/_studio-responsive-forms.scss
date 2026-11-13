@@ -1,0 +1,168 @@
+// Image, Video and 3D Studios on tablets and phones (Taskitty #59).
+//
+// studio/_focused-workflow-responsive.scss hid the prompt form, the bottom dock
+// and the inspector below 1180px (display: none), so on tablets and phones the
+// Studios showed a preview you could not generate from. This layer brings them
+// back:
+//   981-1180px  form column (narrower) + preview; dock under the preview;
+//               the inspector stays hidden (it is secondary and needs width).
+//   <= 980px    one scrolling column: form, preview, quick actions, dock,
+//               inspector (the shell contract in _studio-shell-layout-contract
+//               already stacks Image/Video; 3D joins it here).
+//
+// The hiding rules use `:is(#card .x, ...)` (1 id, 3 classes); each selector
+// below repeats a class to outrank them without depending on load order.
+
+$rf: "body.view-ai-active.studio-workflow-focused";
+$rf-form-width-tablet: 280px;
+$rf-gap: 10px;
+
+// ---------------------------------------------------------------- tablet
+
+@media (min-width: 981px) and (max-width: 1180px) {
+  // The old rule zeroed the dock height when it hid the docks.
+  body.view-ai-active.studio-workflow-focused.studio-workflow-focused {
+    --editor-dock-height: clamp(110px, 16vh, 150px);
+  }
+
+  #{$rf} :is(#image-studio-card .image-studio-workspace, #video-studio-card .video-studio-workspace, #model3d-studio-card .model3d-studio-workspace).studio-workflow-layout {
+    grid-template-columns: #{$rf-form-width-tablet} minmax(0, 1fr) !important;
+  }
+
+  // 3D panels carry a fixed desktop width (304px) that spilled over the preview.
+  #{$rf} #model3d-studio-card :is(.model3d-action-panels, .model3d-studio-panel, .model3d-generate-workflow-field):not(.rf-never) {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #{$rf} #model3d-studio-card .model3d-action-panels.model3d-action-panels {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  // The forms again.
+  #{$rf} #image-studio-card .image-prompt-card.image-prompt-card {
+    display: grid !important;
+  }
+
+  #{$rf} #video-studio-card .video-prompt-field-card.video-prompt-field-card {
+    display: grid !important;
+    grid-column: 1 !important;
+    grid-row: 1 / -1 !important;
+  }
+
+  #{$rf} #model3d-studio-card .model3d-studio-panel.active.active {
+    display: block !important;
+  }
+
+  // Image/3D keep their left column; make sure it spans every row next to the preview.
+  #{$rf} #image-studio-card .image-studio-left-sidebar.image-studio-left-sidebar,
+  #{$rf} #model3d-studio-card .model3d-action-panels.model3d-action-panels {
+    grid-column: 1 !important;
+    grid-row: 1 / -1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  // Docks under the preview, inside the second column (grid items here, so no
+  // left/right offsets: those would shift them sideways off the screen).
+  #{$rf} :is(#image-studio-card .image-bottom-dock, #video-studio-card .video-bottom-dock, #model3d-studio-card .model3d-bottom-dock):not(.rf-never) {
+    display: grid !important;
+    grid-column: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+}
+
+// ---------------------------------------------------------------- phone
+
+@media (max-width: 980px) {
+  // 3D joins the one-column stack Image and Video already use.
+  #{$rf} #model3d-studio-card.ai-detail-card.ai-detail-card {
+    grid-template-rows: none !important;
+    grid-auto-rows: max-content !important;
+    align-content: start !important;
+    height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+
+  #{$rf} :is(#image-studio-card .image-studio-workspace, #video-studio-card .video-studio-workspace, #model3d-studio-card .model3d-studio-workspace).studio-workflow-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    grid-auto-rows: max-content !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #{$rf} #model3d-studio-card .studio-workflow-side-resizer {
+    display: none !important;
+  }
+
+  // Every part is one full-width row in DOM order (the tablet/desktop rules pin
+  // the preview to column 2, which would add an implicit second column here).
+  // `:not(.rf-never)` only adds one class of specificity (nothing has that class).
+  #{$rf} :is(#image-studio-card, #video-studio-card, #model3d-studio-card) :is(
+      .image-studio-left-sidebar, .image-studio-preview-panel, .image-bottom-dock, .image-studio-side,
+      .video-prompt-field-card, .video-preview-card-main, .video-bottom-dock, .video-studio-side,
+      .model3d-action-panels, .model3d-main-threejs-panel, .model3d-bottom-dock, .model3d-studio-side
+    ):not(.rf-never) {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    padding-bottom: 0 !important;
+  }
+
+  // The forms again.
+  #{$rf} #image-studio-card .image-prompt-card.image-prompt-card,
+  #{$rf} #video-studio-card .video-prompt-field-card.video-prompt-field-card {
+    display: grid !important;
+  }
+
+  #{$rf} #model3d-studio-card .model3d-studio-panel.active.active {
+    display: block !important;
+  }
+
+  #{$rf} :is(#image-studio-card .image-bottom-dock, #video-studio-card .video-bottom-dock, #model3d-studio-card .model3d-bottom-dock):is(.image-bottom-dock, .video-bottom-dock, .model3d-bottom-dock) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  // The scrolling column scrolls, not the form inside it.
+  #{$rf} :is(#image-studio-card .image-studio-left-sidebar, #model3d-studio-card .model3d-studio-panel.active, #video-studio-card .video-prompt-field-card):is(.image-studio-left-sidebar, .model3d-studio-panel, .video-prompt-field-card) {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  // Form first: on a phone you fill in the prompt, then look at the result
+  // (the preview plus its quick-action bar is ~1000px tall).
+  #{$rf} #image-studio-card .image-studio-left-sidebar.image-studio-left-sidebar,
+  #{$rf} #video-studio-card .video-prompt-field-card.video-prompt-field-card {
+    order: -1 !important;
+  }
+
+  // A tall portrait image made the preview ~1400px high and pushed the form far down.
+  #{$rf} #image-studio-card .image-studio-preview-panel #imagegen-preview:not(.rf-never) {
+    max-height: 55vh !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+  }
+
+  // The 3D viewer needs a real height once it is a stacked row.
+  #{$rf} #model3d-studio-card .model3d-main-threejs-panel.model3d-main-threejs-panel {
+    min-height: 60vh !important;
+  }
+}
