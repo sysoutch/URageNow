@@ -1,0 +1,325 @@
+// Image Studio left sidebar (Generate and Edit).
+//
+// - Generate/Edit tabs sit at the top of the sidebar and stay pinned while it scrolls.
+// - Edit mode shows the source images first, then the prompt and Apply Edit, and
+//   hides the generate-only "Prompt from an image" builder.
+// - The Generate / Apply Edit button stays pinned at the bottom of the prompt card.
+// - Button rows are compact grids, so labels neither wrap nor truncate.
+//
+// Older layers style this sidebar with `#image-studio-card ... !important`; the
+// scope below adds the sidebar class twice to win without depending on load order.
+
+$img-card: "body.view-ai-active #image-studio-card";
+$img-side: "#{$img-card} .image-studio-left-sidebar.image-studio-left-sidebar";
+$img-tabs-height: 44px;
+$img-control-height: 30px;
+$img-primary-height: 40px;
+
+// ---------------------------------------------------------------- tabs
+
+#{$img-side} > .image-sidebar-tabs {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 6 !important;
+  order: 0 !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  justify-self: stretch !important;
+  width: auto !important;
+  max-width: none !important;
+  height: $img-tabs-height !important;
+  min-height: $img-tabs-height !important;
+  margin: 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line, #444) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--panel, #1a1a1a) 92%, black 8%) !important;
+}
+
+// Older layers pin these children to explicit grid rows, which beats `order`.
+#{$img-side} > :is(.image-sidebar-tabs, .image-prompt-card, #image-studio-panel-generate, #image-studio-panel-edit) {
+  grid-row: auto !important;
+  grid-column: 1 / -1 !important;
+}
+
+// One clear active state; an older layer also underlined the first tab.
+#{$img-side} > .image-sidebar-tabs > .dashboard-tab {
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  box-shadow: none !important;
+}
+
+#{$img-side} > .image-sidebar-tabs > .dashboard-tab.active {
+  border-bottom-color: var(--studio-accent-1, var(--accent)) !important;
+}
+
+#{$img-side} > .image-prompt-card {
+  order: 2 !important;
+}
+
+#{$img-side} > #image-studio-panel-generate {
+  order: 3 !important;
+}
+
+#{$img-side} > #image-studio-panel-edit {
+  order: 4 !important;
+}
+
+// Edit mode: sources first, then the prompt that describes the change.
+#{$img-card}.image-studio-edit-mode .image-studio-left-sidebar.image-studio-left-sidebar > #image-studio-panel-edit {
+  order: 1 !important;
+  padding: 12px 18px 0 !important;
+}
+
+#{$img-card}.image-studio-edit-mode .image-prompt-interpret-panel,
+#{$img-card}.image-studio-edit-mode #image-generate-from-prompt-button {
+  display: none !important;
+}
+
+// ---------------------------------------------------------------- compact button rows
+
+// "Prompt from an image": Upload / Paste / Webcam in one row.
+#{$img-side} .image-prompt-interpret-actions {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+// Everything after the three source buttons takes the full row.
+#{$img-side} .image-prompt-interpret-actions > :not(#image-interpret-source-browse-button, #image-interpret-source-paste-button, #image-interpret-source-webcam-button) {
+  grid-column: 1 / -1 !important;
+}
+
+// Script-toggled buttons (Clear, Use its aspect ratio) must stay hidden when hidden.
+#{$img-side} :is(.image-prompt-interpret-actions, .image-prompt-action-row, .image-object-prompt-actions) > :is(.hidden, [hidden]) {
+  display: none !important;
+}
+
+// Three-up rows are too narrow for icon + word; the word alone reads better.
+#{$img-side} :is(.image-prompt-interpret-actions, .image-prompt-action-row) > button .button-icon {
+  display: none !important;
+}
+
+#{$img-side} :is(.image-prompt-interpret-actions, .image-prompt-action-row, .image-object-prompt-actions) > button:not(.hidden):not([hidden]) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: $img-control-height !important;
+  min-height: $img-control-height !important;
+  padding: 0 6px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}
+
+#{$img-side} :is(.image-prompt-interpret-actions, .image-prompt-action-row, .image-object-prompt-actions) > button span:not(.button-icon) {
+  display: inline !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+// Vague / Normal / Precise: three equal segments (the last one was cut off).
+#{$img-side} .image-interpret-detail-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+  overflow: visible !important;
+}
+
+#{$img-side} .image-interpret-detail-tabs > button {
+  min-width: 0 !important;
+  padding: 0 4px !important;
+  font-size: 11px !important;
+}
+
+// The empty preview repeated the hint three times; show it only with an image.
+#{$img-side} .image-prompt-interpret-preview:has(#image-prompt-interpret-preview-image.hidden) {
+  display: none !important;
+}
+
+// Improve / Change / Translate in one row; Add / Delete in one row.
+#{$img-side} .image-prompt-action-row {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+#{$img-side} .image-object-prompt-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px !important;
+}
+
+#{$img-side} label .label-soft {
+  margin-left: 4px !important;
+}
+
+#{$img-side} #imagegen-prompt {
+  min-height: 108px !important;
+}
+
+#{$img-side} #imagegen-negative-prompt {
+  min-height: 52px !important;
+}
+
+#{$img-side} #image-generate-from-prompt-button {
+  width: 100% !important;
+  margin-top: 6px !important;
+  white-space: nowrap !important;
+}
+
+// ---------------------------------------------------------------- presets
+
+#{$img-side} .studio-prompt-preset-buttons,
+#{$img-side} .image-creative-group .studio-chip-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+#{$img-side} :is(.studio-prompt-preset-buttons, .studio-chip-grid) > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: $img-control-height !important;
+  min-height: $img-control-height !important;
+  padding: 0 8px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}
+
+#{$img-side} .image-creative-group .studio-chip-grid > button {
+  justify-content: center !important;
+}
+
+#{$img-side} :is(.studio-prompt-preset-buttons, .studio-chip-grid) > button span:not(.button-icon) {
+  display: inline !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+// Aspect ratio: one row of five.
+#{$img-side} .image-creative-group .studio-segmented-control {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+}
+
+#{$img-side} .image-creative-group .studio-segmented-control > button {
+  min-width: 0 !important;
+  height: $img-control-height !important;
+  min-height: $img-control-height !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+}
+
+// ---------------------------------------------------------------- settings fields
+
+// Seed / Seed after run / Steps / CFG / Images: label-over-input pairs, two per row.
+#{$img-side} .image-creative-grid > .image-control-card:not(.image-resolution-custom-grid *) {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-flow: dense !important;
+  column-gap: 8px !important;
+  row-gap: 4px !important;
+}
+
+#{$img-side} .image-creative-grid > .image-control-card > label {
+  grid-column: span 1 !important;
+  margin: 6px 0 0 !important;
+}
+
+#{$img-side} .image-creative-grid > .image-control-card > :is(input, select) {
+  grid-column: span 1 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+}
+
+// Label row then input row, pairwise: [label1 label2] / [input1 input2].
+#{$img-side} .image-creative-grid > .image-control-card > label[for="image-editor-seed"] { grid-area: 1 / 1; }
+#{$img-side} .image-creative-grid > .image-control-card > #image-editor-seed { grid-area: 2 / 1; }
+#{$img-side} .image-creative-grid > .image-control-card > label[for="image-editor-seed-control"] { grid-area: 1 / 2; }
+#{$img-side} .image-creative-grid > .image-control-card > #image-editor-seed-control { grid-area: 2 / 2; }
+#{$img-side} .image-creative-grid > .image-control-card > label[for="image-editor-steps"] { grid-area: 3 / 1; }
+#{$img-side} .image-creative-grid > .image-control-card > #image-editor-steps { grid-area: 4 / 1; }
+#{$img-side} .image-creative-grid > .image-control-card > label[for="image-editor-cfg"] { grid-area: 3 / 2; }
+#{$img-side} .image-creative-grid > .image-control-card > #image-editor-cfg { grid-area: 4 / 2; }
+#{$img-side} .image-creative-grid > .image-control-card > label[for="image-generate-count"] { grid-area: 5 / 1; }
+#{$img-side} .image-creative-grid > .image-control-card > #image-generate-count { grid-area: 6 / 1; }
+
+// ---------------------------------------------------------------- primary action
+
+// Generate / Apply Edit stays reachable while scrolling through presets and settings.
+#{$img-side} .image-studio-prompt-action-row {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 5 !important;
+  margin: 4px -18px 0 !important;
+  padding: 10px 18px 12px !important;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--panel, #1a1a1a) 94%, black 6%) 30%) !important;
+}
+
+#{$img-side} #generate-image-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: $img-primary-height !important;
+  min-height: $img-primary-height !important;
+  border-radius: var(--dashboard-control-radius, 6px) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+// ---------------------------------------------------------------- edit panel
+
+// With no source the preview card only repeated the list's "no sources" message.
+#{$img-side} #image-studio-panel-edit .image-edit-source-preview-card:has(#image-edit-source-preview-empty:not(.hidden)) {
+  display: none !important;
+}
+
+#{$img-side} #image-studio-panel-edit .image-edit-source-dropzone {
+  border: 1px dashed color-mix(in srgb, var(--studio-accent-1, var(--accent)) 45%, transparent) !important;
+  border-radius: var(--dashboard-card-radius, 10px) !important;
+  padding: 14px 10px !important;
+  text-align: center !important;
+  cursor: pointer;
+}
+
+// Selects in the two-column settings grid: smaller text so "Randomize" fits.
+#{$img-side} .image-creative-grid > .image-control-card > select {
+  padding-left: 8px !important;
+  padding-right: 20px !important;
+  font-size: 12px !important;
+}
+
+#{$img-side} #image-studio-panel-edit .image-edit-source-import-panel > .row,
+#{$img-side} #image-studio-panel-edit .image-edit-source-grid .row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px !important;
+}
+
+#{$img-side} #image-studio-panel-edit .image-edit-source-grid .row:has(> button:only-child) {
+  grid-template-columns: 1fr !important;
+}
+
+#{$img-side} #image-studio-panel-edit :is(.image-edit-source-import-panel, .image-edit-source-grid) button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 8px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}

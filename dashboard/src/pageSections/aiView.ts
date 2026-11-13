@@ -2428,27 +2428,23 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   </div>
                 </div>
                 <div class="image-studio-left-sidebar">
+                <div class="workspace-tabs-new studio-primary-tabs image-sidebar-tabs" role="tablist" aria-label="Image Studio actions">
+                  <button class="dashboard-tab active" data-image-action-tab="generate" type="button" role="tab" aria-selected="true">${renderButtonIcon("sparkle")}<span>Generate</span></button>
+                  <button class="dashboard-tab" data-image-action-tab="edit" type="button" role="tab" aria-selected="false">${renderButtonIcon("wand")}<span>Edit</span></button>
+                </div>
                 <div class="field studio-step-card image-prompt-card studio-component-form-section">
-                  <div class="workspace-tabs-new studio-primary-tabs" role="tablist" aria-label="Image Studio actions">
-                    <button class="dashboard-tab active" data-image-action-tab="generate" type="button" role="tab" aria-selected="true">${renderButtonIcon("sparkle")}<span>Generate</span></button>
-                    <button class="dashboard-tab" data-image-action-tab="edit" type="button" role="tab" aria-selected="false">${renderButtonIcon("settings")}<span>Edit</span></button>
-                  </div>
-                  <div class="image-prompt-panel-head">
-                    <strong>Prompt</strong>
-                    <button class="secondary mini-button" type="button" title="Collapse prompt" aria-label="Collapse prompt">${renderButtonIcon("expand")}</button>
-                  </div>
                   <div class="image-prompt-interpret-panel image-control-section studio-control-section">
                     <div class="image-prompt-interpret-head">
                       <div>
-                        <strong>Source Image Prompt Builder</strong>
-                        <div class="hint">Add one or more images, then let the vision model create separate prompts by default or one combined prompt.</div>
+                        <strong>Prompt from an image</strong>
+                        <div class="hint">Let the vision model describe one or more images as prompts.</div>
                       </div>
                       <input id="image-interpret-source-file" type="file" accept="image/*" multiple hidden>
                       <div class="row compact-row image-prompt-interpret-actions">
-                        <button class="secondary mini-button" id="image-interpret-source-browse-button" type="button">${renderButtonIcon("upload")}<span>Upload Image</span></button>
-                        <button class="secondary mini-button" id="image-interpret-source-paste-button" type="button">${renderButtonIcon("copy")}<span>Paste Image</span></button>
-                        <button class="secondary mini-button" id="image-interpret-source-webcam-button" type="button">${renderButtonIcon("camera")}<span>From Webcam</span></button>
-                        <button class="secondary mini-button hidden" id="image-interpret-source-aspect-button" type="button" hidden>${renderButtonIcon("image")}<span>Use Same Aspect Ratio</span></button>
+                        <button class="secondary mini-button" id="image-interpret-source-browse-button" type="button">${renderButtonIcon("upload")}<span>Upload</span></button>
+                        <button class="secondary mini-button" id="image-interpret-source-paste-button" type="button" title="Paste an image from the clipboard">${renderButtonIcon("copy")}<span>Paste</span></button>
+                        <button class="secondary mini-button" id="image-interpret-source-webcam-button" type="button" title="Take a photo with the webcam">${renderButtonIcon("camera")}<span>Webcam</span></button>
+                        <button class="secondary mini-button hidden" id="image-interpret-source-aspect-button" type="button" hidden>${renderButtonIcon("image")}<span>Use its aspect ratio</span></button>
                         <button class="secondary mini-button hidden" id="image-interpret-source-clear-button" type="button" hidden>${renderButtonIcon("close")}<span>Clear</span></button>
                         <div class="studio-tabs image-interpret-detail-tabs" role="tablist" aria-label="Prompt interpretation detail">
                           <button data-image-interpret-detail="vague" type="button">Vague</button>
@@ -2456,25 +2452,25 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <button data-image-interpret-detail="precise" type="button">Precise</button>
                         </div>
                         <label class="image-prompt-interpret-mode" for="image-interpret-source-mode">
-                          <span>Multiple images</span>
+                          <span>With several images</span>
                           <select id="image-interpret-source-mode">
-                            <option value="separate" selected>Separate prompts (default)</option>
-                            <option value="combine">Combine into one prompt</option>
+                            <option value="separate" selected>One prompt per image</option>
+                            <option value="combine">One combined prompt</option>
                           </select>
                         </label>
                         <label class="image-prompt-interpret-direction">
-                          <span>Direction keywords or phrases</span>
+                          <span>Steer it (optional)</span>
                           <input id="image-interpret-direction-input" type="text" autocomplete="off" placeholder="logo, app icon, sticker, product render">
                         </label>
                         <label class="toggle compact-toggle image-identify-objects-toggle">
-                          <span>Identify objects and queue images</span>
+                          <span>Find objects, one image each</span>
                           <input id="image-identify-objects-toggle" type="checkbox">
                         </label>
                         <label class="image-identify-max-amount hidden" id="image-identify-max-amount-field" for="image-identify-max-amount" hidden>
                           <span>Maximum objects</span>
                           <input id="image-identify-max-amount" type="number" min="1" max="20" step="1" value="5">
                         </label>
-                        <button class="secondary mini-button image-prompt-interpret-submit" id="image-interpret-with-llm-button" type="button" disabled>${renderButtonIcon("sparkle")}<span>Interpret Image With LLM</span></button>
+                        <button class="secondary mini-button image-prompt-interpret-submit" id="image-interpret-with-llm-button" type="button" disabled>${renderButtonIcon("sparkle")}<span>Write Prompt From Image</span></button>
                       </div>
                     </div>
                     <div class="image-prompt-interpret-preview" id="image-prompt-interpret-preview" tabindex="0">
@@ -2490,12 +2486,12 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                       <div class="image-sidebar-section-title studio-sidebar-section-title"><strong>Prompts</strong></div>
                       <div class="image-object-prompt-editor" id="image-object-prompt-editor">
                         <div class="image-object-prompt-editor-head">
-                          <strong>Separate Image Prompts</strong>
+                          <strong>Prompt list</strong>
                           <small id="image-object-prompt-count">0 prompts</small>
                         </div>
                         <div class="image-object-prompt-actions">
-                          <button class="secondary mini-button" id="image-object-prompt-add-button" type="button">${renderButtonIcon("plus")}<span>Add Prompt</span></button>
-                          <button class="secondary mini-button danger" id="image-object-prompt-delete-button" type="button" disabled>${renderButtonIcon("trash")}<span>Delete Selected</span></button>
+                          <button class="secondary mini-button" id="image-object-prompt-add-button" type="button">${renderButtonIcon("plus")}<span>Add</span></button>
+                          <button class="secondary mini-button danger" id="image-object-prompt-delete-button" type="button" disabled title="Delete the selected prompt">${renderButtonIcon("trash")}<span>Delete</span></button>
                         </div>
                         <div class="studio-tabs image-object-prompt-tabs" id="image-object-prompt-tabs" role="tablist" aria-label="Separate image prompts"></div>
                       </div>
@@ -2513,18 +2509,18 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <input id="image-prompt-processing-batch-size" type="number" min="1" max="20" step="1" value="3">
                         </label>
                       </div>
-                      <label for="imagegen-prompt">Image Prompt</label>
-                      <textarea id="imagegen-prompt" placeholder="Describe the image you want. Leave empty and enable auto prompt if you want the bot to decide."></textarea>
+                      <label for="imagegen-prompt">Prompt</label>
+                      <textarea id="imagegen-prompt" rows="5" placeholder="Describe the image you want."></textarea>
                       <div class="image-prompt-action-row">
-                        <button class="secondary mini-button" id="image-improve-prompt-button" type="button">${renderButtonIcon("sparkle")}<span>Improve Prompt</span></button>
-                        <button class="secondary mini-button" id="image-change-prompt-button" type="button">${renderButtonIcon("wand")}<span>Change Prompt</span></button>
-                        <button class="secondary mini-button" id="image-translate-prompt-button" type="button">${renderButtonIcon("refresh")}<span>Translate Prompt</span></button>
+                        <button class="secondary mini-button" id="image-improve-prompt-button" type="button" title="Let the LLM add detail to the prompt">${renderButtonIcon("sparkle")}<span>Improve</span></button>
+                        <button class="secondary mini-button" id="image-change-prompt-button" type="button" title="Rewrite the prompt with an instruction">${renderButtonIcon("wand")}<span>Change</span></button>
+                        <button class="secondary mini-button" id="image-translate-prompt-button" type="button" title="Translate the prompt">${renderButtonIcon("refresh")}<span>Translate</span></button>
                       </div>
-                    <div class="hint">When auto prompt is enabled and this field is filled, the bot uses this as guidance for prompt generation.</div>
+                    <div class="hint">Empty prompt + "Let bot create its own prompt" (Generation Options) lets the bot decide; with text, it is used as guidance.</div>
                     <div class="field">
-                      <label for="imagegen-negative-prompt">Negative Prompt</label>
-                      <textarea id="imagegen-negative-prompt" placeholder="Optional: describe what the image should avoid."></textarea>
-                      <button class="secondary mini-button" id="image-generate-from-prompt-button" type="button">${renderButtonIcon("sparkle")}<span>Generate from Prompt</span></button>
+                      <label for="imagegen-negative-prompt">Avoid <span class="label-soft">(negative prompt, optional)</span></label>
+                      <textarea id="imagegen-negative-prompt" rows="2" placeholder="Blurry, text, watermark..."></textarea>
+                      <button class="secondary mini-button" id="image-generate-from-prompt-button" type="button" title="Generate from the prompt text only, ignoring the prompt list">${renderButtonIcon("sparkle")}<span>Generate From This Prompt Only</span></button>
                     </div>
                   </div>
                   <div class="image-creative-control-stack">
@@ -2546,7 +2542,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                             <div class="studio-prompt-preset-buttons">
                               <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Epic fantasy concept art, dramatic environment, volumetric light, painterly detail, rich colors." type="button">${renderButtonIcon("sparkle")}<span>Fantasy</span></button>
                               <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Stylized anime key visual, dynamic composition, expressive lighting, clean linework." type="button">${renderButtonIcon("wand")}<span>Anime</span></button>
-                              <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Retro poster illustration, bold shapes, limited palette, textured print finish." type="button">${renderButtonIcon("file")}<span>Retro Poster</span></button>
+                              <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Retro poster illustration, bold shapes, limited palette, textured print finish." type="button">${renderButtonIcon("file")}<span>Retro</span></button>
                             </div>
                           </div>
                           <div class="studio-prompt-preset-category">
@@ -2559,7 +2555,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <div class="studio-prompt-preset-category">
                             <div class="studio-prompt-preset-label">3D Ready</div>
                             <div class="studio-prompt-preset-buttons">
-                              <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Front facing character concept on neutral background, centered, full body, clear silhouette, no text." type="button">${renderButtonIcon("cube")}<span>Character Front</span></button>
+                              <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Front facing character concept on neutral background, centered, full body, clear silhouette, no text." type="button">${renderButtonIcon("cube")}<span>Character</span></button>
                               <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Hard surface prop render, neutral gray background, isolated object, high texture clarity, no text." type="button">${renderButtonIcon("box")}<span>Prop</span></button>
                               <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="imagegen-prompt" data-prompt-preset-value="Creature concept turnaround style, clean neutral background, high detail, texture readable from distance." type="button">${renderButtonIcon("sparkle")}<span>Creature</span></button>
                             </div>
@@ -2591,7 +2587,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                     <div class="image-creative-grid">
                       <div class="field image-control-section studio-control-section image-control-card studio-control-card">
                         <label for="image-editor-seed">Seed</label><input id="image-editor-seed" type="number" min="0" step="1" placeholder="Random">
-                        <label for="image-editor-seed-control">Control After Generate</label><select id="image-editor-seed-control"><option value="fixed">Fixed</option><option value="increase">Increase</option><option value="decrease">Decrease</option><option value="randomize" selected>Randomize</option></select>
+                        <label for="image-editor-seed-control">Seed after run</label><select id="image-editor-seed-control"><option value="fixed">Fixed</option><option value="increase">Increase</option><option value="decrease">Decrease</option><option value="randomize" selected>Randomize</option></select>
                         <label for="image-editor-steps">Steps</label><input id="image-editor-steps" type="number" min="1" max="250" step="1" value="20">
                         <label for="image-editor-cfg">CFG</label><input id="image-editor-cfg" type="number" min="0" max="30" value="4" step="0.1">
                         <label for="image-generate-count">Images</label><input id="image-generate-count" type="number" min="1" max="8" step="1" value="1">
@@ -2726,9 +2722,8 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                 <div class="image-studio-panel" id="image-studio-panel-edit">
                   <div class="image-edit-source-layout">
                     <div class="field image-studio-edit-hint-panel">
-                      <label>Edit Mode</label>
-                      <div class="hint">Choose a source image from disk, URL, clipboard, or image pool, then describe what should change and click <strong>Apply Edit</strong>.</div>
-                      <div class="hint">The configured <code>Image Edit Workflow Path</code> will be used when a source image is attached.</div>
+                      <label>Edit an image</label>
+                      <div class="hint">Add a source image, describe the change in the prompt below, then <strong>Apply Edit</strong>.</div>
                       <div class="toggle compact-toggle">
                         <span>Apply edit to all loaded sources</span>
                         <input id="image-edit-batch-enabled" type="checkbox">
@@ -2737,40 +2732,39 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                         <button class="secondary mini-button" id="image-edit-select-all-button" type="button">Select All</button>
                         <button class="secondary mini-button" id="image-edit-deselect-all-button" type="button">Deselect All</button>
                       </div>
-                      <div class="hint">When enabled, Studio runs one image edit request per selected source image in the current order.</div>
                     </div>
                     <div class="image-edit-source-main-grid">
                       <div class="field image-edit-source-import-panel">
-                        <label>1. Add Source Images</label>
+                        <label>Source images</label>
                         <input id="image-edit-source-file" type="file" accept="image/*" multiple hidden>
                         <div class="media-dropzone image-edit-source-dropzone" id="image-edit-source-dropzone" tabindex="0">
-                          <div class="media-dropzone-title">Drop, paste, or browse one or more images</div>
-                          <div class="media-dropzone-subtitle">GIFs and still images are both supported. The active source becomes the main preview.</div>
+                          <div class="media-dropzone-title">Drop, paste or click to add images</div>
+                          <div class="media-dropzone-subtitle">Still images and GIFs</div>
                         </div>
                         <div class="row">
-                          <button class="secondary" id="image-edit-source-browse-button">${renderButtonIcon("upload")}<span>Upload Images</span></button>
-                          <button class="secondary" id="image-edit-source-clear-button">${renderButtonIcon("trash")}<span>Clear Sources</span></button>
+                          <button class="secondary" id="image-edit-source-browse-button">${renderButtonIcon("upload")}<span>Upload</span></button>
+                          <button class="secondary" id="image-edit-source-clear-button">${renderButtonIcon("trash")}<span>Clear</span></button>
                         </div>
                         <div class="image-edit-source-grid">
                           <div class="field">
-                            <label for="image-edit-source-url">Source URL Or Local Path</label>
+                            <label for="image-edit-source-url">From URL or file path</label>
                             <input id="image-edit-source-url" placeholder="https://example.com/source.png or C:\\images\\source.png">
                             <div class="row">
-                              <button class="secondary" id="image-edit-source-url-apply-button">${renderButtonIcon("sparkle")}<span>Use URL / Path</span></button>
+                              <button class="secondary" id="image-edit-source-url-apply-button">${renderButtonIcon("plus")}<span>Add</span></button>
                             </div>
                           </div>
                           <div class="field">
-                            <label for="image-edit-source-pool-select">Source From Image Pool</label>
+                            <label for="image-edit-source-pool-select">From an image pool</label>
                             <select id="image-edit-source-pool-select"></select>
                             <select id="image-edit-source-pool-image-select"></select>
                             <div class="row">
-                              <button class="secondary" id="image-edit-source-pool-load-button">${renderButtonIcon("image")}<span>Use Pool Image</span></button>
+                              <button class="secondary" id="image-edit-source-pool-load-button">${renderButtonIcon("plus")}<span>Add</span></button>
                             </div>
                           </div>
                         </div>
                       </div>
                       <div class="field image-edit-source-preview-field">
-                        <label>2. Pick Active Source</label>
+                        <label>Active source</label>
                         <div class="image-edit-source-preview-card" id="image-edit-source-preview-card">
                           <div class="image-edit-source-preview-empty studio-component-empty-state" id="image-edit-source-preview-empty">No source image selected.</div>
                           <div class="image-edit-source-preview-meta">
