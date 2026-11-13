@@ -3291,8 +3291,8 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                 </div>
                 <div class="field video-prompt-field-card studio-component-form-section">
                   <div class="workspace-tabs-new studio-primary-tabs" role="tablist" aria-label="Video workflow mode">
-                    <button class="dashboard-tab active" data-video-workflow-mode="text" type="button" role="tab" aria-selected="true">${renderButtonIcon("file")}<span>Text To Video</span></button>
-                    <button class="dashboard-tab" data-video-workflow-mode="image-text" type="button" role="tab" aria-selected="false">${renderButtonIcon("image")}<span>Image + Text To Video</span></button>
+                    <button class="dashboard-tab active" data-video-workflow-mode="text" type="button" role="tab" aria-selected="true">${renderButtonIcon("file")}<span>Text</span></button>
+                    <button class="dashboard-tab" data-video-workflow-mode="image-text" type="button" role="tab" aria-selected="false">${renderButtonIcon("image")}<span>Image + Text</span></button>
                   </div>
 
                   <!-- Start Image Source -->
@@ -3315,12 +3315,13 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   </div>
                   <div class="video-prompt-textarea-wrapper">
                     <textarea id="videogen-prompt" placeholder="Describe the video you want." maxlength="1000"></textarea>
-                    <button class="secondary mini-button video-ai-sparkle-btn" id="videogen-create-ai-prompt-button" type="button">${renderButtonIcon("sparkle")}</button>
+                    <button class="secondary mini-button video-ai-sparkle-btn" id="videogen-create-ai-prompt-button" type="button" title="Write a prompt with the LLM" aria-label="Write a prompt with the LLM">${renderButtonIcon("sparkle")}</button>
                   </div>
 
                   <!-- Text Source Select -->
-                  <select id="videogen-prompt-text-file" data-text-source-select="single" data-text-source-empty-label="No prompt text source selected"></select>
-                  <div class="hint">Optional. One random line is merged with the prompt for each video generation.</div>
+                  <label class="video-section-label" for="videogen-prompt-text-file">Prompt lines <span class="label-soft">(optional)</span></label>
+                  <select id="videogen-prompt-text-file" data-text-source-select="single" data-text-source-empty-label="No text source"></select>
+                  <div class="hint">One random line is added to the prompt for each video.</div>
 
                   <!-- Avoid Repeats Toggle -->
                   <div class="toggle compact-toggle">
@@ -3329,18 +3330,18 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   </div>
 
                   <!-- Motion Controls Grid -->
-                  <div class="video-section-label">Motion Controls</div>
+                  <div class="video-section-label">Camera motion</div>
                   <div class="video-motion-grid">
-                    <button class="video-motion-item" data-video-motion="orbit" type="button">${renderButtonIcon("expand")}<span>Orbit</span></button>
-                    <button class="video-motion-item" data-video-motion="zoom-in" type="button">${renderButtonIcon("expand")}<span>Zoom In</span></button>
-                    <button class="video-motion-item" data-video-motion="pan-left" type="button">${renderButtonIcon("expand")}<span>Pan Left</span></button>
-                    <button class="video-motion-item" data-video-motion="pan-right" type="button">${renderButtonIcon("expand")}<span>Pan Right</span></button>
-                    <button class="video-motion-item" data-video-motion="tilt-up" type="button">${renderButtonIcon("expand")}<span>Tilt Up</span></button>
-                    <button class="video-motion-item" data-video-motion="tilt-down" type="button">${renderButtonIcon("expand")}<span>Tilt Down</span></button>
+                    <button class="video-motion-item" data-video-motion="orbit" type="button">${renderButtonIcon("rotate")}<span>Orbit</span></button>
+                    <button class="video-motion-item" data-video-motion="zoom-in" type="button">${renderButtonIcon("zoomIn")}<span>Zoom In</span></button>
+                    <button class="video-motion-item" data-video-motion="pan-left" type="button">${renderButtonIcon("arrowLeft")}<span>Pan Left</span></button>
+                    <button class="video-motion-item" data-video-motion="pan-right" type="button">${renderButtonIcon("arrowRight")}<span>Pan Right</span></button>
+                    <button class="video-motion-item" data-video-motion="tilt-up" type="button">${renderButtonIcon("arrowUp")}<span>Tilt Up</span></button>
+                    <button class="video-motion-item" data-video-motion="tilt-down" type="button">${renderButtonIcon("arrowDown")}<span>Tilt Down</span></button>
                   </div>
 
                   <!-- Video Presets Cards -->
-                  <div class="video-section-label">Video Presets</div>
+                  <div class="video-section-label">Style</div>
                   <div class="video-preset-cards">
                     <button class="video-preset-card active" data-video-preset="cinematic" type="button">Cinematic</button>
                     <button class="video-preset-card" data-video-preset="animation" type="button">Animation</button>
@@ -3349,30 +3350,31 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                   </div>
 
                   <!-- Prompt Presets Strip -->
+                  <div class="video-section-label">Shot presets</div>
                   <div class="studio-field-preset-strip video-preset-strips">
-                    <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A cinematic orbital camera shot around the subject, camera quickly circling the subject while the subject remains stationary, stable geometry, consistent lighting, smooth turntable motion, clean background, high consistency." type="button">${renderButtonIcon("video")}<span>Rotate Camera Around</span></button>
+                    <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A cinematic orbital camera shot around the subject, camera quickly circling the subject while the subject remains stationary, stable geometry, consistent lighting, smooth turntable motion, clean background, high consistency." type="button">${renderButtonIcon("video")}<span>Orbit Camera</span></button>
                     <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="The subject performs a fast in-place 360 degree rotation, physically turning its body around its vertical axis, consistent proportions, stable anatomy, rigid object motion, no deformation, clean turntable spin, even lighting, fixed camera." type="button">${renderButtonIcon("video")}<span>Turn 360°</span></button>
                     <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A slow cinematic push-in toward the subject with perfectly smooth stabilized camera motion, subtle parallax, consistent framing, stable geometry, and natural cinematic depth." type="button">${renderButtonIcon("sparkle")}<span>Push In</span></button>
                     <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A clean cinematic hero turntable shot, camera smoothly orbiting around the character with even pacing, locked framing, studio-style stabilization, consistent lighting, and stable character details." type="button">${renderButtonIcon("box")}<span>Turntable</span></button>
                     <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="The character remains mostly still with subtle idle breathing, gentle cloth and hair motion, tiny natural body sway, stable anatomy, and a calm locked cinematic camera." type="button">${renderButtonIcon("image")}<span>Idle Motion</span></button>
                     <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="The character performs a clean in-place walk cycle with readable leg motion, balanced timing, natural arm swing, stable anatomy, and a smooth locked side-view cinematic camera." type="button">${renderButtonIcon("expand")}<span>Walk Cycle</span></button>
                     <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="The shot begins wider and slowly reveals the character with a smooth cinematic arc camera move, gentle parallax, stable composition, consistent lighting, and polished cinematic motion." type="button">${renderButtonIcon("wand")}<span>Reveal Arc</span></button>
-                    <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset.button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A dynamic action shot with fast camera movement, dramatic angles, motion blur, and a sense of speed and energy." type="button">${renderButtonIcon("sparkle")}<span>Action Shot</span></button>
-                    <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset.button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A cinematic treasure chest slowly creaks open like a heavy ancient door, revealing an intense glowing light and mysterious artifacts inside. Brilliant golden rays burst outward through the cracks, illuminating the surrounding scene with dramatic volumetric lighting, floating dust particles, soft smoke, and high-contrast shadows. The camera stays in place, creating an epic magical reveal with realistic reflections and atmospheric effects." type="button">${renderButtonIcon("box")}<span>Chest Open</span></button>
+                    <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A dynamic action shot with fast camera movement, dramatic angles, motion blur, and a sense of speed and energy." type="button">${renderButtonIcon("sparkle")}<span>Action Shot</span></button>
+                    <button class="secondary mini-button studio-prompt-preset-button" data-prompt-preset-button="true" data-prompt-preset-target="videogen-prompt" data-prompt-preset-value="A cinematic treasure chest slowly creaks open like a heavy ancient door, revealing an intense glowing light and mysterious artifacts inside. Brilliant golden rays burst outward through the cracks, illuminating the surrounding scene with dramatic volumetric lighting, floating dust particles, soft smoke, and high-contrast shadows. The camera stays in place, creating an epic magical reveal with realistic reflections and atmospheric effects." type="button">${renderButtonIcon("box")}<span>Chest Open</span></button>
                   </div>
 
                   <!-- AI Prompt Toggle -->
                   <div class="studio-toggle-grid video-ai-prompt-toggle">
                     <div class="toggle compact-toggle">
-                      <span>Let LazyDev create its own video prompt</span>
+                      <span>Let LazyDev write the prompt</span>
                       <input id="videogen-auto-prompt" type="checkbox">
                     </div>
-                    <input id="videogen-auto-prompt-direction" placeholder="Optional direction for LazyDev's video prompt">
+                    <input id="videogen-auto-prompt-direction" placeholder="Direction for LazyDev (optional)">
                   </div>
 
                   <!-- Collapsible Advanced Settings -->
                   <details class="video-advanced-settings studio-component-advanced-settings">
-                        <summary class="video-advanced-summary">${renderButtonIcon("settings")}<span>Advanced Settings</span></summary>
+                        <summary class="video-advanced-summary">${renderButtonIcon("settings")}<span>Size, length &amp; quality</span></summary>
                         <div class="video-advanced-content">
                           <!-- Aspect Ratio Segmented Control -->
                           <div class="video-setting-row">
@@ -3428,20 +3430,20 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <div class="video-setting-row"><label for="videogen-frames">Frames</label><input id="videogen-frames" type="number" min="1" max="512" step="1" placeholder="150"></div>
                           <div class="video-setting-row"><label for="video-editor-steps">Steps</label><input id="video-editor-steps" type="number" min="1" max="250" step="1" value="25"></div>
                           <div class="video-setting-row"><label for="video-editor-seed">Seed</label><input id="video-editor-seed" type="number" min="0" step="1" placeholder="Random"></div>
-                          <div class="video-setting-row"><label for="video-editor-seed-control">Control After Generate</label><select id="video-editor-seed-control"><option value="fixed">Fixed</option><option value="increase">Increase</option><option value="decrease">Decrease</option><option value="randomize" selected>Randomize</option></select></div>
+                          <div class="video-setting-row"><label for="video-editor-seed-control">Seed after run</label><select id="video-editor-seed-control"><option value="fixed">Fixed</option><option value="increase">Increase</option><option value="decrease">Decrease</option><option value="randomize" selected>Randomize</option></select></div>
                           <div class="video-setting-row"><label for="video-generate-count">Videos</label><input id="video-generate-count" type="number" min="1" max="8" step="1" value="1"></div>
                         </div>
                       </details>
 
                   <!-- Generate Button -->
                   <div class="studio-component-toolbar">
-                    <button id="generate-video-button">Generate Video</button>
+                    <button class="primary" id="generate-video-button">${renderButtonIcon("sparkle")}<span>Generate Video</span></button>
                     <button class="secondary hidden" id="stop-video-generation-button" type="button" hidden>Stop</button>
                   </div>
                 </div>
                 <div class="field video-negative-field-card">
-                  <label for="videogen-negative-prompt">Negative Prompt</label>
-                  <textarea id="videogen-negative-prompt" placeholder="Optional: describe what to avoid."></textarea>
+                  <label for="videogen-negative-prompt">Avoid <span class="label-soft">(negative prompt, optional)</span></label>
+                  <textarea id="videogen-negative-prompt" rows="2" placeholder="Blurry, flicker, text..."></textarea>
                 </div>
                 <div class="studio-step-card studio-preset-card">
                   <label>Video Presets</label>

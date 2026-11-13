@@ -1,0 +1,188 @@
+// Video Studio: left sidebar, preview tool rows and bottom dock.
+//
+// - Camera motion is a 3x2 grid of compact single-line buttons (they were tall
+//   blocks that wrapped "Pan Right" / "Tilt Down" onto two lines).
+// - Style presets are a 2x2 grid (four items left "Anime" alone on a row).
+// - Shot presets and settings use even grids; Generate stays pinned at the bottom.
+// - The bottom dock shows recent videos and the queue side by side, like Image;
+//   stacked, each got ~80px and the thumbnails were cut off.
+// - The tool quick-action row disappears when it has no tools.
+//
+// Older layers style these with `#video-studio-card ... !important`; the scope
+// repeats the form class to win without depending on load order.
+
+$vid-card: "body.view-ai-active #video-studio-card";
+$vid-form: "#{$vid-card} .video-prompt-field-card.video-prompt-field-card";
+$vid-control-height: 30px;
+$vid-primary-height: 40px;
+
+// ---------------------------------------------------------------- section labels
+
+#{$vid-form} .video-section-label {
+  display: block !important;
+  margin: 12px 0 6px !important;
+  color: var(--muted, var(--ink)) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+#{$vid-form} label .label-soft,
+#{$vid-card} .video-negative-field-card label .label-soft {
+  margin-left: 4px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+// ---------------------------------------------------------------- shared compact button
+
+#{$vid-form} :is(.video-motion-grid, .video-preset-cards, .video-preset-strips) > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: $vid-control-height !important;
+  min-height: $vid-control-height !important;
+  max-height: $vid-control-height !important;
+  margin: 0 !important;
+  padding: 0 8px !important;
+  border: 1px solid color-mix(in srgb, var(--line, #444) 85%, transparent) !important;
+  border-radius: var(--dashboard-control-radius, 6px) !important;
+  background: color-mix(in srgb, var(--panel, #1a1a1a) 80%, black 20%) !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+#{$vid-form} :is(.video-motion-grid, .video-preset-cards, .video-preset-strips) > button:is(:hover, :focus-visible),
+#{$vid-form} :is(.video-motion-grid, .video-preset-cards) > button.active {
+  border-color: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--studio-accent-1, var(--accent)) 16%, var(--panel, #1a1a1a)) !important;
+}
+
+#{$vid-form} :is(.video-motion-grid, .video-preset-cards, .video-preset-strips) > button span:not(.button-icon) {
+  display: inline !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#{$vid-form} :is(.video-motion-grid, .video-preset-strips) > button .button-icon {
+  flex: 0 0 auto !important;
+  font-size: 12px !important;
+  opacity: 0.85;
+}
+
+// ---------------------------------------------------------------- grids
+
+#{$vid-form} .video-motion-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+#{$vid-form} .video-preset-cards {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+#{$vid-form} .video-preset-strips {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  overflow: visible !important;
+}
+
+#{$vid-form} .video-preset-strips > button {
+  justify-content: flex-start !important;
+}
+
+// Size, length & quality: segmented controls as even rows, label above.
+#{$vid-form} .video-advanced-content .studio-segmented-control {
+  display: grid !important;
+  grid-auto-columns: minmax(0, 1fr) !important;
+  grid-auto-flow: column !important;
+  gap: 4px !important;
+}
+
+// Six aspect ratios do not fit one row ("Custom" was cut): 3 x 2.
+#{$vid-form} .video-advanced-content .studio-segmented-control:has([data-video-aspect-ratio]) {
+  grid-auto-flow: row !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+#{$vid-form} .video-advanced-content .studio-segmented-control > button {
+  min-width: 0 !important;
+  height: $vid-control-height !important;
+  min-height: $vid-control-height !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+}
+
+#{$vid-form} .video-advanced-content .video-setting-row:has(> :is(input, select)) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+#{$vid-form} .video-advanced-content .video-setting-row > :is(input, select) {
+  height: 32px !important;
+  min-height: 32px !important;
+  font-size: 12px !important;
+}
+
+// ---------------------------------------------------------------- primary action
+
+#{$vid-form} > .studio-component-toolbar {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 5 !important;
+  margin-top: 10px !important;
+  padding: 10px 0 12px !important;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--panel, #1a1a1a) 94%, black 6%) 30%) !important;
+}
+
+#{$vid-form} #generate-video-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: $vid-primary-height !important;
+  min-height: $vid-primary-height !important;
+  border-radius: var(--dashboard-control-radius, 6px) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+// ---------------------------------------------------------------- preview area
+
+// Empty or hidden tool row: no empty bordered box next to the quick actions.
+#{$vid-card} #video-tool-quick-actions:is(.hidden, [hidden], :empty) {
+  display: none !important;
+}
+
+// Recent videos | queue, side by side with full-height thumbnails.
+body.view-ai-active.studio-workflow-focused #video-studio-card .video-bottom-dock.video-bottom-dock {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 34%) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+}
+
+body.view-ai-active.studio-workflow-focused #video-studio-card .video-bottom-dock.video-bottom-dock > .video-dock-panel {
+  grid-row: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+}

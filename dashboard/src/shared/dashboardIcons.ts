@@ -1,5 +1,5 @@
 export type DashboardWorkflowIconKey = "chat" | "image" | "model3d" | "audio" | "music" | "video";
-export type ButtonIconKey = "plus" | "send" | "history" | "upload" | "trash" | "image" | "camera" | "box" | "sparkle" | "refresh" | "download" | "copy" | "expand" | "settings" | "tags" | "wand" | "folder" | "save" | "undo" | "file" | "cube" | "hand" | "video" | "audio" | "close" | "pin" | "float" | "collapseLeft" | "remesh" | "bake" | "split" | "rig" | "rotate" | "ruler" | "lowpoly" | "sun" | "relief" | "external" | "layers" | "crop" | "palette";
+export type ButtonIconKey = "plus" | "send" | "history" | "upload" | "trash" | "image" | "camera" | "box" | "sparkle" | "refresh" | "download" | "copy" | "expand" | "settings" | "tags" | "wand" | "folder" | "save" | "undo" | "file" | "cube" | "hand" | "video" | "audio" | "close" | "pin" | "float" | "collapseLeft" | "remesh" | "bake" | "split" | "rig" | "rotate" | "ruler" | "lowpoly" | "sun" | "relief" | "external" | "layers" | "crop" | "palette" | "zoomIn" | "arrowLeft" | "arrowRight" | "arrowUp" | "arrowDown";
 
 const workflowBootstrapIconNames: Record<DashboardWorkflowIconKey, string> = {
   chat: "chat-dots",
@@ -51,7 +51,12 @@ const buttonBootstrapIconNames: Record<ButtonIconKey, string> = {
   external: "box-arrow-up-right",
   layers: "layers",
   crop: "crop",
-  palette: "palette"
+  palette: "palette",
+  zoomIn: "zoom-in",
+  arrowLeft: "arrow-left",
+  arrowRight: "arrow-right",
+  arrowUp: "arrow-up",
+  arrowDown: "arrow-down"
 };
 
 const toolsBootstrapIconNames = {
