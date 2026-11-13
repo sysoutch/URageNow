@@ -1030,10 +1030,6 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                     <div class="hint" id="model3d-generate-workflow-hint">Single Image uses the standard 3D model workflow.</div>
                   </div>
                   <div class="model3d-studio-panel studio-component-form-section active" id="model3d-studio-panel-generate">
-                    <div class="model3d-generate-panel-head">
-                      <strong>Generate</strong>
-                      <button class="secondary mini-button" id="model3d-toggle-advanced-button" type="button" title="Toggle advanced options" aria-label="Toggle advanced options">${renderButtonIcon("expand")}</button>
-                    </div>
                     <div class="model3d-generation-grid model3d-generate-overview">
                       <div class="model3d-source-input-stack">
                         <div class="field studio-step-card model3d-source-card">
@@ -1049,32 +1045,34 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                               <img class="model3d-image-upload-preview hidden" id="model3d-image-upload-preview" alt="Selected 3D source image preview">
                               <span class="model3d-image-upload-content">
                                 ${renderButtonIcon("upload")}
-                                <span class="model3d-image-upload-title">Upload Source Image</span>
-                                <span class="model3d-image-upload-subtitle">PNG, JPG up to 10MB</span>
+                                <span class="model3d-image-upload-title">Upload source image</span>
+                                <span class="model3d-image-upload-subtitle">Click or drop &middot; PNG, JPG up to 10MB</span>
                               </span>
                             </button>
-                            <button class="secondary mini-button" id="model3d-image-paste-button" type="button">${renderButtonIcon("copy")}<span>Paste</span></button>
-                            <button class="secondary mini-button" id="model3d-image-webcam-button" type="button">${renderButtonIcon("camera")}<span>From Webcam</span></button>
-                            <button class="secondary mini-button" id="model3d-prepare-source-split-combine-button" type="button">${renderButtonIcon("wand")}<span>Split/Combine Source</span></button>
+                            <div class="model3d-source-actions" role="group" aria-label="Other image sources">
+                              <button class="secondary mini-button" id="model3d-image-paste-button" type="button" title="Paste an image from the clipboard">${renderButtonIcon("copy")}<span>Paste</span></button>
+                              <button class="secondary mini-button" id="model3d-image-webcam-button" type="button" title="Take a photo with the webcam">${renderButtonIcon("camera")}<span>Webcam</span></button>
+                              <button class="secondary mini-button" id="model3d-prepare-source-split-combine-button" type="button" title="Split one image into views, or combine several into one source">${renderButtonIcon("wand")}<span>Split / Combine</span></button>
+                            </div>
                             <div class="hint model3d-image-source-hint" id="model3d-image-source-hint">No source image selected yet.</div>
-                            <div class="hint model3d-source-help">Upload one or more source images. Batch mode generates one model at a time, in order.</div>
+                            <div class="hint model3d-source-help">Several images make a batch: one model each, in order.</div>
                             <div class="model3d-source-list hidden" id="model3d-source-upload-list"></div>
                           </div>
                           <div class="model3d-source-panel">
                             <label for="model3d-image-pool-select">Image Pool <span class="label-soft">(Optional)</span></label>
                             <select id="model3d-image-pool-select"></select>
-                            <div class="hint">When selected, pool images are included in manual 3D source picking.</div>
+                            <div class="hint">Adds the pool's images to the source picker.</div>
                             <div class="row model3d-pool-select-actions">
                               <button class="secondary mini-button hidden" id="model3d-pool-select-all-button" type="button" hidden><span>Select All</span></button>
                               <button class="secondary mini-button hidden" id="model3d-pool-clear-selection-button" type="button" hidden><span>Clear</span></button>
                             </div>
                             <div class="model3d-source-list model3d-pool-source-list" id="model3d-image-pool-list"></div>
                           </div>
-                          <div class="studio-component-toolbar">
-                            <button id="generate-model3d-button" disabled>${renderButtonIcon("sparkle")}<span>Generate 3D Model</span></button>
+                          <div class="studio-component-toolbar model3d-generate-actions">
+                            <button class="primary" id="generate-model3d-button" disabled>${renderButtonIcon("sparkle")}<span>Generate 3D Model</span></button>
                             <button class="secondary hidden" id="model3d-image-clear-button" type="button" hidden>${renderButtonIcon("close")}<span>Clear</span></button>
                             <button class="secondary hidden" id="stop-model3d-generation-button" type="button" hidden><span>Stop</span></button>
-                            <button class="secondary" id="model3d-advanced-settings-button" type="button">${renderButtonIcon("settings")}<span>Advanced Settings</span></button>
+                            <button class="secondary" id="model3d-advanced-settings-button" type="button" title="Generation and post-processing options">${renderButtonIcon("settings")}<span>Options</span></button>
                           </div>
                         </div>
                       </div>
@@ -1327,56 +1325,74 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                     </div>
                   </div>
                   <div class="model3d-studio-panel studio-component-form-section" id="model3d-studio-panel-edit">
-                    <div class="panel-subtitle model3d-texture-intro">Texture one 3D model with one source image using the Hunyuan 3D Paint workflow.</div>
-                    <div class="field studio-step-card model3d-edit-card">
-                      <label class="model3d-texture-flow-title"><span class="model3d-texture-step-number">1</span>${renderButtonIcon("cube")}<span>Select 3D model<small>Choose one mesh to texture.</small></span></label>
-                      <div class="studio-tabs studio-subtabs" aria-label="3D edit target">
-                        <button class="ghost active" data-model3d-edit-target="selected" type="button">${renderButtonIcon("cube")}<span>Selected Model</span></button>
-                        <button class="ghost" data-model3d-edit-target="upload" type="button">${renderButtonIcon("file")}<span>Upload Model</span></button>
+                    <section class="model3d-edit-section" aria-labelledby="model3d-edit-model-title">
+                      <header class="model3d-edit-section-head">
+                        <span class="model3d-edit-section-step">1</span>
+                        <div>
+                          <h3 id="model3d-edit-model-title">Model</h3>
+                          <p>The mesh that Texture and Size &amp; material act on.</p>
+                        </div>
+                      </header>
+                      <div class="studio-tabs studio-subtabs model3d-edit-target-switch" role="group" aria-label="3D edit target">
+                        <button class="ghost active" data-model3d-edit-target="selected" type="button">${renderButtonIcon("cube")}<span>Selected</span></button>
+                        <button class="ghost" data-model3d-edit-target="upload" type="button">${renderButtonIcon("upload")}<span>Upload</span></button>
                       </div>
                       <div class="field" id="model3d-edit-selected-target-field">
-                        <label for="model3d-edit-selected-model-name">Selected Generated Model</label>
-                        <input id="model3d-edit-selected-model-name" placeholder="No model selected from history." readonly>
-                        <div class="hint">Choose one mesh from Recent 3D Models or history.</div>
+                        <label for="model3d-edit-selected-model-name" class="visually-hidden">Selected model</label>
+                        <textarea class="model3d-edit-model-name" id="model3d-edit-selected-model-name" rows="2" placeholder="No model selected. Pick one from Recent Models." readonly></textarea>
                       </div>
                       <div class="field hidden" id="model3d-edit-upload-target-field">
-                        <label for="model3d-edit-upload-source-name">Uploaded Source Model File</label>
+                        <label for="model3d-edit-upload-source-name" class="visually-hidden">Uploaded model files</label>
                         <input id="model3d-edit-upload-source-name" placeholder="No file selected." readonly>
                         <input id="model3d-edit-upload-source-file" type="file" accept=".obj,.glb,.gltf,.stl,.3mf,.ply" multiple hidden>
-                        <div class="row">
-                          <button class="secondary" id="model3d-edit-upload-browse-button">${renderButtonIcon("file")}<span>Choose 3D Files</span></button>
-                          <button class="secondary" id="model3d-edit-upload-clear-button">${renderButtonIcon("trash")}<span>Clear Files</span></button>
+                        <div class="row model3d-edit-button-row">
+                          <button class="secondary" id="model3d-edit-upload-browse-button">${renderButtonIcon("file")}<span>Choose Files</span></button>
+                          <button class="secondary" id="model3d-edit-upload-clear-button">${renderButtonIcon("trash")}<span>Clear</span></button>
                         </div>
-                        <div class="hint">This is the alternative to Selected Model, not a second model input. Choose one OBJ, GLB, GLTF, STL, 3MF, or PLY mesh.</div>
+                        <div class="hint">OBJ, GLB, GLTF, STL, 3MF or PLY. Used instead of the selected model.</div>
                         <div class="toggle compact-toggle">
-                          <span>Apply edit to all uploaded files</span>
+                          <span>Apply to every uploaded file</span>
                           <input id="model3d-edit-batch-enabled" type="checkbox">
                         </div>
                         <div class="row compact-row model3d-edit-batch-controls hidden" id="model3d-edit-batch-controls">
                           <button class="secondary mini-button" id="model3d-edit-select-all-button" type="button">Select All</button>
                           <button class="secondary mini-button" id="model3d-edit-deselect-all-button" type="button">Deselect All</button>
                         </div>
-                        <div class="hint">When enabled, Studio applies the same finish and scale edit to each selected uploaded model in this list, one after another.</div>
                         <div class="model3d-source-list model3d-edit-upload-source-list" id="model3d-edit-upload-source-list"></div>
                       </div>
+                    </section>
+                    <section class="model3d-edit-section" aria-labelledby="model3d-edit-texture-title">
+                      <header class="model3d-edit-section-head">
+                        <span class="model3d-edit-section-step">2</span>
+                        <div>
+                          <h3 id="model3d-edit-texture-title">Texture</h3>
+                          <p>Paint the model from one image (Hunyuan 3D Paint).</p>
+                        </div>
+                      </header>
                       <div class="field model3d-texture-image-step">
-                        <label for="model3d-texture-source-image-file" class="model3d-texture-flow-title"><span class="model3d-texture-step-number">2</span>${renderButtonIcon("image")}<span>Source image<small>Add an image to paint onto your model.</small></span></label>
+                        <label for="model3d-texture-source-image-file" class="visually-hidden">Source image</label>
                         <input id="model3d-texture-source-image-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
                         <div class="model3d-texture-image-dropzone" id="model3d-texture-source-image-dropzone" tabindex="0" role="button" aria-label="Choose source image">
                           ${renderButtonIcon("image")}
-                          <strong>Drop an image here</strong>
-                          <span>or click to browse</span>
+                          <strong>Drop an image or click to browse</strong>
                           <small id="model3d-texture-source-image-name">PNG, JPG, or WebP</small>
                         </div>
                         <div class="row model3d-texture-image-actions">
                           <button class="secondary mini-button" id="model3d-texture-source-image-browse-button" type="button">Browse image</button>
-                          <button class="secondary mini-button" id="model3d-texture-source-image-clear-button" type="button">Clear</button>
+                          <button class="secondary mini-button" id="model3d-texture-source-image-clear-button" type="button">${renderButtonIcon("close")}<span>Remove image</span></button>
                         </div>
-                        <button class="primary model3d-texture-submit" id="texture-model3d-button" type="button">${renderButtonIcon("wand")}<span>Texture model</span></button>
+                        <button class="primary model3d-texture-submit" id="texture-model3d-button" type="button">${renderButtonIcon("wand")}<span>Texture Model</span></button>
                       </div>
-                      <details class="studio-details-panel studio-workflow-advanced">
-                        <summary><span class="studio-workflow-advanced-title">${renderButtonIcon("settings")}<span>Blender adjustments</span></span><small>Optional</small></summary>
-                        <div class="model3d-workflow-details-body">
+                    </section>
+                    <details class="model3d-edit-section model3d-edit-section-fold">
+                      <summary class="model3d-edit-section-head">
+                        <span class="model3d-edit-section-step">3</span>
+                        <div>
+                          <h3>Size &amp; material</h3>
+                          <p>Scale to a real height, metallic and roughness.</p>
+                        </div>
+                      </summary>
+                      <div class="model3d-workflow-details-body">
                         <div class="model3d-edit-grid">
                         <div class="field">
                           <label for="model3d-edit-dimension-mode">Dimension</label>
@@ -1407,36 +1423,36 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           </div>
                         </div>
                       </div>
-                        <div class="row">
-                          <button class="secondary" id="apply-model3d-edit-button" type="button">${renderButtonIcon("wand")}<span>Apply Model Edit</span></button>
+                        <button class="primary model3d-edit-apply" id="apply-model3d-edit-button" type="button">${renderButtonIcon("wand")}<span>Apply Size &amp; Material</span></button>
+                      </div>
+                    </details>
+                    <details class="model3d-edit-section model3d-edit-section-fold">
+                      <summary class="model3d-edit-section-head">
+                        <span class="model3d-edit-section-step">${renderButtonIcon("lowpoly")}</span>
+                        <div>
+                          <h3>Low poly from a file</h3>
+                          <p>Make a low-poly version of any 3D file, without generating.</p>
                         </div>
-                        </div>
-                      </details>
-                    </div>
-                    <details class="studio-details-panel studio-workflow-advanced model3d-secondary-workflow">
-                      <summary><span class="studio-workflow-advanced-title">${renderButtonIcon("box")}<span>Low-poly conversion</span></span><small>Optional</small></summary>
+                      </summary>
                       <div class="model3d-workflow-details-body">
                         <div class="field">
-                          <label for="model3d-lowpoly-upload-source-name">Low Poly Source Model File</label>
+                          <label for="model3d-lowpoly-upload-source-name">3D file</label>
                           <input id="model3d-lowpoly-upload-source-name" placeholder="No file selected." readonly>
                           <input id="model3d-lowpoly-upload-source-file" type="file" accept=".glb,.gltf,.fbx,.obj,.stl,.ply,.dae,.3ds,.blend,.usd,.usdz" hidden>
-                          <div class="row">
-                            <button class="secondary" id="model3d-lowpoly-upload-browse-button">${renderButtonIcon("file")}<span>Choose 3D File</span></button>
-                            <button class="secondary" id="model3d-lowpoly-upload-clear-button">${renderButtonIcon("trash")}<span>Clear File</span></button>
+                          <div class="row model3d-edit-button-row">
+                            <button class="secondary" id="model3d-lowpoly-upload-browse-button">${renderButtonIcon("file")}<span>Choose File</span></button>
+                            <button class="secondary" id="model3d-lowpoly-upload-clear-button">${renderButtonIcon("trash")}<span>Clear</span></button>
                           </div>
-                          <div class="hint">Create a low poly version from an uploaded source model without running full image-to-3D generation.</div>
                         </div>
                         <div class="toggle">
-                          <span>Let LLM choose low poly target faces</span>
+                          <span>Let the LLM choose the face count</span>
                           <input id="model3d-lowpoly-upload-use-llm" type="checkbox">
                         </div>
                         <div class="field">
-                          <label for="model3d-lowpoly-upload-target-faces">Uploaded File Target Faces</label>
+                          <label for="model3d-lowpoly-upload-target-faces">Target faces</label>
                           <input id="model3d-lowpoly-upload-target-faces" type="number" min="1" step="1" value="1500">
                         </div>
-                        <div class="row">
-                          <button class="secondary" id="generate-model3d-lowpoly-upload-button">${renderButtonIcon("box")}<span>Generate Low Poly From File</span></button>
-                        </div>
+                        <button class="primary model3d-edit-apply" id="generate-model3d-lowpoly-upload-button">${renderButtonIcon("lowpoly")}<span>Create Low Poly</span></button>
                       </div>
                     </details>
                   </div>
