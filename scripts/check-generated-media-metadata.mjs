@@ -22,8 +22,9 @@ const [
   readSource("dashboard/src/client/modules/dashboard/3d/viewerHelpers.js")
 ]);
 
-assert.match(aiView, /id="imagegen-auto-filename"[^>]*checked/);
-assert.match(aiView, /id="imagegen-auto-description"[^>]*checked/);
+// Image LLM metadata is opt-in so image generation works without a configured LLM.
+assert.match(aiView, /<input id="imagegen-auto-filename" type="checkbox">/);
+assert.match(aiView, /<input id="imagegen-auto-description" type="checkbox">/);
 assert.match(aiView, /id="model3d-llm-filename"[^>]*checked/);
 assert.match(aiView, /id="model3d-llm-description"[^>]*checked/);
 

@@ -2706,11 +2706,11 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                       </div>
                       <div class="toggle">
                         <span>Let bot create image filename with LLM</span>
-                        <input id="imagegen-auto-filename" type="checkbox" checked>
+                        <input id="imagegen-auto-filename" type="checkbox">
                       </div>
                       <div class="toggle">
                         <span>Let bot create image description with LLM</span>
-                        <input id="imagegen-auto-description" type="checkbox" checked>
+                        <input id="imagegen-auto-description" type="checkbox">
                       </div>
                       <div class="toggle">
                         <span>Remove metadata before storing images</span>
