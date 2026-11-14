@@ -180,54 +180,41 @@ def apply_topology_modifier(obj, levels, topology_mode):
     bpy.ops.object.modifier_apply(modifier=modifier.name)
 
 
-def get_vertex_surface_signature(vertex, uv_layer):
-    loop_signatures = {
-        (
-            loop.face.material_index,
-            round(loop[uv_layer].uv.x, 6),
-            round(loop[uv_layer].uv.y, 6),
-        )
-        for loop in vertex.link_loops
-    }
-    return tuple(sorted(loop_signatures))
+SELECTION_ATTRIBUTE = "urage_source_face_selected"
 
 
-def merge_duplicate_vertices_preserving_seams(bm, uv_layer, distance):
-    if distance <= 0:
-        return 0
-    groups = {}
-    for vertex in bm.verts:
-        signature = get_vertex_surface_signature(vertex, uv_layer)
-        groups.setdefault(signature, []).append(vertex)
-    before = len(bm.verts)
-    for vertices in groups.values():
-        valid_vertices = [vertex for vertex in vertices if vertex.is_valid]
-        if len(valid_vertices) > 1:
-            bmesh.ops.remove_doubles(bm, verts=valid_vertices, dist=distance)
-    bm.verts.ensure_lookup_table()
-    bm.edges.ensure_lookup_table()
-    bm.faces.ensure_lookup_table()
-    return before - len(bm.verts)
+def weld_object_vertices(obj, distance):
+    """Weld the whole mesh with Blender's built-in Merge by Distance.
 
-
-def merge_object_vertices_preserving_seams(obj, distance):
+    GLB imports split vertices along every UV seam. UVs live on face corners, so
+    welding those vertices keeps the UV layout intact; leaving them split lets
+    displacement push each side a different way and tear the surface open.
+    The stored face selection (used by "selected faces only") is kept.
+    """
     if distance <= 0:
         return 0
     mesh = obj.data
-    bm = bmesh.new()
-    bm.from_mesh(mesh)
-    bm.verts.ensure_lookup_table()
-    bm.edges.ensure_lookup_table()
-    bm.faces.ensure_lookup_table()
-    uv_layer = bm.loops.layers.uv.active
-    if not uv_layer:
-        bm.free()
+    if not mesh.uv_layers:
         raise RuntimeError(f'Mesh "{obj.name}" has no UV map.')
-    merged = merge_duplicate_vertices_preserving_seams(bm, uv_layer, distance)
-    bm.to_mesh(mesh)
-    bm.free()
+    selection = mesh.attributes.get(SELECTION_ATTRIBUTE) or mesh.attributes.new(SELECTION_ATTRIBUTE, "BOOLEAN", "FACE")
+    selection.data.foreach_set("value", [polygon.select for polygon in mesh.polygons])
+    before = len(mesh.vertices)
+    set_active_object(obj)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_mode(type="VERT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.remove_doubles(threshold=distance, use_unselected=False, use_sharp_edge_from_normals=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    mesh = obj.data
+    selection = mesh.attributes.get(SELECTION_ATTRIBUTE)
+    if selection:
+        values = [False] * len(mesh.polygons)
+        selection.data.foreach_get("value", values)
+        for polygon, selected in zip(mesh.polygons, values):
+            polygon.select = selected
+        mesh.attributes.remove(selection)
     mesh.update()
-    return merged
+    return before - len(mesh.vertices)
 
 
 def blur_vertex_heights(bm, heights, active_indices, iterations):
@@ -248,11 +235,10 @@ def generate_geometry(obj, strength, subdivisions, topology_mode, blur, auto_smo
     image = find_albedo_image(obj)
     if not image:
         return False
-    merged_before = merge_object_vertices_preserving_seams(obj, merge_distance) if merge_before_subdivide else 0
+    # Weld like Blender's Edit Mode "select all, Merge by Distance", before and
+    # after the displacement work.
+    merged_before = weld_object_vertices(obj, merge_distance) if merge_before_subdivide else 0
     apply_topology_modifier(obj, subdivisions, topology_mode)
-    merged_after = merge_object_vertices_preserving_seams(obj, merge_distance) if subdivisions > 0 and merge_after_subdivide else 0
-    if merged_before or merged_after:
-        print(f'Merged duplicate vertices on "{obj.name}": before={merged_before}, after={merged_after}.')
     mesh = obj.data
     bm = bmesh.new()
     bm.from_mesh(mesh)
@@ -304,9 +290,11 @@ def generate_geometry(obj, strength, subdivisions, topology_mode, blur, auto_smo
     bm.to_mesh(mesh)
     bm.free()
     mesh.update()
+    merged_after = weld_object_vertices(obj, merge_distance) if merge_after_subdivide else 0
+    print(f'Welded vertices on "{obj.name}": before={merged_before}, after={merged_after}.')
     if auto_smooth:
         set_active_object(obj)
-        for polygon in mesh.polygons:
+        for polygon in obj.data.polygons:
             polygon.use_smooth = True
     return True
 
@@ -326,7 +314,7 @@ def main():
     selected_faces_only = parse_bool(get_arg_value(args, "selected_faces_only", "false"), False)
     merge_before_subdivide = parse_bool(get_arg_value(args, "merge_before_subdivide", "true"), True)
     merge_after_subdivide = parse_bool(get_arg_value(args, "merge_after_subdivide", "true"), True)
-    merge_distance = parse_float(get_arg_value(args, "merge_distance", "0.000001"), 0.000001, 0.0, 0.1)
+    merge_distance = parse_float(get_arg_value(args, "merge_distance", "0.0001"), 0.0001, 0.0, 0.1)
     if not filepath:
         raise RuntimeError("--filepath is required.")
     if not output_path:

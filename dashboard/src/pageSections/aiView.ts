@@ -1812,7 +1812,7 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                             <div class="field"><label for="model3d-quick-action-albedo-topology-mode">Topology Modifier</label><select id="model3d-quick-action-albedo-topology-mode"><option value="subdivision">Subdivision Surface</option><option value="multiresolution">Multiresolution</option></select></div>
                             <div class="field"><label for="model3d-quick-action-albedo-subdivisions">Topology Subdivision Levels</label><input id="model3d-quick-action-albedo-subdivisions" type="number" min="0" max="8" step="1" value="0"></div>
                             <div class="field"><label for="model3d-quick-action-albedo-blur">Blur Radius</label><input id="model3d-quick-action-albedo-blur" type="number" min="0" max="10" step="1" value="1"></div>
-                            <div class="field"><label for="model3d-quick-action-albedo-merge-distance">Weld Distance</label><input id="model3d-quick-action-albedo-merge-distance" type="number" min="0" max="0.1" step="0.000001" value="0.000001"></div>
+                            <div class="field"><label for="model3d-quick-action-albedo-merge-distance">Weld Distance</label><input id="model3d-quick-action-albedo-merge-distance" type="number" min="0" max="0.1" step="0.000001" value="0.0001"></div>
                           </div>
                           <div class="model3d-face-budget" id="model3d-quick-action-albedo-face-budget" data-risk="loading">
                             <div class="model3d-face-budget-head"><strong>Face Count Estimate</strong><span id="model3d-quick-action-albedo-face-risk">Inspecting</span></div>
@@ -1828,8 +1828,8 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                           <div class="studio-toggle-grid">
                             <label class="toggle"><span>Smooth shading</span><input id="model3d-quick-action-albedo-auto-smooth" type="checkbox" checked></label>
                             <label class="toggle"><span>Selected faces only</span><input id="model3d-quick-action-albedo-selected-faces-only" type="checkbox"></label>
-                            <label class="toggle"><span>Weld before modifier</span><input id="model3d-quick-action-albedo-merge-before-subdivide" type="checkbox" checked></label>
-                            <label class="toggle"><span>Weld after modifier</span><input id="model3d-quick-action-albedo-merge-after-subdivide" type="checkbox" checked></label>
+                            <label class="toggle"><span>Weld before (select all, merge by distance)</span><input id="model3d-quick-action-albedo-merge-before-subdivide" type="checkbox" checked></label>
+                            <label class="toggle"><span>Weld after displacement</span><input id="model3d-quick-action-albedo-merge-after-subdivide" type="checkbox" checked></label>
                           </div>
                           <div class="hint">The mesh is optionally welded before the modifier and again after it is converted to real topology. Welding preserves UV and material seams.</div>
                         </div>

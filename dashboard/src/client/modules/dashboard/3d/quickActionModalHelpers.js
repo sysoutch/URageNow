@@ -178,7 +178,7 @@ function createDashboardThreeDQuickActionModalHelpers(input) {
     setInputValue("model3d-quick-action-albedo-topology-mode", "subdivision");
     setInputValue("model3d-quick-action-albedo-subdivisions", "0");
     setInputValue("model3d-quick-action-albedo-blur", "1");
-    setInputValue("model3d-quick-action-albedo-merge-distance", "0.000001");
+    setInputValue("model3d-quick-action-albedo-merge-distance", "0.0001");
     setCheckboxValue("model3d-quick-action-albedo-auto-smooth", true);
     setCheckboxValue("model3d-quick-action-albedo-selected-faces-only", false);
     setCheckboxValue("model3d-quick-action-albedo-merge-before-subdivide", true);

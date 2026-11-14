@@ -768,7 +768,7 @@ export async function runModelAlbedoToGeometryScript(input: ModelAlbedoToGeometr
   const subdivisions = typeof input.subdivisions === "number" && Number.isFinite(input.subdivisions) ? Math.max(0, Math.min(8, Math.round(input.subdivisions))) : 0;
   const topologyMode = input.topologyMode === "multiresolution" ? "multiresolution" : "subdivision";
   const blur = typeof input.blur === "number" && Number.isFinite(input.blur) ? Math.max(0, Math.min(10, Math.round(input.blur))) : 1;
-  const mergeDistance = typeof input.mergeDistance === "number" && Number.isFinite(input.mergeDistance) ? Math.max(0, Math.min(0.1, input.mergeDistance)) : 0.000001;
+  const mergeDistance = typeof input.mergeDistance === "number" && Number.isFinite(input.mergeDistance) ? Math.max(0, Math.min(0.1, input.mergeDistance)) : 0.0001;
   await stat(sourceModelPath);
   const args = [
     "--background",
