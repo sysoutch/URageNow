@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { appConfig } from "../config/appConfig.js";
 import type { ComfyRuntimeSettings } from "./comfyRuntimeSettings.js";
+import { resolveGeneratedImageApiSourceToFilePath } from "./internalGeneratedImageSource.js";
 import {
   getGeneratedModelPublicById,
   importGeneratedModelArtifact,
@@ -199,10 +200,16 @@ async function normalizeRemoteModelImageInput(imageInput: string): Promise<strin
   if (!trimmed) {
     throw new Error("An image input is required for 3D model generation.");
   }
-  if (/^data:image\/[a-z0-9.+-]+;base64,/i.test(trimmed) || /^https?:\/\//i.test(trimmed)) {
+  if (/^data:image\/[a-z0-9.+-]+;base64,/i.test(trimmed)) {
     return trimmed;
   }
-  const localPath = normalizePossibleFilePath(trimmed);
+  // Dashboard image links (/api/generated-image-file?...) point at this machine,
+  // which the worker refuses to fetch, so send the file's bytes instead.
+  const generatedImagePath = await resolveGeneratedImageApiSourceToFilePath(trimmed);
+  if (!generatedImagePath && /^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  const localPath = generatedImagePath || normalizePossibleFilePath(trimmed);
   const bytes = await readFile(localPath);
   const mimeType = extensionToMimeType(path.extname(localPath));
   return `data:${mimeType};base64,${bytes.toString("base64")}`;
