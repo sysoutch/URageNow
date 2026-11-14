@@ -40,10 +40,50 @@ def import_model(filepath):
     raise RuntimeError(f"Unsupported model format: {filepath}")
 
 
+IMAGE_FORMAT_EXTENSIONS = {
+    "PNG": ".png",
+    "JPEG": ".jpg",
+    "TARGA": ".tga",
+    "TARGA_RAW": ".tga",
+    "BMP": ".bmp",
+    "TIFF": ".tif",
+    "WEBP": ".webp",
+    "OPEN_EXR": ".exr",
+    "HDR": ".hdr",
+}
+
+
+def ensure_image_file_extensions():
+    """Give packed images a file name with an extension before FBX export.
+
+    The glTF importer names packed textures "Image_0" with no extension. FBX
+    embeds them under that name, and viewers such as three.js FBXLoader pick
+    the decoder from the extension, so the texture silently fails to load.
+    """
+    renamed = 0
+    for image in bpy.data.images:
+        if image.source != "FILE":
+            continue
+        current = bpy.path.basename(image.filepath_raw or "") or image.name
+        stem, extension = current.rsplit(".", 1) if "." in current else (current, "")
+        if extension:
+            continue
+        new_extension = IMAGE_FORMAT_EXTENSIONS.get(image.file_format, ".png")
+        safe_stem = bpy.path.clean_name(stem or image.name or "texture")
+        new_name = f"{safe_stem}{new_extension}"
+        image.name = new_name
+        image.filepath_raw = f"//{new_name}"
+        renamed += 1
+    return renamed
+
+
 def export_model(output_path):
     lower = output_path.lower()
 
     if lower.endswith(".fbx"):
+        renamed_images = ensure_image_file_extensions()
+        if renamed_images:
+            print(f"Named {renamed_images} packed texture(s) with a file extension.")
         bpy.ops.export_scene.fbx(
             filepath=output_path,
             use_selection=True,
