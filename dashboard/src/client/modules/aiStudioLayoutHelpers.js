@@ -1102,7 +1102,9 @@ function createDashboardAiStudioLayoutHelpers(input) {
     const allowedTab = ["sfx", "tts", "stt", "sts"].includes(tab) ? tab : "sfx";
     input.state.audioStudioTab = allowedTab;
     document.querySelectorAll("[data-audio-studio-tab]").forEach(button => {
-      button.classList.toggle("active", button.getAttribute("data-audio-studio-tab") === input.state.audioStudioTab);
+      const isActive = button.getAttribute("data-audio-studio-tab") === input.state.audioStudioTab;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
     });
     document.querySelectorAll("[id^='audio-studio-panel-']").forEach(panel => {
       panel.classList.toggle("active", panel.id === ("audio-studio-panel-" + input.state.audioStudioTab));

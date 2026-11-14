@@ -2876,11 +2876,11 @@ export function renderDashboardAiView(input: DashboardAiViewInput): string {
                 <button class="secondary studio-history-button" data-ai-scroll-target="audiogen-history-list" type="button">${renderButtonIcon("history")}<span>History</span></button>
               </div>
             </div>
-            <div class="workspace-tabs-new" aria-label="Audio workflow mode">
-              <button class="dashboard-tab ghost active" data-audio-studio-tab="sfx" type="button">${renderButtonIcon("sparkle")}<span>SFX</span></button>
-              <button class="dashboard-tab ghost" data-audio-studio-tab="tts" type="button">${renderButtonIcon("file")}<span>TTS</span></button>
-              <button class="dashboard-tab ghost" data-audio-studio-tab="stt" type="button">${renderButtonIcon("file")}<span>STT</span></button>
-              <button class="dashboard-tab ghost" data-audio-studio-tab="sts" type="button">${renderButtonIcon("refresh")}<span>STS</span></button>
+            <div class="workspace-tabs-new" role="tablist" aria-label="Audio workflow mode">
+              <button class="dashboard-tab active" data-audio-studio-tab="sfx" type="button" role="tab" aria-selected="true">${renderButtonIcon("sparkle")}<span>SFX</span></button>
+              <button class="dashboard-tab" data-audio-studio-tab="tts" type="button" role="tab" aria-selected="false">${renderButtonIcon("file")}<span>TTS</span></button>
+              <button class="dashboard-tab" data-audio-studio-tab="stt" type="button" role="tab" aria-selected="false">${renderButtonIcon("file")}<span>STT</span></button>
+              <button class="dashboard-tab" data-audio-studio-tab="sts" type="button" role="tab" aria-selected="false">${renderButtonIcon("refresh")}<span>STS</span></button>
             </div>
             <div class="studio-workflow-layout audio-studio-workspace" data-workflow-sidebar-workspace="audio">
               <div class="studio-workflow-main studio-component-form audio-studio-main">

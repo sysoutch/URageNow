@@ -40,15 +40,11 @@ $img-primary-height: 40px;
   grid-column: 1 / -1 !important;
 }
 
-// One clear active state; an older layer also underlined the first tab.
+// One clear active state: the shared `.workspace-tabs-new` ::after bar. Borders and
+// shadows from older layers would draw a second underline beneath it.
 #{$img-side} > .image-sidebar-tabs > .dashboard-tab {
   border: 0 !important;
-  border-bottom: 2px solid transparent !important;
   box-shadow: none !important;
-}
-
-#{$img-side} > .image-sidebar-tabs > .dashboard-tab.active {
-  border-bottom-color: var(--studio-accent-1, var(--accent)) !important;
 }
 
 #{$img-side} > .image-prompt-card {
@@ -315,6 +311,11 @@ $img-edit-card-radius: 8px;
   position: sticky !important;
   bottom: 0 !important;
   z-index: 5 !important;
+  // Bleed past the card's 18px side padding so the backdrop spans the card,
+  // while the button keeps the same width as the fields above it.
+  justify-self: stretch !important;
+  width: calc(100% + 36px) !important;
+  max-width: none !important;
   margin: 4px -18px 0 !important;
   padding: 10px 18px 12px !important;
   background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--panel, #1a1a1a) 94%, black 6%) 30%) !important;
