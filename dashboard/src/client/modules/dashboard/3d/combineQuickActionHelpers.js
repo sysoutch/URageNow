@@ -1,6 +1,7 @@
-// 3D Studio "Combine" quick action: merges a model's mesh objects (all, or the chosen
-// ones) into one clean mesh with a boolean union, like Blender's Bool Tool. It can split
-// the objects by loose parts first, which is what one-object generated models need.
+// 3D Studio "Combine" quick action: fuses the parts of a model that OVERLAP (cross each
+// other or sit inside one another) with a boolean union, like Blender's Bool Tool. Parts
+// that overlap nothing stay as they are. It can split objects by loose parts first,
+// which is what one-object generated models need.
 // Runs blender-scripts/combine/combine_meshes.py on the server; the result is saved as a
 // new model entry and selected, the source model stays as it is.
 
@@ -13,7 +14,7 @@ const COMBINE_MAX_MIN_PART_FACES = 100000;
 const COMBINE_METHODS = [
   {
     value: "union",
-    label: "Union (one clean mesh)",
+    label: "Union (Bool Tool)",
     hint: "Boolean union: overlapping parts are fused and faces hidden inside other parts are removed. Best for game-ready models."
   },
   {
@@ -93,7 +94,7 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
         + "<section class='runtime-overlay-panel model3d-share-overlay-panel' role='dialog' aria-modal='true' aria-labelledby='model3d-combine-title'>"
         + "<header class='runtime-overlay-header'><div class='runtime-overlay-title-wrap'><span class='panel-kicker'>3D Quick Action</span>"
         + "<h3 id='model3d-combine-title'>Combine Meshes</h3>"
-        + "<p class='model3d-share-overlay-message'>Fuse the parts of <strong>" + escapeHtml(selected.modelFileName) + "</strong> (" + escapeHtml(objectSummary) + ") into one clean mesh. The result is saved as a new model; the original stays as it is.</p>"
+        + "<p class='model3d-share-overlay-message'>Fuse the overlapping parts of <strong>" + escapeHtml(selected.modelFileName) + "</strong> (" + escapeHtml(objectSummary) + "), like Bool Tool. Parts that overlap nothing stay as they are. The result is saved as a new model; the original stays as it is.</p>"
         + "</div><button class='secondary mini-button' data-combine-cancel type='button' aria-label='Close'>✕</button></header>"
         + "<div class='model3d-share-overlay-body'>"
         + (objects.length > 1
@@ -105,6 +106,11 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
           ? "This model is one object, so it is split into its connected pieces and those are fused."
           : "Split each object into its connected pieces before fusing, so overlapping pieces inside one object are cleaned up too.") + "</div>"
         + "<div class='field'><label for='model3d-combine-method'>Method</label><select id='model3d-combine-method'>" + renderOptions(COMBINE_METHODS, "union") + "</select><div class='hint' id='model3d-combine-method-hint'></div></div>"
+        + "<div id='model3d-combine-union-fields'>"
+        + "<label class='toggle'><span>Only fuse overlapping parts</span><input id='model3d-combine-overlap-only' type='checkbox' checked></label>"
+        + "<div class='hint'>Off fuses every part into one mesh, even parts that do not touch.</div>"
+        + "</div>"
+        + "<label class='toggle'><span>Join result into one object</span><input id='model3d-combine-join-result' type='checkbox'></label>"
         + "<div class='field' id='model3d-combine-solver-field'><label for='model3d-combine-solver'>Boolean Solver</label><select id='model3d-combine-solver'>" + renderOptions(COMBINE_SOLVERS, "exact") + "</select></div>"
         + "<div class='field'><label for='model3d-combine-min-faces'>Delete Parts Under (faces)</label><input id='model3d-combine-min-faces' type='number' min='0' max='" + COMBINE_MAX_MIN_PART_FACES + "' step='1' value='0'><div class='hint'>Removes tiny floating debris. 0 keeps every part.</div></div>"
         + "<div class='field'><label for='model3d-combine-merge-distance'>Weld Distance</label><input id='model3d-combine-merge-distance' type='number' min='0' max='" + COMBINE_MAX_MERGE_DISTANCE + "' step='0.0001' value='" + COMBINE_DEFAULT_MERGE_DISTANCE + "'></div>"
@@ -117,6 +123,7 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
       const method = overlay.querySelector("#model3d-combine-method");
       const methodHint = overlay.querySelector("#model3d-combine-method-hint");
       const solverField = overlay.querySelector("#model3d-combine-solver-field");
+      const unionFields = overlay.querySelector("#model3d-combine-union-fields");
       const errorLine = overlay.querySelector("#model3d-combine-error");
 
       const close = value => {
@@ -133,6 +140,7 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
         objectField?.classList.toggle("hidden", scope?.value !== "chosen");
         methodHint.textContent = COMBINE_METHODS.find(item => item.value === method.value)?.hint || "";
         solverField.classList.toggle("hidden", method.value !== "union");
+        unionFields.classList.toggle("hidden", method.value !== "union");
       };
       const readChosenObjectNames = () => {
         if (scope?.value !== "chosen") {
@@ -164,6 +172,8 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
         close({
           objectNames,
           separateLooseParts,
+          overlapOnly: overlay.querySelector("#model3d-combine-overlap-only").checked,
+          joinResult: overlay.querySelector("#model3d-combine-join-result").checked,
           method: method.value,
           solver: overlay.querySelector("#model3d-combine-solver").value,
           minPartFaces: Number.isFinite(minFaces) ? Math.max(0, Math.min(COMBINE_MAX_MIN_PART_FACES, minFaces)) : 0,
@@ -189,14 +199,31 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
     if (!report) {
       return "";
     }
-    const parts = [report.parts + " part" + (report.parts === 1 ? "" : "s"), report.inputFaces.toLocaleString() + " → " + report.faces.toLocaleString() + " faces"];
+    const parts = [];
+    if (report.method === "join") {
+      parts.push("joined " + report.parts + " part" + (report.parts === 1 ? "" : "s"));
+    } else if (!report.overlapGroups) {
+      parts.push("no overlapping parts among " + report.parts + ", nothing fused");
+    } else {
+      parts.push("fused " + report.fusedParts + " overlapping part" + (report.fusedParts === 1 ? "" : "s") + " in " + report.overlapGroups + " group" + (report.overlapGroups === 1 ? "" : "s"));
+      if (report.separateParts) {
+        parts.push(report.separateParts + " part" + (report.separateParts === 1 ? "" : "s") + " left as they are");
+      }
+    }
+    parts.push(report.resultObjects + " object" + (report.resultObjects === 1 ? "" : "s"));
+    parts.push(report.inputFaces.toLocaleString() + " → " + report.faces.toLocaleString() + " faces");
+    if (report.interiorFacesRemoved) {
+      parts.push(report.interiorFacesRemoved.toLocaleString() + " hidden inner faces removed");
+    }
     if (report.droppedParts) {
       parts.push(report.droppedParts + " tiny part(s) removed");
     }
     if (report.joinedFallbackParts) {
       parts.push(report.joinedFallbackParts + " part(s) could not be fused and were joined");
     }
-    parts.push(report.nonManifoldEdges === 0 ? "watertight" : report.nonManifoldEdges.toLocaleString() + " open edges");
+    if (report.overlapGroups || report.method === "join") {
+      parts.push(report.nonManifoldEdges === 0 ? "fused parts watertight" : report.nonManifoldEdges.toLocaleString() + " open edges on fused parts");
+    }
     return parts.join(", ");
   }
 
@@ -220,6 +247,12 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
     setModel3dStatus("Combining " + selected.modelFileName + "...");
     try {
       const result = await request("/api/model3d-combine", { modelId: selected.id, ...options });
+      if (result?.unchanged) {
+        const partCount = result?.report?.parts ?? "?";
+        setModel3dStatus("No overlapping parts in " + selected.modelFileName + "; nothing changed.");
+        setOutput("Combine found no overlapping parts among " + partCount + " part(s) of " + selected.modelFileName + ", so nothing was fused and no new model was saved. Turn off \"Only fuse overlapping parts\" or turn on \"Join result into one object\" to merge them anyway.");
+        return;
+      }
       await loadModel3dHistory(result?.generated?.id || selected.id);
       const summary = describeReport(result?.report);
       setModel3dStatus("Combined " + selected.modelFileName + (summary ? " — " + summary : "") + ".");

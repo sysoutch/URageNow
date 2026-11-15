@@ -1,7 +1,9 @@
-"""URage Mesh Combiner: combine objects into one clean mesh with a boolean union.
+"""URage Mesh Combiner: fuse overlapping objects or parts with a boolean union, like Bool Tool.
 
 Adds two operators (3D View > Sidebar > URage, and Object > URage Combine):
-  - Combine Meshes: union the selected mesh objects (or every mesh when nothing is selected).
+  - Combine Meshes: union the selected mesh objects that overlap (or every mesh when nothing
+    is selected). Parts that overlap nothing stay as they are; turn off "Only overlapping
+    parts" to fuse everything.
   - Separate & Combine: split each object by loose parts first, then union the parts.
     Use it on one object whose pieces overlap (typical for AI-generated models).
 
@@ -39,6 +41,16 @@ class CombineOperatorMixin:
     (A registered operator must not subclass another one, so this is a plain mixin.)"""
 
     method: EnumProperty(name="Method", items=METHOD_ITEMS, default="union")
+    overlap_only: BoolProperty(
+        name="Only overlapping parts",
+        description="Fuse only parts that intersect or sit inside each other (like Bool Tool); other parts stay as they are",
+        default=True,
+    )
+    join_result: BoolProperty(
+        name="Join result into one object",
+        description="Put the fused parts and the untouched parts into one object at the end",
+        default=False,
+    )
     solver: EnumProperty(name="Solver", items=SOLVER_ITEMS, default="exact")
     separate_loose_parts: BoolProperty(
         name="Separate loose parts first",
@@ -72,7 +84,11 @@ class CombineOperatorMixin:
         row = layout.row()
         row.enabled = self.method == "union"
         row.prop(self, "solver")
+        row = layout.row()
+        row.enabled = self.method == "union"
+        row.prop(self, "overlap_only")
         layout.prop(self, "separate_loose_parts")
+        layout.prop(self, "join_result")
         layout.prop(self, "merge_distance")
         layout.prop(self, "min_part_faces")
         col = layout.column()
@@ -91,15 +107,21 @@ class CombineOperatorMixin:
             self_intersection=self.self_intersection,
             hole_tolerant=self.hole_tolerant,
             min_part_faces=self.min_part_faces,
+            overlap_only=self.overlap_only,
+            join_result=self.join_result,
             result_name=(context.active_object.name if context.active_object in targets else targets[0].name) if targets else "Combined",
         )
         try:
-            result, report = combine_core.combine_objects(targets, options)
+            results, report = combine_core.combine_objects(targets, options)
         except RuntimeError as error:
             self.report({"ERROR"}, str(error))
             return {"CANCELLED"}
-        combine_core.select_only([result])
-        message = f"Combined {report['parts']} part(s) into {report['faces']} faces"
+        combine_core.select_only(results)
+        if report["method"] != "join" and report["overlapGroups"] == 0:
+            message = f"No overlapping parts among {report['parts']} part(s); nothing was fused"
+        else:
+            message = (f"Fused {report['fusedParts']} overlapping part(s) in {report['overlapGroups']} group(s); "
+                       f"{report['separateParts']} part(s) left as they are")
         if report["joinedFallbackParts"]:
             message += f"; {report['joinedFallbackParts']} part(s) could not be unioned and were joined"
         self.report({"WARNING"} if report["joinedFallbackParts"] else {"INFO"}, message)

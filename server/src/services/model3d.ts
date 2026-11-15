@@ -2020,6 +2020,8 @@ export interface GeneratedModelCombineResult {
   generated: GeneratedModelPublicRecord;
   sourceModelId: string;
   report: ModelCombineReport | null;
+  /** True when no parts overlapped, so nothing was saved and `generated` is the source model. */
+  unchanged: boolean;
 }
 
 /** Mesh objects of a model (GLB/glTF), for choosing which ones to combine. */
@@ -2029,13 +2031,16 @@ export async function listGeneratedModelMeshObjects(modelId: string): Promise<Mo
 }
 
 /**
- * Combine a model's mesh objects into one clean mesh (boolean union, like Bool Tool),
- * optionally splitting them by loose parts first. Saved as a NEW model entry.
+ * Fuse a model's overlapping mesh objects with a boolean union, like Bool Tool: parts that
+ * overlap nothing stay as they are (overlapOnly false fuses everything). Optionally splits
+ * objects by loose parts first. Saved as a NEW model entry.
  */
 export async function combineGeneratedModelMeshes(input: {
   modelId: string;
   objectNames?: string[];
   separateLooseParts?: boolean;
+  overlapOnly?: boolean;
+  joinResult?: boolean;
   method?: ModelCombineMethod;
   solver?: ModelCombineSolver;
   mergeDistance?: number;
@@ -2053,11 +2058,25 @@ export async function combineGeneratedModelMeshes(input: {
       outputModelPath: path.join(workDirectory, outputFileName),
       objectNames: input.objectNames,
       separateLooseParts: input.separateLooseParts,
+      overlapOnly: input.overlapOnly,
+      joinResult: input.joinResult,
       method: input.method,
       solver: input.solver,
       mergeDistance: input.mergeDistance,
       minPartFaces: input.minPartFaces
     });
+    const nothingFused = result.report !== null
+      && result.report.method !== "join"
+      && result.report.overlapGroups === 0
+      && input.joinResult !== true;
+    if (nothingFused) {
+      // Saving an identical copy would only clutter the model list.
+      const sourcePublic = await getGeneratedModelPublicById(source.record.id);
+      if (!sourcePublic) {
+        throw new Error("Source model could not be read back.");
+      }
+      return { generated: sourcePublic, sourceModelId: source.record.id, report: result.report, unchanged: true };
+    }
     await assertRustValidatedModelArtifact(result.outputPath, "Combined model");
     const imported = await importUploadedSourceModel({
       fileName: outputFileName,
@@ -2069,7 +2088,7 @@ export async function combineGeneratedModelMeshes(input: {
     if (!generated) {
       throw new Error("Combined model was saved but could not be read back.");
     }
-    return { generated, sourceModelId: source.record.id, report: result.report };
+    return { generated, sourceModelId: source.record.id, report: result.report, unchanged: false };
   } finally {
     await rm(workDirectory, { recursive: true, force: true }).catch(() => undefined);
   }

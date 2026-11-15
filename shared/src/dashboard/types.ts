@@ -637,6 +637,8 @@ export interface DashboardDependencies {
     modelId: string;
     objectNames?: string[];
     separateLooseParts?: boolean;
+    overlapOnly?: boolean;
+    joinResult?: boolean;
     method?: "union" | "join";
     solver?: "exact" | "fast" | "manifold";
     mergeDistance?: number;
@@ -645,17 +647,23 @@ export interface DashboardDependencies {
     generated: GeneratedModelPublicRecord;
     sourceModelId: string;
     report: {
-      method: "union" | "union_per_part" | "join";
+      method: "union_overlapping" | "union" | "union_per_part" | "join";
       solver: string | null;
       inputObjects: number;
       parts: number;
+      overlapGroups: number;
+      fusedParts: number;
+      separateParts: number;
+      resultObjects: number;
       droppedParts: number;
+      interiorFacesRemoved: number;
       joinedFallbackParts: number;
       inputFaces: number;
       faces: number;
       nonManifoldEdges: number;
       untouchedObjects: number;
     } | null;
+    unchanged: boolean;
   }>;
   listModelMeshObjects: (modelId: string) => Promise<{
     modelId: string;

@@ -911,6 +911,10 @@ export interface ModelCombineRunInput {
   /** Mesh object names to combine; empty combines every mesh. Others are kept unchanged. */
   objectNames?: string[];
   separateLooseParts?: boolean;
+  /** Fuse only parts that overlap (default true, like Bool Tool); false fuses every part. */
+  overlapOnly?: boolean;
+  /** Put every result into one object at the end. */
+  joinResult?: boolean;
   method?: ModelCombineMethod;
   solver?: ModelCombineSolver;
   mergeDistance?: number;
@@ -920,14 +924,23 @@ export interface ModelCombineRunInput {
 
 /** What blender-scripts/combine/combine_meshes.py reports in its COMBINE_RESULT line. */
 export interface ModelCombineReport {
-  method: "union" | "union_per_part" | "join";
+  method: "union_overlapping" | "union" | "union_per_part" | "join";
   solver: string | null;
   inputObjects: number;
   parts: number;
+  /** Groups of overlapping parts that were fused. */
+  overlapGroups: number;
+  fusedParts: number;
+  /** Parts that overlapped nothing and were kept as they are. */
+  separateParts: number;
   droppedParts: number;
+  /** Interior (inner wall) and degenerate faces deleted before the union. */
+  interiorFacesRemoved: number;
   joinedFallbackParts: number;
+  resultObjects: number;
   inputFaces: number;
   faces: number;
+  /** Open edges on the fused results; 0 means they are watertight. */
   nonManifoldEdges: number;
   untouchedObjects: number;
 }
@@ -967,6 +980,8 @@ export async function runModelCombineScript(input: ModelCombineRunInput): Promis
     `--output_path=${outputModelPath}`,
     ...(objectNames.length > 0 ? [`--objects_json=${JSON.stringify(objectNames)}`] : []),
     `--separate_loose_parts=${boolToArg(input.separateLooseParts === true)}`,
+    `--overlap_only=${boolToArg(input.overlapOnly !== false)}`,
+    `--join_result=${boolToArg(input.joinResult === true)}`,
     `--method=${method}`,
     `--solver=${solver}`,
     `--merge_distance=${mergeDistance}`,

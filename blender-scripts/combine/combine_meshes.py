@@ -9,10 +9,13 @@ Usage:
     --filepath=in.glb --output_path=out.glb \
     [--objects_json='["Body","Hat"]'] [--separate_loose_parts=true] \
     [--method=union|join] [--solver=exact|fast|manifold] [--merge_distance=0.0001] \
-    [--min_part_faces=0] [--self_intersection=true] [--hole_tolerant=true]
+    [--min_part_faces=0] [--self_intersection=true] [--hole_tolerant=true]     [--overlap_only=true] [--join_result=false]
 
 --objects_json chooses which mesh objects to combine; the others are exported unchanged.
 Leave it out (or pass []) to combine every mesh.
+--overlap_only (default true) fuses only parts that overlap, like Bool Tool; parts that
+overlap nothing are exported as they are. false fuses every part into one mesh.
+--join_result puts everything into one object at the end.
 
 Prints "COMBINE_RESULT {json}" on success, "COMBINE_ERROR <message>" on failure (exit 1).
 """
@@ -77,6 +80,8 @@ def read_options():
         hole_tolerant=parse_bool(get_arg_value(args, "hole_tolerant", "true"), True),
         min_part_faces=int(float(get_arg_value(args, "min_part_faces", "0") or 0)),
         result_name="Combined",
+        overlap_only=parse_bool(get_arg_value(args, "overlap_only", "true"), True),
+        join_result=parse_bool(get_arg_value(args, "join_result", "false"), False),
     )
     return {
         "filepath": filepath,
@@ -160,14 +165,13 @@ def main():
         if untouched:
             # Keep the untouched objects where they are once their parents are gone.
             combine_core.prepare_objects(untouched)
-        result, report = combine_core.combine_objects(targets, options["combine"])
+        results, report = combine_core.combine_objects(targets, options["combine"])
         # Drop the now-empty import hierarchy so the export holds only meshes.
         for obj in list(bpy.context.scene.objects):
             if obj.type == "EMPTY":
                 bpy.data.objects.remove(obj, do_unlink=True)
-        export_glb([result, *untouched], options["output_path"])
+        export_glb([*results, *untouched], options["output_path"])
         report["untouchedObjects"] = len(untouched)
-        report["combinedObjectNames"] = [obj_name for obj_name in options["objects"]] or None
         print("COMBINE_RESULT " + json.dumps(report), flush=True)
     except Exception as error:  # noqa: BLE001 - every failure must reach the server
         traceback.print_exc()

@@ -743,6 +743,8 @@ async function handlePostApiModel3dCombine(request: IncomingMessage, response: S
       modelId,
       objectNames,
       separateLooseParts: body.separateLooseParts === true,
+      overlapOnly: body.overlapOnly !== false,
+      joinResult: body.joinResult === true,
       method,
       solver,
       mergeDistance: typeof body.mergeDistance === "number" ? body.mergeDistance : undefined,
@@ -750,7 +752,9 @@ async function handlePostApiModel3dCombine(request: IncomingMessage, response: S
     });
     dependencies.runtimeState.recordAction(
       "dashboard:model3d-combine",
-      `Combined ${result.report?.parts ?? "?"} part(s) of ${modelId} with ${result.report?.method ?? method} (${result.report?.faces ?? "?"} faces) into ${result.generated.id}.`
+      result.unchanged
+        ? `Combine found no overlapping parts in ${modelId}; nothing was changed.`
+        : `Combined ${modelId}: fused ${result.report?.fusedParts ?? "?"} of ${result.report?.parts ?? "?"} part(s) in ${result.report?.overlapGroups ?? "?"} group(s) with ${result.report?.method ?? method} (${result.report?.faces ?? "?"} faces) into ${result.generated.id}.`
     );
     sendJson(response, 200, result);
   } catch (error) {
