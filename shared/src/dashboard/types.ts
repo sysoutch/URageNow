@@ -633,6 +633,35 @@ export interface DashboardDependencies {
     targetFaceCount: number;
     faceCount: number | null;
   }>;
+  combineModel: (input: {
+    modelId: string;
+    objectNames?: string[];
+    separateLooseParts?: boolean;
+    method?: "union" | "join";
+    solver?: "exact" | "fast" | "manifold";
+    mergeDistance?: number;
+    minPartFaces?: number;
+  }) => Promise<{
+    generated: GeneratedModelPublicRecord;
+    sourceModelId: string;
+    report: {
+      method: "union" | "union_per_part" | "join";
+      solver: string | null;
+      inputObjects: number;
+      parts: number;
+      droppedParts: number;
+      joinedFallbackParts: number;
+      inputFaces: number;
+      faces: number;
+      nonManifoldEdges: number;
+      untouchedObjects: number;
+    } | null;
+  }>;
+  listModelMeshObjects: (modelId: string) => Promise<{
+    modelId: string;
+    supported: boolean;
+    objects: Array<{ name: string; triangles: number | null }>;
+  }>;
   bakeModel: (input: {
     modelId: string;
     sourceModelId?: string;

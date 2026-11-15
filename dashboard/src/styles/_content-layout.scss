@@ -835,6 +835,20 @@
     min-height: 42px;
   }
 
+  // Combine quick action: a model can have hundreds of objects, so the list scrolls.
+  .model3d-combine-object-list {
+    display: grid;
+    gap: 4px;
+    max-height: min(240px, 40vh);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .model3d-combine-configuration-overlay .runtime-overlay-panel {
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+
   .settings-overlay-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

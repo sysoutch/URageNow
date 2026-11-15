@@ -171,6 +171,7 @@ function createDashboardThreeDStudioEventBindingHelpers(input) {
       });
     }
     input?.remeshQuickActionHelpers?.bindRemeshQuickAction?.();
+    input?.combineQuickActionHelpers?.bindCombineQuickAction?.();
     input?.bakeQuickActionHelpers?.bindBakeQuickAction?.();
     document.getElementById("model3d-create-lowpoly-button")?.addEventListener("click", async event => {
       event.preventDefault();

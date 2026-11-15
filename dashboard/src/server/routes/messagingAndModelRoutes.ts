@@ -713,6 +713,53 @@ async function handlePostApiModel3dBake(request: IncomingMessage, response: Serv
   }
 }
 
+const COMBINE_METHODS = new Set(["union", "join"]);
+const COMBINE_SOLVERS = new Set(["exact", "fast", "manifold"]);
+const COMBINE_MAX_OBJECT_NAMES = 500;
+
+async function handleGetApiModel3dMeshObjects(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const modelId = String(url.searchParams.get("modelId") || "").trim();
+  if (!modelId) {
+    sendJson(response, 400, { error: "modelId is required." });
+    return;
+  }
+  sendJson(response, 200, await dependencies.listModelMeshObjects(modelId));
+}
+
+async function handlePostApiModel3dCombine(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
+  const body = await parseJsonBody(request);
+  const modelId = typeof body.modelId === "string" ? body.modelId.trim() : "";
+  if (!modelId) {
+    sendJson(response, 400, { error: "modelId is required." });
+    return;
+  }
+  const objectNames = Array.isArray(body.objectNames)
+    ? body.objectNames.filter((name: unknown): name is string => typeof name === "string" && name.trim().length > 0).slice(0, COMBINE_MAX_OBJECT_NAMES)
+    : [];
+  const method = typeof body.method === "string" && COMBINE_METHODS.has(body.method) ? body.method as "union" | "join" : "union";
+  const solver = typeof body.solver === "string" && COMBINE_SOLVERS.has(body.solver) ? body.solver as "exact" | "fast" | "manifold" : "exact";
+  try {
+    const result = await dependencies.combineModel({
+      modelId,
+      objectNames,
+      separateLooseParts: body.separateLooseParts === true,
+      method,
+      solver,
+      mergeDistance: typeof body.mergeDistance === "number" ? body.mergeDistance : undefined,
+      minPartFaces: typeof body.minPartFaces === "number" ? body.minPartFaces : undefined
+    });
+    dependencies.runtimeState.recordAction(
+      "dashboard:model3d-combine",
+      `Combined ${result.report?.parts ?? "?"} part(s) of ${modelId} with ${result.report?.method ?? method} (${result.report?.faces ?? "?"} faces) into ${result.generated.id}.`
+    );
+    sendJson(response, 200, result);
+  } catch (error) {
+    const detail = error instanceof Error ? (error.message?.trim() || "Combine failed.") : (String(error).trim() || "Combine failed.");
+    console.error("Dashboard combine failed:", { modelId, method, solver, objectCount: objectNames.length, detail });
+    throw new Error(detail);
+  }
+}
+
 async function handlePostApiModel3dRemesh(request: IncomingMessage, response: ServerResponse, url: URL, dependencies: DashboardDependencies): Promise<void> {
   const body = await parseJsonBody(request);
   const modelId = typeof body.modelId === "string" ? body.modelId.trim() : "";
@@ -2347,6 +2394,8 @@ const dashboardMessagingAndModelRouteTable = createDashboardRouteTable([
   postRoute("/api/model3d-albedo-to-geometry", handlePostApiModel3dAlbedoToGeometry),
   postRoute("/api/model3d-remesh", handlePostApiModel3dRemesh),
   postRoute("/api/model3d-bake", handlePostApiModel3dBake),
+  postRoute("/api/model3d-combine", handlePostApiModel3dCombine),
+  getRoute("/api/model3d-mesh-objects", handleGetApiModel3dMeshObjects),
   postRoute("/api/model3d-separate-loose-parts", handlePostApiModel3dSeparateByLooseParts),
   postRoute("/api/model3d-separate-by-loose-parts", handlePostApiModel3dSeparateByLooseParts),
   postRoute("/api/model3d-autorig-preview", handlePostApiModel3dAutoRigPreview),

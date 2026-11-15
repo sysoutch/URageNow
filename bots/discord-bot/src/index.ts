@@ -68,6 +68,8 @@ import {
   applyGeneratedModelAlbedoToGeometry,
   remeshGeneratedModel,
   bakeGeneratedModel,
+  combineGeneratedModelMeshes,
+  listGeneratedModelMeshObjects,
   captureGeneratedModelArtifact,
   applyGeneratedModelMaterialFinish,
   applyGeneratedModelSeparateByLooseParts,
@@ -1868,6 +1870,8 @@ const dashboardServer = startDashboardServer({
   },
   remeshModel: async input => remeshGeneratedModel(input),
   bakeModel: async input => bakeGeneratedModel(input),
+  combineModel: async input => combineGeneratedModelMeshes(input),
+  listModelMeshObjects: async modelId => listGeneratedModelMeshObjects(modelId),
   applyModelAlbedoToGeometry: async input => {
     return applyGeneratedModelAlbedoToGeometry(input);
   },

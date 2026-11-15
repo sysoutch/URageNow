@@ -216,6 +216,10 @@ function assertModelRemeshScriptPath(): void {
   assertScriptPath("BLENDER_MODEL_REMESH_SCRIPT_PATH", appConfig.blenderModelRemeshScriptPath, "remesh", "remesh_model.py");
 }
 
+function assertModelCombineScriptPath(): void {
+  assertScriptPath("BLENDER_MODEL_COMBINE_SCRIPT_PATH", appConfig.blenderModelCombineScriptPath, "combine", "combine_meshes.py");
+}
+
 function assertModelBakeScriptPath(): void {
   assertScriptPath("BLENDER_MODEL_BAKE_SCRIPT_PATH", appConfig.blenderModelBakeScriptPath, "bake", "bake_maps.py");
 }
@@ -896,6 +900,102 @@ export async function runModelBakeScript(input: ModelBakeRunInput): Promise<Mode
     outputPath: await resolveScriptOutputPath(outputModelPath, result.output),
     maps: mapsMatch ? normalizeBakeMaps(mapsMatch[1]?.split(",")) : maps
   };
+}
+
+export type ModelCombineMethod = "union" | "join";
+export type ModelCombineSolver = "exact" | "fast" | "manifold";
+
+export interface ModelCombineRunInput {
+  sourceModelPath: string;
+  outputModelPath: string;
+  /** Mesh object names to combine; empty combines every mesh. Others are kept unchanged. */
+  objectNames?: string[];
+  separateLooseParts?: boolean;
+  method?: ModelCombineMethod;
+  solver?: ModelCombineSolver;
+  mergeDistance?: number;
+  minPartFaces?: number;
+  timeoutMs?: number;
+}
+
+/** What blender-scripts/combine/combine_meshes.py reports in its COMBINE_RESULT line. */
+export interface ModelCombineReport {
+  method: "union" | "union_per_part" | "join";
+  solver: string | null;
+  inputObjects: number;
+  parts: number;
+  droppedParts: number;
+  joinedFallbackParts: number;
+  inputFaces: number;
+  faces: number;
+  nonManifoldEdges: number;
+  untouchedObjects: number;
+}
+
+export interface ModelCombineRunResult {
+  outputPath: string;
+  report: ModelCombineReport | null;
+}
+
+const COMBINE_MAX_MERGE_DISTANCE = 0.1;
+const COMBINE_DEFAULT_MERGE_DISTANCE = 0.0001;
+const COMBINE_MAX_MIN_PART_FACES = 100_000;
+
+export async function runModelCombineScript(input: ModelCombineRunInput): Promise<ModelCombineRunResult> {
+  assertModelCombineScriptPath();
+  const sourceModelPath = path.resolve(input.sourceModelPath);
+  const outputModelPath = path.resolve(input.outputModelPath);
+  const timeoutMs = normalizePositiveInteger(input.timeoutMs, appConfig.blenderModelCombineTimeoutMs);
+  const method: ModelCombineMethod = input.method === "join" ? "join" : "union";
+  const solver: ModelCombineSolver = input.solver === "fast" || input.solver === "manifold" ? input.solver : "exact";
+  const mergeDistance = typeof input.mergeDistance === "number" && Number.isFinite(input.mergeDistance)
+    ? Math.max(0, Math.min(COMBINE_MAX_MERGE_DISTANCE, input.mergeDistance))
+    : COMBINE_DEFAULT_MERGE_DISTANCE;
+  const minPartFaces = typeof input.minPartFaces === "number" && Number.isFinite(input.minPartFaces)
+    ? Math.max(0, Math.min(COMBINE_MAX_MIN_PART_FACES, Math.round(input.minPartFaces)))
+    : 0;
+  const objectNames = (input.objectNames ?? []).map(name => String(name).trim()).filter(Boolean);
+  await stat(sourceModelPath);
+  const args = [
+    "--background",
+    "--python",
+    appConfig.blenderModelCombineScriptPath,
+    "--python-exit-code",
+    "1",
+    "--",
+    `--filepath=${sourceModelPath}`,
+    `--output_path=${outputModelPath}`,
+    ...(objectNames.length > 0 ? [`--objects_json=${JSON.stringify(objectNames)}`] : []),
+    `--separate_loose_parts=${boolToArg(input.separateLooseParts === true)}`,
+    `--method=${method}`,
+    `--solver=${solver}`,
+    `--merge_distance=${mergeDistance}`,
+    `--min_part_faces=${minPartFaces}`
+  ];
+  const result = await runBlenderProcess(args, timeoutMs);
+  const errorMatch = /COMBINE_ERROR (.+)/.exec(result.output);
+  if (!isAttemptSuccessful(result) || errorMatch) {
+    const reason = errorMatch?.[1]?.trim();
+    throw new Error(reason
+      ? `Combine failed: ${reason}`
+      : `Blender combine script failed (code=${result.exitCode}, signal=${result.signal ?? "none"}).\n${trimProcessOutput(result.output)}`);
+  }
+  return {
+    outputPath: await resolveScriptOutputPath(outputModelPath, result.output),
+    report: parseCombineReport(result.output)
+  };
+}
+
+function parseCombineReport(output: string): ModelCombineReport | null {
+  const match = /COMBINE_RESULT (\{.*\})/.exec(output);
+  if (!match?.[1]) {
+    return null;
+  }
+  try {
+    return JSON.parse(match[1]) as ModelCombineReport;
+  } catch {
+    return null;
+  }
 }
 
 export async function runModelScaleScript(input: ModelScaleRunInput): Promise<string> {

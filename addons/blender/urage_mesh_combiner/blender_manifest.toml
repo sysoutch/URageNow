@@ -1,0 +1,12 @@
+schema_version = "1.0.0"
+
+id = "urage_mesh_combiner"
+version = "1.0.0"
+name = "URage Mesh Combiner"
+tagline = "Combine objects or loose parts into one clean mesh"
+maintainer = "URage"
+type = "add-on"
+website = "https://urage.net"
+tags = ["Mesh", "Modeling"]
+blender_version_min = "4.2.0"
+license = ["SPDX:GPL-3.0-or-later"]

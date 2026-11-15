@@ -279,6 +279,7 @@ export const appConfig = {
   // BakeLab2 add-on source folder; empty lets bake_maps.py use its own default.
   blenderBakeLabAddonPath: optionalString("BAKELAB_ADDON_PATH", ""),
   blenderModelRemeshScriptPath: optionalRepositoryPath("BLENDER_MODEL_REMESH_SCRIPT_PATH", resolveRepoPath("blender-scripts", "remesh", "remesh_model.py")),
+  blenderModelCombineScriptPath: optionalRepositoryPath("BLENDER_MODEL_COMBINE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "combine", "combine_meshes.py")),
   blenderModelScaleScriptPath: optionalRepositoryPath("BLENDER_MODEL_SCALE_SCRIPT_PATH", resolveRepoPath("blender-scripts", "transform", "scale.py")),
   blenderModelAutoRigScriptPath: optionalRepositoryPath("BLENDER_MODEL_AUTORIG_SCRIPT_PATH", resolveRepoPath("blender-scripts", "rig", "autorigger", "autorig.py")),
   blenderModelPreviewTimeoutMs: optionalNumber("BLENDER_MODEL_PREVIEW_TIMEOUT_MS", 3 * 60_000),
@@ -290,6 +291,8 @@ export const appConfig = {
   blenderModelAlbedoToGeometryTimeoutMs: optionalNumber("BLENDER_MODEL_ALBEDO_TO_GEOMETRY_TIMEOUT_MS", 20 * 60_000),
   blenderModelBakeTimeoutMs: optionalNumber("BLENDER_MODEL_BAKE_TIMEOUT_MS", 30 * 60_000),
   blenderModelRemeshTimeoutMs: optionalNumber("BLENDER_MODEL_REMESH_TIMEOUT_MS", 20 * 60_000),
+  // Exact boolean unions of dense generated meshes can take several minutes.
+  blenderModelCombineTimeoutMs: optionalNumber("BLENDER_MODEL_COMBINE_TIMEOUT_MS", 20 * 60_000),
   blenderModelScaleTimeoutMs: optionalNumber("BLENDER_MODEL_SCALE_TIMEOUT_MS", 10 * 60_000),
   blenderModelAutoRigTimeoutMs: optionalNumber("BLENDER_MODEL_AUTORIG_TIMEOUT_MS", 20 * 60_000),
   blenderLowPolyTimeoutMs: optionalNumber("BLENDER_LOWPOLY_TIMEOUT_MS", 20 * 60_000),

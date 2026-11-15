@@ -59,6 +59,17 @@ Subdivision level `0` displaces existing vertices only. Levels `1-8` apply eithe
   --method=quadriflow --target_faces=5000 --bake_engine=builtin --bake_maps=albedo,normal
 ```
 
+## Combine
+
+`combine/combine_meshes.py` fuses a model's mesh objects into one clean mesh with a boolean union, like the Bool Tool add-on (the Studio's Combine quick action). `--separate_loose_parts=true` splits every object into its connected pieces first, which one-object generated models need. `--objects_json='["Body","Hat"]'` combines only those objects and keeps the rest unchanged. `--method=join` only merges into one object; `--solver=exact|fast|manifold` picks Blender's boolean solver. Runs with `--background` and prints `COMBINE_RESULT {json}` (parts, faces, `nonManifoldEdges`) or `COMBINE_ERROR`.
+
+```powershell
+& $env:BLENDER_EXECUTABLE_PATH --background --python blender-scripts/combine/combine_meshes.py --python-exit-code 1 -- `
+  --filepath=.\models\source.glb --output_path=.\models\source-combined.glb --separate_loose_parts=true
+```
+
+The pipeline lives in the **URage Mesh Combiner** add-on (`addons/blender/urage_mesh_combiner/combine_core.py`), so the script and the add-on give the same result. Install the add-on by zipping that folder (Edit > Preferences > Add-ons > Install from Disk); it adds Combine Meshes and Separate & Combine to 3D View > Sidebar > URage and to the Object menu. With nothing selected it combines every visible mesh.
+
 ## Bake
 
 `bake/bake_maps.py` bakes albedo, normal, roughness, metallic, AO and emission into one PBR material (the Studio's Bake quick action). Without `--source_path` it flattens the model's own materials; with it, it bakes that high-poly model onto `--filepath`. `--engine=bakelab` uses the BakeLab2 add-on (window required; set `--bakelab_path` or `URAGE_BAKELAB_PATH`).

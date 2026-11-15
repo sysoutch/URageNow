@@ -3,7 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import { appConfig } from "../config/appConfig.js";
 import { getComfyRuntimeSettings, resolveComfyWorkspacePath } from "./comfyRuntimeSettings.js";
-import { runLowPolyModelScript, runModelAlbedoToGeometryScript, runModelAutoRigPreviewScript, runModelAutoRigScript, runModelDecimateToFacesScript, runModelMaterialScript, runModelMergeVerticesScript, runModelBakeScript, runModelMetallicScript, runModelRemeshScript, runModelScaleScript, runModelSeparateByLoosePartsScript } from "./model3d/lowPolyModelService.js";
+import { listModelMeshObjects, type ModelMeshObjectList } from "./model3d/gltfMeshObjects.js";
+import type { ModelCombineMethod, ModelCombineReport, ModelCombineSolver } from "./model3d/lowPolyModelService.js";
+import { runLowPolyModelScript, runModelAlbedoToGeometryScript, runModelAutoRigPreviewScript, runModelAutoRigScript, runModelDecimateToFacesScript, runModelMaterialScript, runModelMergeVerticesScript, runModelBakeScript, runModelCombineScript, runModelMetallicScript, runModelRemeshScript, runModelScaleScript, runModelSeparateByLoosePartsScript } from "./model3d/lowPolyModelService.js";
 import {
   comfyGetJson,
   comfyPostJson,
@@ -2009,6 +2011,65 @@ export async function bakeGeneratedModel(input: {
       engine: input.engine,
       maps: result.maps
     };
+  } finally {
+    await rm(workDirectory, { recursive: true, force: true }).catch(() => undefined);
+  }
+}
+
+export interface GeneratedModelCombineResult {
+  generated: GeneratedModelPublicRecord;
+  sourceModelId: string;
+  report: ModelCombineReport | null;
+}
+
+/** Mesh objects of a model (GLB/glTF), for choosing which ones to combine. */
+export async function listGeneratedModelMeshObjects(modelId: string): Promise<ModelMeshObjectList & { modelId: string }> {
+  const { record, modelPath } = await readModelPathById(modelId);
+  return { modelId: record.id, ...(await listModelMeshObjects(modelPath)) };
+}
+
+/**
+ * Combine a model's mesh objects into one clean mesh (boolean union, like Bool Tool),
+ * optionally splitting them by loose parts first. Saved as a NEW model entry.
+ */
+export async function combineGeneratedModelMeshes(input: {
+  modelId: string;
+  objectNames?: string[];
+  separateLooseParts?: boolean;
+  method?: ModelCombineMethod;
+  solver?: ModelCombineSolver;
+  mergeDistance?: number;
+  minPartFaces?: number;
+}): Promise<GeneratedModelCombineResult> {
+  const source = await readModelPathById(input.modelId);
+  const sourceExt = path.extname(source.record.modelFileName);
+  const sourceStem = path.basename(source.record.modelFileName, sourceExt) || "model";
+  const suffix = input.method === "join" ? "joined" : "combined";
+  const outputFileName = sanitizeFileName(`${sourceStem}_${suffix}.glb`, `model_${suffix}.glb`);
+  const workDirectory = await mkdtemp(path.join(os.tmpdir(), "urage-combine-"));
+  try {
+    const result = await runModelCombineScript({
+      sourceModelPath: source.modelPath,
+      outputModelPath: path.join(workDirectory, outputFileName),
+      objectNames: input.objectNames,
+      separateLooseParts: input.separateLooseParts,
+      method: input.method,
+      solver: input.solver,
+      mergeDistance: input.mergeDistance,
+      minPartFaces: input.minPartFaces
+    });
+    await assertRustValidatedModelArtifact(result.outputPath, "Combined model");
+    const imported = await importUploadedSourceModel({
+      fileName: outputFileName,
+      fileData: await readFile(result.outputPath),
+      prompt: source.record.prompt,
+      useSourceAsCurrent: true
+    });
+    const generated = await getGeneratedModelPublicById(imported.id);
+    if (!generated) {
+      throw new Error("Combined model was saved but could not be read back.");
+    }
+    return { generated, sourceModelId: source.record.id, report: result.report };
   } finally {
     await rm(workDirectory, { recursive: true, force: true }).catch(() => undefined);
   }
