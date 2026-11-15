@@ -2256,7 +2256,26 @@ function createDashboardThreeDViewerHelpers(input) {
     setModel3dPreviewStatus("Previewing " + resolved.fileName + (resolved.variantLabel === "low poly" ? " (low poly)." : "."));
   }
 
+  /** Make `record` the only selected model, on its default variant, without rendering. */
+  function selectModel3dRecordForPreview(record) {
+    const modelId = String(record?.id || "").trim();
+    if (!modelId) {
+      return;
+    }
+    ensureModel3dHistoryEntryVisible(modelId);
+    state.selectedGeneratedModelId = modelId;
+    state.selectedGeneratedModelIds = [modelId];
+    state.model3dThreeVariant = normalizeModel3dThreeVariant(resolveDefaultModel3dThreeVariantForRecord(record));
+    const variant = getModel3dRecordVariants(record).find(item => item.key === state.model3dThreeVariant);
+    state.selectedGeneratedModelVariantRefs = [getModel3dVariantRef(modelId, state.model3dThreeVariant, variant?.fileName || "")];
+    state.model3dVariantSelectionAnchorRef = state.selectedGeneratedModelVariantRefs[0];
+    updateModel3dThreeVariantUi();
+    updateModel3dEditSelectedModelName();
+    scrollSelectedModel3dHistoryIntoView(modelId, state.model3dThreeVariant);
+  }
+
   async function loadModel3dHistory(preferredModelId) {
+    const previouslySelectedId = String(state.selectedGeneratedModelId || "");
     const history = await request("/api/model3d-history");
     const dedupedHistory = dedupeModel3dHistory(history);
     state.generatedModels = dedupedHistory;
@@ -2276,6 +2295,17 @@ function createDashboardThreeDViewerHelpers(input) {
     state.selectedGeneratedModelId = state.generatedModels.some(item => item.id === candidateId)
       ? candidateId
       : (state.generatedModels[0] ? state.generatedModels[0].id : "");
+    // Only a DIFFERENT preferred model is selected fully; refreshes that pass the current
+    // selection keep the variant the user is looking at.
+    const preferredRecord = candidateIdFromPreferred && candidateIdFromPreferred !== previouslySelectedId
+      ? state.generatedModels.find(item => item.id === candidateIdFromPreferred)
+      : null;
+    if (preferredRecord) {
+      // A quick action (Combine, Remesh, Bake...) asked for its new model. The history also
+      // keeps variant refs, and rendering re-syncs the selected id from them, so point those
+      // at the new model too; otherwise the old (source) model wins and stays in the viewer.
+      selectModel3dRecordForPreview(preferredRecord);
+    }
     mediaMultiSelectionHelpers.pruneSelection("selectedGeneratedModelIds", "selectedGeneratedModelId", state.generatedModels);
     renderModel3dHistory();
     renderModel3dPreviewMedia();
