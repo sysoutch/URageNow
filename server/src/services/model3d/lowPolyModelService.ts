@@ -925,6 +925,9 @@ export interface ModelCombineRunInput {
 /** What blender-scripts/combine/combine_meshes.py reports in its COMBINE_RESULT line. */
 export interface ModelCombineReport {
   method: "union_overlapping" | "union" | "union_per_part" | "join";
+  /** booltool = Bool Tool's Auto Union merged every group; modifier = Boolean modifier fallback. */
+  engine: "booltool" | "booltool+modifier" | "modifier" | null;
+  boolToolGroups: number;
   solver: string | null;
   inputObjects: number;
   parts: number;
@@ -934,8 +937,6 @@ export interface ModelCombineReport {
   /** Parts that overlapped nothing and were kept as they are. */
   separateParts: number;
   droppedParts: number;
-  /** Interior (inner wall) and degenerate faces deleted before the union. */
-  interiorFacesRemoved: number;
   joinedFallbackParts: number;
   resultObjects: number;
   inputFaces: number;

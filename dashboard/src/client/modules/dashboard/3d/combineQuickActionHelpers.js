@@ -1,5 +1,6 @@
-// 3D Studio "Combine" quick action: fuses the parts of a model that OVERLAP (cross each
-// other or sit inside one another) with a boolean union, like Blender's Bool Tool. Parts
+// 3D Studio "Combine" quick action: merges the parts of a model that OVERLAP (cross each
+// other or sit inside one another) with the Bool Tool add-on's Auto Union
+// (bpy.ops.object.boolean_auto_union; Blender's Boolean modifier if Bool Tool is missing). Parts
 // that overlap nothing stay as they are. It can split objects by loose parts first,
 // which is what one-object generated models need.
 // Runs blender-scripts/combine/combine_meshes.py on the server; the result is saved as a
@@ -26,7 +27,7 @@ const COMBINE_METHODS = [
 
 const COMBINE_SOLVERS = [
   { value: "exact", label: "Exact (robust, slower)" },
-  { value: "fast", label: "Fast (can fail on flat overlaps)" },
+  { value: "fast", label: "Fast / Float (can leave hidden faces)" },
   { value: "manifold", label: "Manifold (very fast, needs closed parts)" }
 ];
 
@@ -94,7 +95,7 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
         + "<section class='runtime-overlay-panel model3d-share-overlay-panel' role='dialog' aria-modal='true' aria-labelledby='model3d-combine-title'>"
         + "<header class='runtime-overlay-header'><div class='runtime-overlay-title-wrap'><span class='panel-kicker'>3D Quick Action</span>"
         + "<h3 id='model3d-combine-title'>Combine Meshes</h3>"
-        + "<p class='model3d-share-overlay-message'>Fuse the overlapping parts of <strong>" + escapeHtml(selected.modelFileName) + "</strong> (" + escapeHtml(objectSummary) + "), like Bool Tool. Parts that overlap nothing stay as they are. The result is saved as a new model; the original stays as it is.</p>"
+        + "<p class='model3d-share-overlay-message'>Fuse the overlapping parts of <strong>" + escapeHtml(selected.modelFileName) + "</strong> (" + escapeHtml(objectSummary) + ") with Bool Tool's Auto Union. Parts that overlap nothing stay as they are. The result is saved as a new model; the original stays as it is.</p>"
         + "</div><button class='secondary mini-button' data-combine-cancel type='button' aria-label='Close'>✕</button></header>"
         + "<div class='model3d-share-overlay-body'>"
         + (objects.length > 1
@@ -111,7 +112,7 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
         + "<div class='hint'>Off fuses every part into one mesh, even parts that do not touch.</div>"
         + "</div>"
         + "<label class='toggle'><span>Join result into one object</span><input id='model3d-combine-join-result' type='checkbox'></label>"
-        + "<div class='field' id='model3d-combine-solver-field'><label for='model3d-combine-solver'>Boolean Solver</label><select id='model3d-combine-solver'>" + renderOptions(COMBINE_SOLVERS, "exact") + "</select></div>"
+        + "<div class='field' id='model3d-combine-solver-field'><label for='model3d-combine-solver'>Boolean Solver</label><select id='model3d-combine-solver'>" + renderOptions(COMBINE_SOLVERS, "exact") + "</select><div class='hint'>Passed to Bool Tool for this run (your Bool Tool preference is put back afterwards). Exact gives the cleanest result; Fast can leave hidden faces where parts touch.</div></div>"
         + "<div class='field'><label for='model3d-combine-min-faces'>Delete Parts Under (faces)</label><input id='model3d-combine-min-faces' type='number' min='0' max='" + COMBINE_MAX_MIN_PART_FACES + "' step='1' value='0'><div class='hint'>Removes tiny floating debris. 0 keeps every part.</div></div>"
         + "<div class='field'><label for='model3d-combine-merge-distance'>Weld Distance</label><input id='model3d-combine-merge-distance' type='number' min='0' max='" + COMBINE_MAX_MERGE_DISTANCE + "' step='0.0001' value='" + COMBINE_DEFAULT_MERGE_DISTANCE + "'></div>"
         + "<p class='hint' id='model3d-combine-error' role='alert'></p>"
@@ -205,15 +206,15 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
     } else if (!report.overlapGroups) {
       parts.push("no overlapping parts among " + report.parts + ", nothing fused");
     } else {
-      parts.push("fused " + report.fusedParts + " overlapping part" + (report.fusedParts === 1 ? "" : "s") + " in " + report.overlapGroups + " group" + (report.overlapGroups === 1 ? "" : "s"));
+      parts.push("merged " + report.fusedParts + " overlapping part" + (report.fusedParts === 1 ? "" : "s") + " in " + report.overlapGroups + " group" + (report.overlapGroups === 1 ? "" : "s"));
       if (report.separateParts) {
         parts.push(report.separateParts + " part" + (report.separateParts === 1 ? "" : "s") + " left as they are");
       }
     }
     parts.push(report.resultObjects + " object" + (report.resultObjects === 1 ? "" : "s"));
     parts.push(report.inputFaces.toLocaleString() + " → " + report.faces.toLocaleString() + " faces");
-    if (report.interiorFacesRemoved) {
-      parts.push(report.interiorFacesRemoved.toLocaleString() + " hidden inner faces removed");
+    if (report.engine) {
+      parts.push(report.engine === "booltool" ? "merged with Bool Tool" : report.engine === "modifier" ? "merged with Blender's Boolean modifier (Bool Tool not installed)" : "merged with Bool Tool and Boolean modifier fallback");
     }
     if (report.droppedParts) {
       parts.push(report.droppedParts + " tiny part(s) removed");
@@ -222,7 +223,7 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
       parts.push(report.joinedFallbackParts + " part(s) could not be fused and were joined");
     }
     if (report.overlapGroups || report.method === "join") {
-      parts.push(report.nonManifoldEdges === 0 ? "fused parts watertight" : report.nonManifoldEdges.toLocaleString() + " open edges on fused parts");
+      parts.push(report.nonManifoldEdges === 0 ? "merged parts watertight" : report.nonManifoldEdges.toLocaleString() + " non-manifold edges on merged parts (holes or edges shared by 3+ faces)");
     }
     return parts.join(", ");
   }

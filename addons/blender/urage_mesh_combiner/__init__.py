@@ -1,9 +1,11 @@
-"""URage Mesh Combiner: fuse overlapping objects or parts with a boolean union, like Bool Tool.
+"""URage Mesh Combiner: merge overlapping objects or parts with Bool Tool's Auto Union.
 
 Adds two operators (3D View > Sidebar > URage, and Object > URage Combine):
   - Combine Meshes: union the selected mesh objects that overlap (or every mesh when nothing
-    is selected). Parts that overlap nothing stay as they are; turn off "Only overlapping
-    parts" to fuse everything.
+    is selected) with Bool Tool's Auto Union (bpy.ops.object.boolean_auto_union), one call
+    per group of overlapping parts. Parts that overlap nothing stay as they are; turn off
+    "Only overlapping parts" to merge everything. Without Bool Tool a Boolean modifier
+    union is used instead.
   - Separate & Combine: split each object by loose parts first, then union the parts.
     Use it on one object whose pieces overlap (typical for AI-generated models).
 
@@ -31,7 +33,7 @@ METHOD_ITEMS = (
 )
 SOLVER_ITEMS = (
     ("exact", "Exact", "Slow but robust; handles overlapping and touching parts"),
-    ("fast", "Fast", "Quick float solver; can fail on coplanar faces"),
+    ("fast", "Fast", "Quick float solver; can leave hidden faces where parts touch or share planes"),
     ("manifold", "Manifold", "Very fast; needs closed (manifold) parts (Blender 4.5+, else Exact)"),
 )
 
@@ -51,7 +53,7 @@ class CombineOperatorMixin:
         description="Put the fused parts and the untouched parts into one object at the end",
         default=False,
     )
-    solver: EnumProperty(name="Solver", items=SOLVER_ITEMS, default="exact")
+    solver: EnumProperty(name="Solver", description="Boolean solver for this run, passed to Bool Tool (its preference is restored afterwards) or to the fallback Boolean modifier", items=SOLVER_ITEMS, default="exact")
     separate_loose_parts: BoolProperty(
         name="Separate loose parts first",
         description="Split each object into its connected pieces before combining",

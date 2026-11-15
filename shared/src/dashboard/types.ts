@@ -648,6 +648,8 @@ export interface DashboardDependencies {
     sourceModelId: string;
     report: {
       method: "union_overlapping" | "union" | "union_per_part" | "join";
+      engine: "booltool" | "booltool+modifier" | "modifier" | null;
+      boolToolGroups: number;
       solver: string | null;
       inputObjects: number;
       parts: number;
@@ -656,7 +658,6 @@ export interface DashboardDependencies {
       separateParts: number;
       resultObjects: number;
       droppedParts: number;
-      interiorFacesRemoved: number;
       joinedFallbackParts: number;
       inputFaces: number;
       faces: number;

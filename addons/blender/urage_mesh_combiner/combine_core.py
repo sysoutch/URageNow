@@ -1,4 +1,4 @@
-"""Combine mesh objects into one clean mesh (boolean union), like Bool Tool's Union.
+"""Fuse overlapping mesh objects with Bool Tool's Auto Union (bpy.ops.object.boolean_auto_union).
 
 This module holds the whole combine pipeline with no UI, so it is shared by:
   - the URage Mesh Combiner add-on operators (inside Blender), and
@@ -7,13 +7,13 @@ This module holds the whole combine pipeline with no UI, so it is shared by:
 Pipeline:
   1. prepare    Unparent, make mesh data single-user, apply transforms.
   2. separate   Optional: weld split vertices, then split each object by loose parts.
-     clean      Delete interior faces (inner walls whose edges have 3+ faces) and
-                degenerate faces; Exact booleans leave holes around them.
   3. group      Find the parts that overlap: their surfaces cross (BVH triangle test) or
                 one sits completely inside another. Overlap chains form one group.
-  4. combine    "union": each overlapping group gets one n-ary Boolean Union (faces hidden
-                inside other parts are removed). Parts that overlap nothing stay as they
-                are, like Bool Tool only fuses what intersects. overlap_only=False fuses all.
+  4. combine    "union": each overlapping group is merged with the Bool Tool add-on's
+                Auto Union (biggest part active, the others selected); faces hidden inside
+                other parts are removed. Parts that overlap nothing stay as they are.
+                overlap_only=False puts every part into one group. Without Bool Tool (or
+                if it fails) a Boolean modifier union does the same job as a fallback.
                 "join": plain join of every part (keeps every face).
   5. clean up   Weld by distance and delete loose vertices/edges on fused results, then
                 shade them smooth with hard edges: edges where the imported custom normals
@@ -52,6 +52,11 @@ CONTAINMENT_SAMPLES = 8
 # Fused results lose their custom normals; edges sharper than this are shaded flat again.
 SHADE_SHARP_ANGLE_DEGREES = 30.0
 TEMP_COLLECTION_NAME = "URageCombineOperands"
+# Bool Tool add-on module names: the Blender 4.2+ extension first, then the legacy add-on.
+BOOL_TOOL_MODULES = ("bl_ext.blender_org.bool_tool", "object_boolean_tools")
+BOOL_TOOL_UNION_IDNAME = "boolean_auto_union"
+# Our solver names -> Bool Tool's preference values. Set for one run, then restored.
+BOOL_TOOL_SOLVERS = {"exact": "EXACT", "fast": "FLOAT", "manifold": "MANIFOLD"}
 UNION_MODIFIER_NAME = "URageCombineUnion"
 
 
@@ -70,7 +75,7 @@ class CombineOptions:
         result_name="Combined",
         overlap_only=True,
         join_result=False,
-        clean_parts=True,
+        use_bool_tool=True,
     ):
         self.method = method if method in COMBINE_METHODS else "union"
         self.solver = solver if solver in SOLVER_CANDIDATES else DEFAULT_SOLVER
@@ -84,8 +89,8 @@ class CombineOptions:
         self.overlap_only = bool(overlap_only)
         # Put every result (fused groups and untouched parts) into one object at the end.
         self.join_result = bool(join_result)
-        # Delete interior/duplicate faces before the union; they make Exact booleans leave holes.
-        self.clean_parts = bool(clean_parts)
+        # Merge with the Bool Tool add-on's Auto Union when it is installed.
+        self.use_bool_tool = bool(use_bool_tool)
 
 
 def log(message):
@@ -162,23 +167,6 @@ def separate_by_loose_parts(objects, merge_distance):
     unique = list(dict.fromkeys(parts))
     log(f"Separated {len(objects)} object(s) into {len(unique)} loose part(s).")
     return unique
-
-
-def clean_part(obj, merge_distance):
-    """Delete degenerate faces and interior faces (inner walls). Returns faces removed."""
-    before = face_count(obj)
-    select_only([obj])
-    bpy.ops.object.mode_set(mode="EDIT")
-    bm = bmesh.from_edit_mesh(obj.data)
-    bmesh.ops.dissolve_degenerate(bm, edges=bm.edges, dist=max(merge_distance, OVERLAP_EPSILON))
-    bmesh.update_edit_mesh(obj.data)
-    bpy.ops.mesh.select_mode(type="FACE")
-    bpy.ops.mesh.select_all(action="DESELECT")
-    bpy.ops.mesh.select_interior_faces()
-    if any(face.select for face in bmesh.from_edit_mesh(obj.data).faces):
-        bpy.ops.mesh.delete(type="FACE")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    return before - face_count(obj)
 
 
 def drop_small_parts(parts, min_part_faces):
@@ -346,8 +334,9 @@ def _bounds_overlap(a, b, margin):
     return all(a[0][axis] - margin <= b[1][axis] and b[0][axis] - margin <= a[1][axis] for axis in range(3))
 
 
-def _bounds_contain(outer, inner):
-    return all(outer[0][axis] <= inner[0][axis] and inner[1][axis] <= outer[1][axis] for axis in range(3))
+def _bounds_volume(bounds):
+    size = bounds[1] - bounds[0]
+    return size.x * size.y * size.z
 
 
 def _build_bvh(obj, epsilon):
@@ -384,11 +373,10 @@ def parts_overlap(a, b, cache, epsilon):
         return False
     if bvh_a.overlap(bvh_b):
         return True
-    if _bounds_contain(bounds_b, bounds_a):
+    # No crossing surfaces: the smaller part may still sit completely inside the bigger one.
+    if _bounds_volume(bounds_a) <= _bounds_volume(bounds_b):
         return _contained_in(a, b, bvh_b)
-    if _bounds_contain(bounds_a, bounds_b):
-        return _contained_in(b, a, bvh_a)
-    return False
+    return _contained_in(b, a, bvh_a)
 
 
 def find_overlap_groups(parts, epsilon):
@@ -411,6 +399,130 @@ def find_overlap_groups(parts, epsilon):
     for obj in parts:
         groups.setdefault(root(obj), []).append(obj)
     return [sorted(group, key=face_count, reverse=True) for group in groups.values()]
+
+
+# --- Bool Tool ------------------------------------------------------------------------
+
+def bool_tool_module():
+    """Name of the enabled Bool Tool add-on, enabling it for this session if installed."""
+    import addon_utils
+
+    for module in BOOL_TOOL_MODULES:
+        loaded, enabled = addon_utils.check(module)
+        if loaded and enabled:
+            return module
+    for module in BOOL_TOOL_MODULES:
+        try:
+            if addon_utils.enable(module, default_set=False, persistent=False):
+                return module
+        except Exception:  # noqa: BLE001 - not installed under this name
+            continue
+    return None
+
+
+def unify_material_slots(group):
+    """Give every part the same material slot list. Bool Tool's Float solver (and the
+    Exact solver in Index mode) take face materials by slot number from the canvas, so
+    without this every merged face would get the base part's first material."""
+    materials = []
+    for obj in group:
+        for material in obj.data.materials:
+            if material not in materials:
+                materials.append(material)
+    if len(materials) <= 1:
+        return
+    for obj in group:
+        mesh = obj.data
+        remap = [materials.index(material) for material in mesh.materials] or [0]
+        indices = [0] * len(mesh.polygons)
+        mesh.polygons.foreach_get("material_index", indices)
+        indices = [remap[index] if index < len(remap) else 0 for index in indices]
+        mesh.materials.clear()
+        for material in materials:
+            mesh.materials.append(material)
+        mesh.polygons.foreach_set("material_index", indices)
+        mesh.update()
+
+
+class bool_tool_solver_override:
+    """Use our solver in Bool Tool for one call and put the user's preference back after.
+    (Float leaves hidden faces where parts touch or share planes; Exact resolves them.)"""
+
+    def __init__(self, module, solver):
+        self.prefs = None
+        self.previous = None
+        self.value = BOOL_TOOL_SOLVERS.get(solver)
+        try:
+            self.prefs = bpy.context.preferences.addons[module].preferences
+        except (KeyError, AttributeError):
+            self.prefs = None
+
+    def __enter__(self):
+        if self.prefs is not None and self.value:
+            self.previous = self.prefs.solver
+            try:
+                self.prefs.solver = self.value
+            except TypeError:  # an older Bool Tool without this solver
+                self.previous = None
+        return self
+
+    def __exit__(self, *_exc):
+        if self.prefs is not None and self.previous is not None:
+            self.prefs.solver = self.previous
+        return False
+
+
+def _detached_copies(objects):
+    """Unlinked copies, so cutters that Bool Tool deleted can be brought back on failure."""
+    copies = []
+    for obj in objects:
+        copy = obj.copy()
+        copy.data = obj.data.copy()
+        copies.append(copy)
+    return copies
+
+
+def union_group_with_bool_tool(group, options, module):
+    """Merge one group with Bool Tool's Auto Union: the biggest part is the active canvas,
+    the others are cutters that Bool Tool applies and deletes. Returns the result or None."""
+    base, cutters = group[0], group[1:]
+    unify_material_slots(group)
+    base_backup = base.data.copy()
+    cutter_copies = _detached_copies(cutters)
+    select_only(group, active=base)
+    try:
+        with bool_tool_solver_override(module, options.solver):
+            status = bpy.ops.object.boolean_auto_union(
+                material_mode="INDEX",  # slots were unified, so indices match on every solver
+                use_self=options.self_intersection,
+                use_hole_tolerant=options.hole_tolerant,
+            )
+    except RuntimeError as error:
+        log(f"Bool Tool Auto Union raised: {error}")
+        status = {"CANCELLED"}
+    if "FINISHED" in status and face_count(base) > 0:
+        bpy.data.meshes.remove(base_backup)
+        for copy in cutter_copies:
+            mesh = copy.data
+            bpy.data.objects.remove(copy)
+            bpy.data.meshes.remove(mesh)
+        log(f"Bool Tool Auto Union merged {len(group)} parts -> {face_count(base)} faces.")
+        return base
+    # Undo whatever Bool Tool managed to do, so the modifier fallback starts clean.
+    _remove_leftover_modifiers(base)
+    for modifier in [m for m in base.modifiers if m.type == "BOOLEAN"]:
+        base.modifiers.remove(modifier)
+    _restore_mesh(base, base_backup)
+    for original, copy in zip(cutters, cutter_copies):
+        if original.name in bpy.data.objects:
+            mesh = copy.data
+            bpy.data.objects.remove(copy)
+            bpy.data.meshes.remove(mesh)
+        else:
+            bpy.context.scene.collection.objects.link(copy)
+            group[group.index(original)] = copy
+    log("Bool Tool Auto Union failed; using the Boolean modifier union instead.")
+    return None
 
 
 # --- Union of one group ---------------------------------------------------------------
@@ -465,14 +577,6 @@ def combine_objects(objects, options=None):
     if not parts:
         raise RuntimeError("Every part was smaller than the minimum part size.")
     part_count = len(parts)
-    cleaned_faces = 0
-    if options.method == "union" and options.clean_parts:
-        cleaned_faces = sum(clean_part(obj, options.merge_distance) for obj in parts)
-        if cleaned_faces:
-            log(f"Removed {cleaned_faces} interior/degenerate face(s) before the union.")
-        emptied = [obj for obj in parts if face_count(obj) == 0]
-        _remove_objects(emptied)
-        parts = [obj for obj in parts if obj not in emptied]
 
     if options.method == "union" and options.overlap_only:
         groups = find_overlap_groups(parts, max(options.merge_distance, OVERLAP_EPSILON))
@@ -487,6 +591,10 @@ def combine_objects(objects, options=None):
     untouched = []
     joined_fallback_count = 0
     used_per_part = False
+    bool_tool = bool_tool_module() if options.method == "union" and options.use_bool_tool else None
+    bool_tool_groups = 0
+    if options.method == "union" and fuse_groups:
+        log(f"Union engine: {'Bool Tool (' + bool_tool + ')' if bool_tool else 'Boolean modifier (Bool Tool not available)'}.")
     for group in groups:
         if len(group) == 1:
             untouched.append(group[0])
@@ -494,7 +602,13 @@ def combine_objects(objects, options=None):
         if options.method == "join":
             result = join_into(group[0], group[1:])
         else:
-            result, joined_fallback, per_part = union_group(group, options)
+            result = union_group_with_bool_tool(group, options, bool_tool) if bool_tool else None
+            if result is not None:
+                bool_tool_groups += 1
+                per_part = False
+                joined_fallback = []
+            else:
+                result, joined_fallback, per_part = union_group(group, options)
             joined_fallback_count += len(joined_fallback)
             used_per_part = used_per_part or per_part
         clean_up(result, options.merge_distance)
@@ -523,14 +637,16 @@ def combine_objects(objects, options=None):
         used_method = "union_per_part" if used_per_part else ("union_overlapping" if options.overlap_only else "union")
     report = {
         "method": used_method,
-        "solver": modifier_solver_label(options) if options.method == "union" else None,
+        "engine": ("booltool" if bool_tool_groups == len(fuse_groups) else "booltool+modifier" if bool_tool_groups else "modifier")
+                  if options.method == "union" and fuse_groups else None,
+        "boolToolGroups": bool_tool_groups,
+        "solver": options.solver if options.method == "union" else None,
         "inputObjects": input_object_count,
         "parts": part_count,
         "overlapGroups": len(fuse_groups),
         "fusedParts": fused_part_count,
         "separateParts": len(untouched),
         "droppedParts": dropped_parts,
-        "interiorFacesRemoved": cleaned_faces,
         "joinedFallbackParts": joined_fallback_count,
         "resultObjects": len(all_objects),
         "inputFaces": input_faces,
