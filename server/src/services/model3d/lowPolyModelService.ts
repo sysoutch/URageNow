@@ -928,7 +928,10 @@ export interface ModelCombineReport {
   /** booltool = Bool Tool's Auto Union merged every group; modifier = Boolean modifier fallback. */
   engine: "booltool" | "booltool+modifier" | "modifier" | null;
   boolToolGroups: number;
+  /** Solver(s) actually used, e.g. "exact", "fast" or "exact+fast". */
   solver: string | null;
+  /** Groups where Exact opened holes and Float was used instead. */
+  holeFallbackGroups: number;
   inputObjects: number;
   parts: number;
   /** Groups of overlapping parts that were fused. */

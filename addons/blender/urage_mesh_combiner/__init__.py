@@ -124,6 +124,8 @@ class CombineOperatorMixin:
         else:
             message = (f"Fused {report['fusedParts']} overlapping part(s) in {report['overlapGroups']} group(s); "
                        f"{report['separateParts']} part(s) left as they are")
+            if report.get("holeFallbackGroups"):
+                message += f"; Exact left holes, so {report['holeFallbackGroups']} group(s) used Fast"
         if report["joinedFallbackParts"]:
             message += f"; {report['joinedFallbackParts']} part(s) could not be unioned and were joined"
         self.report({"WARNING"} if report["joinedFallbackParts"] else {"INFO"}, message)

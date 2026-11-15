@@ -76,6 +76,7 @@ class CombineOptions:
         overlap_only=True,
         join_result=False,
         use_bool_tool=True,
+        avoid_holes=True,
     ):
         self.method = method if method in COMBINE_METHODS else "union"
         self.solver = solver if solver in SOLVER_CANDIDATES else DEFAULT_SOLVER
@@ -91,6 +92,8 @@ class CombineOptions:
         self.join_result = bool(join_result)
         # Merge with the Bool Tool add-on's Auto Union when it is installed.
         self.use_bool_tool = bool(use_bool_tool)
+        # When Exact opens holes, redo that group with Float (holes break bakes and show in game).
+        self.avoid_holes = bool(avoid_holes)
 
 
 def log(message):
@@ -472,57 +475,102 @@ class bool_tool_solver_override:
         return False
 
 
-def _detached_copies(objects):
-    """Unlinked copies, so cutters that Bool Tool deleted can be brought back on failure."""
-    copies = []
-    for obj in objects:
-        copy = obj.copy()
-        copy.data = obj.data.copy()
-        copies.append(copy)
-    return copies
+def _detached_copy(obj):
+    """Unlinked copy, so a part that Bool Tool deleted can be brought back for a retry."""
+    copy = obj.copy()
+    copy.data = obj.data.copy()
+    return copy
 
 
-def union_group_with_bool_tool(group, options, module):
-    """Merge one group with Bool Tool's Auto Union: the biggest part is the active canvas,
-    the others are cutters that Bool Tool applies and deletes. Returns the result or None."""
-    base, cutters = group[0], group[1:]
-    unify_material_slots(group)
-    base_backup = base.data.copy()
-    cutter_copies = _detached_copies(cutters)
+def _discard(obj):
+    mesh = obj.data
+    bpy.data.objects.remove(obj)
+    if mesh is not None and mesh.users == 0:
+        bpy.data.meshes.remove(mesh)
+
+
+def _is_alive(obj):
+    try:
+        return obj.name in bpy.data.objects
+    except ReferenceError:  # Bool Tool deleted it
+        return False
+
+
+def count_open_edges(obj):
+    """Boundary edges: each one borders a hole in the surface."""
+    bm = bmesh.new()
+    try:
+        bm.from_mesh(obj.data)
+        return sum(1 for edge in bm.edges if edge.is_boundary)
+    finally:
+        bm.free()
+
+
+def _bool_tool_auto_union(group, options, module, solver):
+    """One Bool Tool Auto Union call with `solver`. True when it produced a mesh."""
+    base = group[0]
     select_only(group, active=base)
     try:
-        with bool_tool_solver_override(module, options.solver):
+        with bool_tool_solver_override(module, solver):
             status = bpy.ops.object.boolean_auto_union(
                 material_mode="INDEX",  # slots were unified, so indices match on every solver
                 use_self=options.self_intersection,
                 use_hole_tolerant=options.hole_tolerant,
             )
     except RuntimeError as error:
-        log(f"Bool Tool Auto Union raised: {error}")
-        status = {"CANCELLED"}
-    if "FINISHED" in status and face_count(base) > 0:
-        bpy.data.meshes.remove(base_backup)
-        for copy in cutter_copies:
-            mesh = copy.data
-            bpy.data.objects.remove(copy)
-            bpy.data.meshes.remove(mesh)
-        log(f"Bool Tool Auto Union merged {len(group)} parts -> {face_count(base)} faces.")
-        return base
-    # Undo whatever Bool Tool managed to do, so the modifier fallback starts clean.
-    _remove_leftover_modifiers(base)
+        log(f"Bool Tool Auto Union ({solver}) raised: {error}")
+        return False
+    return "FINISHED" in status and face_count(base) > 0
+
+
+def _restore_group(group, base_backup, cutter_backups):
+    """Put the group back as it was before a Bool Tool attempt."""
+    base = group[0]
     for modifier in [m for m in base.modifiers if m.type == "BOOLEAN"]:
         base.modifiers.remove(modifier)
-    _restore_mesh(base, base_backup)
-    for original, copy in zip(cutters, cutter_copies):
-        if original.name in bpy.data.objects:
-            mesh = copy.data
-            bpy.data.objects.remove(copy)
-            bpy.data.meshes.remove(mesh)
-        else:
-            bpy.context.scene.collection.objects.link(copy)
-            group[group.index(original)] = copy
-    log("Bool Tool Auto Union failed; using the Boolean modifier union instead.")
-    return None
+    _restore_mesh(base, base_backup.copy())
+    for index, backup in enumerate(cutter_backups, start=1):
+        if _is_alive(group[index]):
+            _discard(group[index])
+        restored = _detached_copy(backup)
+        bpy.context.scene.collection.objects.link(restored)
+        group[index] = restored
+
+
+def union_group_with_bool_tool(group, options, module):
+    """Merge one group with Bool Tool's Auto Union: the biggest part is the active canvas,
+    the others are cutters that Bool Tool applies and deletes.
+
+    Exact is tried first. If it opens holes the parts did not have (it does on parts that
+    are not closed, like segments welded at their rims), the group is restored and merged
+    with Float, which leaves no holes; a holed surface lets bake rays through to inner
+    faces and shows gaps in game. Returns (result or None, solver used)."""
+    unify_material_slots(group)
+    solvers = [options.solver]
+    if options.solver == "exact" and options.avoid_holes:
+        solvers.append("fast")
+    open_before = sum(count_open_edges(obj) for obj in group)
+    base_backup = group[0].data.copy()
+    cutter_backups = [_detached_copy(obj) for obj in group[1:]]
+    try:
+        for attempt, solver in enumerate(solvers):
+            if attempt > 0:
+                _restore_group(group, base_backup, cutter_backups)
+            if not _bool_tool_auto_union(group, options, module, solver):
+                continue
+            new_holes = count_open_edges(group[0]) - open_before
+            if new_holes > 0 and attempt + 1 < len(solvers):
+                log(f"Bool Tool ({solver}) opened {new_holes} hole edge(s); retrying with {solvers[attempt + 1]}.")
+                continue
+            log(f"Bool Tool Auto Union ({solver}) merged {len(group)} parts -> {face_count(group[0])} faces.")
+            return group[0], solver
+        _restore_group(group, base_backup, cutter_backups)
+        log("Bool Tool Auto Union failed; using the Boolean modifier union instead.")
+        return None, None
+    finally:
+        bpy.data.meshes.remove(base_backup)
+        for backup in cutter_backups:
+            _discard(backup)
 
 
 # --- Union of one group ---------------------------------------------------------------
@@ -593,6 +641,8 @@ def combine_objects(objects, options=None):
     used_per_part = False
     bool_tool = bool_tool_module() if options.method == "union" and options.use_bool_tool else None
     bool_tool_groups = 0
+    hole_fallback_groups = 0
+    solvers_used = set()
     if options.method == "union" and fuse_groups:
         log(f"Union engine: {'Bool Tool (' + bool_tool + ')' if bool_tool else 'Boolean modifier (Bool Tool not available)'}.")
     for group in groups:
@@ -602,9 +652,12 @@ def combine_objects(objects, options=None):
         if options.method == "join":
             result = join_into(group[0], group[1:])
         else:
-            result = union_group_with_bool_tool(group, options, bool_tool) if bool_tool else None
+            result, solver_used = union_group_with_bool_tool(group, options, bool_tool) if bool_tool else (None, None)
             if result is not None:
                 bool_tool_groups += 1
+                solvers_used.add(solver_used)
+                if solver_used != options.solver:
+                    hole_fallback_groups += 1
                 per_part = False
                 joined_fallback = []
             else:
@@ -640,7 +693,8 @@ def combine_objects(objects, options=None):
         "engine": ("booltool" if bool_tool_groups == len(fuse_groups) else "booltool+modifier" if bool_tool_groups else "modifier")
                   if options.method == "union" and fuse_groups else None,
         "boolToolGroups": bool_tool_groups,
-        "solver": options.solver if options.method == "union" else None,
+        "solver": "+".join(sorted(solvers_used)) if solvers_used else (modifier_solver_label(options) if options.method == "union" else None),
+        "holeFallbackGroups": hole_fallback_groups,
         "inputObjects": input_object_count,
         "parts": part_count,
         "overlapGroups": len(fuse_groups),

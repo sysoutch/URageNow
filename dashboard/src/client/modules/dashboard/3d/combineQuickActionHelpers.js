@@ -216,6 +216,9 @@ function createDashboardThreeDCombineQuickActionHelpers(input) {
     if (report.engine) {
       parts.push(report.engine === "booltool" ? "merged with Bool Tool" : report.engine === "modifier" ? "merged with Blender's Boolean modifier (Bool Tool not installed)" : "merged with Bool Tool and Boolean modifier fallback");
     }
+    if (report.holeFallbackGroups) {
+      parts.push("Exact would have left holes, so " + report.holeFallbackGroups + " group" + (report.holeFallbackGroups === 1 ? " was" : "s were") + " merged with Fast; hidden inner faces remain, Remesh cleans them up");
+    }
     if (report.droppedParts) {
       parts.push(report.droppedParts + " tiny part(s) removed");
     }

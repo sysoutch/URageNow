@@ -651,6 +651,7 @@ export interface DashboardDependencies {
       engine: "booltool" | "booltool+modifier" | "modifier" | null;
       boolToolGroups: number;
       solver: string | null;
+      holeFallbackGroups: number;
       inputObjects: number;
       parts: number;
       overlapGroups: number;
